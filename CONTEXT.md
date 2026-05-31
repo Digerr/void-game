@@ -20,8 +20,8 @@
 ## 📋 ТЕКУЩИЙ СТАТУС
 
 - **Версия стабильная**: beta 0.8.0 (index.html, чистый Canvas)
-- **Версия разработки**: beta 0.9.0-phaser (index-phaser.html, Phaser 3)
-- **Строк кода**: ~1792 (index.html)
+- **Версия разработки**: beta 0.9.0-phaser (index-phaser.html, Phaser 3, 1635 строк)
+- **Строк кода**: ~1792 (index.html), ~1635 (index-phaser.html)
 - **Хостинг**: GitHub Pages → https://digerr.github.io/void-game/
 - **Telegram бот**: @voide_game_bot (id: 8858889318)
 - **Локальный путь**: /home/z/my-project/void-game/
@@ -54,8 +54,14 @@
   - i18n: RU/EN
   - Audio: процедурная музыка и SFX через Web Audio API
   - Config: физика Phaser (гравитация, прыжок, скорость)
-  - Levels: портировано 1/30 уровней (L0: Пробуждение)
-  - Механики: move, jump, wall slide, wall jump, falling platforms
+  - Levels: портировано 30/30 уровней (bL0-bL29, switch dispatcher)
+  - Механики: move, jump, wall slide, wall jump, falling platforms, moving platforms,
+    spikes, saws, pendulums, enemies, levers, doors, boxes, pressure plates,
+    breakable platforms, ropes, stalactites, flood, chase, ice, vines
+  - Текстуры: 16 программных текстур (player, platform, spikes, saw, pendulum,
+    enemy, lever, door, box, rope, stalactite, breakable, pressurePlate, vine, checkpoint, torch)
+  - i18n: полный RU/EN (все причины смерти, подсказки, FAQ)
+  - UI: все табы (играть, прогресс, уровни, FAQ, настройки)
   - Прогресс: localStorage
   - Тач-контролы для мобильных
   - Кастомный рендеринг через Phaser Graphics (аура, шарф, частицы, виньетка)
@@ -125,7 +131,7 @@
 
 | Дата | Версия | Изменение |
 |------|--------|-----------|
-| 2026-06-01 | 0.9.0-phaser | Начало миграции на Phaser 3. BootScene + GameScene, Arcade Physics, Level 0 портирован |
+| 2026-06-01 | 0.9.0-phaser | Полная миграция: все 30 уровней, все механики (saws, pendulums, enemies, levers, doors, boxes, pressure plates, breakable platforms, ropes, stalactites, flood, chase, ice, vines), 16 текстур, полный i18n, FAQ |
 | 2026-06-01 | 0.8.0 | Стабильная версия. 30 уровней, все механики, бот настроен. Защищена git tag |
 | 2026-06-01 | — | Бот: добавлены команды /start /play /help /stats /news, описания, кнопка меню |
 
