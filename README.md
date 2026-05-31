@@ -1,67 +1,63 @@
 # VOID — into darkness
 
-A Limbo-inspired 2D side-scrolling platformer, built as a single offline HTML file. No dependencies, no server — just open and play.
+A Limbo-inspired 2D side-scrolling platformer built with **Phaser 3**. Single HTML file, no build tools — just open and play.
+
+## Tech Stack
+
+- **Phaser 3.80.1** (CDN) — game engine with Arcade Physics
+- **Web Audio API** — procedural music & SFX
+- **HTML/CSS overlay** — menus, HUD, touch controls
+- **localStorage** — save system
 
 ## Features
 
 ### Mechanics
 - **Wall slide & wall jump** — hold toward wall + jump
-- **Wall run** — while wall-sliding, hold direction + jump to run along walls
-- **Dash** — press X/L to dash through danger with invincibility frames
-- **Ledge grab** — automatically grab ledges when falling near platform edges
+- **Dash** — press X/L to dash through danger
+- **Ledge grab** — automatically grab ledges near platform edges
 - **Push boxes** — push boxes onto pressure plates to open doors
 - **Pull levers** — interact with levers to open doors
 - **Rope swing** — grab ropes and swing across gaps
+- **Vine grab** — swing on vines
+- **Ice** — slippery surfaces
+- **Lava** — instant death
+- **Flood** — rising water, climb fast
+- **Chase** — darkness pursues from behind
+- **Breakable platforms** — crumble under your feet
+- **Saws, spikes, pendulums, stalactites** — deadly traps
+- **Shadow enemies** — patrolling hostiles
+- **Pressure plates + doors** — weight-activated mechanics
+- **Checkpoints** — save progress mid-level
+- **Light shards** — collect for the secret ending
+- **Two endings** — survive (normal) or transcend (all shards)
 
 ### Progression
-- **Light shards** — collect glowing shards for the secret ending
-- **Two endings** — survive (normal) or transcend (all shards)
-- **NG+ mode** — extra traps and harder challenges
-- **Random Run** — procedurally generated levels with seeded random
-- **Three difficulties** — Easy / Normal / Hardcore (one life)
-
-### Atmosphere
-- **Shadow pursuer** — a dark entity chases you in the final sections
-- **Rising darkness** — outrun the void in the final run
-- **Light & dark zones** — stay in the light or take damage
-- **Story runes** — discover lore scattered throughout the world
-- **Animated cutscenes** — canvas-based cinematic moments
-- **Whisper voices** — procedural audio that responds to danger
+- **30 levels** across 4 acts (Awakening, Descent, The Abyss, Rebirth)
+- **Three difficulties** — Easy / Normal / Hard
+- **RU/EN** — full bilingual support
 
 ### Audio (Procedural Web Audio API)
-- Low ambient drones
-- Wind noise
-- Dynamic danger intensity (heartbeat near traps)
-- SFX: jump, land, death, dash, lever, door, shard, checkpoint
-- Whisper & musical note ambient sounds
+- Ambient arpeggio music (Am→G→F→Em)
+- 14 SFX types: click, interact, lever, grab, release, door, death, jump, checkpoint, enemy, flood, chase, lightning, stalactite
 
 ### Visual
-- Dynamic torch lighting with flickering
-- Moonlight & starfield
-- Parallax cityscape background
-- Rain, fog, fireflies, ash particles
-- Water puddles with ripple effects
-- Wet footprints
-- Death burst particles (color-coded by cause)
-- Screen transitions between sections
-- Vignette & scan lines
+- Programmatic textures (16 types)
+- Custom Phaser Graphics rendering (aura, scarf, particles, vignette)
+- Dynamic torch lighting
+- Dark minimalist palette, Courier New typography
 
 ### Mobile
-- Touch controls with adaptive feedback
-- Interact button glows near interactables
-- Dash button shows cooldown
-- Jump button enlarges near walls
-- Haptic vibration feedback
-- Swipe-up jump detection
+- Touch controls with left/right/jump/interact buttons
+- Pause button overlay
+- Safe area support (notch handling)
 
 ### Technical
-- **Save system** — localStorage saves checkpoints, deaths, shards, best times
-- **Minimap** — press TAB to toggle
-- **Replay system** — watch your last moments before death
-- **Achievements** — Untouched, Perseverance, Sufferer, Light Bearer, Speed Demon, Hardcore, Lorekeeper
-- **Speedrun timer** — track your time
+- **Save system** — localStorage saves checkpoints, deaths, best distances
 - **Quality settings** — low/med/high
-- **FPS options** — 30/60
+- **Brightness slider** — adjustable in settings
+- **Music volume** — 4 levels (0/♪/♪♪/♪♪♪)
+- **FAQ tab** — in-game help for all mechanics
+- **Progress tab** — track completion across all 30 levels
 
 ## Controls
 
@@ -70,13 +66,18 @@ A Limbo-inspired 2D side-scrolling platformer, built as a single offline HTML fi
 | Move | ← → or A D | ◀ ▶ |
 | Jump | Space or ↑ | ▲ |
 | Interact | E or Shift | E button |
-| Dash | X or L | X button |
+| Dash | X or L | — |
 | Respawn | R | — |
-| Minimap | TAB | — |
+| Pause | ESC | ❚❚ button |
+| Music | M | — |
 
 ## Play
 
-Open `index.html` in any modern browser. Works offline — no server needed.
+Open `index.html` in any modern browser. Requires internet for Phaser CDN load (first time only, then cached).
+
+**Online:** https://digerr.github.io/void-game/
+
+**Telegram:** @voide_game_bot — tap "Играть" to launch as Mini App
 
 ## License
 
