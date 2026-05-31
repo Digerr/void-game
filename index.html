@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>VOID — beta 0.9.2 (Phaser)</title>
+<title>VOID — beta 0.9.3 (Phaser)</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <script>if(typeof Phaser==='undefined'){document.write('<scr'+'ipt src="https://unpkg.com/phaser@3.80.1/dist/phaser.min.js"></scr'+'ipt>')}</script>
@@ -111,7 +111,7 @@ canvas{display:block}
 <div class="hang-wrap"><div class="swing-anchor"><div class="scarf-line"></div><div class="scarf-knot"></div><div class="char-body"><div class="char-head"><div class="char-eye l"></div><div class="char-eye r"></div></div><div class="char-torso"></div><div class="char-arms"><div class="char-arm left"></div><div class="char-arm right"></div></div><div class="char-legs"><div class="char-leg left"></div><div class="char-leg right"></div></div></div></div></div>
 <div class="logo">VOID</div>
 <div class="logo-sub" id="ui-sub">во тьму</div>
-<div class="ver">beta 0.9.2 phaser</div>
+<div class="ver">beta 0.9.3 phaser</div>
 <div class="made-by">made by SERGO</div>
 <div class="tabs">
 <button class="tab active" onclick="showTab('play',this)" id="tab-play">играть</button>
@@ -311,10 +311,10 @@ function formatTime(ms){const s=Math.floor(ms/1000);const m=Math.floor(s/60);ret
 
 // ═══ PROGRESS ═══
 let levelProgress=[],totalDeaths=0,lvlDeaths=0,startTime=0,playTime=0;
-function initProgress(){levelProgress=[];for(let i=0;i<30;i++)levelProgress.push({completed:false,deaths:0,bestDist:0})}
-function loadProgress(){try{const d=JSON.parse(localStorage.getItem('void_progress'));if(d&&d.length>0){levelProgress=d;if(d.length<30)for(let i=d.length;i<30;i++)levelProgress.push({completed:false,deaths:0,bestDist:0});totalDeaths=parseInt(localStorage.getItem('void_deaths')||'0');startTime=parseInt(localStorage.getItem('void_startTime')||'0');return true}}catch(e){}return false}
+function initProgress(){levelProgress=[];for(let i=0;i<30;i++)levelProgress.push({completed:false,deaths:0,bestDist:0,bestTime:0})}
+function loadProgress(){try{const d=JSON.parse(localStorage.getItem('void_progress'));if(d&&d.length>0){levelProgress=d;if(d.length<30)for(let i=d.length;i<30;i++)levelProgress.push({completed:false,deaths:0,bestDist:0,bestTime:0});totalDeaths=parseInt(localStorage.getItem('void_deaths')||'0');startTime=parseInt(localStorage.getItem('void_startTime')||'0');return true}}catch(e){}return false}
 function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(levelProgress));localStorage.setItem('void_deaths',totalDeaths+'');localStorage.setItem('void_startTime',startTime+'')}catch(e){}}
-function updateProgress(){const grid=document.getElementById('prog-grid');if(!grid)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const p=levelProgress[i];const unlocked=i===0||levelProgress[i-1].completed;const status=!unlocked?0:(p.completed?2:1);const cls=!unlocked?'locked':'';const statusText=l.progress[status];const statusCls=status===2?'done':status===1?'cur':'lock';html+='<div class="prog-card '+cls+'"><div class="prog-num">'+(i+1)+'/30</div><div class="prog-name">'+LEVELS[i].name[lang]+'</div><div class="prog-stat">'+l.deathsL+': '+p.deaths+'</div><div class="prog-status '+statusCls+'">'+statusText+'</div></div>'}grid.innerHTML=html}
+function updateProgress(){const grid=document.getElementById('prog-grid');if(!grid)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const p=levelProgress[i];const unlocked=i===0||levelProgress[i-1].completed;const status=!unlocked?0:(p.completed?2:1);const cls=!unlocked?'locked':'';const statusText=l.progress[status];const statusCls=status===2?'done':status===1?'cur':'lock';const bt=p.bestTime?' | '+formatTime(p.bestTime):'';html+='<div class="prog-card '+cls+'"><div class="prog-num">'+(i+1)+'/30</div><div class="prog-name">'+LEVELS[i].name[lang]+'</div><div class="prog-stat">'+l.deathsL+': '+p.deaths+bt+'</div><div class="prog-status '+statusCls+'">'+statusText+'</div></div>'}grid.innerHTML=html}
 function updateLevelList(){const list=document.getElementById('lvl-list');if(!list)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const lv=LEVELS[i];const actIdx=i<8?0:i<16?1:i<24?2:3;const actName=l.actNames[actIdx];html+='<div class="lvl-item"><div class="lvl-num">'+(i+1)+'</div><div class="lvl-info"><div class="lvl-name">'+lv.name[lang]+'</div><div class="lvl-desc">'+lv.story[lang].substring(0,80)+(lv.story[lang].length>80?'...':'')+'</div><div class="lvl-act">'+actName+'</div></div></div>'}list.innerHTML=html}
 function updateFAQ(){const el=document.getElementById('faq-content');if(!el)return;const l=L[lang];let html='';for(const item of l.faq){html+='<div class="faq-item"><div class="faq-q">'+item.q+'</div><div class="faq-a">'+item.a+'</div></div>'}el.innerHTML=html}
 
@@ -1474,7 +1474,9 @@ this.hintTimer=0;this.curHint='';this.hintAlpha=0;
 }
 
 winGame(){
-levelProgress[curLvl].completed=true;levelProgress[curLvl].deaths=lvlDeaths;levelProgress[curLvl].bestDist=this.score;saveProgress();updateProgress();
+levelProgress[curLvl].completed=true;levelProgress[curLvl].deaths=lvlDeaths;levelProgress[curLvl].bestDist=this.score;
+const pt=Date.now()-startTime;if(!levelProgress[curLvl].bestTime||pt<levelProgress[curLvl].bestTime)levelProgress[curLvl].bestTime=pt;
+saveProgress();updateProgress();
 playTime=Date.now()-startTime;const tm=formatTime(playTime);
 if(curLvl===29){document.getElementById('vs-deaths').textContent=totalDeaths+'';document.getElementById('vs-dist').textContent=this.score+'m';document.getElementById('vs-time').textContent=tm;document.getElementById('victory-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'начать заново':'play again')}
 else{document.getElementById('ws-deaths').textContent=totalDeaths+'';document.getElementById('ws-dist').textContent=this.score+'m';document.getElementById('ws-time').textContent=tm;document.getElementById('win-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'далее':'next')}
@@ -1712,10 +1714,21 @@ renderHUD(){
 const cam=this.cameras.main;const w=cam.width;const h=cam.height;const lv=this.levelData;
 const portalX=lv.portalX||7000;const prog=Math.min(1,this.player.x/portalX);
 
+// Level timer
+const elapsed=this.playerAlive?Date.now()-startTime:playTime;
+const tm=formatTime(elapsed);
+
 // HUD text
 this.hudText.setText(this.score+'m').setPosition(16,24);
+const completed=levelProgress.filter(p=>p.completed).length;
 this.hudText2.setText((tgPlayerName?tgPlayerName+' — ':'')+(curLvl+1)+'/30 '+lv.name[lang]+'  '+getActName(curLvl)).setPosition(16,54);
 this.hudDeaths.setText(totalDeaths+'').setPosition(w-89,28);
+
+// Timer + progress in HUD
+if(!this.hudTimer)this.hudTimer=this.add.text(0,0,'',{fontFamily:'"Courier New",monospace',fontSize:'8px',color:'#4a4a5a'}).setScrollFactor(0).setDepth(21);
+this.hudTimer.setText(tm+' | '+completed+'/30').setPosition(16,70);
+if(!this.hudBest&&levelProgress[curLvl].bestTime){this.hudBest=this.add.text(0,0,'',{fontFamily:'"Courier New",monospace',fontSize:'7px',color:'#3a3a44'}).setScrollFactor(0).setDepth(21)}
+if(this.hudBest&&levelProgress[curLvl].bestTime){this.hudBest.setText((lang==='ru'?'рекорд: ':'best: ')+formatTime(levelProgress[curLvl].bestTime)).setPosition(16,82)}
 
 // Progress bar
 const g=this.hudGraphics;g.clear();
