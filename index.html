@@ -1208,6 +1208,10 @@ this.aG(7600,500,500);this.aTorch(7700,470);this.aTorch(7900,470);this.aTorch(81
 
 // ═══ UPDATE METHOD ═══
 update(time,delta){
+// === TRANSITION FADE-OUT (must run even when paused/story) ===
+if(transState===2){transAlpha-=0.025;if(transAlpha<=0){transAlpha=0;transState=0;document.getElementById('transition-screen').style.display='none';document.getElementById('transition-screen').style.opacity='0'}document.getElementById('transition-screen').style.opacity=transAlpha}
+// === FADE-IN (must run even when paused/story) ===
+if(this.fadeAlpha>0&&this.fadeDir<0){this.fadeAlpha=Math.max(0,this.fadeAlpha-0.03)}
 if(!this.playerAlive||paused||storyShown||transAlpha>0)return;
 const dt=delta/1000;this.gameTime+=delta;
 const input=getInput();const dm=DIFF_MULT[difficulty];const lv=this.levelData;
@@ -1430,9 +1434,6 @@ this.wasGrounded=grounded;
 for(let i=this.dustParticles.length-1;i>=0;i--){const dp=this.dustParticles[i];dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=0.06;dp.vx*=0.97;dp.life--;if(dp.life<=0)this.dustParticles.splice(i,1)}
 for(let i=this.deathParticles.length-1;i>=0;i--){const dp=this.deathParticles[i];dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=dp.grav;dp.vx*=0.96;dp.life--;if(dp.life<=0)this.deathParticles.splice(i,1)}
 
-// === FADE ===
-if(this.fadeAlpha>0&&this.fadeDir<0){this.fadeAlpha=Math.max(0,this.fadeAlpha-0.03)}
-
 // === HINTS ===
 this.hintTimer++;
 if(this.hintTimer>500&&!this.curHint){const h=t('hints');if(this.grabbedBox)this.curHint=h.push;else if(this.flood.active)this.curHint=this.flood.isLava?h.lava:h.flood;else if(this.chase.active)this.curHint=h.chase;else if(this.isWallSliding)this.curHint=h.walljump;else if(Math.abs(this.player.body.velocity.x)<5&&grounded)this.curHint=h.move;else this.curHint=h.jump;this.hintAlpha=0}
@@ -1444,9 +1445,6 @@ for(const l of this.levers){if(Math.abs(this.player.x-l.getData('x'))<26&&Math.a
 for(let i=0;i<this.ropes.length;i++){const r=this.ropes[i];const rx=r.px+Math.sin(r.angle)*r.len;const ry=r.py+Math.cos(r.angle)*r.len;if(Math.abs(this.player.x-rx)<22&&Math.abs(this.player.y-ry)<22){showH=true;hintText=lang==='ru'?'E — верёвка':'E — rope'}}
 for(const b of this.boxGroup.getChildren()){if(!b.getData('grabbed')&&Math.abs(this.player.x-b.x)<CFG.GRAB_DIST+12&&Math.abs(this.player.y-b.y)<30){showH=true;hintText=lang==='ru'?'E — ящик':'E — box'}}
 const ihEl=document.getElementById('interact-hint');ihEl.style.display=showH?'block':'none';ihEl.textContent=hintText;
-
-// === TRANSITION ===
-if(transState===2){transAlpha-=0.025;if(transAlpha<=0){transAlpha=0;transState=0;document.getElementById('transition-screen').style.display='none';document.getElementById('transition-screen').style.opacity='0'}document.getElementById('transition-screen').style.opacity=transAlpha}
 
 // === LIGHTNING ===
 if(lv.lightning&&quality>=2&&Math.random()<0.003){this.flash=0.12;this.cameras.main.shake(200,0.005);sfx('lightning')}
