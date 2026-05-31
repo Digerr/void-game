@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>VOID — beta 0.9.3 (Phaser)</title>
+<title>VOID — beta 0.9.4 (Phaser)</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <script>if(typeof Phaser==='undefined'){document.write('<scr'+'ipt src="https://unpkg.com/phaser@3.80.1/dist/phaser.min.js"></scr'+'ipt>')}</script>
@@ -111,7 +111,7 @@ canvas{display:block}
 <div class="hang-wrap"><div class="swing-anchor"><div class="scarf-line"></div><div class="scarf-knot"></div><div class="char-body"><div class="char-head"><div class="char-eye l"></div><div class="char-eye r"></div></div><div class="char-torso"></div><div class="char-arms"><div class="char-arm left"></div><div class="char-arm right"></div></div><div class="char-legs"><div class="char-leg left"></div><div class="char-leg right"></div></div></div></div></div>
 <div class="logo">VOID</div>
 <div class="logo-sub" id="ui-sub">во тьму</div>
-<div class="ver">beta 0.9.3 phaser</div>
+<div class="ver">beta 0.9.4 phaser</div>
 <div class="made-by">made by SERGO</div>
 <div class="tabs">
 <button class="tab active" onclick="showTab('play',this)" id="tab-play">играть</button>
@@ -122,6 +122,7 @@ canvas{display:block}
 </div>
 <div class="tab-content active" id="tc-play">
 <button class="btn primary" onclick="startGame()" id="ui-start">спуститься</button>
+<button class="btn" onclick="startDaily()" id="ui-daily" style="font-size:.65rem"></button>
 <button class="btn" onclick="tgShare()" id="ui-share" style="font-size:.65rem">пригласить</button>
 <div class="hints" id="ui-hints"></div>
 </div>
@@ -225,7 +226,7 @@ pauseT:'пауза',deathT:'поглощён',winT:'СПАСЁН',winSub:'ты �
 victT:'СВОБОДА',victSub:'Ты вырвался из Пустоты. Свет принял тебя. Ты больше не тень — ты пламя, которое тьма никогда не погасит.',
 ql:'качество',diff:'сложность',diffs:['легко','средне','сложно'],music:'музыка',
 lvl:'уровень',deaths:'смерти',dist:'расстояние',timeL:'время',
-tabPlay:'играть',tabProg:'прогресс',tabLvl:'уровни',tabFaq:'faq',tabSet:'настройки',share:'пригласить',
+tabPlay:'играть',tabProg:'прогресс',tabLvl:'уровни',tabFaq:'faq',tabSet:'настройки',share:'пригласить',daily:'ежедневное',
 causes:{fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',pendulum:'раздавлен маятником',crush:'раздавлен',enemy:'поглощён тенью',flood:'поглощён водой',chase:'поглощён пустотой',stalactite:'раздавлен сталактитом',lava:'сгорел в лаве',ice:'замёрз насмерть'},
 hints:{move:'← → для движения',jump:'ПРОБЕЛ — прыжок',walljump:'Стена + прыжок = прыжок от стены',
 push:'E — схватить ящик, затем ← →',lever:'E — активировать рычаг',rope:'E — схватить верёвку',
@@ -242,7 +243,7 @@ pauseT:'paused',deathT:'consumed',winT:'SURVIVED',winSub:'you escaped the void',
 victT:'FREEDOM',victSub:'You escaped the Void. The light embraced you. You are no longer a shadow — you are the flame that darkness can never extinguish.',
 ql:'quality',diff:'difficulty',diffs:['easy','medium','hard'],music:'music',
 lvl:'level',deaths:'deaths',dist:'distance',timeL:'time',
-tabPlay:'play',tabProg:'progress',tabLvl:'levels',tabFaq:'faq',tabSet:'settings',share:'invite',
+tabPlay:'play',tabProg:'progress',tabLvl:'levels',tabFaq:'faq',tabSet:'settings',share:'invite',daily:'daily',
 causes:{fall:'the void consumed you',spikes:'impaled on spikes',saw:'torn apart',pendulum:'crushed by the pendulum',crush:'crushed to death',enemy:'consumed by shadow',flood:'swallowed by water',chase:'consumed by the void',stalactite:'crushed by stalactite',lava:'burned in lava',ice:'frozen to death'},
 hints:{move:'← → to move',jump:'SPACE — jump',walljump:'Wall + jump = wall jump',
 push:'E — grab box, then ← →',lever:'E — activate lever',rope:'E — grab rope',
@@ -296,6 +297,7 @@ document.getElementById('tab-set').textContent=l.tabSet;
 const hintsEl=document.getElementById('ui-hints');
 hintsEl.innerHTML=l.controls.split('|').map(h=>'<p>'+h+'</p>').join('');
 const shareBtn=document.getElementById('ui-share');if(shareBtn)shareBtn.textContent=l.share;
+const dailyBtn=document.getElementById('ui-daily');if(dailyBtn)dailyBtn.textContent=l.daily;
 updateProgress();updateLevelList();updateFAQ();
 }
 function hideAll(){['start-screen','death-screen','win-screen','pause-screen','touch-controls','victory-screen'].forEach(id=>document.getElementById(id).style.display='none')}
@@ -387,7 +389,7 @@ let gameScene=null,phaserGame=null,running=false;
 const touch={l:false,r:false,j:false,e:false};
 function setupTouch(id,k){const el=document.getElementById(id);if(!el)return;el.addEventListener('touchstart',e=>{e.preventDefault();touch[k]=true;if(k==='pause')togglePause()},{passive:false});el.addEventListener('touchend',e=>{e.preventDefault();touch[k]=false},{passive:false});el.addEventListener('touchcancel',()=>touch[k]=false);el.addEventListener('mousedown',()=>{touch[k]=true;if(k==='pause')togglePause()});el.addEventListener('mouseup',()=>touch[k]=false);el.addEventListener('mouseleave',()=>touch[k]=false)}
 const keys=new Set();
-document.addEventListener('keydown',e=>{keys.add(e.code);if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(storyShown){dismissStory();return}if(e.code==='Escape'&&gameScene&&gameScene.playerAlive)togglePause();if(e.code==='KeyM')toggleMusicMute()});
+document.addEventListener('keydown',e=>{keys.add(e.code);if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(storyShown){dismissStory();return}if(e.code==='Escape'&&gameScene&&gameScene.playerAlive)togglePause();if(e.code==='KeyM')toggleMusicMute();if(e.code==='KeyP'&&gameScene)takeScreenshot()});
 document.addEventListener('keyup',e=>keys.delete(e.code));
 let _lastSfxClick=0;
 document.addEventListener('click',e=>{ensureAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(e.target.matches('button,.btn,.sb,.tab')&&Date.now()-_lastSfxClick>80){sfx('click');_lastSfxClick=Date.now()}});
@@ -575,6 +577,7 @@ this.levers=[];this.pressurePlates=[];this.breakablePlatforms=[];
 this.ropes=[];this.stalactites=[];this.movingPlatforms=[];this.fallingPlatforms=[];
 this.flood={active:false,level:800,speed:0,maxLevel:800,grace:0,isLava:false};
 this.chase={active:false,x:0,speed:0};
+this.portals=[];this.wind={x:0,y:0};
 this.onRope=-1;this.grabbedBox=null;
 
 switch(n){
@@ -613,6 +616,8 @@ aFlood(speed,maxLevel,isLava){this.flood={active:true,level:800,speed:speed||0.3
 aChase(startX,speed){this.chase={active:true,x:startX||-200,speed:speed||2}}
 aVine(x,y,w,h){const v=this.platformGroup.create(x+w/2,y+h/2,'vine');v.setDisplaySize(w,h||200);v.setSize(w,h||200);v.setOrigin(0.5,0.5);v.refreshBody();v.setData('type','vine');this.physics.world.remove(v.body);v.body.enable=true;v.body.setImmovable(true);v.body.setAllowGravity(false);v.body.moves=false}
 aPud(x,y,w){}
+aPortal(x,y,tx,ty,color){if(!this.portals)this.portals=[];this.portals.push({x,y,tx,ty,color:color||0x5050a0,r:18,cooldown:0})}
+aWind(dirX,dirY){this.wind={x:dirX||0,y:dirY||0}}
 
 // ═══ LEVEL BUILDERS ═══
 // L0
@@ -657,7 +662,8 @@ this.aF(3450,200,70,'falling');this.aF(3570,280,70,'falling');this.aG(3700,500,4
 this.aG(4150,500,300);this.aSp(4250,484,60);this.aF(4400,440,80,'moving',70,.7,'y');this.aG(4550,500,400);this.aTorch(4600,470);this.aCP(4600)
 this.aG(5000,500,300);this.aF(5200,420,70,'falling');this.aF(5330,380,70,'falling');this.aF(5460,340,80,'solid')
 this.aG(5550,500,300);this.aTorch(5560,470);this.aCP(5600)
-this.aG(5900,500,400);this.aTorch(5950,470);this.aTorch(6150,470);this.aTorch(6250,470)}
+this.aG(5900,500,400);this.aTorch(5950,470);this.aTorch(6150,470);this.aTorch(6250,470);
+this.aPortal(3450,180,5550,480,0x5050a0);this.aPortal(5600,470,3500,200,0x5050a0)}
 
 // L3
 bL3(){this.aG(0,500,500);this.aTorch(100,470);this.aCP(200)
@@ -911,7 +917,7 @@ this.aG(5000,80,200);this.aTorch(5010,50);this.aCP(5050)
 this.aG(5150,500,400);this.aTorch(5200,470);this.aTorch(5400,470);this.aTorch(5500,470)}
 
 // L16
-bL16(){this.aChase(-200,2);this.aFlood(.2,300)
+bL16(){this.aChase(-200,2);this.aFlood(.2,300);this.aWind(60,0)
 this.aG(0,500,500);this.aTorch(100,470);this.aCP(200)
 this.aG(700,500,300);this.aEnemy(800,464,120,1);this.aSp(900,484,40);this.aTorch(710,470);this.aCP(750)
 this.aF(1050,440,80,'falling');this.aF(1180,400,80,'falling');this.aG(1300,500,200);this.aCP(1350)
@@ -1383,6 +1389,19 @@ if(this.chase.x>=this.player.x)this.kill('chase');
 if(this.playerAlive&&Math.random()<0.005)sfx('chase');
 }
 
+// === WIND ===
+if(this.wind.x||this.wind.y){this.player.body.velocity.x+=this.wind.x*dt;this.player.body.velocity.y+=this.wind.y*dt}
+
+// === PORTALS ===
+if(this.portals.length>0){
+for(const p of this.portals){
+if(p.cooldown>0){p.cooldown--;continue}
+const dx=this.player.x-p.x;const dy=this.player.y-p.y;
+if(Math.abs(dx)<p.r&&Math.abs(dy)<p.r+16){
+this.player.setPosition(p.tx,p.ty-CFG.PH);this.player.body.velocity.set(0,0);
+p.cooldown=30;sfx('interact');this.spawnDust(p.tx,p.ty,0);this.fadeAlpha=0.3;this.fadeDir=-1;
+}}}
+
 // === DEATH BY VOID ===
 if(this.player.y>CFG.DEATH_Y)this.kill('fall');
 
@@ -1610,6 +1629,17 @@ g.fillStyle(0x2a2a38,1);g.fillCircle(ex,ey,7);
 if(this.onRope===i){g.fillStyle(0xc8c896,0.06);g.fillCircle(ex,ey,14)}
 });
 
+// Portals
+this.portals.forEach(p=>{
+const pulse=Math.sin(now*0.005)*0.3+0.7;
+g.fillStyle(p.color,0.15*pulse);g.fillCircle(p.x,p.y,p.r*2.5);
+g.fillStyle(p.color,0.25*pulse);g.fillCircle(p.x,p.y,p.r*1.5);
+g.fillStyle(p.color,0.5*pulse);g.fillCircle(p.x,p.y,p.r*0.8);
+// Particles
+for(let i=0;i<3;i++){const a=now*0.003+i*2.1;const pr=p.r*1.2;
+g.fillStyle(p.color,0.3);g.fillCircle(p.x+Math.cos(a)*pr,p.y+Math.sin(a)*pr,2)}
+});
+
 // Levers
 this.levers.forEach(l=>{
 const x=l.getData('x');const y=l.getData('y');const active=l.getData('active');
@@ -1741,6 +1771,26 @@ onResize(){}
 }
 
 // ═══ LAUNCH GAME ═══
+// ═══ DAILY CHALLENGE ═══
+let dailySeed=0;let isDaily=false;
+function getDailySeed(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()}
+function startDaily(){
+isDaily=true;dailySeed=getDailySeed();
+const lvlIdx=Math.floor(Phaser.Math.Between.Seed(dailySeed)(0,29));curLvl=lvlIdx;
+totalDeaths=0;lvlDeaths=0;initProgress();startTime=Date.now();playTime=0;
+document.getElementById('start-screen').style.display='none';document.getElementById('btn-pause').style.display='flex';
+if('ontouchstart'in window)document.getElementById('touch-controls').style.display='block';
+paused=false;transState=0;transAlpha=0;ensureAudio();initMusic();
+if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume().then(()=>fadeMusicIn());else fadeMusicIn();
+launchLevel(lvlIdx,true);
+}
+
+// ═══ PHOTO MODE ═══
+function takeScreenshot(){
+const c=document.querySelector('canvas');if(!c)return;
+c.toBlob(blob=>{if(!blob)return;const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='void_'+Date.now()+'.png';a.click();URL.revokeObjectURL(url)},'image/png');
+}
+
 function startGame(){
 curLvl=0;totalDeaths=0;lvlDeaths=0;initProgress();startTime=Date.now();playTime=0;loadProgress();
 document.getElementById('start-screen').style.display='none';document.getElementById('btn-pause').style.display='flex';
