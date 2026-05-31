@@ -19,8 +19,8 @@
 
 ## 📋 ТЕКУЩИЙ СТАТУС
 
-- **Версия**: beta 0.9.0 (Phaser 3)
-- **Файл**: index.html (единый файл, ~1635 строк)
+- **Версия**: beta 0.9.4 (Phaser 3)
+- **Файл**: index.html (единый файл)
 - **Хостинг**: GitHub Pages → https://digerr.github.io/void-game/
 - **Telegram бот**: @voide_game_bot (id: 8858889318)
 - **Локальный путь**: /home/z/my-project/void-game/
@@ -39,6 +39,7 @@
 
 **Один HTML-файл** (index.html) содержит:
 - **Phaser 3.80.1** — загружается через CDN (jsdelivr)
+- **Telegram WebApp SDK** — интеграция с TG (ready, expand, MainButton, share)
 - **BootScene** — генерация текстур программно (16 текстур)
 - **GameScene** — основной геймплей с Arcade Physics
 - CSS стили (встроенные, тёмная тема, Courier New)
@@ -51,12 +52,17 @@
   - Levels: 30 уровней в 4 актах (bL0–bL29, switch dispatcher)
   - Механики: move, jump, wall slide, wall jump, falling platforms, moving platforms,
     spikes, saws, pendulums, enemies, levers, doors, boxes, pressure plates,
-    breakable platforms, ropes, stalactites, flood, chase, ice, vines
+    breakable platforms, ropes, stalactites, flood, chase, ice, vines, portals, wind
   - Текстуры: 16 программных текстур (player, platform, spikes, saw, pendulum,
     enemy, lever, door, box, rope, stalactite, breakable, pressurePlate, vine, checkpoint, torch)
-  - Прогресс: localStorage
+  - Визуал: параллакс фон (3 слоя), частицы смерти (по типу), screen shake, fade transitions
+  - Telegram: MainButton, имя игрока, share, expand
+  - HUD: таймер уровня, лучший рекорд, прогресс X/30
+  - Прогресс: localStorage (completed, deaths, bestDist, bestTime)
   - Тач-контролы для мобильных
   - Кастомный рендеринг через Phaser Graphics (аура, шарф, частицы, виньетка)
+  - Ежедневное испытание (сид по дате)
+  - Фоторежим (P — скриншот PNG)
 
 ---
 
@@ -85,34 +91,23 @@
 - Плиты давления + двери
 - Чекпоинты
 - 2 финала (обычный + секретный за все осколки)
+- **Порталы** — телепорт между точками (L2)
+- **Ветер** — сносит игрока (L16)
 
 ---
 
 ## 📝 ИДЕИ НА БУДУЩЕЕ (не реализовано)
 
 ### Геймплей:
-- Ежедневные испытания (сид по дате)
 - Призраки других игроков (тонкие силуэты)
 - Арена выживания (endless режим)
-- Фоторежим (скриншоты)
-- Speedrun-рейтинг
+- Speedrun-рейтинг (глобальный)
 
 ### Атмосфера:
-- Углублённый параллакс (3 слоя фона)
-- Уникальные частицы смерти по типу
-- Screen shake при попадании в ловушку
 - Система теней на персонаже
 - Скрытые руны в фоне (лор)
 
-### Монетизация (Telegram Stars):
-- Продолжить с места смерти (5-10 ⭐)
-- Косметические скины персонажа (15-30 ⭐)
-- Подсказки для головоломок (3 ⭐)
-- Ежедневный пропуск (30 ⭐)
-- Сезонные ивенты
-
 ### Техническое:
-- Telegram WebApp SDK интеграция
 - Delta time вместо фиксированного таймера
 - Обработка команд бота (/stats и т.д.)
 - Vercel deployment (в будущем)
@@ -125,6 +120,10 @@
 |------|--------|-----------|
 | 2026-06-01 | 0.9.0 | Миграция на Phaser 3. Все 30 уровней, все механики, 16 текстур, Arcade Physics, полный i18n, FAQ |
 | 2026-06-01 | — | Бот: добавлены команды /start /play /help /stats /news, описания, кнопка меню |
+| 2026-06-01 | 0.9.1 | Пачка 1: параллакс фон (3 слоя), частицы смерти, screen shake, fade transitions |
+| 2026-06-01 | 0.9.2 | Пачка 2: Telegram SDK (ready, expand, MainButton, share, имя игрока) |
+| 2026-06-01 | 0.9.3 | Пачка 3: таймер уровня в HUD, лучший рекорд, прогресс X/30, bestTime в localStorage |
+| 2026-06-01 | 0.9.4 | Пачка 4: порталы, ветер, ежедневное испытание, фоторежим (P) |
 
 ---
 
