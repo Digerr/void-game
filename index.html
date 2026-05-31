@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>VOID — beta 0.9.1 (Phaser)</title>
+<title>VOID — beta 0.9.2 (Phaser)</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <script>if(typeof Phaser==='undefined'){document.write('<scr'+'ipt src="https://unpkg.com/phaser@3.80.1/dist/phaser.min.js"></scr'+'ipt>')}</script>
@@ -111,7 +111,7 @@ canvas{display:block}
 <div class="hang-wrap"><div class="swing-anchor"><div class="scarf-line"></div><div class="scarf-knot"></div><div class="char-body"><div class="char-head"><div class="char-eye l"></div><div class="char-eye r"></div></div><div class="char-torso"></div><div class="char-arms"><div class="char-arm left"></div><div class="char-arm right"></div></div><div class="char-legs"><div class="char-leg left"></div><div class="char-leg right"></div></div></div></div></div>
 <div class="logo">VOID</div>
 <div class="logo-sub" id="ui-sub">во тьму</div>
-<div class="ver">beta 0.9.1 phaser</div>
+<div class="ver">beta 0.9.2 phaser</div>
 <div class="made-by">made by SERGO</div>
 <div class="tabs">
 <button class="tab active" onclick="showTab('play',this)" id="tab-play">играть</button>
@@ -122,6 +122,7 @@ canvas{display:block}
 </div>
 <div class="tab-content active" id="tc-play">
 <button class="btn primary" onclick="startGame()" id="ui-start">спуститься</button>
+<button class="btn" onclick="tgShare()" id="ui-share" style="font-size:.65rem">пригласить</button>
 <div class="hints" id="ui-hints"></div>
 </div>
 <div class="tab-content" id="tc-progress"><div class="prog-grid" id="prog-grid"></div></div>
@@ -192,6 +193,20 @@ canvas{display:block}
 <script>
 'use strict';
 
+// ═══ TELEGRAM WEBAPP SDK ═══
+const tg=window.Telegram&&window.Telegram.WebApp?window.Telegram.WebApp:null;
+let tgPlayerName='';
+if(tg){
+tg.ready();tg.expand();
+if(tg.initDataUnsafe&&tg.initDataUnsafe.user){tgPlayerName=tg.initDataUnsafe.user.first_name||''}
+// MainButton — shows "play again" on death/victory
+tg.MainButton.setParams({color:'#1a1a2e',text_color:'#7a7a9a',is_visible:false});
+tg.MainButton.onClick(()=>{if(document.getElementById('death-screen').style.display==='flex')respawn();else if(document.getElementById('victory-screen').style.display==='flex'||document.getElementById('win-screen').style.display==='flex'){document.getElementById('win-screen').style.display='none';document.getElementById('victory-screen').style.display='none';startGame()}else if(document.getElementById('start-screen').style.display==='flex')startGame();tg.MainButton.hide()});
+}
+function tgShowMainBtn(text){if(tg){tg.MainButton.setText(text);tg.MainButton.show()}}
+function tgHideMainBtn(){if(tg)tg.MainButton.hide()}
+function tgShare(){if(tg){tg.openTelegramLink('https://t.me/share/url?url=https://t.me/voide_game_bot&text='+encodeURIComponent(lang==='ru'?'Загляни во тьму — VOID':'Step into the void — VOID'))}else{window.open('https://t.me/share/url?url=https://t.me/voide_game_bot','_blank')}}
+
 // ═══ SETTINGS ═══
 let quality=2,lang='ru',difficulty=0,paused=false;
 let musicVolume=1,musicMuted=false,brightness=100;
@@ -210,7 +225,7 @@ pauseT:'пауза',deathT:'поглощён',winT:'СПАСЁН',winSub:'ты �
 victT:'СВОБОДА',victSub:'Ты вырвался из Пустоты. Свет принял тебя. Ты больше не тень — ты пламя, которое тьма никогда не погасит.',
 ql:'качество',diff:'сложность',diffs:['легко','средне','сложно'],music:'музыка',
 lvl:'уровень',deaths:'смерти',dist:'расстояние',timeL:'время',
-tabPlay:'играть',tabProg:'прогресс',tabLvl:'уровни',tabFaq:'faq',tabSet:'настройки',
+tabPlay:'играть',tabProg:'прогресс',tabLvl:'уровни',tabFaq:'faq',tabSet:'настройки',share:'пригласить',
 causes:{fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',pendulum:'раздавлен маятником',crush:'раздавлен',enemy:'поглощён тенью',flood:'поглощён водой',chase:'поглощён пустотой',stalactite:'раздавлен сталактитом',lava:'сгорел в лаве',ice:'замёрз насмерть'},
 hints:{move:'← → для движения',jump:'ПРОБЕЛ — прыжок',walljump:'Стена + прыжок = прыжок от стены',
 push:'E — схватить ящик, затем ← →',lever:'E — активировать рычаг',rope:'E — схватить верёвку',
@@ -227,7 +242,7 @@ pauseT:'paused',deathT:'consumed',winT:'SURVIVED',winSub:'you escaped the void',
 victT:'FREEDOM',victSub:'You escaped the Void. The light embraced you. You are no longer a shadow — you are the flame that darkness can never extinguish.',
 ql:'quality',diff:'difficulty',diffs:['easy','medium','hard'],music:'music',
 lvl:'level',deaths:'deaths',dist:'distance',timeL:'time',
-tabPlay:'play',tabProg:'progress',tabLvl:'levels',tabFaq:'faq',tabSet:'settings',
+tabPlay:'play',tabProg:'progress',tabLvl:'levels',tabFaq:'faq',tabSet:'settings',share:'invite',
 causes:{fall:'the void consumed you',spikes:'impaled on spikes',saw:'torn apart',pendulum:'crushed by the pendulum',crush:'crushed to death',enemy:'consumed by shadow',flood:'swallowed by water',chase:'consumed by the void',stalactite:'crushed by stalactite',lava:'burned in lava',ice:'frozen to death'},
 hints:{move:'← → to move',jump:'SPACE — jump',walljump:'Wall + jump = wall jump',
 push:'E — grab box, then ← →',lever:'E — activate lever',rope:'E — grab rope',
@@ -280,17 +295,18 @@ document.getElementById('tab-faq').textContent=l.tabFaq;
 document.getElementById('tab-set').textContent=l.tabSet;
 const hintsEl=document.getElementById('ui-hints');
 hintsEl.innerHTML=l.controls.split('|').map(h=>'<p>'+h+'</p>').join('');
+const shareBtn=document.getElementById('ui-share');if(shareBtn)shareBtn.textContent=l.share;
 updateProgress();updateLevelList();updateFAQ();
 }
 function hideAll(){['start-screen','death-screen','win-screen','pause-screen','touch-controls','victory-screen'].forEach(id=>document.getElementById(id).style.display='none')}
 function togglePause(){if(storyShown||transState||!gameScene||!gameScene.playerAlive)return;paused=!paused;document.getElementById('pause-screen').style.display=paused?'flex':'none';if(gameScene){paused?gameScene.physics.pause():gameScene.physics.resume()}}
 function resumeGame(){paused=false;document.getElementById('pause-screen').style.display='none';if(gameScene)gameScene.physics.resume()}
-function quitToMenu(){paused=false;running=false;hideAll();document.getElementById('start-screen').style.display='flex';document.getElementById('btn-pause').style.display='none';curLvl=0;initProgress();updateProgress();fadeMusicOut();if(phaserGame){phaserGame.destroy(true);phaserGame=null}gameScene=null}
+function quitToMenu(){paused=false;running=false;hideAll();document.getElementById('start-screen').style.display='flex';document.getElementById('btn-pause').style.display='none';curLvl=0;initProgress();updateProgress();fadeMusicOut();tgHideMainBtn();if(phaserGame){phaserGame.destroy(true);phaserGame=null}gameScene=null}
 function showStory(n){const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent=lang==='ru'?'нажмите чтобы продолжить':'click to continue';document.getElementById('transition-screen').style.display='flex';document.getElementById('transition-screen').style.opacity='1';document.getElementById('transition-screen').onclick=dismissStory;document.getElementById('transition-screen').style.cursor='pointer';storyShown=true}
 function doTransition(n){transState=2;transAlpha=1;const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent='';document.getElementById('transition-screen').style.display='flex';document.getElementById('transition-screen').style.opacity='1';document.getElementById('transition-screen').onclick=null;setTimeout(()=>{transState=2},2500)}
 function dismissStory(){storyShown=false;transState=2;transAlpha=1;const ts=document.getElementById('transition-screen');ts.style.display='flex';ts.style.opacity='1';ts.onclick=null;ts.style.cursor='default'}
-function respawn(){if(gameScene)gameScene.doRespawn();document.getElementById('death-screen').style.display='none'}
-function nextLevel(){document.getElementById('win-screen').style.display='none';if(curLvl<LEVELS.length-1){curLvl++;launchLevel(curLvl,false)}}
+function respawn(){if(gameScene)gameScene.doRespawn();document.getElementById('death-screen').style.display='none';tgHideMainBtn()}
+function nextLevel(){document.getElementById('win-screen').style.display='none';tgHideMainBtn();if(curLvl<LEVELS.length-1){curLvl++;launchLevel(curLvl,false)}}
 function formatTime(ms){const s=Math.floor(ms/1000);const m=Math.floor(s/60);return m+':'+(s%60<10?'0':'')+(s%60)}
 
 // ═══ PROGRESS ═══
@@ -1439,6 +1455,7 @@ levelProgress[curLvl].deaths=lvlDeaths;saveProgress();
 const causes=t('causes');document.getElementById('death-cause').textContent=causes[cause]||causes.fall;
 document.getElementById('ds-lvl').textContent=(curLvl+1)+'';document.getElementById('ds-deaths').textContent=totalDeaths+'';document.getElementById('ds-dist').textContent=this.score+'m';
 document.getElementById('death-screen').style.display='flex';this.player.setVisible(false);
+tgShowMainBtn(lang==='ru'?'попробовать снова':'try again');
 if(this.grabbedBox){this.grabbedBox.setData('grabbed',false);this.grabbedBox=null}
 }
 
@@ -1459,8 +1476,8 @@ this.hintTimer=0;this.curHint='';this.hintAlpha=0;
 winGame(){
 levelProgress[curLvl].completed=true;levelProgress[curLvl].deaths=lvlDeaths;levelProgress[curLvl].bestDist=this.score;saveProgress();updateProgress();
 playTime=Date.now()-startTime;const tm=formatTime(playTime);
-if(curLvl===29){document.getElementById('vs-deaths').textContent=totalDeaths+'';document.getElementById('vs-dist').textContent=this.score+'m';document.getElementById('vs-time').textContent=tm;document.getElementById('victory-screen').style.display='flex'}
-else{document.getElementById('ws-deaths').textContent=totalDeaths+'';document.getElementById('ws-dist').textContent=this.score+'m';document.getElementById('ws-time').textContent=tm;document.getElementById('win-screen').style.display='flex'}
+if(curLvl===29){document.getElementById('vs-deaths').textContent=totalDeaths+'';document.getElementById('vs-dist').textContent=this.score+'m';document.getElementById('vs-time').textContent=tm;document.getElementById('victory-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'начать заново':'play again')}
+else{document.getElementById('ws-deaths').textContent=totalDeaths+'';document.getElementById('ws-dist').textContent=this.score+'m';document.getElementById('ws-time').textContent=tm;document.getElementById('win-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'далее':'next')}
 }
 
 // ═══ PARALLAX ═══
@@ -1697,7 +1714,7 @@ const portalX=lv.portalX||7000;const prog=Math.min(1,this.player.x/portalX);
 
 // HUD text
 this.hudText.setText(this.score+'m').setPosition(16,24);
-this.hudText2.setText((curLvl+1)+'/30 '+lv.name[lang]+'  '+getActName(curLvl)).setPosition(16,54);
+this.hudText2.setText((tgPlayerName?tgPlayerName+' — ':'')+(curLvl+1)+'/30 '+lv.name[lang]+'  '+getActName(curLvl)).setPosition(16,54);
 this.hudDeaths.setText(totalDeaths+'').setPosition(w-89,28);
 
 // Progress bar
