@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>VOID — beta 0.9.0 (Phaser)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+<script>if(typeof Phaser==='undefined'){document.write('<scr'+'ipt src="https://unpkg.com/phaser@3.80.1/dist/phaser.min.js"></scr'+'ipt>')}</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a14;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;font-family:'Courier New',monospace}
@@ -1630,6 +1632,9 @@ running=true;
 setupTouch('btn-left','l');setupTouch('btn-right','r');setupTouch('btn-jump','j');setupTouch('btn-interact','e');setupTouch('btn-pause','pause');
 initProgress();loadProgress();updateUI();
 try{const sb=localStorage.getItem('void_brightness');if(sb){brightness=parseInt(sb);const c=document.querySelector('canvas');if(c)c.style.filter='brightness('+brightness+'%)'}}catch(e){}
+
+// ═══ TELEGRAM WEBAPP ═══
+try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();Telegram.WebApp.setHeaderColor('#0a0a14');Telegram.WebApp.setBackgroundColor('#06060e')}}catch(e){}
 
 </script>
 </body>
