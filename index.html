@@ -722,7 +722,7 @@ let running=false,canvas,ctx,prevOg=false
 
 function startGame(){
   initAudio()
-  ngPlusMode=false
+  ngPlusMode=false;won=false
   buildLevel();initParticles()
   const cp0=checkpoints[0]
   P=newPlayer(cp0.x,cp0.y-CFG.PH)
@@ -764,18 +764,18 @@ function generateLevel(){
   const runeTexts=["the void shifts endlessly","stone remembers what flesh forgets","darkness is patient","chains bind the willing","steel sings a lullaby","the end watches","echoes of the fallen","light bends here","the wall remembers your touch","randomness is just order unseen"]
   while(x<WORLD_W-400){
     section++
-    const difficulty=Math.min(1+x/WORLD_W,1) // 0 to 1 progressive difficulty
+    const prog=Math.min(1+x/WORLD_W,1) // 0 to 1 progressive difficulty
     const segType=Math.floor(seededRandom()*6)
     const segW=300+Math.floor(seededRandom()*400)
-    const gapChance=0.2+difficulty*0.2
+    const gapChance=0.2+prog*0.2
     if(seededRandom()<gapChance&&x>600){
       // Gap with floating platforms
-      const gapW=80+Math.floor(seededRandom()*(60+difficulty*80))
-      const platCount=1+Math.floor(seededRandom()*(1+difficulty*2))
+      const gapW=80+Math.floor(seededRandom()*(60+prog*80))
+      const platCount=1+Math.floor(seededRandom()*(1+prog*2))
       for(let i=0;i<platCount;i++){
         const px=x+20+i*(gapW/platCount)
         const py=groundY-40-Math.floor(seededRandom()*100)
-        const ptype=seededRandom()<0.3+difficulty*0.2?'falling':'solid'
+        const ptype=seededRandom()<0.3+prog*0.2?'falling':'solid'
         addFloating(px,py,60+Math.floor(seededRandom()*40),ptype)
       }
       x+=gapW
@@ -783,16 +783,16 @@ function generateLevel(){
     // Ground segment
     addGround(x,groundY,segW)
     // Add traps based on difficulty
-    if(section>1&&seededRandom()<0.3+difficulty*0.3){
+    if(section>1&&seededRandom()<0.3+prog*0.3){
       const trapType=Math.floor(seededRandom()*3)
       if(trapType===0){addSpikeTrap(x+50+Math.floor(seededRandom()*(segW-150)),groundY-16,60+Math.floor(seededRandom()*60))}
-      else if(trapType===1){const sawR=60+Math.floor(seededRandom()*120);addSaw(x+segW/2,groundY-150-Math.floor(seededRandom()*100),sawR,seededRandom()<0.5?'y':'x',0.8+difficulty*1.2)}
-      else{addPendulum(x+segW/2,60+Math.floor(seededRandom()*60),200+Math.floor(seededRandom()*200),0.02+difficulty*0.02)}
+      else if(trapType===1){const sawR=60+Math.floor(seededRandom()*120);addSaw(x+segW/2,groundY-150-Math.floor(seededRandom()*100),sawR,seededRandom()<0.5?'y':'x',0.8+prog*1.2)}
+      else{addPendulum(x+segW/2,60+Math.floor(seededRandom()*60),200+Math.floor(seededRandom()*200),0.02+prog*0.02)}
     }
-    if(section>2&&seededRandom()<0.15+difficulty*0.15){
+    if(section>2&&seededRandom()<0.15+prog*0.15){
       const trapType2=Math.floor(seededRandom()*3)
       if(trapType2===0){addSpikeTrap(x+Math.floor(seededRandom()*segW),groundY-16,40+Math.floor(seededRandom()*60))}
-      else if(trapType2===1){addSaw(x+Math.floor(seededRandom()*segW),groundY-100-Math.floor(seededRandom()*100),80+Math.floor(seededRandom()*60),'y',1+difficulty)}
+      else if(trapType2===1){addSaw(x+Math.floor(seededRandom()*segW),groundY-100-Math.floor(seededRandom()*100),80+Math.floor(seededRandom()*60),'y',1+prog)}
     }
     // Puddles
     if(seededRandom()<0.3)addPuddle(x+Math.floor(seededRandom()*segW),groundY-2,40+Math.floor(seededRandom()*40))
@@ -805,7 +805,7 @@ function generateLevel(){
     // Checkpoints every ~1500px
     if(x%1500<segW&&x>500)addCheckpoint(x+Math.floor(segW/2))
     // Dark zones at higher difficulty
-    if(difficulty>0.3&&seededRandom()<0.2){addDarkZone(x,groundY-250,segW,200)}
+    if(prog>0.3&&seededRandom()<0.2){addDarkZone(x,groundY-250,segW,200)}
     // Light zones occasionally
     if(seededRandom()<0.15){addLightZone(x+segW/2,groundY-80,100+Math.floor(seededRandom()*80))}
     // Rope occasionally
@@ -828,7 +828,7 @@ function generateLevel(){
 
 function startRandomRun(){
   initAudio()
-  ngPlusMode=false
+  ngPlusMode=false;won=false
   randomSeed=Date.now()%2147483647
   generateLevel();initParticles()
   const cp0=checkpoints[0]
@@ -891,7 +891,10 @@ function kill(cause){
   saveProgress()
 }
 
+let won=false
 function win(){
+  if(won)return;won=true
+  P.alive=false
   const allShards=P.shardsCollected.filter(s=>s).length>=shards.length
   if(allShards){
     document.getElementById('win-title-text').textContent='TRANSCENDED'
