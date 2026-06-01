@@ -195,8 +195,15 @@ canvas{display:block}
 <div class="tb pause" id="btn-pause" style="display:none">❚❚</div>
 <div class="interact-hint" id="interact-hint">E</div>
 <div id="ach-toast" style="position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(10px);z-index:50;background:rgba(16,16,28,0.95);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:10px 18px;text-align:center;display:none;transition:opacity .3s,transform .3s;pointer-events:none"></div>
+<div id="debug-output" style="position:fixed;bottom:120px;left:8px;z-index:60;font-size:10px;color:#f44;background:rgba(0,0,0,0.8);padding:6px;max-width:90%;display:none;pointer-events:none;font-family:monospace;white-space:pre-wrap"></div>
 <script>
 'use strict';
+// ═══ ERROR DISPLAY ═══
+window.onerror=function(msg,url,line,col,err){
+const d=document.getElementById('debug-output');if(d){d.style.display='block';d.textContent+='ERR: '+msg+' L'+line+'\n'}
+return false};
+window.addEventListener('unhandledrejection',function(e){
+const d=document.getElementById('debug-output');if(d){d.style.display='block';d.textContent+='REJ: '+e.reason+'\n'}});
 
 // ═══ TELEGRAM WEBAPP SDK ═══
 const tg=window.Telegram&&window.Telegram.WebApp?window.Telegram.WebApp:null;
@@ -330,7 +337,7 @@ function quitToMenu(){paused=false;running=false;hideAll();document.getElementBy
 let storyAutoTimer=null;
 function showStory(n){const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent=lang==='ru'?'нажмите чтобы продолжить':'click to continue';const ts=document.getElementById('transition-screen');ts.style.display='flex';ts.style.opacity='1';ts.onclick=dismissStory;ts.ontouchstart=function(e){if(Date.now()-storyShownTime>400)dismissStory()};ts.onmousedown=function(){if(Date.now()-storyShownTime>400)dismissStory()};ts.style.cursor='pointer';storyShown=true;storyShownTime=Date.now();clearTimeout(storyAutoTimer);storyAutoTimer=setTimeout(function(){if(storyShown)dismissStory()},8000)}
 function doTransition(n){transState=2;transAlpha=1;const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent='';document.getElementById('transition-screen').style.display='flex';document.getElementById('transition-screen').style.opacity='1';document.getElementById('transition-screen').onclick=null;setTimeout(()=>{transState=2},2500)}
-function dismissStory(){if(!storyShown)return;storyShown=false;transState=0;transAlpha=0;clearTimeout(storyAutoTimer);const ts=document.getElementById('transition-screen');ts.style.display='none';ts.style.opacity='0';ts.onclick=null;ts.ontouchstart=null;ts.onmousedown=null;ts.style.cursor='default';if(gameScene&&gameScene.playerAlive){gameScene.fadeAlpha=0;gameScene.renderParallax();gameScene.renderForeground();gameScene.renderHUD()}tgHaptic('light')}
+function dismissStory(){if(!storyShown)return;storyShown=false;transState=2;transAlpha=1;clearTimeout(storyAutoTimer);const ts=document.getElementById('transition-screen');ts.onclick=null;ts.ontouchstart=null;ts.onmousedown=null;ts.style.cursor='default';tgHaptic('light');if(gameScene){gameScene.fadeAlpha=0;gameScene.cameras.main.stopFollow();gameScene.cameras.main.startFollow(gameScene.player,true,0.08,0.06);gameScene.cameras.main.setFollowOffset(-gameScene.cameras.main.width*0.15,50)}}
 function respawn(){if(gameScene)gameScene.doRespawn();document.getElementById('death-screen').style.display='none';tgHideMainBtn()}
 function nextLevel(){document.getElementById('win-screen').style.display='none';tgHideMainBtn();if(curLvl<LEVELS.length-1){curLvl++;launchLevel(curLvl,false)}}
 function skipLevel(){const nextUncompleted=levelProgress.findIndex(p=>!p.completed);if(nextUncompleted>=0&&levelProgress[nextUncompleted].deaths>=15){levelProgress[nextUncompleted].completed=true;levelProgress[nextUncompleted].shards=0;saveProgress();updateProgress();updateUI();tgHaptic('warning')}}
@@ -1264,18 +1271,19 @@ this.aG(7600,500,500);this.aTorch(7700,470);this.aTorch(7900,470);this.aTorch(81
 
 // ═══ UPDATE METHOD ═══
 update(time,delta){
-// === TRANSITION FADE-OUT (must run even when paused/story) ===
+// === TRANSITION FADE-OUT (must run always) ===
 if(transState===2){transAlpha-=0.025;if(transAlpha<=0){transAlpha=0;transState=0;document.getElementById('transition-screen').style.display='none';document.getElementById('transition-screen').style.opacity='0'}document.getElementById('transition-screen').style.opacity=transAlpha}
-// === FADE-IN (must run even when paused/story) ===
+// === FADE-IN (must run always) ===
 if(this.fadeAlpha>0&&this.fadeDir<0){this.fadeAlpha=Math.max(0,this.fadeAlpha-0.03)}
 // === SLOW-MO ===
 if(this.slowMoTimer>0){this.slowMoTimer--;this.timeScale=Math.min(1,this.timeScale+0.06);this.physics.world.timeScale=this.timeScale}
 // === DELAYED DEATH SCREEN ===
 if(this.deathScreenTimer>0){this.deathScreenTimer--;if(this.deathScreenTimer<=0){document.getElementById('death-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'попробовать снова':'try again')}}
 // === DEATH PARTICLES (update even when dead) ===
-if(!this.playerAlive){this.deathParticles.forEach(dp=>{dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=dp.grav;dp.vx*=0.96;dp.life--});this.deathParticles=this.deathParticles.filter(dp=>dp.life>0);this.weatherParticles.forEach(wp=>{wp.life--;if(wp.type==='rain'){wp.x+=wp.vx;wp.y+=wp.vy}else if(wp.type==='ash'){wp.x+=wp.vx;wp.y+=wp.vy}else if(wp.type==='leaf'){wp.x+=wp.vx;wp.y+=wp.vy}else if(wp.type==='crystal'){wp.y+=wp.vy}});this.weatherParticles=this.weatherParticles.filter(wp=>wp.life>0)}
-// === GAME LOGIC (only when alive and not paused/story/transition) ===
-const _gameActive=this.playerAlive&&!paused&&!storyShown&&transAlpha<=0;
+if(!this.playerAlive){this.deathParticles.forEach(dp=>{dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=dp.grav;dp.vx*=0.96;dp.life--});this.deathParticles=this.deathParticles.filter(dp=>dp.life>0);this.weatherParticles.forEach(wp=>{wp.life--;if(wp.type==='rain'){wp.x+=wp.vx;wp.y+=wp.vy}else if(wp.type==='ash'){wp.x+=wp.vx;wp.y+=wp.vy}else if(wp.type==='leaf'){wp.x+=wp.vx;wp.y+=wp.vy}else if(wp.type==='crystal'){wp.y+=wp.vy}});this.weatherParticles=this.weatherParticles.filter(wp=>wp.life>0);this.renderParallax();this.renderForeground();this.renderHUD();return}
+// === GAME LOGIC (only when alive and not paused/story) ===
+// NOTE: transAlpha>0 is OK during fade-out — game renders behind fading overlay
+const _gameActive=this.playerAlive&&!paused&&!storyShown;
 if(!_gameActive){this.renderParallax();this.renderForeground();this.renderHUD();return}
 const dt=delta/1000;this.gameTime+=delta;
 const input=getInput();const dm=DIFF_MULT[difficulty];const lv=this.levelData;
@@ -1887,6 +1895,11 @@ renderHUD(){
 const cam=this.cameras.main;const w=cam.width;const h=cam.height;const lv=this.levelData;
 const portalX=lv.portalX||7000;const prog=Math.min(1,this.player.x/portalX);
 
+// DEBUG: bright test rectangle to confirm rendering works
+const dbg=document.getElementById('debug-output');
+const g=this.hudGraphics;g.clear();
+g.fillStyle(0xff0000,0.3);g.fillRect(w/2-30,2,60,4); // RED line at top — visible if rendering works
+
 // Level timer
 const elapsed=this.playerAlive?Date.now()-startTime:playTime;
 const tm=formatTime(elapsed);
@@ -1904,14 +1917,20 @@ if(!this.hudBest&&levelProgress[curLvl].bestTime){this.hudBest=this.add.text(0,0
 if(this.hudBest&&levelProgress[curLvl].bestTime){this.hudBest.setText((lang==='ru'?'рекорд: ':'best: ')+formatTime(levelProgress[curLvl].bestTime)).setPosition(16,82)}
 
 // Progress bar
-const g=this.hudGraphics;g.clear();
 g.fillStyle(0x0c0c10,0.8);g.fillRoundedRect(w/2-60,10,120,6,3);
 g.fillStyle(0x1e1e2a,1);g.fillRect(w/2-58,12,116,2);
 g.fillStyle(Phaser.Display.Color.HexStringToColor(lv.accent).color,1);g.fillRect(w/2-58,12,116*prog,2);
+
+// DEBUG: show canvas/game state info
+if(dbg){
+const cv=document.querySelector('canvas');
+const cvInfo=cv?('CV:'+cv.width+'x'+cv.height+' z:'+cv.style.zIndex):'NO-CV';
+dbg.style.display='block';
+dbg.textContent='P:'+Math.round(this.player.x)+','+Math.round(this.player.y)+' C:'+Math.round(cam.scrollX)+','+Math.round(cam.scrollY)+' '+cvInfo+' alive:'+this.playerAlive+' story:'+storyShown+' trans:'+transAlpha.toFixed(2)+' fps:'+Math.round(this.game.loop.actualFps);
+}
 }
 
 onResize(){}
-}
 
 // ═══ LAUNCH GAME ═══
 // ═══ DAILY CHALLENGE ═══
@@ -1958,30 +1977,27 @@ launchLevel(0,true);
 function launchLevel(n,first){
 curLvl=n;lvlDeaths=0;
 if(phaserGame){phaserGame.destroy(true);phaserGame=null;gameScene=null}
+// Remove old canvases and Phaser containers
+document.querySelectorAll('canvas.phaser-canvas').forEach(c=>c.remove());
 const config={
 type:Phaser.CANVAS,width:window.innerWidth,height:window.innerHeight,
 parent:document.body,backgroundColor:'#06060e',
 physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
 scale:{mode:Phaser.Scale.RESIZE,autoCenter:Phaser.Scale.CENTER_BOTH},
 scene:[BootScene,GameScene],
-canvas:document.createElement('canvas'),banner:false,title:'VOID',version:'0.9.0'
+banner:false,title:'VOID',version:'0.9.0'
 };
-const oldCanvas=document.querySelector('canvas.phaser-canvas');if(oldCanvas)oldCanvas.remove();
 phaserGame=new Phaser.Game(config);
 phaserGame.canvas.classList.add('phaser-canvas');
-phaserGame.canvas.style.cssText='display:block;position:fixed;top:0;left:0;z-index:1;';
-// Show story/transition ONLY after GameScene is fully initialized
-const _lvlNum=n;
-const _isFirst=first;
-const gs=phaserGame.scene.getScene('Game');
-if(gs){
-gs.events.once('create',function(){
+phaserGame.canvas.style.cssText='display:block;position:fixed;top:0;left:0;z-index:1;width:100%;height:100%;';
+// Show story/transition after Phaser is initialized (reliable setTimeout)
+const _lvlNum=n;const _isFirst=first;
+setTimeout(function(){
 if(_isFirst)showStory(_lvlNum);else doTransition(_lvlNum);
-});
-}else{
-// Fallback: if scene not found immediately, use timeout
-setTimeout(function(){if(_isFirst)showStory(_lvlNum);else doTransition(_lvlNum)},300);
-}
+// Debug: log game state
+const dbg=document.getElementById('debug-output');
+if(dbg){dbg.style.display='block';dbg.textContent='LAUNCH lvl:'+_lvlNum+' gs:'+!!gameScene+' canvas:'+!!phaserGame.canvas+'\n'}
+},600);
 running=true;
 }
 
