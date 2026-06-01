@@ -345,6 +345,7 @@ else if(type==='flood'){const o=ctx.createOscillator();o.type='sine';o.frequency
 else if(type==='chase'){const o=ctx.createOscillator();o.type='square';o.frequency.setValueAtTime(60,tt);o.frequency.linearRampToValueAtTime(30,tt+0.3);const g=ctx.createGain();g.gain.setValueAtTime(0.1,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.4);o.connect(g);g.connect(sfxGain);o.start(tt);o.stop(tt+0.45)}
 else if(type==='lightning'){const buf=ctx.createBuffer(1,ctx.sampleRate*0.3,ctx.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.08));const s=ctx.createBufferSource();s.buffer=buf;const g=ctx.createGain();g.gain.setValueAtTime(0.2,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.3);s.connect(g);g.connect(sfxGain);s.start(tt)}
 else if(type==='stalactite'){const o=ctx.createOscillator();o.type='square';o.frequency.setValueAtTime(600,tt);o.frequency.linearRampToValueAtTime(200,tt+0.15);const g=ctx.createGain();g.gain.setValueAtTime(0.08,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.2);o.connect(g);g.connect(sfxGain);o.start(tt);o.stop(tt+0.25)}
+else if(type==='land'){const o=ctx.createOscillator();o.type='triangle';o.frequency.setValueAtTime(120,tt);o.frequency.exponentialRampToValueAtTime(40,tt+0.12);const g=ctx.createGain();g.gain.setValueAtTime(0.06,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.15);o.connect(g);g.connect(sfxGain);o.start(tt);o.stop(tt+0.2)}
 }
 function fadeMusicIn(){if(!musicGain||!audioCtx)return;musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setValueAtTime(musicGain.gain.value,audioCtx.currentTime);musicGain.gain.linearRampToValueAtTime(musicMuted?0:musicVolume,audioCtx.currentTime+2)}
 function fadeMusicOut(){if(!musicGain||!audioCtx)return;musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setValueAtTime(musicGain.gain.value,audioCtx.currentTime);musicGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+1.5);musicPlaying=false}
@@ -1451,7 +1452,7 @@ for(let i=1;i<this.scarfPoints.length;i++){const pr=this.scarfPoints[i-1];const 
 
 // === DUST + DEATH PARTICLES ===
 if(grounded&&Math.abs(this.player.body.velocity.x)>100&&Math.random()<0.3)this.spawnDust(this.player.x,this.player.y+CFG.PH/2,this.player.body.velocity.x*0.01);
-if(grounded&&!this.wasGrounded&&this.playerAlive)this.spawnLand(this.player.x,this.player.y+CFG.PH/2);
+if(grounded&&!this.wasGrounded&&this.playerAlive){this.spawnLand(this.player.x,this.player.y+CFG.PH/2);if(Math.abs(this.player.body.velocity.y)>200)sfx('land')}
 this.wasGrounded=grounded;
 for(let i=this.dustParticles.length-1;i>=0;i--){const dp=this.dustParticles[i];dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=0.06;dp.vx*=0.97;dp.life--;if(dp.life<=0)this.dustParticles.splice(i,1)}
 for(let i=this.deathParticles.length-1;i>=0;i--){const dp=this.deathParticles[i];dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=dp.grav;dp.vx*=0.96;dp.life--;if(dp.life<=0)this.deathParticles.splice(i,1)}
@@ -1468,12 +1469,17 @@ if(lv.ash){for(let s=0;s<(spawnRate>>1);s++)this.weatherParticles.push({x:px-400
 if(lv.leaves){if(this.weatherTimer%12===0)this.weatherParticles.push({x:px-350+Math.random()*700,y:cam.scrollY-10,vx:0.3+Math.random()*0.6,vy:0.4+Math.random()*0.8,life:200+Math.random()*100,type:'leaf',rot:Math.random()*6.28,rv:Math.random()*0.04-0.02,phase:Math.random()*6.28})}
 if(lv.crystals){if(this.weatherTimer%20===0)this.weatherParticles.push({x:px-300+Math.random()*600,y:cam.scrollY+Math.random()*cam.height,vx:0,vy:-0.15-Math.random()*0.2,life:100+Math.random()*60,type:'crystal',phase:Math.random()*6.28,hue:Math.random()})}
 }
+// Wind particles
+if((this.wind.x||this.wind.y)&&this.weatherTimer%6===0){
+const windX=this.wind.x;const windY=this.wind.y;
+this.weatherParticles.push({x:px+(windX>0?-350:350)+Math.random()*100,y:cam.scrollY+Math.random()*cam.height,vx:windX*2+Math.random()*2,vy:windY*2+Math.random(),life:30+Math.random()*20,type:'wind'})}
 // Update weather particles
 for(let i=this.weatherParticles.length-1;i>=0;i--){const wp=this.weatherParticles[i];
 if(wp.type==='rain'){wp.x+=wp.vx;wp.y+=wp.vy}
 else if(wp.type==='ash'){wp.x+=wp.vx+Math.sin(this.gameTime*0.002+wp.phase)*0.3;wp.y+=wp.vy}
 else if(wp.type==='leaf'){wp.x+=wp.vx+Math.sin(this.gameTime*0.001+wp.phase)*0.5;wp.y+=wp.vy;wp.rot+=wp.rv}
 else if(wp.type==='crystal'){wp.x+=Math.sin(this.gameTime*0.003+wp.phase)*0.2;wp.y+=wp.vy;wp.phase+=0.01}
+else if(wp.type==='wind'){wp.x+=wp.vx;wp.y+=wp.vy}
 wp.life--;if(wp.life<=0||wp.y>cam.scrollY+cam.height+20)this.weatherParticles.splice(i,1)}
 // Cap weather particles
 if(this.weatherParticles.length>400)this.weatherParticles.splice(0,this.weatherParticles.length-400);
@@ -1782,6 +1788,7 @@ if(wp.type==='rain'){g.lineStyle(1,0x6a8aaa,alpha*0.4);g.beginPath();g.moveTo(wp
 else if(wp.type==='ash'){const sz=1.5+Math.random();g.fillStyle(0xc8a078,alpha*0.35);g.fillCircle(wp.x,wp.y,sz)}
 else if(wp.type==='leaf'){g.fillStyle(0x8a6a3a,alpha*0.5);g.fillRect(wp.x-2,wp.y-1,4,2)}
 else if(wp.type==='crystal'){const hue=wp.hue;const col=hue<0.33?0x60a0d0:hue<0.66?0xa060d0:0x60d0a0;g.fillStyle(col,alpha*0.6);g.fillCircle(wp.x,wp.y,1.5+Math.sin(wp.phase)*0.5)}
+else if(wp.type==='wind'){g.lineStyle(1,0x4a4a6a,alpha*0.2);g.beginPath();g.moveTo(wp.x,wp.y);g.lineTo(wp.x-wp.vx*3,wp.y-wp.vy*3);g.strokePath()}
 });
 
 // Fog
@@ -1854,7 +1861,13 @@ launchLevel(lvlIdx,true);
 // ═══ PHOTO MODE ═══
 function takeScreenshot(){
 const c=document.querySelector('canvas');if(!c)return;
-c.toBlob(blob=>{if(!blob)return;const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='void_'+Date.now()+'.png';a.click();URL.revokeObjectURL(url)},'image/png');
+c.toBlob(blob=>{if(!blob)return;
+if(tg){
+// Try sharing via TG WebApp
+try{const file=new File([blob],'void_'+Date.now()+'.png',{type:'image/png'});tg.showPopup({title:lang==='ru'?'Фоторежим':'Photo Mode',message:lang==='ru'?'Скриншот сохранён!':'Screenshot saved!'})}catch(e){}
+}
+// Always also download
+const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='void_'+Date.now()+'.png';a.click();URL.revokeObjectURL(url)},'image/png');
 }
 
 function startGame(){
