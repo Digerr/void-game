@@ -204,6 +204,17 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .aw-text.visible{opacity:1;transform:translateY(0)}
 .aw-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;font-size:.4rem;color:#2a2a3a;letter-spacing:.15em;text-transform:uppercase;z-index:2;opacity:0;transition:opacity 1s ease-out}
 .aw-hint.visible{opacity:1;animation:pulse 2s infinite}
+/* Challenge screen */
+#challenge-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:28px}
+#challenge-screen.active{display:flex}
+.ch-card{max-width:340px;width:100%;padding:0 8px;text-align:center}
+.ch-day{font-size:.35rem;color:#4a4a5a;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
+.ch-title{font-size:1.2rem;font-weight:900;letter-spacing:.15em;margin-bottom:4px}
+.ch-desc{font-size:.55rem;color:#7a7a9a;letter-spacing:.06em;line-height:1.7;margin-bottom:12px}
+.ch-modifier{display:inline-block;font-size:.5rem;padding:4px 12px;border-radius:4px;margin-bottom:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.ch-level{font-size:.65rem;color:#6a6a7a;letter-spacing:.08em;margin-bottom:4px}
+.ch-result{font-size:.45rem;color:#4a5a6a;letter-spacing:.06em;margin-top:8px}
+.ch-best{font-size:.35rem;color:#3a4a5a;letter-spacing:.06em;margin-top:2px}
 #level-select{overflow:hidden;justify-content:flex-start;padding-top:28px}
 .ls-summary{font-size:.4rem;color:#5a5a6a;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
 .ls-progress{width:300px;height:5px;background:rgba(255,255,255,.04);border-radius:3px;margin-bottom:12px;overflow:hidden;position:relative}
@@ -293,6 +304,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       <button class="btn" id="btn-faq" style="width:126px;font-size:.6rem;letter-spacing:.15em">faq</button>
     </div>
     <button class="btn" id="btn-records" style="width:260px;font-size:.55rem;letter-spacing:.2em;margin-top:6px">рекорды</button>
+    <button class="btn" id="btn-challenge" style="width:260px;font-size:.55rem;letter-spacing:.2em;margin-top:4px;border-color:#3a3a5a;color:#7a7a9a">испытание дня</button>
     </div>
   </div>
   <div id="game-hud">
@@ -448,6 +460,14 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div id="records-list" class="rec-acts"></div>
     <div style="padding:12px 0;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px">
       <button class="btn" id="btn-records-back">назад</button>
+    </div>
+  </div>
+  <div id="challenge-screen">
+    <div class="ls-title">испытание дня</div>
+    <div class="ch-card" id="ch-card"></div>
+    <div style="padding:16px 0;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <button class="btn primary" id="btn-ch-play">принять</button>
+      <button class="btn" id="btn-ch-back">назад</button>
     </div>
   </div>
 </div>
@@ -1881,7 +1901,10 @@ function updatePlayer(dt){
     MBody.setVelocity(player.body,{x:player.velocityX,y:player.body.velocity.y});
     if(player.onGround&&Math.abs(player.velocityX)>3&&Math.random()<0.3)spawnParticles(player.body.position.x-player.facing*4,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2+player.facing*0.3,spread:0.6,speed:0.8,life:0.25,size:1.8,gravity:0.5});
   }
-  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();unlockAchievement('dash_king');progress.stats.dashes=(progress.stats.dashes||0)+1;spawnParticles(player.body.position.x,player.body.position.y,12,0x6a6aaa,{angle:Math.PI+player.dashDir,spread:1.2,speed:3.5,life:0.4,size:3.5,gravity:0});spawnParticles(player.body.position.x,player.body.position.y,6,0x8a8acc,{angle:Math.PI+player.dashDir,spread:0.5,speed:2,life:0.3,size:2,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1;state.slowMo=0.1;state.slowMoTimer=0.04;state.shakeAmount=3;state.shakeTime=0.1;state.flashColor=0x4a4a8a;state.flashAlpha=0.12;state.flashTimer=0.1}
+  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){
+    // Challenge mode: no_dash modifier
+    if(challengeMode&&currentChallenge&&currentChallenge.modifier.id==='no_dash'){player.inputDashPressed=false}
+    else{player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();unlockAchievement('dash_king');progress.stats.dashes=(progress.stats.dashes||0)+1;spawnParticles(player.body.position.x,player.body.position.y,12,0x6a6aaa,{angle:Math.PI+player.dashDir,spread:1.2,speed:3.5,life:0.4,size:3.5,gravity:0});spawnParticles(player.body.position.x,player.body.position.y,6,0x8a8acc,{angle:Math.PI+player.dashDir,spread:0.5,speed:2,life:0.3,size:2,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1;state.slowMo=0.1;state.slowMoTimer=0.04;state.shakeAmount=3;state.shakeTime=0.1;state.flashColor=0x4a4a8a;state.flashAlpha=0.12;state.flashTimer=0.1}}
   player.inputDashPressed=false;
   if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
@@ -1929,7 +1952,14 @@ function updatePlayer(dt){
   engine.gravity.y=1.5;
 }
 
-function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.hitStop=0.06;state.shakeAmount=8;state.shakeTime=0.35;state.flashColor=0x2a1a1a;state.flashAlpha=0.4;state.flashTimer=0.3;state.slowMo=0.15;state.slowMoTimer=0.5;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},700)}
+function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.hitStop=0.06;state.shakeAmount=8;state.shakeTime=0.35;state.flashColor=0x2a1a1a;state.flashAlpha=0.4;state.flashTimer=0.3;state.slowMo=0.15;state.slowMoTimer=0.5;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
+  // Challenge: check fail conditions
+  if(challengeMode&&currentChallenge){
+    var mid=currentChallenge.modifier.id;
+    if(mid==='no_death'){endChallenge(false);setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showScreen('menu')},800);return}
+    if(mid==='max3'&&state.deaths>=3){endChallenge(false);setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showScreen('menu')},800);return}
+  }
+  setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},700)}
 
 function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);state.levelStartTime=performance.now()}
 
@@ -2723,7 +2753,17 @@ function showScreen(name){state.screen=name;document.getElementById('main-menu')
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
-function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,20,0x6a5aaa,{speed:2.5,life:1,size:3.5,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,12,0x8a7aca,{speed:3.5,life:1.2,size:2.5,gravity:0.1});spawnParticles(player.body.position.x,player.body.position.y,6,0xaaaaff,{speed:1.5,life:0.8,size:1.5,gravity:0});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');state.slowMo=0.2;state.slowMoTimer=0.8;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a2a5a;state.flashAlpha=0.2;state.flashTimer=0.4;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
+function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,20,0x6a5aaa,{speed:2.5,life:1,size:3.5,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,12,0x8a7aca,{speed:3.5,life:1.2,size:2.5,gravity:0.1});spawnParticles(player.body.position.x,player.body.position.y,6,0xaaaaff,{speed:1.5,life:0.8,size:1.5,gravity:0});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;var elapsedSec=elapsed/1000;
+  // Challenge: check completion and speed conditions
+  if(challengeMode&&currentChallenge){
+    var mid=currentChallenge.modifier.id;
+    var chComplete=true;
+    if(mid==='speed'&&elapsedSec>=25)chComplete=false;
+    if(mid==='speed40'&&elapsedSec>=40)chComplete=false;
+    if(mid==='max3'&&state.deaths>3)chComplete=false;
+    endChallenge(chComplete);
+  }
+  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');state.slowMo=0.2;state.slowMoTimer=0.8;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a2a5a;state.flashAlpha=0.2;state.flashTimer=0.4;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
@@ -3129,6 +3169,9 @@ function bindUI(){
   document.getElementById('btn-faq-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-records').addEventListener('click',function(){showScreen('records')});
   document.getElementById('btn-records-back').addEventListener('click',function(){showScreen('menu')});
+  document.getElementById('btn-challenge').addEventListener('click',function(){showChallengeScreen()});
+  document.getElementById('btn-ch-back').addEventListener('click',function(){document.getElementById('challenge-screen').classList.remove('active');showScreen('menu')});
+  document.getElementById('btn-ch-play').addEventListener('click',function(){startChallenge()});
   document.getElementById('btn-sfx-toggle').addEventListener('click',function(){toggleSound();saveSettings();updateSettingsUI()});
   document.getElementById('btn-music-toggle').addEventListener('click',function(){toggleMusic();saveSettings();updateSettingsUI()});
   document.getElementById('btn-haptic-toggle').addEventListener('click',function(){settings.hapticEnabled=!settings.hapticEnabled;saveSettings();updateSettingsUI()});
@@ -3675,6 +3718,75 @@ var logoAnim={
     this.update(dt);this.draw();
   }
 };
+
+// ═══ DAILY CHALLENGE ═══
+var CHALLENGE_MODIFIERS=[
+  {id:'no_dash',name:'без рывка',desc:'Пройди уровень, не используя рывок. Каждое движение — только ноги.',color:'#5a7a9a',bg:'rgba(90,122,154,.08)'},
+  {id:'speed',name:'на время',desc:'Пройди уровень за 25 секунд. Мгновения решают всё.',color:'#8a5a5a',bg:'rgba(138,90,90,.08)'},
+  {id:'no_death',name:'без смерти',desc:'Пройди уровень, не умерев ни разу. Ни единой ошибки.',color:'#5a8a5a',bg:'rgba(90,138,90,.08)'},
+  {id:'max3',name:'три жизни',desc:'Пройди уровень максимум с 3 смертями. Каждый шаг на счету.',color:'#8a7a3a',bg:'rgba(138,122,58,.08)'},
+  {id:'speed40',name:'спидран',desc:'Пройди уровень за 40 секунд. Быстрее ветра.',color:'#6a4a6a',bg:'rgba(106,74,106,.08)'},
+  {id:'only_dash',name:'только рывок',desc:'Двигайся только рывками. Ни шагу без ускорения.',color:'#4a6a8a',bg:'rgba(74,106,138,.08)'}
+];
+var currentChallenge=null;
+var challengeMode=false;
+function getDaySeed(){var d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()}
+function seededRandom(seed){var x=Math.sin(seed)*10000;return x-Math.floor(x)}
+function generateDailyChallenge(){
+  var seed=getDaySeed();
+  var levelIdx=Math.floor(seededRandom(seed)*LEVELS.length);
+  var modIdx=Math.floor(seededRandom(seed+1)*CHALLENGE_MODIFIERS.length);
+  return{level:levelIdx,modifier:CHALLENGE_MODIFIERS[modIdx],seed:seed,date:new Date().toLocaleDateString('ru-RU')};
+}
+function getChallengeResult(){var key='ch_'+getDaySeed();return progress.challenges&&progress.challenges[key]?progress.challenges[key]:null}
+function saveChallengeResult(result){if(!progress.challenges)progress.challenges={};var key='ch_'+getDaySeed();progress.challenges[key]=result;saveProgress();saveToCloud()}
+function showChallengeScreen(){
+  currentChallenge=generateDailyChallenge();
+  var card=document.getElementById('ch-card');
+  if(!card)return;
+  var ch=currentChallenge;
+  var lvl=LEVELS[ch.level];
+  var result=getChallengeResult();
+  var resultHtml='';
+  if(result){
+    if(result.completed){
+      resultHtml='<div class="ch-result" style="color:#6a9a5a">испытание пройдено!</div><div class="ch-best">время: '+formatTime(result.time*1000)+' | смерти: '+result.deaths+'</div>';
+    }else{
+      resultHtml='<div class="ch-result" style="color:#6a5a5a">попытка: '+result.deaths+' смертей</div>';
+    }
+  }
+  card.innerHTML=
+    '<div class="ch-day">'+ch.date+'</div>'+
+    '<div class="ch-title" style="color:'+ch.modifier.color+'">'+ch.modifier.name+'</div>'+
+    '<div class="ch-modifier" style="color:'+ch.modifier.color+';border:1px solid '+ch.modifier.color+';background:'+ch.modifier.bg+'">'+ch.modifier.name+'</div>'+
+    '<div class="ch-desc">'+ch.modifier.desc+'</div>'+
+    '<div class="ch-level">уровень '+(ch.level+1)+' — '+lvl.name+'</div>'+
+    resultHtml;
+  // Update play button
+  var playBtn=document.getElementById('btn-ch-play');
+  if(playBtn){
+    playBtn.textContent=result&&result.completed?'пройти снова':'принять';
+  }
+  // Show the screen
+  var el=document.getElementById('challenge-screen');
+  el.classList.add('active');
+  el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein');
+}
+function startChallenge(){
+  if(!currentChallenge)return;
+  challengeMode=true;
+  state.level=currentChallenge.level;
+  state.deaths=0;
+  if(engine)clearLevel();
+  initMatter();loadLevel(currentChallenge.level);
+  showStoryScreen(currentChallenge.level);
+}
+function endChallenge(completed){
+  if(!challengeMode)return;
+  var elapsed=(performance.now()-state.levelStartTime)/1000;
+  saveChallengeResult({completed:completed,time:elapsed,deaths:state.deaths,modifier:currentChallenge.modifier.id});
+  challengeMode=false;
+}
 
 // ═══ AWAKENING CUTSCENE ═══
 var awakeningShown=false;
