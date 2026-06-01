@@ -778,13 +778,40 @@ function loadLevel(n){
   // Anchors
   levelAnchors=[];if(lvl.anchors)for(var i=0;i<lvl.anchors.length;i++)createAnchor(lvl.anchors[i]);
   // Exit
-  if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Graphics();espr.rect(0,0,lvl.exit.w,lvl.exit.h);espr.fill({color:0x1a2a1a,alpha:0.5});espr.rect(0,0,lvl.exit.w,3);espr.fill({color:0x3a6a3a,alpha:0.7});espr.rect(0,0,2,lvl.exit.h);espr.fill({color:0x2a4a2a,alpha:0.5});espr.rect(lvl.exit.w-2,0,2,lvl.exit.h);espr.fill({color:0x2a4a2a,alpha:0.5});espr.x=lvl.exit.x;espr.y=lvl.exit.y;gameContainer.addChild(espr)}
+  if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();eg.rect(0,0,lvl.exit.w,lvl.exit.h);eg.fill({color:0x1a2a1a,alpha:0.5});eg.rect(0,0,lvl.exit.w,3);eg.fill({color:0x3a6a3a,alpha:0.7});eg.rect(0,0,2,lvl.exit.h);eg.fill({color:0x2a4a2a,alpha:0.5});eg.rect(lvl.exit.w-2,0,2,lvl.exit.h);eg.fill({color:0x2a4a2a,alpha:0.5});espr.addChild(eg);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
 function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];if(thread.active)detachThread();clearParticles();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
 
 // ═══ CAMERA ═══
 var camera={x:0,y:0};
+var exitGlowTime=0;
+function updateExitGlow(dt){
+  exitGlowTime+=dt;
+  var children=gameContainer.children;
+  for(var i=0;i<children.length;i++){
+    if(children[i]._isExit){
+      var ec=children[i];
+      // Remove old glow (2nd+ child), keep base rect
+      while(ec.children.length>1)ec.removeChildAt(ec.children.length-1);
+      var gg=new PIXI.Graphics();
+      var pulse=Math.sin(exitGlowTime*3)*0.3+0.7;
+      // Outer glow circle
+      gg.circle(20,40,50);gg.fill({color:0x2a5a2a,alpha:pulse*0.06});
+      // Beam of light going up
+      gg.moveTo(10,0);gg.lineTo(20,-60*pulse);gg.lineTo(30,0);
+      gg.fill({color:0x2a6a2a,alpha:0.08+pulse*0.04});
+      // Light particles floating up
+      for(var j=0;j<3;j++){
+        var py=-20-Math.sin(exitGlowTime*2+j*2)*40*pulse;
+        var px=10+Math.sin(exitGlowTime*1.5+j*3)*8;
+        gg.circle(px,py,2);gg.fill({color:0x4a8a4a,alpha:0.2+Math.sin(exitGlowTime*4+j)*0.1});
+      }
+      ec.addChild(gg);
+      break;
+    }
+  }
+}
 function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var tx=player.body.position.x-sw*0.35;var ty=player.body.position.y-sh*0.5;var lvl=LEVELS[state.level];tx=Math.max(0,Math.min(tx,lvl.width-sw));ty=Math.max(-200,Math.min(ty,lvl.height-sh));camera.x+=(tx-camera.x)*0.08;camera.y+=(ty-camera.y)*0.06;var sx=0,sy=0;if(state.shakeTime>0){sx=(Math.random()-0.5)*state.shakeAmount*2;sy=(Math.random()-0.5)*state.shakeAmount*2}gameContainer.x=-camera.x+sx;gameContainer.y=-camera.y+sy}
 
 // ═══ PARALLAX BACKGROUND ═══
@@ -824,7 +851,7 @@ function gameLoop(timestamp){
   if(state.slowMoTimer>0){state.slowMoTimer-=rawDt;if(state.slowMoTimer<=0)state.slowMo=1}
   var dt=rawDt*state.slowMo;
   if(state.shakeTime>0){state.shakeTime-=rawDt;if(state.shakeTime<=0){state.shakeAmount=0;state.shakeTime=0}}
-  if(state.screen==='playing'){readInput();updatePlayer(dt);MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateThread(dt);updateCamera();updateBackground();updateParticles(rawDt);var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
+  if(state.screen==='playing'){readInput();updatePlayer(dt);MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateThread(dt);updateExitGlow(dt);updateCamera();updateBackground();updateParticles(rawDt);var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
   if(state.screen==='story'){updateCamera();updateBackground()}
   if(state.screen!=='playing')updateParticles(rawDt);
 }
