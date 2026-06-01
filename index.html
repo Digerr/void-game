@@ -795,7 +795,7 @@ function toggleSound(){
 }
 
 // ═══ GAME STATE ═══
-var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0,lastCheckpoint:null,flashColor:0,flashAlpha:0,flashTimer:0,hitStop:0,dashTrails:[],runDustTimer:0};
+var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0,lastCheckpoint:null,flashColor:0,flashAlpha:0,flashTimer:0,hitStop:0,dashTrails:[],runDustTimer:0,_flashGfx:null,_dashGfx:null,_lastHudTime:'',_lastHudDeaths:''};
 
 // ═══ PROGRESS / SAVE ═══
 var progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},firstLaunch:false};
@@ -3115,27 +3115,25 @@ function gameLoop(timestamp){
   if(player.alive&&player.onGround&&Math.abs(player.body.velocity.x)>3){state.runDustTimer-=rawDt;if(state.runDustTimer<=0){state.runDustTimer=0.08;spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2-2,1,0x3a3a4a,{angle:-Math.PI/2+player.facing*0.4,spread:0.5,speed:0.6,life:0.2,size:1.5,gravity:0.5})}}
   // Update dash trails
   for(var ti=state.dashTrails.length-1;ti>=0;ti--){state.dashTrails[ti].life-=rawDt;state.dashTrails[ti].alpha-=rawDt*2;if(state.dashTrails[ti].life<=0)state.dashTrails.splice(ti,1)}
-  var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
+  var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);var ts=mins+':'+(secs%60<10?'0':'')+(secs%60);var ds='смерти: '+state.deaths;if(ts!==state._lastHudTime){document.getElementById('hud-timer').textContent=ts;state._lastHudTime=ts}if(ds!==state._lastHudDeaths){document.getElementById('hud-deaths').textContent=ds;state._lastHudDeaths=ds}}
   if(state.screen==='story'){updateCamera();updateBackground()}
   if(state.screen!=='playing')updateParticles(rawDt);
-  // Draw flash overlay on canvas if active
+  // Draw flash overlay (reuse persistent Graphics to avoid GC thrashing)
   if(state.flashAlpha>0.01&&pixiApp){
-    var fg=new PIXI.Graphics();fg.rect(0,0,pixiApp.screen.width,pixiApp.screen.height);fg.fill({color:state.flashColor,alpha:state.flashAlpha});pixiApp.stage.addChild(fg);
-    setTimeout(function(){if(fg.parent)fg.parent.removeChild(fg);fg.destroy()},50);
-  }
-  // Draw dash trails as fading silhouettes
+    if(!state._flashGfx){state._flashGfx=new PIXI.Graphics();pixiApp.stage.addChild(state._flashGfx)}
+    state._flashGfx.clear();state._flashGfx.rect(0,0,pixiApp.screen.width,pixiApp.screen.height);state._flashGfx.fill({color:state.flashColor,alpha:state.flashAlpha});
+  }else if(state._flashGfx){state._flashGfx.clear()}
+  // Draw dash trails (reuse persistent Graphics to avoid GC thrashing)
   if(state.dashTrails.length>0&&player.sprite){
-    var skin=getCurrentSkin();
+    if(!state._dashGfx){state._dashGfx=new PIXI.Graphics();fxContainer.addChild(state._dashGfx)}
+    state._dashGfx.clear();var skin=getCurrentSkin();
     for(var ti=0;ti<state.dashTrails.length;ti++){
       var trail=state.dashTrails[ti];
-      var tg2=new PIXI.Graphics();
-      tg2.circle(0,-8,9);tg2.fill({color:skin.body,alpha:trail.alpha*0.5});
-      tg2.rect(-PLAYER_W/2,-PLAYER_H/2,PLAYER_W,PLAYER_H);tg2.fill({color:skin.body,alpha:trail.alpha*0.3});
-      tg2.x=trail.x-camera.x;tg2.y=trail.y-camera.y;
-      fxContainer.addChild(tg2);
-      (function(g2){setTimeout(function(){if(g2.parent)g2.parent.removeChild(g2);g2.destroy()},100)})(tg2);
+      var tx=trail.x-camera.x,ty=trail.y-camera.y;
+      state._dashGfx.circle(tx,ty-8,9);state._dashGfx.fill({color:skin.body,alpha:trail.alpha*0.5});
+      state._dashGfx.rect(tx-PLAYER_W/2,ty-PLAYER_H/2,PLAYER_W,PLAYER_H);state._dashGfx.fill({color:skin.body,alpha:trail.alpha*0.3});
     }
-  }
+  }else if(state._dashGfx){state._dashGfx.clear()}
   // Logo animation (menu only)
   logoAnim.tick(rawDt);
 }
