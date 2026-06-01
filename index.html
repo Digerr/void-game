@@ -2409,12 +2409,21 @@ var tutorial={
   shown:{},tips:[
     {id:'move',level:0,trigger:'time',delay:1.5,text:'используй <span class="tip-key">◀</span> <span class="tip-key">▶</span> для движения'},
     {id:'jump',level:0,trigger:'time',delay:4,text:'нажми <span class="tip-key">▲</span> чтобы прыгнуть'},
+    {id:'spikes',level:0,trigger:'time',delay:10,text:'шипы смертельны — перепрыгивай их'},
+    {id:'checkpoint',level:0,trigger:'time',delay:16,text:'кристаллы — чекпоинты. Коснись чтобы активировать'},
     {id:'dash',level:1,trigger:'time',delay:2,text:'нажми <span class="tip-key">D</span> для рывка'},
     {id:'wall',level:1,trigger:'wall',delay:0,text:'прижмись к стене — <span class="tip-key">◀</span> или <span class="tip-key">▶</span> — и прыгни <span class="tip-key">▲</span>'},
     {id:'saw',level:2,trigger:'time',delay:2,text:'опасайся пил — они не прощают'},
+    {id:'gap',level:3,trigger:'time',delay:4,text:'бездна — тоже смерть. Не падай'},
     {id:'lever',level:4,trigger:'lever',delay:0,text:'подойди к рычагу и нажми <span class="tip-key">✋</span>'},
+    {id:'enemy',level:5,trigger:'time',delay:3,text:'тени патрулируют. Не попадайся им на пути'},
+    {id:'enemy2',level:6,trigger:'time',delay:6,text:'тени слепы, но чувствуют движение'},
     {id:'thread',level:10,trigger:'time',delay:2,text:'нажми <span class="tip-key">↗</span> чтобы привязать нить к якорю'},
     {id:'swing',level:10,trigger:'thread',delay:0,text:'раскачивайся <span class="tip-key">◀</span> <span class="tip-key">▶</span> и прыгай <span class="tip-key">▲</span>'},
+    {id:'climb',level:10,trigger:'time',delay:8,text:'укорачивай нить — жми <span class="tip-key">▲</span> во время раскачки'},
+    {id:'falling',level:12,trigger:'time',delay:3,text:'падающие платформы рушатся — не стой долго'},
+    {id:'pendulum',level:15,trigger:'time',delay:3,text:'маятники качаются ритмично — просчитай тайминг'},
+    {id:'multi_lever',level:19,trigger:'time',delay:2,text:'три рычага — три двери. Ищи все'},
   ],
   timer:0,activeTip:null
 };
