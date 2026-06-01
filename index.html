@@ -79,7 +79,9 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .ls-cell.locked{opacity:.12;cursor:default;pointer-events:none;filter:grayscale(1)}
 .ls-cell.current{border-color:rgba(100,150,220,.4);background:rgba(60,100,180,.08);animation:ls-glow 3s ease-in-out infinite}
 .ls-cell.completed{border-color:rgba(90,140,90,.3);background:rgba(60,130,60,.05)}
+.ls-cell.completed:hover{border-color:rgba(100,170,100,.5);background:rgba(70,150,70,.1);box-shadow:0 0 16px rgba(90,160,90,.1)}
 .ls-cell.perfect{border-color:rgba(200,160,60,.4);background:rgba(160,130,30,.06);box-shadow:0 0 12px rgba(180,140,40,.08)}
+.ls-cell.perfect:hover{border-color:rgba(220,180,60,.6);background:rgba(180,150,30,.1);box-shadow:0 0 20px rgba(200,160,40,.15)}
 @keyframes ls-glow{0%,100%{box-shadow:0 0 6px rgba(80,120,200,.06),inset 0 0 6px rgba(80,120,200,.04)}50%{box-shadow:0 0 18px rgba(80,140,220,.15),inset 0 0 10px rgba(80,140,220,.08)}}
 .ls-num{font-size:.95rem;font-weight:700;color:#6a6a7a;transition:all .3s;line-height:1}
 .ls-cell.completed .ls-num{color:#6aaa6a}
@@ -2947,7 +2949,7 @@ function setupTouchButton(id,action){var el=document.getElementById(id);if(!el)r
 function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.left)ix-=1;if(keys['ArrowRight']||keys['KeyD']||touchState.right)ix+=1;player.inputX=ix;player.inputJump=keys['Space']||keys['ArrowUp']||keys['KeyW']||touchState.jump}
 
 // ═══ SCREEN MANAGEMENT ═══
-function showScreen(name){state.screen=name;document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');document.getElementById('touch-controls').classList.toggle('active',name==='playing');document.getElementById('story-screen').classList.toggle('active',name==='story');document.getElementById('pause-screen').classList.toggle('active',name==='paused');document.getElementById('death-screen').classList.toggle('active',name==='dead');document.getElementById('win-screen').classList.toggle('active',name==='win');document.getElementById('level-select').classList.toggle('active',name==='levels');document.getElementById('settings-screen').classList.toggle('active',name==='settings');document.getElementById('faq-screen').classList.toggle('active',name==='faq');document.getElementById('records-screen').classList.toggle('active',name==='records');var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen'};if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}if(name==='menu'){updateMenuStats();saveProgress()};if(name==='settings')updateSettingsUI();if(name==='records')showRecords()}
+function showScreen(name){state.screen=name;document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');document.getElementById('touch-controls').classList.toggle('active',name==='playing');document.getElementById('story-screen').classList.toggle('active',name==='story');document.getElementById('pause-screen').classList.toggle('active',name==='paused');document.getElementById('death-screen').classList.toggle('active',name==='dead');document.getElementById('win-screen').classList.toggle('active',name==='win');document.getElementById('level-select').classList.toggle('active',name==='levels');document.getElementById('settings-screen').classList.toggle('active',name==='settings');document.getElementById('faq-screen').classList.toggle('active',name==='faq');document.getElementById('records-screen').classList.toggle('active',name==='records');document.getElementById('challenge-screen').classList.toggle('active',name==='challenge');var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen',challenge:'challenge-screen'};if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}if(name==='menu'){updateMenuStats();saveProgress()};if(name==='settings')updateSettingsUI();if(name==='records')showRecords()}
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
@@ -3134,6 +3136,13 @@ function showLevelSelect(){
             var bestDiv=document.createElement('div');bestDiv.className='ls-cell best-time';
             bestDiv.textContent=formatTime(best*1000);cell.appendChild(bestDiv);
           }
+          // Replay indicator
+          var repDiv=document.createElement('div');repDiv.style.cssText='font-size:.25rem;color:#4a6a4a;letter-spacing:.08em;text-transform:uppercase;margin-top:1px';
+          repDiv.textContent='↻ повторить';cell.appendChild(repDiv);
+        } else {
+          // Current level — play indicator
+          var playDiv=document.createElement('div');playDiv.style.cssText='font-size:.25rem;color:#4a6a8a;letter-spacing:.08em;text-transform:uppercase;margin-top:1px';
+          playDiv.textContent='▶ играть';cell.appendChild(playDiv);
         }
       } else {
         // Locked indicator
@@ -3142,7 +3151,7 @@ function showLevelSelect(){
         lockDiv.textContent='🔒';
         cell.appendChild(lockDiv);
       }
-      if(isUnlocked){(function(iidx){cell.addEventListener('click',function(){state.level=iidx;state.deaths=0;if(engine)clearLevel();initMatter();createBackground();loadLevel(iidx);showStoryScreen(iidx)});cell.addEventListener('touchstart',function(e){e.preventDefault();tgHaptic('light')},{passive:false})})(idx)}
+      if(isUnlocked){(function(iidx){cell.addEventListener('click',function(){try{state.level=iidx;state.deaths=0;challengeMode=false;if(engine)clearLevel();initAudio();startMusic();initMatter();createBackground();loadLevel(iidx);showStoryScreen(iidx)}catch(e){console.error('[VOID] Level select error:',e)}});cell.addEventListener('touchstart',function(e){e.preventDefault();tgHaptic('light')},{passive:false})})(idx)}
       actGrid.appendChild(cell);
     }
     inner.appendChild(actGrid);
@@ -3369,7 +3378,7 @@ function bindUI(){
   document.getElementById('btn-records').addEventListener('click',function(){showScreen('records')});
   document.getElementById('btn-records-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-challenge').addEventListener('click',function(){showChallengeScreen()});
-  document.getElementById('btn-ch-back').addEventListener('click',function(){document.getElementById('challenge-screen').classList.remove('active');showScreen('menu')});
+  document.getElementById('btn-ch-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-ch-play').addEventListener('click',function(){startChallenge()});
   document.getElementById('btn-sfx-toggle').addEventListener('click',function(){toggleSound();saveSettings();updateSettingsUI()});
   document.getElementById('btn-music-toggle').addEventListener('click',function(){toggleMusic();saveSettings();updateSettingsUI()});
@@ -3984,9 +3993,7 @@ function showChallengeScreen(){
     playBtn.textContent=result&&result.completed?'пройти снова':'принять';
   }
   // Show the screen
-  var el=document.getElementById('challenge-screen');
-  el.classList.add('active');
-  el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein');
+  showScreen('challenge');
 }
 function startChallenge(){
   if(!currentChallenge)return;
