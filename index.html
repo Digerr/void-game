@@ -159,6 +159,7 @@ canvas{display:block}
 <div><div class="st-l">смерти</div><div class="st-v red" id="ws-deaths">0</div></div>
 <div><div class="st-l">расстояние</div><div class="st-v grn" id="ws-dist">0m</div></div>
 <div><div class="st-l" id="ui-wtime">время</div><div class="st-v" id="ws-time">0:00</div></div>
+<div><div class="st-l" id="ui-wshard">рейтинг</div><div class="st-v" id="ws-shards" style="color:#8a8a4a;font-size:1.1rem">☆☆☆</div></div>
 </div>
 <button class="btn primary" onclick="nextLevel()" id="ui-wnext">далее</button>
 </div></div>
@@ -237,7 +238,7 @@ push:'E — схватить ящик, затем ← →',lever:'E — акти
 falling:'Беги — платформа рухнет!',saw:'Рассчитай время',breakable:'Пол крошится!',
 enemy:'Избегай теней',flood:'Вода поднимается!',chase:'БЕГИ!',vine:'Лианы можно обхватить',lava:'Лава смертельна!',slippery:'Лёд скользкий!'},
 controls:'← → или A D — движение|ПРОБЕЛ или ↑ — прыжок|E или Shift — взаимодействие|R — респавн|ESC — пауза|M — музыка',
-progress:['закрыт','текущий','пройден'],deathsL:'смертей',
+progress:['закрыт','текущий','пройден'],deathsL:'смертей',shardL:'рейтинг',
 actNames:['Акт I: Пробуждение','Акт II: Погружение','Акт III: Бездна','Акт IV: Возрождение'],
 bright:'яркость',
 faq:[{q:'Как двигаться?',a:'Используйте стрелки ← → или клавиши A D для движения. ПРОБЕЛ или ↑ для прыжка.'},{q:'Как взаимодействовать с объектами?',a:'Нажмите E или Shift рядом с рычагом, ящиком или верёвкой. Для ящиков: схватите E, затем двигайтесь ← → чтобы толкать, ПРОБЕЛ чтобы отпрыгнуть.'},{q:'Как прыгать от стены?',a:'Прижмитесь к стене в воздухе (зажмите ← или →), затем нажмите ПРОБЕЛ. Герой соскользнёт вниз и оттолкнётся.'},{q:'Что делает рычаг?',a:'Рычаг открывает дверь. Подойдите и нажмите E — дверь поднимется, открывая путь.'},{q:'Что такое плита давления?',a:'Встаньте на плиту или поставьте на неё ящик — дверь откроется, пока плита нажата.'},{q:'Как избежать теней?',a:'Тени патрулируют территорию. Не касайтесь их! Обходите стороной или ждите, пока они отвернутся.'},{q:'Вода/лава поднимается — что делать?',a:'Двигайтесь вверх как можно быстрее! Используйте платформы и прыжки от стен, чтобы подняться выше уровня воды.'},{q:'Что за тьма наступает сзади?',a:'Это погоня! Бегите вперёд не останавливаясь. Если тьма настигнет — вы погибнете.'},{q:'Как использовать верёвку?',a:'Подойдите к концу верёвки и нажмите E. Раскачивайтесь ← → и нажмите ПРОБЕЛ, чтобы спрыгнуть в нужный момент.'},{q:'Лёд скользкий — как управлять?',a:'На льду герой скользит. Тормозите плавно, не делайте резких движений. Помните: скорость = опасность!'}]},
@@ -254,7 +255,7 @@ push:'E — grab box, then ← →',lever:'E — activate lever',rope:'E — gra
 falling:'Run — it will fall!',saw:'Time the saws',breakable:'The floor is crumbling!',
 enemy:'Avoid the shadows',flood:'Water is rising!',chase:'RUN!',vine:'Vines can be grabbed',lava:'Lava is deadly!',slippery:'Ice is slippery!'},
 controls:'← → or A D — move|SPACE or ↑ — jump|E or Shift — interact|R — respawn|ESC — pause|M — music',
-progress:['locked','current','completed'],deathsL:'deaths',
+progress:['locked','current','completed'],deathsL:'deaths',shardL:'rating',
 actNames:['Act I: Awakening','Act II: Descent','Act III: The Abyss','Act IV: Rebirth'],
 bright:'brightness',
 faq:[{q:'How to move?',a:'Use arrow keys ← → or A D to move. SPACE or ↑ to jump.'},{q:'How to interact with objects?',a:'Press E or Shift near a lever, box, or rope. For boxes: grab with E, then move ← → to push, SPACE to jump off.'},{q:'How to wall jump?',a:'Press against a wall in the air (hold ← or →), then press SPACE.'},{q:'What does a lever do?',a:'A lever opens a door. Approach and press E — the door will rise.'},{q:'What is a pressure plate?',a:'Stand on it or place a box on it — the door opens while the plate is pressed.'},{q:'How to avoid shadows?',a:'Shadows patrol areas. Don\'t touch them! Go around or wait until they turn away.'},{q:'Water/lava is rising?',a:'Move upward as fast as possible! Use platforms and wall jumps.'},{q:'What is the darkness chasing me?',a:'It\'s a chase sequence! Run forward without stopping.'},{q:'How to use a rope?',a:'Approach the end of a rope and press E. Swing with ← → and press SPACE to jump off.'},{q:'Ice is slippery?',a:'On ice the character slides. Brake gently, avoid sudden movements.'}]}
@@ -318,10 +319,10 @@ function formatTime(ms){const s=Math.floor(ms/1000);const m=Math.floor(s/60);ret
 
 // ═══ PROGRESS ═══
 let levelProgress=[],totalDeaths=0,lvlDeaths=0,startTime=0,playTime=0;
-function initProgress(){levelProgress=[];for(let i=0;i<30;i++)levelProgress.push({completed:false,deaths:0,bestDist:0,bestTime:0})}
+function initProgress(){levelProgress=[];for(let i=0;i<30;i++)levelProgress.push({completed:false,deaths:0,bestDist:0,bestTime:0,shards:0})}
 function loadProgress(){try{const d=JSON.parse(localStorage.getItem('void_progress'));if(d&&d.length>0){levelProgress=d;if(d.length<30)for(let i=d.length;i<30;i++)levelProgress.push({completed:false,deaths:0,bestDist:0,bestTime:0});totalDeaths=parseInt(localStorage.getItem('void_deaths')||'0');startTime=parseInt(localStorage.getItem('void_startTime')||'0');return true}}catch(e){}return false}
 function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(levelProgress));localStorage.setItem('void_deaths',totalDeaths+'');localStorage.setItem('void_startTime',startTime+'')}catch(e){}tgSaveCloud()}
-function updateProgress(){const grid=document.getElementById('prog-grid');if(!grid)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const p=levelProgress[i];const unlocked=i===0||levelProgress[i-1].completed;const status=!unlocked?0:(p.completed?2:1);const cls=!unlocked?'locked':'';const statusText=l.progress[status];const statusCls=status===2?'done':status===1?'cur':'lock';const bt=p.bestTime?' | '+formatTime(p.bestTime):'';html+='<div class="prog-card '+cls+'"><div class="prog-num">'+(i+1)+'/30</div><div class="prog-name">'+LEVELS[i].name[lang]+'</div><div class="prog-stat">'+l.deathsL+': '+p.deaths+bt+'</div><div class="prog-status '+statusCls+'">'+statusText+'</div></div>'}grid.innerHTML=html}
+function updateProgress(){const grid=document.getElementById('prog-grid');if(!grid)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const p=levelProgress[i];const unlocked=i===0||levelProgress[i-1].completed;const status=!unlocked?0:(p.completed?2:1);const cls=!unlocked?'locked':'';const statusText=l.progress[status];const statusCls=status===2?'done':status===1?'cur':'lock';const bt=p.bestTime?' | '+formatTime(p.bestTime):'';const shards=p.shards?'★'.repeat(p.shards)+'☆'.repeat(3-p.shards):'';html+='<div class="prog-card '+cls+'"><div class="prog-num">'+(i+1)+'/30</div><div class="prog-name">'+LEVELS[i].name[lang]+'</div><div class="prog-stat">'+l.deathsL+': '+p.deaths+bt+'</div><div class="prog-status '+statusCls+'">'+statusText+(shards?' '+shards:'')+'</div></div>'}grid.innerHTML=html}
 function updateLevelList(){const list=document.getElementById('lvl-list');if(!list)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const lv=LEVELS[i];const actIdx=i<8?0:i<16?1:i<24?2:3;const actName=l.actNames[actIdx];html+='<div class="lvl-item"><div class="lvl-num">'+(i+1)+'</div><div class="lvl-info"><div class="lvl-name">'+lv.name[lang]+'</div><div class="lvl-desc">'+lv.story[lang].substring(0,80)+(lv.story[lang].length>80?'...':'')+'</div><div class="lvl-act">'+actName+'</div></div></div>'}list.innerHTML=html}
 function updateFAQ(){const el=document.getElementById('faq-content');if(!el)return;const l=L[lang];let html='';for(const item of l.faq){html+='<div class="faq-item"><div class="faq-q">'+item.q+'</div><div class="faq-a">'+item.a+'</div></div>'}el.innerHTML=html}
 
@@ -1543,10 +1544,15 @@ this.hintTimer=0;this.curHint='';this.hintAlpha=0;
 winGame(){
 levelProgress[curLvl].completed=true;levelProgress[curLvl].deaths=lvlDeaths;levelProgress[curLvl].bestDist=this.score;
 const pt=Date.now()-startTime;if(!levelProgress[curLvl].bestTime||pt<levelProgress[curLvl].bestTime)levelProgress[curLvl].bestTime=pt;
+// Shard rating: ★★★ = 0 deaths, ★★ = 1-3 deaths, ★ = 4+ deaths
+const prevShards=levelProgress[curLvl].shards||0;
+const newShards=lvlDeaths===0?3:lvlDeaths<=3?2:1;
+if(newShards>prevShards)levelProgress[curLvl].shards=newShards;
 saveProgress();updateProgress();
 playTime=Date.now()-startTime;const tm=formatTime(playTime);
+const shardStr='★'.repeat(newShards)+'☆'.repeat(3-newShards);
 if(curLvl===29){document.getElementById('vs-deaths').textContent=totalDeaths+'';document.getElementById('vs-dist').textContent=this.score+'m';document.getElementById('vs-time').textContent=tm;document.getElementById('victory-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'начать заново':'play again')}
-else{document.getElementById('ws-deaths').textContent=totalDeaths+'';document.getElementById('ws-dist').textContent=this.score+'m';document.getElementById('ws-time').textContent=tm;document.getElementById('win-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'далее':'next')}
+else{document.getElementById('ws-deaths').textContent=totalDeaths+'';document.getElementById('ws-dist').textContent=this.score+'m';document.getElementById('ws-time').textContent=tm;document.getElementById('ws-shards').textContent=shardStr;document.getElementById('win-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'далее':'next')}
 }
 
 // ═══ PARALLAX ═══
