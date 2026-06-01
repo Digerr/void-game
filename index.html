@@ -1340,17 +1340,26 @@ function loadProfile(){
   if(!c)return;
   if(!tg||!tg.initData){c.innerHTML='<div class="lb-empty">играй через Telegram<br><div class="lb-sub">для доступа к профилю</div></div>';return}
   c.innerHTML='<div class="lb-loading">загрузка...</div>';
-  // Debug: send initData to debug endpoint first, then profile
-  fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'debug_init',initData:tg.initData})}).then(function(r){return r.json()}).then(function(dbg){
-    console.log('[VOID] Debug initData:', JSON.stringify(dbg));
-  }).catch(function(){});
-  // Now actual profile request
   fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'profile',initData:tg.initData})}).then(function(r){return r.json()}).then(function(d){
     console.log('[VOID] Profile response:',JSON.stringify(d));
     if(!d.ok){
-      var dbg=d.debug?JSON.stringify(d.debug):'';
-      console.log('[VOID] Profile debug:',dbg);
-      c.innerHTML='<div class="lb-empty">ошибка: '+(d.detail||d.error||'неизвестно')+(dbg?'<br><div class="lb-sub" style="font-size:.45rem;word-break:break-all;margin-top:8px;max-height:200px;overflow-y:auto">'+escHtml(dbg)+'</div>':'')+'</div>';
+      // On error, fetch full debug info
+      fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'debug_init',initData:tg.initData})}).then(function(r2){return r2.json()}).then(function(dbg){
+        console.log('[VOID] Debug:',JSON.stringify(dbg));
+        var info='ошибка: '+(d.detail||d.error||'?');
+        if(d.debug){
+          info+='<br><div style="font-size:.45rem;word-break:break-all;margin-top:6px;max-height:120px;overflow-y:auto;color:#8a8aaa">';
+          info+='hash_received: '+escHtml(d.debug.hash_received||'');
+          info+='<br>token_len: '+(d.debug.token_len||'?');
+          info+='<br>keys: '+(d.debug.keys||[]).join(', ');
+          info+='</div>';
+        }
+        info+='<div style="margin-top:8px"><div style="font-size:.5rem;color:#6a6a8a;margin-bottom:4px">скопируй и отправь разработчику:</div>';
+        info+='<textarea style="width:100%;height:60px;font-size:.4rem;background:#1a1a2e;color:#aaa;border:1px solid #333;border-radius:4px;padding:4px;word-break:break-all" readonly onclick="this.select()">'+escHtml(tg.initData)+'</textarea></div>';
+        c.innerHTML='<div class="lb-empty">'+info+'</div>';
+      }).catch(function(){
+        c.innerHTML='<div class="lb-empty">ошибка: '+(d.detail||d.error||'?')+'</div>';
+      });
       return;
     }
     profileData=d;
