@@ -21,7 +21,7 @@
 
 ## ТЕКУЩИЙ СТАТУС
 
-- **Версия**: Alpha 2.2 (commit a870b94)
+- **Версия**: Alpha 2.2 (commit 2804599)
 - **Стек**: PixiJS 8.9.2 + Matter.js 0.20.0
 - **Файл**: index.html (единый файл)
 - **Хостинг**: GitHub Pages → https://digerr.github.io/void-game/
@@ -218,4 +218,4 @@ Scripted sequence в canvas:
 | 2026-06-01 | alpha 2.0 | Персонаж с эмоциями, логотип анимация, портал финиша, мелодия, wall climb анимации, FAQ/Settings |
 | 2026-06-01 | alpha 2.1 | Скины (6 шт), достижения (10 шт), актовые заставки, туториал |
 | 2026-06-01 | alpha 2.1-hotfix | Фикс синтаксической ошибки в селекторе скинов (игра не стартовала) |
-| 2026-06-01 | alpha 2.2 | Переработка уровней, Game Feel/Juice, усиление акт-интро, осколки памяти, экран рекордов, PWA |
+| 2026-06-01 | alpha 2.2 | Levels tab redesign, leaderboard ranks, awakening cutscene, profile stats, daily challenge, extended tutorial, perf optimization |
