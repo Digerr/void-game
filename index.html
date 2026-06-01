@@ -16,11 +16,11 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 #main-menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,6,14,0.97);overflow:hidden}
 #main-menu.hidden{display:none}
 .logo-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-#main-menu>.menu-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;pointer-events:none}
+#main-menu>.menu-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;width:100%;height:100%;pointer-events:none;padding:0 0 max(12px,env(safe-area-inset-bottom))}
 #main-menu>.menu-content>*{pointer-events:auto}
 .logo-sub{font-size:.65rem;color:#7a7a8a;letter-spacing:.5em;text-transform:uppercase;margin-bottom:2px}
-.logo-ver{font-size:.5rem;color:#5a5a6a;letter-spacing:.15em;margin-bottom:20px}
-.made-by{font-size:.55rem;color:#6a6a7a;letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px}
+.logo-ver{font-size:.5rem;color:#5a5a6a;letter-spacing:.15em;margin-bottom:8px}
+.made-by{font-size:.5rem;color:#4a4a5a;letter-spacing:.3em;text-transform:uppercase}
 .btn{width:260px;padding:14px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.25em;background:transparent;border:1px solid #3a3a4a;color:#9a9aaa;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:8px;border-radius:3px}
 .btn:hover{border-color:#5a5a6a;color:#ccccdd;background:rgba(255,255,255,.02)}
 .btn:active{transform:scale(.97)}
@@ -228,22 +228,24 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .ls-shard{font-size:.35rem;color:#4a5a6a;margin-top:1px;letter-spacing:.04em}
 .ls-cell.best-time{font-size:.28rem;color:#3a4a5a;margin-top:1px;letter-spacing:.03em}
 .ls-cell.locked::after{content:none}
-.menu-progress{width:220px;height:3px;background:rgba(255,255,255,.04);border-radius:2px;margin-bottom:16px;overflow:hidden}
+.menu-top{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.menu-mid{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;justify-content:center}
+.menu-bottom-row{display:flex;align-items:center;justify-content:space-between;width:280px;flex-shrink:0}
+.menu-progress{width:280px;height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
 .menu-progress-fill{height:100%;background:linear-gradient(90deg,#2a3a4a,#3a5a7a);border-radius:2px;transition:width .5s}
-.menu-stats{display:flex;gap:16px;margin-bottom:12px;font-size:.42rem;color:#5a5a6a;letter-spacing:.08em;text-transform:uppercase;justify-content:center;flex-wrap:wrap}
+.menu-stats{display:flex;gap:20px;font-size:.42rem;color:#5a5a6a;letter-spacing:.08em;text-transform:uppercase;justify-content:center;flex-wrap:wrap}
 .menu-stats .stat-item{display:flex;align-items:center;gap:4px}
 .menu-stats .stat-val{color:#8a8a9a;font-weight:700;font-variant-numeric:tabular-nums}
-.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:260px;margin-top:10px}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:280px}
 .menu-grid .btn{width:100%;margin:0}
-.menu-challenge{width:260px;margin-top:8px;padding:12px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em;background:transparent;border:1px solid rgba(100,80,140,.3);color:#8a7aaa;font-family:inherit;cursor:pointer;transition:all .2s;border-radius:3px}
+.menu-challenge{width:280px;padding:14px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em;background:transparent;border:1px solid rgba(100,80,140,.3);color:#8a7aaa;font-family:inherit;cursor:pointer;transition:all .2s;border-radius:3px}
 .menu-challenge:hover{border-color:rgba(140,110,180,.5);color:#a09aca;background:rgba(100,80,140,.05)}
 .menu-challenge:active{transform:scale(.97)}
 .menu-challenge .ch-label{display:block;margin-bottom:2px}
 .menu-challenge .ch-sub{font-size:.35rem;color:#5a5a6a;letter-spacing:.1em;font-weight:400}
-.menu-bottom{display:flex;gap:12px;margin-top:10px}
-.menu-bottom .menu-icon-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.3);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-family:inherit}
-.menu-bottom .menu-icon-btn:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.5)}
-.menu-bottom .menu-icon-btn:active{transform:scale(.9)}
+.menu-icon-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.3);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-family:inherit}
+.menu-icon-btn:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.5)}
+.menu-icon-btn:active{transform:scale(.9)}
 @keyframes screenFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .screen-fadein{animation:screenFadeIn .3s ease-out}
 .tutorial-tip{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(10,10,20,.85);border:1px solid rgba(100,120,180,.2);border-radius:8px;padding:8px 14px;font-size:.55rem;color:#8a9aba;letter-spacing:.06em;text-align:center;pointer-events:none;z-index:25;white-space:nowrap;animation:tipFade 0.4s ease-out;backdrop-filter:blur(4px)}
@@ -295,34 +297,41 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   <div id="main-menu">
     <canvas class="logo-canvas" id="logo-canvas"></canvas>
     <div class="menu-content">
-    <div style="height:60px"></div><!-- spacer for logo area -->
-    <div class="logo-sub">во тьму</div>
-    <div class="logo-ver">alpha 2.2</div>
-    <div class="player-info" id="player-info" style="display:none">
-      <div class="player-avatar" id="player-avatar"></div>
-      <div class="player-name" id="player-name"></div>
+    <!-- TOP: Logo area -->
+    <div class="menu-top">
+      <div style="height:50px"></div>
+      <div class="logo-sub">во тьму</div>
+      <div class="logo-ver">alpha 2.2</div>
+      <div class="player-info" id="player-info" style="display:none">
+        <div class="player-avatar" id="player-avatar"></div>
+        <div class="player-name" id="player-name"></div>
+      </div>
     </div>
-    <div class="menu-stats" id="menu-stats">
-      <span class="stat-item" id="menu-rank-wrap"><span id="menu-rank" style="font-weight:900;color:#6a5a6a"></span></span>
-      <span class="stat-item"><span class="stat-val" id="menu-completed">0/20</span></span>
-      <span class="stat-item"><span class="stat-val" id="menu-stars-total">0 звёзд</span></span>
-      <span class="stat-item"><span class="stat-val" id="menu-deaths-total">0 смертей</span></span>
+    <!-- MID: Stats + Buttons -->
+    <div class="menu-mid">
+      <div class="menu-stats" id="menu-stats">
+        <span class="stat-item" id="menu-rank-wrap"><span id="menu-rank" style="font-weight:900;color:#6a5a6a"></span></span>
+        <span class="stat-item"><span class="stat-val" id="menu-completed">0/20</span></span>
+        <span class="stat-item"><span class="stat-val" id="menu-stars-total">0 ★</span></span>
+        <span class="stat-item"><span class="stat-val" id="menu-deaths-total">0 смертей</span></span>
+      </div>
+      <div class="menu-progress"><div class="menu-progress-fill" id="menu-progress-fill"></div></div>
+      <button class="btn primary" id="btn-play">спуститься</button>
+      <div class="menu-grid">
+        <button class="btn" id="btn-levels">уровни</button>
+        <button class="btn" id="btn-records">рекорды</button>
+      </div>
+      <button class="menu-challenge" id="btn-challenge">
+        <span class="ch-label">испытание дня</span>
+        <span class="ch-sub" id="ch-sub">ежедневный вызов</span>
+      </button>
     </div>
-    <div class="menu-progress"><div class="menu-progress-fill" id="menu-progress-fill"></div></div>
-    <button class="btn primary" id="btn-play">спуститься</button>
-    <div class="menu-grid">
-      <button class="btn" id="btn-levels">уровни</button>
-      <button class="btn" id="btn-records">рекорды</button>
-    </div>
-    <button class="menu-challenge" id="btn-challenge">
-      <span class="ch-label">испытание дня</span>
-      <span class="ch-sub" id="ch-sub">ежедневный вызов</span>
-    </button>
-    <div class="menu-bottom">
+    <!-- BOTTOM: Icons + Credit -->
+    <div class="menu-bottom-row">
       <button class="menu-icon-btn" id="btn-settings" title="Настройки">⚙</button>
+      <div class="made-by">made by SERGO</div>
       <button class="menu-icon-btn" id="btn-faq" title="FAQ">?</button>
     </div>
-    <div class="made-by" style="margin-top:auto;margin-bottom:8px">made by SERGO</div>
     </div>
   </div>
   <div id="game-hud">
