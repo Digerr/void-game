@@ -211,11 +211,11 @@ function tgShare(){if(tg){tg.openTelegramLink('https://t.me/share/url?url=https:
 // ═══ SETTINGS ═══
 let quality=2,lang='ru',difficulty=0,paused=false;
 let musicVolume=1,musicMuted=false,brightness=100;
-function setQuality(v,el){quality=v;activateSb(el)}
-function setDiff(v,el){difficulty=v;activateSb(el)}
+function setQuality(v,el){quality=v;activateSb(el);try{localStorage.setItem('void_quality',v+'')}catch(e){}}
+function setDiff(v,el){difficulty=v;activateSb(el);try{localStorage.setItem('void_diff',v+'')}catch(e){}}
 function setBrightness(v){brightness=parseInt(v);const c=document.querySelector('canvas');if(c)c.style.filter='brightness('+brightness+'%)';try{localStorage.setItem('void_brightness',brightness+'')}catch(e){}}
 function activateSb(el){if(!el)return;el.parentElement.querySelectorAll('.sb').forEach(b=>b.classList.remove('on'));el.classList.add('on')}
-function setLang(v,el){lang=v;document.querySelectorAll('.sbtns').forEach(g=>{g.querySelectorAll('.sb').forEach(b=>{b.classList.remove('on');if(b.textContent===(v==='ru'?'RU':'EN'))b.classList.add('on')})});updateUI()}
+function setLang(v,el){lang=v;document.querySelectorAll('.sbtns').forEach(g=>{g.querySelectorAll('.sb').forEach(b=>{b.classList.remove('on');if(b.textContent===(v==='ru'?'RU':'EN'))b.classList.add('on')})});updateUI();try{localStorage.setItem('void_lang',v)}catch(e){}}
 function showTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.getElementById('tc-'+name).classList.add('active')}
 
 // ═══ i18n ═══
@@ -343,7 +343,7 @@ else if(type==='stalactite'){const o=ctx.createOscillator();o.type='square';o.fr
 }
 function fadeMusicIn(){if(!musicGain||!audioCtx)return;musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setValueAtTime(musicGain.gain.value,audioCtx.currentTime);musicGain.gain.linearRampToValueAtTime(musicMuted?0:musicVolume,audioCtx.currentTime+2)}
 function fadeMusicOut(){if(!musicGain||!audioCtx)return;musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setValueAtTime(musicGain.gain.value,audioCtx.currentTime);musicGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+1.5);musicPlaying=false}
-function setMusicVolume(v,el){musicVolume=v;activateSb(el);if(musicGain&&audioCtx&&!musicMuted){musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setValueAtTime(musicGain.gain.value,audioCtx.currentTime);musicGain.gain.linearRampToValueAtTime(v,audioCtx.currentTime+0.3)}document.querySelectorAll('[id^="mv-"],[id^="pmv-"]').forEach(b=>b.classList.remove('on'));const volMap={0:['mv-off','pmv-off'],'0.3':['mv-lo','pmv-lo'],'0.7':['mv-mid','pmv-mid'],'1':['mv-hi','pmv-hi']};const ids=volMap[v+''];if(ids)ids.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('on')})}
+function setMusicVolume(v,el){musicVolume=v;activateSb(el);if(musicGain&&audioCtx&&!musicMuted){musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setValueAtTime(musicGain.gain.value,audioCtx.currentTime);musicGain.gain.linearRampToValueAtTime(v,audioCtx.currentTime+0.3)}document.querySelectorAll('[id^="mv-"],[id^="pmv-"]').forEach(b=>b.classList.remove('on'));const volMap={0:['mv-off','pmv-off'],'0.3':['mv-lo','pmv-lo'],'0.7':['mv-mid','pmv-mid'],'1':['mv-hi','pmv-hi']};const ids=volMap[v+''];if(ids)ids.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('on')});try{localStorage.setItem('void_musicVol',v+'')}catch(e){}}
 function toggleMusicMute(){musicMuted=!musicMuted;if(musicGain&&audioCtx){musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setValueAtTime(musicGain.gain.value,audioCtx.currentTime);musicGain.gain.linearRampToValueAtTime(musicMuted?0:musicVolume,audioCtx.currentTime+0.3)}}
 
 // ═══ CONFIG ═══
@@ -610,9 +610,9 @@ aSaw(x,y,r,a,s){const sw=this.sawGroup.create(x,y,'saw');sw.setDisplaySize(28,28
 aPend(x,y,r,s){const pb=this.pendGroup.create(x,y+r||350,'pendulum');pb.setDisplaySize(36,36);pb.setSize(36,36);pb.setOrigin(0.5,0.5);pb.setData('px',x);pb.setData('py',y);pb.setData('rl',r||350);pb.setData('angle',Math.PI/4);pb.setData('as',s||0.03);pb.body.setImmovable(true);pb.body.setAllowGravity(false);pb.setDepth(6)}
 aCP(x,y){let bestY=-1;this.platformGroup.getChildren().forEach(p=>{if(x>=p.x-p.displayWidth/2&&x<=p.x+p.displayWidth/2&&p.y-20>bestY)bestY=p.y-20});if(bestY<0)bestY=500;const cp=this.add.image(x,bestY-19,'checkpoint').setDepth(5);cp.setData('id',this.checkpointObjects.length);cp.setData('activated',false);this.checkpointObjects.push(cp)}
 aBox(x,y){const b=this.boxGroup.create(x,y,'box');b.setDisplaySize(24,28);b.setSize(24,28);b.setOrigin(0.5,0.5);b.setData('grabbed',false);b.body.setGravityY(CFG.GRAVITY);b.body.setMaxVelocity(CFG.MOVE_SPEED,CFG.MAX_FALL);b.setDepth(6)}
-aLev(x,y){const l=this.add.image(x,y,'lever').setDepth(6);l.setData('active',false);l.setData('x',x);l.setData('y',y);l.setData('w',16);l.setData('h',28);this.levers.push(l)}
-aDoor(x,y,w,h){const d=this.doorGroup.create(x+w/2,y+h/2,'door');d.setDisplaySize(w,h);d.setSize(w,h);d.setOrigin(0.5,0.5);d.refreshBody();d.setData('open',false);d.setData('opening',0);d.setData('origY',y+h/2);d.setData('w',w);d.setData('h',h);d.setDepth(5)}
-aPP(x,y,w){const pp=this.add.image(x+w/2,y+3,'pressurePlate').setDepth(6);pp.setData('x',x);pp.setData('y',y);pp.setData('w',w);pp.setData('h',6);pp.setData('pressed',false);this.pressurePlates.push(pp)}
+aLev(x,y,linkId){const l=this.add.image(x,y,'lever').setDepth(6);l.setData('active',false);l.setData('x',x);l.setData('y',y);l.setData('w',16);l.setData('h',28);l.setData('linkId',linkId||0);this.levers.push(l)}
+aDoor(x,y,w,h,linkId){const d=this.doorGroup.create(x+w/2,y+h/2,'door');d.setDisplaySize(w,h);d.setSize(w,h);d.setOrigin(0.5,0.5);d.refreshBody();d.setData('open',false);d.setData('opening',0);d.setData('origY',y+h/2);d.setData('w',w);d.setData('h',h);d.setData('linkId',linkId||0);d.setDepth(5)}
+aPP(x,y,w,linkId){const pp=this.add.image(x+w/2,y+3,'pressurePlate').setDepth(6);pp.setData('x',x);pp.setData('y',y);pp.setData('w',w);pp.setData('h',6);pp.setData('pressed',false);pp.setData('linkId',linkId||0);this.pressurePlates.push(pp)}
 aBP(x,y,w,h){const p=this.platformGroup.create(x+w/2,y+h/2,'breakable');p.setDisplaySize(w,h);p.setSize(w,h);p.setOrigin(0.5,0.5);p.refreshBody();p.setData('type','breakable');p.setData('ox',x);p.setData('oy',y);p.setData('breaking',false);p.setData('bt',0);p.setData('broken',false);p.setData('rt',0);this.breakablePlatforms.push(p)}
 aRope(x,y,len){this.ropes.push({x,y,len,angle:Math.PI/6,av:0,px:x,py:y})}
 aTorch(x,y){const t=this.add.image(x,y,'torch').setDepth(5);t.setData('glowPhase',Math.random()*Math.PI*2);this.torchObjects.push(t)}
@@ -1372,7 +1372,12 @@ pp.setData('pressed',pressed);
 
 // === DOORS ===
 this.doorGroup.getChildren().forEach(d=>{
-let sh=false;this.levers.forEach(l=>{if(l.getData('active'))sh=true});this.pressurePlates.forEach(pp=>{if(pp.getData('pressed'))sh=true});
+const dLink=d.getData('linkId')||0;
+let sh=false;
+this.levers.forEach(l=>{if(l.getData('active')&&(l.getData('linkId')||0)===dLink)sh=true});
+this.pressurePlates.forEach(pp=>{if(pp.getData('pressed')&&(pp.getData('linkId')||0)===dLink)sh=true});
+// Backward compat: linkId 0 = any lever/plate opens (old behavior)
+if(dLink===0){this.levers.forEach(l=>{if(l.getData('active'))sh=true});this.pressurePlates.forEach(pp=>{if(pp.getData('pressed'))sh=true})}
 const wasOpen=d.getData('open');d.setData('open',sh);
 if(sh&&d.getData('opening')<1){d.setData('opening',Math.min(1,d.getData('opening')+0.05));d.y=d.getData('origY')-d.getData('opening')*d.getData('h');if(!wasOpen){sfx('door');this.spawnDust(d.x,d.y+d.getData('h')/2)}}
 if(!sh&&d.getData('opening')>0){d.setData('opening',Math.max(0,d.getData('opening')-0.05));d.y=d.getData('origY')-d.getData('opening')*d.getData('h')}
@@ -1872,8 +1877,18 @@ running=true;
 
 // ═══ INIT ═══
 setupTouch('btn-left','l');setupTouch('btn-right','r');setupTouch('btn-jump','j');setupTouch('btn-interact','e');setupTouch('btn-pause','pause');
-initProgress();loadProgress();updateUI();
+initProgress();loadProgress();
+// Load saved settings
+try{const sl=localStorage.getItem('void_lang');if(sl){lang=sl;document.querySelectorAll('.sbtns').forEach(g=>{g.querySelectorAll('.sb').forEach(b=>{b.classList.remove('on');if(b.textContent===(sl==='ru'?'RU':'EN'))b.classList.add('on')})})}}catch(e){}
+try{const sq=localStorage.getItem('void_quality');if(sq){quality=parseInt(sq)}}catch(e){}
+try{const sd=localStorage.getItem('void_diff');if(sd){difficulty=parseInt(sd)}}catch(e){}
+try{const smv=localStorage.getItem('void_musicVol');if(smv){musicVolume=parseFloat(smv)}}catch(e){}
 try{const sb=localStorage.getItem('void_brightness');if(sb){brightness=parseInt(sb);const c=document.querySelector('canvas');if(c)c.style.filter='brightness('+brightness+'%)'}}catch(e){}
+// Apply saved settings to UI
+if(musicVolume===0)document.getElementById('mv-off')?.classList.add('on');
+else if(musicVolume<=0.3)document.getElementById('mv-lo')?.classList.add('on');
+else if(musicVolume<=0.7)document.getElementById('mv-mid')?.classList.add('on');
+updateUI();
 
 // ═══ TELEGRAM WEBAPP ═══
 try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();Telegram.WebApp.setHeaderColor('#0a0a14');Telegram.WebApp.setBackgroundColor('#06060e')}}catch(e){}
