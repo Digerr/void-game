@@ -1893,7 +1893,7 @@ function loadLevel(n){
   // Checkpoints
   levelCheckpoints=[];state.lastCheckpoint=null;if(lvl.checkpoints)for(var i=0;i<lvl.checkpoints.length;i++)createCheckpoint(lvl.checkpoints[i]);
   // Exit
-  if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();eg.rect(0,0,lvl.exit.w,lvl.exit.h);eg.fill({color:0x2a4a2a,alpha:0.7});eg.rect(0,0,lvl.exit.w,3);eg.fill({color:0x5a8a5a,alpha:0.9});eg.rect(0,0,2,lvl.exit.h);eg.fill({color:0x3a6a3a,alpha:0.7});eg.rect(lvl.exit.w-2,0,2,lvl.exit.h);eg.fill({color:0x3a6a3a,alpha:0.7});espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;gameContainer.addChild(espr)}
+  if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;espr._base=eg;espr._ew=lvl.exit.w;espr._eh=lvl.exit.h;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
 function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelCheckpoints=[];state.lastCheckpoint=null;if(thread.active)detachThread();clearParticles();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
@@ -1907,21 +1907,71 @@ function updateExitGlow(dt){
   for(var i=0;i<children.length;i++){
     if(children[i]._isExit){
       var ec=children[i];
-      // Remove old glow (2nd+ child), keep base rect
+      var w=ec._ew||40, h=ec._eh||80;
+      var cx=w/2, cy=h/2;
+      var bg=ec._base;if(!bg){bg=new PIXI.Graphics();ec.addChildAt(bg,0);ec._base=bg}bg.clear();
       var gg=ec._glow;if(!gg){gg=new PIXI.Graphics();ec.addChild(gg);ec._glow=gg}gg.clear();
-      var pulse=Math.sin(exitGlowTime*3)*0.3+0.7;
-      // Outer glow circle
-      gg.circle(20,40,60);gg.fill({color:0x3a7a3a,alpha:pulse*0.12});
-      // Beam of light going up
-      gg.moveTo(10,0);gg.lineTo(20,-60*pulse);gg.lineTo(30,0);
-      gg.fill({color:0x3a8a3a,alpha:0.15+pulse*0.08});
-      // Light particles floating up
-      for(var j=0;j<3;j++){
-        var py=-20-Math.sin(exitGlowTime*2+j*2)*40*pulse;
-        var px=10+Math.sin(exitGlowTime*1.5+j*3)*8;
-        gg.circle(px,py,2.5);gg.fill({color:0x6aaa6a,alpha:0.35+Math.sin(exitGlowTime*4+j)*0.15});
+      var t=exitGlowTime;
+      var pulse=Math.sin(t*2.5)*0.25+0.75;
+      var pulse2=Math.sin(t*3.5+1)*0.2+0.8;
+
+      // === PORTAL BASE (drawn on bg) ===
+      // Dark void interior
+      bg.rect(3,3,w-6,h-6);bg.fill({color:0x0a0a1a,alpha:0.85});
+      // Portal edge frame — arched top
+      bg.moveTo(0,h);bg.lineTo(0,12);bg.quadraticCurveTo(0,0,cx,0);bg.quadraticCurveTo(w,0,w,12);bg.lineTo(w,h);
+      bg.stroke({width:2.5,color:0x4a4a8a,alpha:0.9*pulse});
+      // Inner arch line
+      bg.moveTo(3,h-1);bg.lineTo(3,13);bg.quadraticCurveTo(3,3,cx,3);bg.quadraticCurveTo(w-3,3,w-3,13);bg.lineTo(w-3,h-1);
+      bg.stroke({width:1.2,color:0x6a5aaa,alpha:0.5*pulse2});
+      // Keystone at top of arch
+      bg.moveTo(cx-4,1);bg.lineTo(cx,6);bg.lineTo(cx+4,1);bg.closePath();bg.fill({color:0x7a6aba,alpha:0.7*pulse2});
+      // Side pillars hint
+      bg.rect(0,h*0.3,3,h*0.5);bg.fill({color:0x3a3a6a,alpha:0.5});
+      bg.rect(w-3,h*0.3,3,h*0.5);bg.fill({color:0x3a3a6a,alpha:0.5});
+
+      // === GLOW EFFECTS (drawn on gg) ===
+      // Deep void aura — large soft glow
+      gg.circle(cx,cy,50);gg.fill({color:0x2a2a5a,alpha:pulse*0.08});
+      gg.circle(cx,cy,35);gg.fill({color:0x3a3a7a,alpha:pulse*0.1});
+
+      // Swirling energy inside portal
+      for(var s=0;s<3;s++){
+        var angle=t*(1.5+s*0.4)+s*2.094;
+        var rx=8+Math.sin(t*2+s)*3;
+        var ry=18+Math.sin(t*1.5+s)*5;
+        var sx=cx+Math.cos(angle)*rx;
+        var sy=cy+Math.sin(angle)*ry*0.6;
+        var sr=2+Math.sin(t*3+s*1.5)*0.8;
+        gg.circle(sx,sy,sr);gg.fill({color:0x7a6aba,alpha:0.3+Math.sin(t*4+s)*0.15});
       }
-      ec.addChild(gg);
+
+      // Vertical energy beam going up from portal top
+      var beamW=6+Math.sin(t*3)*2;
+      var beamH=40+Math.sin(t*2)*15;
+      gg.moveTo(cx-beamW/2,4);gg.lineTo(cx,4-beamH*pulse);gg.lineTo(cx+beamW/2,4);
+      gg.fill({color:0x5a5aaa,alpha:0.12+pulse*0.06});
+
+      // Rising particles
+      for(var j=0;j<5;j++){
+        var ppy=cy-10-j*12-Math.sin(t*1.8+j*1.7)*18;
+        var ppx=cx+Math.sin(t*1.2+j*2.5)*8;
+        var psize=1.5+Math.sin(t*3+j)*0.7;
+        var palpha=0.25+Math.sin(t*2.5+j*1.3)*0.15;
+        if(ppy>-30){
+          gg.circle(ppx,ppy,psize);gg.fill({color:0x8a7aca,alpha:palpha*pulse2});
+        }
+      }
+
+      // Bottom glow pool
+      gg.ellipse(cx,h,14,5);gg.fill({color:0x4a4a8a,alpha:0.15*pulse});
+
+      // Tiny sparkle at keystone
+      var sparkle=Math.sin(t*5)*0.5+0.5;
+      if(sparkle>0.7){
+        gg.circle(cx,4,1.5);gg.fill({color:0xccccff,alpha:(sparkle-0.7)*2});
+      }
+
       break;
     }
   }
@@ -1967,10 +2017,11 @@ function updateLightAndFog(dt){
     var ex=lvl.exit.x+lvl.exit.w/2-camera.x,ey=lvl.exit.y+lvl.exit.h/2-camera.y;
     var exitR=160+Math.sin(lightTime*2.5)*25;
     var exitGrad=lightCtx.createRadialGradient(ex,ey,0,ex,ey,exitR);
-    exitGrad.addColorStop(0,'rgba(255,255,255,0.85)');
-    exitGrad.addColorStop(0.3,'rgba(255,255,255,0.55)');
-    exitGrad.addColorStop(0.6,'rgba(255,255,255,0.2)');
-    exitGrad.addColorStop(1,'rgba(255,255,255,0)');
+    exitGrad.addColorStop(0,'rgba(200,200,255,0.85)');
+    exitGrad.addColorStop(0.2,'rgba(160,160,240,0.6)');
+    exitGrad.addColorStop(0.4,'rgba(120,120,210,0.3)');
+    exitGrad.addColorStop(0.7,'rgba(80,80,170,0.12)');
+    exitGrad.addColorStop(1,'rgba(40,40,120,0)');
     lightCtx.fillStyle=exitGrad;
     lightCtx.beginPath();lightCtx.arc(ex,ey,exitR,0,Math.PI*2);lightCtx.fill();
   }
@@ -2106,7 +2157,7 @@ function showScreen(name){state.screen=name;document.getElementById('main-menu')
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
-function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x3a6a3a,{speed:2,life:0.8,size:3,gravity:0.3});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;recordLevelComplete(state.level,state.deaths,elapsed);setTimeout(function(){showWinScreen(elapsed)},300)}
+function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x6a5aaa,{speed:2,life:0.8,size:3,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,8,0x8a7aca,{speed:3,life:1.0,size:2,gravity:0.1});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;recordLevelComplete(state.level,state.deaths,elapsed);setTimeout(function(){showWinScreen(elapsed)},300)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
