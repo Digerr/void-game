@@ -26,15 +26,24 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .btn.primary:hover{border-color:#4a7a9a;color:#9ac0e0;background:rgba(60,100,160,.04)}
 #level-select,#settings-screen,#faq-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center}
 #level-select.active,#settings-screen.active,#faq-screen.active{display:flex}
-.ls-title{font-size:1.1rem;font-weight:900;color:#7a7a8a;letter-spacing:.2em;margin-bottom:8px}
-.ls-grid{display:flex;flex-direction:column;gap:16px;max-width:360px;width:100%;padding:0 8px}
-.ls-act{display:flex;flex-direction:column;gap:6px}
-.ls-act-header{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:2px}
-.ls-act-name{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
-.ls-act-progress{font-size:.4rem;letter-spacing:.08em;opacity:.5}
-.ls-act-bar{height:2px;background:rgba(255,255,255,.04);border-radius:1px;overflow:hidden;margin-bottom:4px}
-.ls-act-bar-fill{height:100%;border-radius:1px;transition:width .4s}
-.ls-act-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+#level-select{background:linear-gradient(180deg,rgba(6,6,14,.98) 0%,rgba(10,10,20,.97) 100%)}
+.ls-title{font-size:1.1rem;font-weight:900;color:#7a7a8a;letter-spacing:.2em;margin-bottom:12px}
+.ls-grid{display:flex;flex-direction:column;gap:12px;max-width:380px;width:100%;padding:0 8px}
+.ls-act{display:flex;flex-direction:column;gap:8px;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:10px 10px 8px;position:relative;overflow:hidden;transition:border-color .3s}
+.ls-act:hover{border-color:rgba(255,255,255,.08)}
+.ls-act::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:.6}
+.ls-act0::before{background:linear-gradient(90deg,#2a4a6a,#5a8aba)}
+.ls-act1::before{background:linear-gradient(90deg,#4a2a6a,#8a5aba)}
+.ls-act2::before{background:linear-gradient(90deg,#6a4a1a,#ba8a2a)}
+.ls-act3::before{background:linear-gradient(90deg,#3a1a2a,#8a3a5a)}
+.ls-act-header{display:flex;align-items:center;gap:6px;padding:0 0 6px;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:4px}
+.ls-act-icon{font-size:.75rem;opacity:.7}
+.ls-act-name{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;flex:1}
+.ls-act-progress{font-size:.38rem;letter-spacing:.08em;opacity:.4;font-variant-numeric:tabular-nums}
+.ls-act-stars{display:flex;gap:1px;font-size:.35rem;margin-left:4px}
+.ls-act-bar{height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.ls-act-bar-fill{height:100%;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.ls-act-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .ls-act0 .ls-act-name{color:#5a7a9a}
 .ls-act0 .ls-act-bar-fill{background:linear-gradient(90deg,#2a4a6a,#5a8aba)}
 .ls-act1 .ls-act-name{color:#7a5a9a}
@@ -43,27 +52,27 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .ls-act2 .ls-act-bar-fill{background:linear-gradient(90deg,#6a4a1a,#ba8a2a)}
 .ls-act3 .ls-act-name{color:#6a4a5a}
 .ls-act3 .ls-act-bar-fill{background:linear-gradient(90deg,#3a1a2a,#8a3a5a)}
-.ls-cell{aspect-ratio:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.ls-cell:active{transform:scale(.93)}
-.ls-cell.locked{opacity:.2;cursor:default;pointer-events:none;filter:grayscale(1)}
-.ls-cell.current{border-color:rgba(100,140,200,.4);background:rgba(60,100,160,.08);box-shadow:0 0 12px rgba(80,120,180,.12)}
-.ls-cell.current::after{content:'';position:absolute;inset:0;border-radius:5px;animation:ls-pulse 2s infinite;pointer-events:none}
-.ls-cell.completed{border-color:rgba(90,140,90,.3);background:rgba(60,120,60,.06)}
-.ls-cell.perfect{border-color:rgba(180,140,60,.4);background:rgba(140,110,30,.08)}
-.ls-num{font-size:.85rem;font-weight:700;color:#7a7a8a}
+.ls-cell{aspect-ratio:1;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;gap:2px}
+.ls-cell:active{transform:scale(.92);transition:transform .08s}
+.ls-cell.locked{opacity:.15;cursor:default;pointer-events:none;filter:grayscale(1)}
+.ls-cell.current{border-color:rgba(100,140,200,.35);background:rgba(60,100,160,.06);animation:ls-glow 3s ease-in-out infinite}
+.ls-cell.completed{border-color:rgba(90,140,90,.25);background:rgba(60,120,60,.04)}
+.ls-cell.perfect{border-color:rgba(180,140,60,.3);background:rgba(140,110,30,.05)}
+@keyframes ls-glow{0%,100%{box-shadow:0 0 8px rgba(80,120,180,.08)}50%{box-shadow:0 0 16px rgba(80,120,180,.18)}}
+.ls-num{font-size:.9rem;font-weight:700;color:#7a7a8a;transition:color .3s}
 .ls-cell.completed .ls-num{color:#6aaa6a}
 .ls-cell.current .ls-num{color:#7aAaca}
 .ls-cell.perfect .ls-num{color:#caba4a}
 .ls-cell.locked .ls-num{color:#3a3a4a}
-.ls-stars-row{display:flex;gap:1px;font-size:.35rem;margin-top:1px}
+.ls-stars-row{display:flex;gap:1px;font-size:.4rem;margin-top:1px}
 .ls-star-lit{color:#8ac070}
-.ls-star-dim{color:#3a3a4a}
-.ls-cell-name{font-size:.28rem;color:#5a5a6a;margin-top:2px;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ls-star-dim{color:#2a2a3a}
+.ls-cell-name{font-size:.3rem;color:#5a5a6a;margin-top:1px;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.04em}
 .ls-cell.completed .ls-cell-name{color:#4a7a4a}
 .ls-cell.current .ls-cell-name{color:#4a6a8a}
 .ls-cell.locked .ls-cell-name{color:#2a2a3a}
-.ls-cell.locked::before{content:'🔒';font-size:.45rem;opacity:.4;position:absolute;top:3px;right:3px}
-@keyframes ls-pulse{0%,100%{box-shadow:inset 0 0 8px rgba(80,120,180,.1)}50%{box-shadow:inset 0 0 12px rgba(80,120,180,.2)}}
+.ls-cell.locked::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(255,255,255,.01) 4px,rgba(255,255,255,.01) 8px)}
+@keyframes ls-pulse{0%,100%{box-shadow:inset 0 0 8px rgba(80,120,180,.08)}50%{box-shadow:inset 0 0 14px rgba(80,120,180,.16)}}
 .player-info{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .player-avatar{width:32px;height:32px;border-radius:50%;border:1px solid #2a2a3a;overflow:hidden}
 .player-avatar img{width:100%;height:100%;object-fit:cover}
@@ -130,14 +139,16 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 @keyframes starPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.4);opacity:1}100%{transform:scale(1);opacity:1}}
 .win-total-stats{display:flex;gap:16px;margin-top:6px;margin-bottom:8px;justify-content:center}
 .win-total-stat{font-size:.4rem;color:#2a3a3a;letter-spacing:.08em;text-transform:uppercase}
-#level-select{overflow:hidden;justify-content:flex-start;padding-top:40px}
-.ls-summary{font-size:.4rem;color:#5a5a6a;letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase}
-.ls-progress{width:260px;height:3px;background:rgba(255,255,255,.04);border-radius:2px;margin-bottom:12px;overflow:hidden}
-.ls-progress-fill{height:100%;background:linear-gradient(90deg,#3a5a7a,#5a8aba);border-radius:2px;transition:width .5s}
-.ls-stats{display:flex;gap:16px;margin-bottom:8px}
+#level-select{overflow:hidden;justify-content:flex-start;padding-top:36px}
+.ls-summary{font-size:.4rem;color:#5a5a6a;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
+.ls-progress{width:280px;height:4px;background:rgba(255,255,255,.04);border-radius:2px;margin-bottom:10px;overflow:hidden}
+.ls-progress-fill{height:100%;background:linear-gradient(90deg,#3a5a7a,#5a8aba);border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.ls-stats{display:flex;gap:20px;margin-bottom:6px}
 .ls-stat{display:flex;flex-direction:column;align-items:center;gap:2px}
-.ls-stat-val{font-size:.75rem;font-weight:700;color:#7a8aaa}
+.ls-stat-val{font-size:.8rem;font-weight:700;color:#7a8aaa;font-variant-numeric:tabular-nums}
 .ls-stat-label{font-size:.3rem;color:#4a4a5a;letter-spacing:.08em;text-transform:uppercase}
+.ls-shard{font-size:.35rem;color:#4a5a6a;margin-top:1px;letter-spacing:.04em}
+.ls-cell.best-time{font-size:.28rem;color:#3a4a5a;margin-top:1px;letter-spacing:.03em}
 .ls-cell.locked::after{content:'';position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .menu-progress{width:200px;height:2px;background:rgba(255,255,255,.04);border-radius:2px;margin-bottom:20px;overflow:hidden}
 .menu-progress-fill{height:100%;background:#2a3a4a;border-radius:2px;transition:width .5s}
@@ -2567,23 +2578,28 @@ function showLevelSelect(){
   var progressFill=document.getElementById('ls-progress-fill');
   if(progressFill)progressFill.style.width=(LEVELS.length>0?((completedCount/LEVELS.length)*100):0)+'%';
 
-  // Acts
+  // Acts with icons and more info
   var acts=[
-    {name:'Пробуждение',cls:'ls-act0',levels:[0,1,2,3,4]},
-    {name:'Глубины',cls:'ls-act1',levels:[5,6,7,8,9]},
-    {name:'Нити',cls:'ls-act2',levels:[10,11,12,13,14]},
-    {name:'Пустота',cls:'ls-act3',levels:[15,16,17,18,19]}
+    {name:'Пробуждение',icon:'🌑',cls:'ls-act0',levels:[0,1,2,3,4]},
+    {name:'Глубины',icon:'🌀',cls:'ls-act1',levels:[5,6,7,8,9]},
+    {name:'Нити',icon:'🔗',cls:'ls-act2',levels:[10,11,12,13,14]},
+    {name:'Пустота',icon:'🕳️',cls:'ls-act3',levels:[15,16,17,18,19]}
   ];
 
   for(var a=0;a<acts.length;a++){
     var act=acts[a];
     var actDiv=document.createElement('div');actDiv.className='ls-act '+act.cls;
-    // Act header
-    var actCompleted=0,actStars=0;
+    // Act header with icon, name, stars, progress %
+    var actCompleted=0,actStars=0,actPossible=act.levels.length*3;
     for(var li=0;li<act.levels.length;li++){var ls=getLevelStars(act.levels[li]);if(ls>0){actCompleted++;actStars+=ls}}
     var actPct=Math.round((actCompleted/act.levels.length)*100);
     var header=document.createElement('div');header.className='ls-act-header';
-    header.innerHTML='<span class="ls-act-name">'+act.name+'</span><span class="ls-act-progress">'+actPct+'%</span>';
+    var starsHtml='';
+    for(var j=0;j<3;j++){
+      var third=Math.floor(actPossible/3);
+      starsHtml+='<span style="color:'+(actStars>=(j+1)*third?'#8ac070':'#2a2a3a')+'">★</span>';
+    }
+    header.innerHTML='<span class="ls-act-icon">'+act.icon+'</span><span class="ls-act-name">'+act.name+'</span><span class="ls-act-stars">'+starsHtml+'</span><span class="ls-act-progress">'+actPct+'%</span>';
     actDiv.appendChild(header);
     // Act progress bar
     var bar=document.createElement('div');bar.className='ls-act-bar';
@@ -2602,7 +2618,20 @@ function showLevelSelect(){
       else cell.classList.add('current');
       var numDiv=document.createElement('div');numDiv.className='ls-num';numDiv.textContent=idx+1;cell.appendChild(numDiv);
       var nameDiv=document.createElement('div');nameDiv.className='ls-cell-name';nameDiv.textContent=LEVELS[idx].name;cell.appendChild(nameDiv);
-      if(isUnlocked){var row=document.createElement('div');row.className='ls-stars-row';for(var j=0;j<3;j++){var se=document.createElement('span');se.className=j<stars?'ls-star-lit':'ls-star-dim';se.textContent='★';row.appendChild(se)}cell.appendChild(row)}
+      // Stars row (show for unlocked cells)
+      if(isUnlocked){
+        var row=document.createElement('div');row.className='ls-stars-row';
+        for(var j=0;j<3;j++){var se=document.createElement('span');se.className=j<stars?'ls-star-lit':'ls-star-dim';se.textContent='★';row.appendChild(se)}
+        cell.appendChild(row);
+        // Best time for completed levels
+        if(stars>0){
+          var best=getLevelBestTime(idx);
+          if(best<Infinity){
+            var bestDiv=document.createElement('div');bestDiv.className='ls-cell best-time';
+            bestDiv.textContent=formatTime(best*1000);cell.appendChild(bestDiv);
+          }
+        }
+      }
       if(isUnlocked){(function(iidx){cell.addEventListener('click',function(){state.level=iidx;state.deaths=0;if(engine)clearLevel();initMatter();loadLevel(iidx);showStoryScreen(iidx)});cell.addEventListener('touchstart',function(e){e.preventDefault();tgHaptic('light')},{passive:false})})(idx)}
       actGrid.appendChild(cell);
     }
