@@ -158,16 +158,21 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .tutorial-tip{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(10,10,20,.85);border:1px solid rgba(100,120,180,.2);border-radius:8px;padding:8px 14px;font-size:.55rem;color:#8a9aba;letter-spacing:.06em;text-align:center;pointer-events:none;z-index:25;white-space:nowrap;animation:tipFade 0.4s ease-out;backdrop-filter:blur(4px)}
 .tutorial-tip .tip-key{display:inline-block;background:rgba(100,120,180,.15);border:1px solid rgba(100,120,180,.3);border-radius:3px;padding:1px 5px;font-weight:700;color:#aabbdd;margin:0 2px;font-size:.6rem}
 @keyframes tipFade{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-.act-intro{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(2,2,8,.95);z-index:100}
+.act-intro{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(2,2,8,.97);z-index:100;overflow:hidden}
 .act-intro.active{display:flex}
-.act-intro-num{font-size:.4rem;color:#4a4a6a;letter-spacing:.3em;text-transform:uppercase;margin-bottom:8px;animation:actFadeIn 1s ease-out}
-.act-intro-name{font-size:1.2rem;font-weight:900;letter-spacing:.15em;margin-bottom:16px;animation:actFadeIn 1.2s ease-out}
-.act-intro-text{font-size:.55rem;color:#6a6a8a;max-width:280px;text-align:center;line-height:1.7;animation:actFadeIn 1.5s ease-out}
-.act-intro-line{width:40px;height:1px;background:rgba(255,255,255,.1);margin:12px 0;animation:actFadeIn 1.3s ease-out}
-.act-intro0 .act-intro-name{color:#5a8aba}
-.act-intro1 .act-intro-name{color:#8a5aba}
-.act-intro2 .act-intro-name{color:#ba8a2a}
-.act-intro3 .act-intro-name{color:#8a3a5a}
+.act-intro-bg{position:absolute;inset:0;pointer-events:none;opacity:.3}
+.act-intro-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.8) 100%);pointer-events:none}
+.act-intro-num{font-size:.38rem;color:#4a4a6a;letter-spacing:.35em;text-transform:uppercase;margin-bottom:10px;animation:actFadeIn 1s ease-out}
+.act-intro-name{font-size:1.3rem;font-weight:900;letter-spacing:.18em;margin-bottom:12px;animation:actFadeIn 1.2s ease-out;position:relative}
+.act-intro-name::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:0;height:2px;animation:actLineGrow 1.5s ease-out .5s forwards}
+.act-intro0 .act-intro-name{color:#5a8aba}.act-intro0 .act-intro-name::after{background:#5a8aba}
+.act-intro1 .act-intro-name{color:#8a5aba}.act-intro1 .act-intro-name::after{background:#8a5aba}
+.act-intro2 .act-intro-name{color:#ba8a2a}.act-intro2 .act-intro-name::after{background:#ba8a2a}
+.act-intro3 .act-intro-name{color:#8a3a5a}.act-intro3 .act-intro-name::after{background:#8a3a5a}
+.act-intro-line{width:40px;height:1px;background:rgba(255,255,255,.08);margin:14px 0;animation:actFadeIn 1.3s ease-out}
+.act-intro-text{font-size:.55rem;color:#7a7a9a;max-width:300px;text-align:center;line-height:1.8;animation:actFadeIn 1.5s ease-out;letter-spacing:.03em}
+.act-intro-hint{font-size:.4rem;color:#3a3a4a;letter-spacing:.15em;text-transform:uppercase;margin-top:20px;animation:actFadeIn 2s ease-out;cursor:pointer}
+@keyframes actLineGrow{to{width:60px}}
 .achievement-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(10,10,25,.9);border:1px solid rgba(180,160,60,.3);border-radius:8px;padding:8px 16px;z-index:200;animation:achieveIn .4s ease-out;display:flex;align-items:center;gap:8px;backdrop-filter:blur(4px)}
 .achievement-toast .ach-icon{font-size:1rem}
 .achievement-toast .ach-text{font-size:.5rem;color:#caba6a;letter-spacing:.08em;text-transform:uppercase}
@@ -179,10 +184,13 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 <div id="loading"><div class="loading-text">загрузка</div></div>
 <div id="ui-layer">
   <div class="act-intro" id="act-intro">
+    <canvas class="act-intro-bg" id="act-intro-bg"></canvas>
+    <div class="act-intro-vignette"></div>
     <div class="act-intro-num" id="act-intro-num"></div>
     <div class="act-intro-name" id="act-intro-name"></div>
     <div class="act-intro-line"></div>
     <div class="act-intro-text" id="act-intro-text"></div>
+    <div class="act-intro-hint" id="act-intro-hint">нажми чтобы продолжить</div>
   </div>
   <div id="main-menu">
     <canvas class="logo-canvas" id="logo-canvas"></canvas>
@@ -2560,10 +2568,41 @@ function showActIntro(actIdx,callback){
   document.getElementById('act-intro-num').textContent=intro.num;
   document.getElementById('act-intro-name').textContent=intro.name;
   document.getElementById('act-intro-text').textContent=intro.text;
+  // Animate background particles on canvas
+  var bgCanvas=document.getElementById('act-intro-bg');
+  var bgCtx=null;
+  var bgParts=[];
+  var bgAnim=null;
+  var actColors=[[0x5a8aba,0x2a4a6a],[0x8a5aba,0x4a2a6a],[0xba8a2a,0x6a4a1a],[0x8a3a5a,0x3a1a2a]];
+  if(bgCanvas){
+    bgCanvas.width=window.innerWidth;bgCanvas.height=window.innerHeight;
+    bgCtx=bgCanvas.getContext('2d');
+    bgParts=[];
+    for(var p=0;p<40;p++){
+      bgParts.push({x:Math.random()*bgCanvas.width,y:Math.random()*bgCanvas.height,vx:(Math.random()-0.5)*0.3,vy:-0.2-Math.random()*0.4,r:1+Math.random()*2,a:0.2+Math.random()*0.3});
+    }
+    function drawBg(){
+      if(!el.classList.contains('active'))return;
+      bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
+      var c=actColors[actIdx%actColors.length];
+      for(var i=0;i<bgParts.length;i++){
+        var pp=bgParts[i];
+        pp.x+=pp.vx;pp.y+=pp.vy;
+        if(pp.y<-10){pp.y=bgCanvas.height+10;pp.x=Math.random()*bgCanvas.width}
+        if(pp.x<-10)pp.x=bgCanvas.width+10;if(pp.x>bgCanvas.width+10)pp.x=-10;
+        bgCtx.beginPath();bgCtx.arc(pp.x,pp.y,pp.r,0,Math.PI*2);
+        var hex=c[i%2].toString(16).padStart(6,'0');
+        bgCtx.fillStyle='rgba('+parseInt(hex.substr(0,2),16)+','+parseInt(hex.substr(2,2),16)+','+parseInt(hex.substr(4,2),16)+','+pp.a+')';
+        bgCtx.fill();
+      }
+      bgAnim=requestAnimationFrame(drawBg);
+    }
+    drawBg();
+  }
   tgHaptic('medium');
   var dismissed=false;
-  function dismiss(){if(dismissed)return;dismissed=true;el.classList.remove('active');if(callback)callback()}
-  var timer=setTimeout(dismiss,4500);
+  function dismiss(){if(dismissed)return;dismissed=true;if(bgAnim)cancelAnimationFrame(bgAnim);el.classList.remove('active');if(callback)callback()}
+  var timer=setTimeout(dismiss,5000);
   el.onclick=function(){clearTimeout(timer);dismiss()};
   el.ontouchstart=function(e){e.preventDefault();clearTimeout(timer);dismiss()};
 }
