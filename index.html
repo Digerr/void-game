@@ -70,7 +70,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   <div id="main-menu">
     <div class="logo">VOID</div>
     <div class="logo-sub">во тьму</div>
-    <div class="logo-ver">alpha 1.5</div>
+    <div class="logo-ver">alpha 1.6</div>
     <div class="made-by">made by SERGO</div>
     <button class="btn primary" id="btn-play">спуститься</button>
   </div>
@@ -390,7 +390,7 @@ function updateParticles(dt){for(var i=particles.length-1;i>=0;i--){var p=partic
 function clearParticles(){for(var i=0;i<particles.length;i++){if(particles[i].sprite)particles[i].sprite.destroy()}particles=[]}
 
 // ═══ PLAYER ═══
-var player={body:null,sprite:null,speed:6.5,accelGround:80,accelAir:35,decelGround:70,decelAir:20,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:18,dashDuration:0.12,dashCooldown:0.6,gravityUp:1.2,gravityDown:2.0,apexThreshold:2.0,apexGravityMult:0.6,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0};
+var player={body:null,sprite:null,speed:6.5,accelGround:80,accelAir:45,decelGround:70,decelAir:28,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:18,dashDuration:0.12,dashCooldown:0.6,gravityUp:1.2,gravityDown:2.0,apexThreshold:2.0,apexGravityMult:0.6,airControlBonus:0.5,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0};
 var playerSensorGround=null,playerSensorLeft=null,playerSensorRight=null;
 var COYOTE_DURATION=0.08,JUMP_BUFFER_DURATION=0.1,WALL_SLIDE_SPEED=2.2,PLAYER_W=18,PLAYER_H=34;
 
@@ -413,7 +413,7 @@ function createPlayer(x,y){
   player.onGround=false;player.wasOnGround=false;player.onWallLeft=false;player.onWallRight=false;
   player.wallSliding=false;player.alive=true;player.coyoteTime=0;player.jumpBuffer=0;player.facing=1;
   player.dashing=false;player.dashTimer=0;player.dashCooldownTimer=0;player.animTime=0;player.runCycle=0;
-  player.lastGroundY=y;player.justLanded=false;player.nearLever=null;player.velocityX=0;
+  player.lastGroundY=y;player.justLanded=false;player.nearLever=null;player.velocityX=0;player.squashX=1;player.squashY=1;player.squashTimer=0;
   setupPlayerSensors();
 }
 
@@ -437,7 +437,10 @@ function updatePlayer(dt){
   if(!player.alive||!player.body)return;
   player.wasOnGround=player.onGround;player.onGround=playerSensorGround._colliding>0;player.onWallLeft=playerSensorLeft._colliding>0;player.onWallRight=playerSensorRight._colliding>0;
   player.justLanded=false;
-  if(player.onGround&&!player.wasOnGround){player.justLanded=true;var fd=player.lastGroundY-player.body.position.y;if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.4,size:3,gravity:1});state.shakeAmount=Math.min(fd*0.02,4);state.shakeTime=0.15}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1})}player.lastGroundY=player.body.position.y;tgHaptic('light')}
+  if(player.onGround&&!player.wasOnGround){player.justLanded=true;var fd=player.lastGroundY-player.body.position.y;
+    // Squash & stretch on landing
+    if(fd>20){player.squashX=1.3;player.squashY=0.7;player.squashTimer=0.15}
+    if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.4,size:3,gravity:1});state.shakeAmount=Math.min(fd*0.02,4);state.shakeTime=0.15}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1})}player.lastGroundY=player.body.position.y;tgHaptic('light')}
   if(player.onGround)player.lastGroundY=player.body.position.y;
   if(player.onGround)player.coyoteTime=COYOTE_DURATION;else player.coyoteTime-=dt;
   if(player.inputJumpPressed){player.jumpBuffer=JUMP_BUFFER_DURATION;player.inputJumpPressed=false}else player.jumpBuffer-=dt;
@@ -453,7 +456,7 @@ function updatePlayer(dt){
 
   // Dash
   player.dashCooldownTimer-=dt;
-  if(player.dashing){player.dashTimer-=dt;if(player.dashTimer<=0)player.dashing=false;else{player.velocityX=player.dashDir*player.dashSpeed;MBody.setVelocity(player.body,{x:player.velocityX,y:0});if(Math.random()<0.5)spawnParticles(player.body.position.x-player.dashDir*10,player.body.position.y,1,0x5a5a8a,{angle:Math.PI+player.dashDir*0.5,spread:0.5,speed:1,life:0.2,size:2,gravity:0})}}
+  if(player.dashing){player.dashTimer-=dt;if(player.dashTimer<=0)player.dashing=false;else{player.velocityX=player.dashDir*player.dashSpeed;MBody.setVelocity(player.body,{x:player.velocityX,y:0});if(Math.random()<0.7)spawnParticles(player.body.position.x-player.dashDir*10,player.body.position.y,1,0x5a5a8a,{angle:Math.PI+player.dashDir*0.5,spread:0.5,speed:1.5,life:0.25,size:2.5,gravity:0})}}
   else if(thread.active){
     // While on thread: allow swinging with left/right (add angular force)
     var swingForce=player.inputX*0.15;
@@ -466,6 +469,8 @@ function updatePlayer(dt){
     if(player.inputX!==0){
       // Accelerating
       var accel=player.onGround?player.accelGround:player.accelAir;
+      // Air control bonus: allow faster direction change in air
+      if(!player.onGround&&player.inputX!==0&&Math.sign(targetVx)!==Math.sign(player.velocityX))accel+=player.airControlBonus*60;
       player.velocityX+=(targetVx-player.velocityX)*Math.min(1,accel*dt);
     }else{
       // Decelerating
@@ -476,7 +481,7 @@ function updatePlayer(dt){
     MBody.setVelocity(player.body,{x:player.velocityX,y:player.body.velocity.y});
     if(player.onGround&&Math.abs(player.velocityX)>3&&Math.random()<0.15)spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.5});
   }
-  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');spawnParticles(player.body.position.x,player.body.position.y,6,0x5a5a8a,{angle:Math.PI+player.dashDir,spread:1,speed:2,life:0.3,size:2.5,gravity:0})}
+  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');spawnParticles(player.body.position.x,player.body.position.y,8,0x5a5a8a,{angle:Math.PI+player.dashDir,spread:1,speed:2.5,life:0.35,size:3,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1}
   player.inputDashPressed=false;
   if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
@@ -493,17 +498,28 @@ function updatePlayer(dt){
       player.jumpBuffer=0;player.coyoteTime=0;
       tgHaptic('medium');
       spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,5,0x4a4a8a,{angle:-Math.PI/2,spread:2,speed:2,life:0.3,size:2,gravity:1});
-    }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.velocityX,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1})}else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,5,0x4a4a5a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2,life:0.3,size:2,gravity:0.5})}
+    }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.velocityX,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1});
+    // Jump stretch
+    player.squashX=0.75;player.squashY=1.3;player.squashTimer=0.1;
+    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,5,0x4a4a5a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2,life:0.3,size:2,gravity:0.5});
+    // Wall jump squash
+    player.squashX=0.7;player.squashY=1.2;player.squashTimer=0.1;
+    }
   }
   if(!player.inputJump&&player.body.velocity.y<-4)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.85});
 
   player.animTime+=dt;if(player.onGround&&Math.abs(player.body.velocity.x)>0.5)player.runCycle+=dt*Math.abs(player.body.velocity.x)*0.15;
+  // Squash & stretch animation (spring back to 1.0)
+  if(player.squashTimer>0){player.squashTimer-=dt;if(player.squashTimer<=0){player.squashX=1;player.squashY=1}else{var sp=Math.min(1,player.squashTimer/0.1);player.squashX=1+(player.squashX-1)*sp;player.squashY=1+(player.squashY-1)*sp}}
   // Smooth visual position (lerp towards physics position, snap if far)
   var dx=player.body.position.x-player._vx,dy=player.body.position.y-player._vy;
   var dist=Math.sqrt(dx*dx+dy*dy);
   var lerpRate=dist>20?0.8:0.35; // snap if teleporting, smooth otherwise
   player._vx+=dx*lerpRate;player._vy+=dy*lerpRate;
-  player.sprite.x=player._vx;player.sprite.y=player._vy;drawPlayerParts();
+  player.sprite.x=player._vx;player.sprite.y=player._vy;
+  // Apply squash & stretch scale
+  player.sprite.scale.set(player.squashX,player.squashY);
+  drawPlayerParts();
   var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+100)killPlayer('fall');
   var dashReady=player.dashCooldownTimer<=0&&!player.dashing;document.getElementById('hud-dash').style.color=dashReady?'#3a5a6a':'#1a2a3a';
   var threadReady=!thread.active&&levelAnchors.length>0;var nearAnchor=false;
@@ -513,7 +529,7 @@ function updatePlayer(dt){
   engine.gravity.y=1.5;
 }
 
-function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,20,dc,{speed:3,life:0.8,size:3,gravity:0.5});spawnParticles(px,py,5,0x6a6a9a,{speed:1.5,life:0.5,size:5,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
+function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
 
 function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];createPlayer(lvl.spawn.x,lvl.spawn.y);state.levelStartTime=performance.now()}
 
@@ -757,38 +773,61 @@ function updateThread(dt){
   if(thread.sprite){
     thread.sprite.removeChildren();var g=new PIXI.Graphics();
     var px=player.body.position.x,py=player.body.position.y-PLAYER_H/4;
-    // Curved thread with catenary sag
-    var segs=14;var prevX=thread.anchorX,prevY=thread.anchorY;
+    var ax=thread.anchorX,ay=thread.anchorY;
+    // Glow underneath (wide soft line)
+    g.moveTo(ax,ay);g.lineTo(px,py);
+    g.stroke({width:8,color:0x2a2a5a,alpha:0.06});
+    // Curved thread with catenary sag + shimmer
+    var segs=16;var prevX=ax,prevY=ay;
     for(var i=1;i<=segs;i++){
       var t=i/segs;
-      var tx=thread.anchorX+(px-thread.anchorX)*t;
-      var ty=thread.anchorY+(py-thread.anchorY)*t;
+      var tx=ax+(px-ax)*t;
+      var ty=ay+(py-ay)*t;
       // Catenary sag
       var sag=Math.sin(t*Math.PI)*thread.length*0.06;
       ty+=sag;
-      var alpha=0.5+Math.sin(player.animTime*6+i*0.5)*0.15;
+      // Shimmer: brightness varies along thread over time
+      var shimmer=0.45+Math.sin(player.animTime*8+i*0.4)*0.2+Math.sin(player.animTime*3+i*1.2)*0.1;
+      // Core line
       g.moveTo(prevX,prevY);g.lineTo(tx,ty);
-      g.stroke({width:2,color:0x3a3a6a,alpha:alpha});
+      g.stroke({width:2,color:0x5a5a9a,alpha:shimmer});
+      // Thin bright core
+      g.moveTo(prevX,prevY);g.lineTo(tx,ty);
+      g.stroke({width:1,color:0x7a7abb,alpha:shimmer*0.5});
+      // Sparkle at random segments
+      if(Math.sin(player.animTime*10+i*2.5)>0.7){
+        g.circle(tx,ty,1.5+Math.sin(player.animTime*12+i)*0.5);
+        g.fill({color:0x9a9acc,alpha:shimmer*0.7});
+      }
       prevX=tx;prevY=ty;
     }
-    // Glow line
-    g.moveTo(thread.anchorX,thread.anchorY);g.lineTo(px,py);
-    g.stroke({width:5,color:0x2a2a5a,alpha:0.1});
-    // Anchor point glow
-    g.circle(thread.anchorX,thread.anchorY,4);
-    g.fill({color:0x7a7aaa,alpha:0.4+Math.sin(player.animTime*4)*0.15});
+    // Anchor point glow (larger, pulsing)
+    var anchorPulse=0.35+Math.sin(player.animTime*4)*0.2;
+    g.circle(ax,ay,8);g.fill({color:0x5a5aaa,alpha:anchorPulse*0.3});
+    g.circle(ax,ay,4);g.fill({color:0x7a7abb,alpha:anchorPulse});
+    g.circle(ax,ay,2);g.fill({color:0x9a9acc,alpha:anchorPulse*1.2});
     // Attachment point on player
-    g.circle(px,py,3);
-    g.fill({color:0x5a5a8a,alpha:0.3});
+    var attachPulse=0.3+Math.sin(player.animTime*5)*0.15;
+    g.circle(px,py,5);g.fill({color:0x5a5a9a,alpha:attachPulse*0.3});
+    g.circle(px,py,3);g.fill({color:0x7a7aaa,alpha:attachPulse});
     thread.sprite.addChild(g);
   }
-  // Thread particles
-  if(Math.random()<0.1){
+  // Thread particles — more frequent, traveling along the thread
+  if(Math.random()<0.18){
     var rt=Math.random();
     var rpx=thread.anchorX+(player.body.position.x-thread.anchorX)*rt;
     var rpy=thread.anchorY+(player.body.position.y-PLAYER_H/4-thread.anchorY)*rt;
     rpy+=Math.sin(rt*Math.PI)*thread.length*0.06;
-    spawnParticles(rpx,rpy,1,0x4a4a7a,{speed:0.2,life:0.25,size:1,gravity:0});
+    var pSize=0.8+Math.random()*1.5;
+    spawnParticles(rpx,rpy,1,0x6a6aaa,{speed:0.15,life:0.35,size:pSize,gravity:0});
+  }
+  // Occasional bright spark traveling along thread
+  if(Math.random()<0.03){
+    var rt2=Math.random();
+    var rpx2=thread.anchorX+(player.body.position.x-thread.anchorX)*rt2;
+    var rpy2=thread.anchorY+(player.body.position.y-PLAYER_H/4-thread.anchorY)*rt2;
+    rpy2+=Math.sin(rt2*Math.PI)*thread.length*0.06;
+    spawnParticles(rpx2,rpy2,1,0x9a9acc,{speed:0.05,life:0.5,size:2.5,gravity:0});
   }
   // Auto-detach if too far
   var dx=player.body.position.x-thread.anchorX,dy=player.body.position.y-thread.anchorY;
@@ -960,35 +999,59 @@ function updateLightAndFog(dt){
 
 // ═══ PARALLAX BACKGROUND ═══
 var bgLayers=[];
-function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();bgLayers=[];
-// Layer 0: Stars + Moon (furthest)
-var l0=new PIXI.Graphics();
-// Moon
-l0.circle(2200,80,35);l0.fill({color:0x2a2a50,alpha:0.8});
-l0.circle(2200,80,33);l0.fill({color:0x3a3a60,alpha:0.6});
-// Moon glow
-l0.circle(2200,80,55);l0.fill({color:0x222244,alpha:0.18});
-l0.circle(2200,80,80);l0.fill({color:0x1a1a38,alpha:0.1});
-// Stars
-for(var i=0;i<80;i++){var sx=Math.random()*6000;var sy=Math.random()*350;var ss=0.3+Math.random()*1.2;var sa=0.3+Math.random()*0.6;l0.circle(sx,sy,ss);l0.fill({color:0x8a8aaa,alpha:sa})}
-bgContainer.addChild(l0);bgLayers.push({sprite:l0,speed:0.03});
-// Layer 1: Far mountains
+var bgStars=[]; // Store star positions for twinkling
+var bgStarSprite=null;
+var bgMoonSprite=null;
+var bgTime=0;
+function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();bgLayers=[];bgStars=[];
+// Layer 0: Stars (dynamic — redrawn each frame for twinkling)
+bgStarSprite=new PIXI.Graphics();
+bgContainer.addChild(bgStarSprite);bgLayers.push({sprite:bgStarSprite,speed:0.03});
+// Pre-generate star data
+for(var i=0;i<120;i++){bgStars.push({x:Math.random()*6000,y:Math.random()*400,size:0.3+Math.random()*1.5,baseAlpha:0.25+Math.random()*0.55,twinkleSpeed:1.5+Math.random()*4,twinkleOffset:Math.random()*Math.PI*2})}
+// Layer 0b: Moon (separate so stars can be behind it)
+bgMoonSprite=new PIXI.Graphics();
+bgContainer.addChild(bgMoonSprite);bgLayers.push({sprite:bgMoonSprite,speed:0.03});
+// Layer 1: Far mountains with peaks and misty valleys
 var l1=new PIXI.Graphics();
-for(var i=0;i<14;i++){var bx=i*200+Math.random()*80;var bh=60+Math.random()*180;l1.moveTo(bx,750);l1.lineTo(bx+40+Math.random()*40,750-bh);l1.lineTo(bx+80+Math.random()*50,750);l1.closePath();l1.fill(0x1e1e34)}
+for(var i=0;i<18;i++){var bx=i*160+Math.random()*60;var bh=80+Math.random()*200;var peakW=30+Math.random()*50;l1.moveTo(bx,780);l1.lineTo(bx+peakW*0.3,780-bh*0.8);l1.lineTo(bx+peakW*0.5,780-bh);l1.lineTo(bx+peakW*0.7,780-bh*0.75);l1.lineTo(bx+peakW+Math.random()*30,780);l1.closePath();l1.fill(0x1e1e34)}
+// Mountain mist between peaks
+for(var i=0;i<6;i++){var mx=i*500+Math.random()*200;var my=600+Math.random()*80;l1.circle(mx,my,40+Math.random()*30);l1.fill({color:0x1a1a30,alpha:0.15})}
 bgContainer.addChild(l1);bgLayers.push({sprite:l1,speed:0.08});
-// Layer 2: Mid buildings/towers
+// Layer 2: Mid buildings/towers with more detail
 var l2=new PIXI.Graphics();
-for(var i=0;i<20;i++){var bx=i*120+Math.random()*50;var bh=40+Math.random()*120;l2.rect(bx,680-bh,20+Math.random()*20,bh);l2.fill(0x222244)}
-// Occasional window lights
-for(var i=0;i<8;i++){var wx=i*350+Math.random()*150;var wy=580+Math.random()*60;l2.rect(wx,wy,3,4);l2.fill({color:0x5a5a7a,alpha:0.4+Math.random()*0.3})}
+for(var i=0;i<22;i++){var bx=i*110+Math.random()*40;var bh=40+Math.random()*140;var bw=16+Math.random()*22;l2.rect(bx,680-bh,bw,bh);l2.fill(0x222244)}
+// Window lights (more of them, some flickering)
+for(var i=0;i<14;i++){var wx=i*200+Math.random()*100;var wy=560+Math.random()*80;l2.rect(wx,wy,3,4);l2.fill({color:0x5a5a7a,alpha:0.3+Math.random()*0.4})}
+// Rooftop details
+for(var i=0;i<6;i++){var rx=i*400+Math.random()*150;var ry=530+Math.random()*60;l2.moveTo(rx,ry);l2.lineTo(rx+6,ry-12);l2.lineTo(rx+12,ry);l2.closePath();l2.fill(0x2a2a4a)}
 bgContainer.addChild(l2);bgLayers.push({sprite:l2,speed:0.25});
-// Layer 3: Near towers
+// Layer 3: Near towers with more detail
 var l3=new PIXI.Graphics();
-for(var i=0;i<10;i++){var bx=i*250+Math.random()*100;var bh=80+Math.random()*200;l3.rect(bx,660-bh,12+Math.random()*10,bh);l3.fill(0x2a2a4a)}
-// Dripping particles from towers
-for(var i=0;i<4;i++){var dx=i*600+Math.random()*200;var dy=500+Math.random()*100;l3.circle(dx,dy,1.5);l3.fill({color:0x5a5a7a,alpha:0.4})}
+for(var i=0;i<12;i++){var bx=i*220+Math.random()*80;var bh=80+Math.random()*220;var bw=10+Math.random()*14;l3.rect(bx,660-bh,bw,bh);l3.fill(0x2a2a4a)}
+// Dripping particles / falling debris
+for(var i=0;i<6;i++){var dx=i*400+Math.random()*200;var dy=480+Math.random()*120;l3.circle(dx,dy,1.5);l3.fill({color:0x5a5a7a,alpha:0.4})}
+// Small windows on near towers
+for(var i=0;i<4;i++){var wx=i*600+Math.random()*200;var wy=560+Math.random()*40;l3.rect(wx,wy,2,3);l3.fill({color:0x4a4a6a,alpha:0.5})}
 bgContainer.addChild(l3);bgLayers.push({sprite:l3,speed:0.45})}
-function updateBackground(){for(var i=0;i<bgLayers.length;i++){bgLayers[i].sprite.x=-camera.x*bgLayers[i].speed;bgLayers[i].sprite.y=-camera.y*bgLayers[i].speed*0.3}}
+function updateBackground(){bgTime+=0.016;
+for(var i=0;i<bgLayers.length;i++){bgLayers[i].sprite.x=-camera.x*bgLayers[i].speed;bgLayers[i].sprite.y=-camera.y*bgLayers[i].speed*0.3}
+// Twinkling stars — redraw every frame
+if(bgStarSprite){bgStarSprite.clear();for(var i=0;i<bgStars.length;i++){var s=bgStars[i];var twinkle=Math.sin(bgTime*s.twinkleSpeed+s.twinkleOffset);var alpha=Math.max(0.05,s.baseAlpha+twinkle*0.3);var size=s.size+twinkle*0.3;bgStarSprite.circle(s.x,s.y,Math.max(0.2,size));bgStarSprite.fill({color:0x9a9abb,alpha:alpha})}}
+// Moon with pulsing halo
+if(bgMoonSprite){bgMoonSprite.clear();var moonX=2200,moonY=80;var haloPulse=Math.sin(bgTime*0.5)*0.03;
+// Outer halo
+bgMoonSprite.circle(moonX,moonY,110);bgMoonSprite.fill({color:0x1a1a38,alpha:0.04+haloPulse});
+bgMoonSprite.circle(moonX,moonY,85);bgMoonSprite.fill({color:0x1e1e40,alpha:0.07+haloPulse});
+bgMoonSprite.circle(moonX,moonY,60);bgMoonSprite.fill({color:0x222248,alpha:0.12+haloPulse});
+// Moon body
+bgMoonSprite.circle(moonX,moonY,35);bgMoonSprite.fill({color:0x2a2a55,alpha:0.8});
+bgMoonSprite.circle(moonX,moonY,33);bgMoonSprite.fill({color:0x3a3a65,alpha:0.65});
+// Moon highlight
+bgMoonSprite.circle(moonX-5,moonY-5,12);bgMoonSprite.fill({color:0x4a4a78,alpha:0.15});
+// Moon craters
+bgMoonSprite.circle(moonX+8,moonY+4,5);bgMoonSprite.fill({color:0x28284a,alpha:0.3});
+bgMoonSprite.circle(moonX-3,moonY+10,3);bgMoonSprite.fill({color:0x28284a,alpha:0.2})}}
 
 // ═══ INPUT ═══
 var keys={},touchState={left:false,right:false,jump:false};
