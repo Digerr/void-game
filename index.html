@@ -1342,7 +1342,7 @@ function loadProfile(){
   c.innerHTML='<div class="lb-loading">загрузка...</div>';
   fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'profile',initData:tg.initData})}).then(function(r){return r.json()}).then(function(d){
     console.log('[VOID] Profile response:',JSON.stringify(d));
-    if(!d.ok){c.innerHTML='<div class="lb-empty">ошибка: '+(d.error||'неизвестно')+'</div>';return}
+    if(!d.ok){c.innerHTML='<div class="lb-empty">ошибка: '+(d.detail||d.error||'неизвестно')+'</div>';return}
     profileData=d;
     renderProfile(d);
   }).catch(function(e){console.warn('[VOID] Profile error:',e);c.innerHTML='<div class="lb-empty">нет подключения</div>'});
