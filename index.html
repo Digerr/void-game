@@ -13,7 +13,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 #ui-layer *{pointer-events:auto}
 #main-menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,6,14,0.97)}
 #main-menu.hidden{display:none}
-.logo-canvas{width:320px;height:200px;margin-bottom:0px}
+.logo-canvas{width:320px;height:220px;margin-bottom:0px;margin-top:20px}
 .logo-sub{font-size:.65rem;color:#7a7a8a;letter-spacing:.5em;text-transform:uppercase;margin-bottom:2px}
 .logo-ver{font-size:.5rem;color:#5a5a6a;letter-spacing:.15em;margin-bottom:20px}
 .made-by{font-size:.55rem;color:#6a6a7a;letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px}
@@ -22,8 +22,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .btn:active{transform:scale(.97)}
 .btn.primary{border-color:#3a5a7a;color:#7ab0d0}
 .btn.primary:hover{border-color:#4a7a9a;color:#9ac0e0;background:rgba(60,100,160,.04)}
-#level-select{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center}
-#level-select.active{display:flex}
+#level-select,#settings-screen,#faq-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center}
+#level-select.active,#settings-screen.active,#faq-screen.active{display:flex}
 .ls-title{font-size:1.1rem;font-weight:900;color:#7a7a8a;letter-spacing:.2em;margin-bottom:16px}
 .ls-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:340px;margin-bottom:16px}
 .ls-cell{width:60px;height:60px;background:rgba(255,255,255,.03);border:1px solid #1a1a2a;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
@@ -136,6 +136,10 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="menu-progress"><div class="menu-progress-fill" id="menu-progress-fill"></div></div>
     <button class="btn primary" id="btn-play">спуститься</button>
     <button class="btn" id="btn-levels">уровни</button>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn" id="btn-settings" style="width:126px;font-size:.6rem;letter-spacing:.15em">настройки</button>
+      <button class="btn" id="btn-faq" style="width:126px;font-size:.6rem;letter-spacing:.15em">faq</button>
+    </div>
   </div>
   <div id="game-hud">
     <div class="hud-level" id="hud-level"></div>
@@ -200,6 +204,80 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="ls-grid" id="ls-grid"></div>
     <button class="btn" id="btn-ls-back">назад</button>
   </div>
+  <div id="settings-screen">
+    <div class="ls-title">настройки</div>
+    <div style="display:flex;flex-direction:column;gap:10px;width:280px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:.65rem;color:#8a8a9a;letter-spacing:.1em;text-transform:uppercase">звук</span>
+        <button class="btn" id="btn-sfx-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">вкл</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:.65rem;color:#8a8a9a;letter-spacing:.1em;text-transform:uppercase">музыка</span>
+        <button class="btn" id="btn-music-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">вкл</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:.65rem;color:#8a8a9a;letter-spacing:.1em;text-transform:uppercase">вибрация</span>
+        <button class="btn" id="btn-haptic-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">вкл</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:.65rem;color:#8a8a9a;letter-spacing:.1em;text-transform:uppercase">нить — автозахват</span>
+        <button class="btn" id="btn-autograb-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">вкл</button>
+      </div>
+      <div style="padding:12px 0;margin-top:4px">
+        <button class="btn" id="btn-reset-progress" style="width:100%;border-color:#3a1a1a;color:#6a3535;font-size:.6rem">сбросить прогресс</button>
+      </div>
+    </div>
+    <button class="btn" id="btn-settings-back">назад</button>
+  </div>
+  <div id="faq-screen">
+    <div class="ls-title">faq</div>
+    <div style="max-width:320px;max-height:60vh;overflow-y:auto;padding:0 8px;margin-bottom:16px">
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">что это за игра?</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">VOID — это платформер во тьме. Ты играешь за маленькое существо, которое очнулось в пустоте. Твоя задача — добраться до выхода через шипы, пилы, врагов и ловушки. 20 уровней, от простых до адских.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">управление</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">
+          <b style="color:#8a8aaa">A/D</b> или <b style="color:#8a8aaa">стрелки</b> — движение<br>
+          <b style="color:#8a8aaa">Space/W</b> — прыжок<br>
+          <b style="color:#8a8aaa">Shift/D</b> — рывок (dash)<br>
+          <b style="color:#8a8aaa">E</b> — взаимодействие (рычаги, якоря)<br>
+          <b style="color:#8a8aaa">T</b> — нить (привязаться к якорю)<br>
+          На мобильном — экранные кнопки
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">как работает нить?</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Нажми T рядом с якорем (синий кристалл), чтобы привязаться. Ты будешь раскачиваться как маятник. Нажми T снова или отпрыгни, чтобы отпустить. Нить помогает преодолеть пропасти и добраться до труднодоступных мест.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">что такое dash?</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Рывок — быстрый бросок в направлении движения. Помогает преодолеть большие разрывы между платформами и увернуться от опасностей. Перезарядка ~0.6 сек. Индикатор готовности — справа вверху.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">wall slide / wall jump</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Прижмись к стене в воздухе — начнёшь медленно скользить вниз. Нажми прыжок во время скольжения — оттолкнёшься от стены. Это ключевой навык для многих уровней.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">чекпоинты</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Мерцающие кристаллы на уровне — это чекпоинты. Пройди через них, чтобы активировать. При смерти ты возродишься на последнем чекпоинте, а не с начала уровня.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">рычаги и двери</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Нажми E рядом с рычагом, чтобы открыть привязанную дверь. Некоторые уровни требуют активировать несколько рычагов в правильном порядке.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">звёзды</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">3 звезды = 0 смертей, 2 звезды = 1-3 смерти, 1 звезда = 4+ смертей. Собирай звёзды, чтобы доказать своё мастерство!</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">прогресс не сохраняется?</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Прогресс автоматически сохраняется в Telegram CloudStorage. Убедись, что играешь через Telegram-бота @voide_game_bot. Если играешь в браузере — прогресс хранится в localStorage.</div>
+      </div>
+    </div>
+    <button class="btn" id="btn-faq-back">назад</button>
+  </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.9.2/dist/pixi.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
@@ -216,11 +294,33 @@ window.addEventListener('unhandledrejection',function(e){console.error('REJ:',e.
 
 var tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;
 if(tg){tg.ready();tg.expand()}
-function tgHaptic(t){if(!tg||!tg.HapticFeedback)return;try{if(t==='light')tg.HapticFeedback.impactOccurred('light');else if(t==='medium')tg.HapticFeedback.impactOccurred('medium');else if(t==='heavy')tg.HapticFeedback.impactOccurred('heavy')}catch(e){}}
+function tgHaptic(t){if(!settings.hapticEnabled)return;if(!tg||!tg.HapticFeedback)return;try{if(t==='light')tg.HapticFeedback.impactOccurred('light');else if(t==='medium')tg.HapticFeedback.impactOccurred('medium');else if(t==='heavy')tg.HapticFeedback.impactOccurred('heavy')}catch(e){}}
 
 // ═══ AUDIO ENGINE ═══
 var audioCtx=null,masterGain=null,musicGain=null,sfxGain=null,musicPlaying=false;
 var audioInited=false,soundMuted=false,musicMuted=false;
+// Settings
+var settings={hapticEnabled:true,autoGrab:true};
+function loadSettings(){try{var s=localStorage.getItem('void_settings');if(s)settings=Object.assign(settings,JSON.parse(s))}catch(e){}}
+function saveSettings(){try{localStorage.setItem('void_settings',JSON.stringify(settings))}catch(e){}}
+function updateSettingsUI(){
+  var sfxBtn=document.getElementById('btn-sfx-toggle');
+  var musicBtn=document.getElementById('btn-music-toggle');
+  var hapticBtn=document.getElementById('btn-haptic-toggle');
+  var autoBtn=document.getElementById('btn-autograb-toggle');
+  if(sfxBtn)sfxBtn.textContent=soundMuted?'выкл':'вкл';
+  if(musicBtn)musicBtn.textContent=musicMuted?'выкл':'вкл';
+  if(hapticBtn)hapticBtn.textContent=settings.hapticEnabled?'вкл':'выкл';
+  if(autoBtn)autoBtn.textContent=settings.autoGrab?'вкл':'выкл';
+  // Style toggle buttons
+  var toggles=[sfxBtn,musicBtn,hapticBtn,autoBtn];
+  for(var i=0;i<toggles.length;i++){
+    if(!toggles[i])continue;
+    var isOn=toggles[i].textContent==='вкл';
+    toggles[i].style.borderColor=isOn?'#2a4a2a':'#4a2a2a';
+    toggles[i].style.color=isOn?'#5a8a5a':'#8a4a4a';
+  }
+}
 
 function initAudio(){
   if(audioInited)return;
@@ -1919,7 +2019,7 @@ function setupTouchButton(id,action){var el=document.getElementById(id);if(!el)r
 function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.left)ix-=1;if(keys['ArrowRight']||keys['KeyD']||touchState.right)ix+=1;player.inputX=ix;player.inputJump=keys['Space']||keys['ArrowUp']||keys['KeyW']||touchState.jump}
 
 // ═══ SCREEN MANAGEMENT ═══
-function showScreen(name){state.screen=name;document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');document.getElementById('touch-controls').classList.toggle('active',name==='playing');document.getElementById('story-screen').classList.toggle('active',name==='story');document.getElementById('pause-screen').classList.toggle('active',name==='paused');document.getElementById('death-screen').classList.toggle('active',name==='dead');document.getElementById('win-screen').classList.toggle('active',name==='win');document.getElementById('level-select').classList.toggle('active',name==='levels');var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select'};if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}if(name==='menu')updateMenuStats()}
+function showScreen(name){state.screen=name;document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');document.getElementById('touch-controls').classList.toggle('active',name==='playing');document.getElementById('story-screen').classList.toggle('active',name==='story');document.getElementById('pause-screen').classList.toggle('active',name==='paused');document.getElementById('death-screen').classList.toggle('active',name==='dead');document.getElementById('win-screen').classList.toggle('active',name==='win');document.getElementById('level-select').classList.toggle('active',name==='levels');document.getElementById('settings-screen').classList.toggle('active',name==='settings');document.getElementById('faq-screen').classList.toggle('active',name==='faq');var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen'};if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}if(name==='menu')updateMenuStats();if(name==='settings')updateSettingsUI()}
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
@@ -2045,6 +2145,16 @@ function bindUI(){
   document.getElementById('btn-next').addEventListener('click',function(){state.level++;state.deaths=0;if(state.level<LEVELS.length){clearLevel();loadLevel(state.level);showStoryScreen(state.level)}else{clearLevel();showScreen('menu')}});
   document.getElementById('btn-share').addEventListener('click',shareResult);
   document.getElementById('btn-share').addEventListener('touchstart',function(e){e.preventDefault();shareResult()},{passive:false});
+  // Settings & FAQ
+  document.getElementById('btn-settings').addEventListener('click',function(){showScreen('settings')});
+  document.getElementById('btn-faq').addEventListener('click',function(){showScreen('faq')});
+  document.getElementById('btn-settings-back').addEventListener('click',function(){showScreen('menu')});
+  document.getElementById('btn-faq-back').addEventListener('click',function(){showScreen('menu')});
+  document.getElementById('btn-sfx-toggle').addEventListener('click',function(){toggleSound();saveSettings();updateSettingsUI()});
+  document.getElementById('btn-music-toggle').addEventListener('click',function(){toggleMusic();saveSettings();updateSettingsUI()});
+  document.getElementById('btn-haptic-toggle').addEventListener('click',function(){settings.hapticEnabled=!settings.hapticEnabled;saveSettings();updateSettingsUI()});
+  document.getElementById('btn-autograb-toggle').addEventListener('click',function(){settings.autoGrab=!settings.autoGrab;saveSettings();updateSettingsUI()});
+  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem('void_progress');progress={unlockedLevels:1,levelStars:{},levelTimes:{},totalDeaths:0};saveProgress();updateMenuStats();showScreen('menu')}});
 }
 
 // ═══ LOGO ANIMATION ═══
@@ -2052,16 +2162,16 @@ var logoAnim={
   canvas:null,ctx:null,time:0,
   // Letter positions (platform rectangles) — V O I D
   letters:[
-    {ch:'V',x:80,y:130,w:70,h:90,angle:-0.05},
-    {ch:'O',x:210,y:125,w:75,h:95,angle:0.03},
-    {ch:'I',x:345,y:128,w:45,h:90,angle:-0.02},
-    {ch:'D',x:445,y:126,w:70,h:92,angle:0.04}
+    {ch:'V',x:80,y:180,w:70,h:90,angle:-0.05},
+    {ch:'O',x:210,y:175,w:75,h:95,angle:0.03},
+    {ch:'I',x:345,y:178,w:45,h:90,angle:-0.02},
+    {ch:'D',x:445,y:176,w:70,h:92,angle:0.04}
   ],
   // Ropes between letters (swing points)
   ropes:[
-    {x1:150,y1:120,x2:210,y2:115,swing:0,swingSpeed:1.2},
-    {x1:285,y1:115,x2:345,y2:120,swing:0,swingSpeed:0.9},
-    {x1:390,y1:120,x2:445,y2:115,swing:0,swingSpeed:1.5}
+    {x1:150,y1:170,x2:210,y2:165,swing:0,swingSpeed:1.2},
+    {x1:285,y1:165,x2:345,y2:170,swing:0,swingSpeed:0.9},
+    {x1:390,y1:170,x2:445,y2:165,swing:0,swingSpeed:1.5}
   ],
   // Character state machine
   char:{
@@ -2087,10 +2197,10 @@ var logoAnim={
     this.canvas=document.getElementById('logo-canvas');
     if(!this.canvas)return;
     this.ctx=this.canvas.getContext('2d');
-    // Generate background stars
-    for(var i=0;i<40;i++){
+    // Generate background stars (spread across full canvas)
+    for(var i=0;i<50;i++){
       this.stars.push({
-        x:Math.random()*640,y:Math.random()*400,
+        x:Math.random()*640,y:30+Math.random()*340,
         r:Math.random()*1.5+0.3,
         speed:Math.random()*0.5+0.2,
         phase:Math.random()*Math.PI*2
@@ -2500,7 +2610,7 @@ var logoAnim={
 };
 
 // ═══ INIT ═══
-async function init(){try{loadProgress();loadFromCloud();await initPixi();initInput();bindUI();initTelegramPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized')}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
+async function init(){try{loadProgress();loadSettings();loadFromCloud();await initPixi();initInput();bindUI();initTelegramPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized')}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
 init();
 </script>
 </body>
