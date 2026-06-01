@@ -40,6 +40,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .tb.jump{width:76px;height:76px;border-radius:50%}
 .tb.dash{width:52px;height:52px;border-radius:50%;font-size:12px;font-weight:700}
 .tb.interact{width:44px;height:44px;border-radius:50%;font-size:13px;font-weight:700}
+.hud-thread{position:absolute;top:26px;right:60px;font-size:.5rem;color:#2a2a4a;letter-spacing:.08em;text-transform:uppercase}
 .right-grp{display:flex;flex-direction:column;gap:6px;align-items:center}
 #pause-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.94);flex-direction:column;align-items:center;justify-content:center}
 #pause-screen.active{display:flex}
@@ -69,7 +70,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   <div id="main-menu">
     <div class="logo">VOID</div>
     <div class="logo-sub">во тьму</div>
-    <div class="logo-ver">alpha 1.2</div>
+    <div class="logo-ver">alpha 1.3</div>
     <div class="made-by">made by SERGO</div>
     <button class="btn primary" id="btn-play">спуститься</button>
   </div>
@@ -78,6 +79,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="hud-deaths" id="hud-deaths"></div>
     <div class="hud-timer" id="hud-timer">0:00</div>
     <div class="hud-dash" id="hud-dash">dash</div>
+    <div class="hud-thread" id="hud-thread">нить</div>
     <div class="hud-pause" id="hud-pause">❚❚</div>
     <div class="hud-interact" id="hud-interact">E</div>
   </div>
@@ -89,6 +91,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       </div>
       <div class="right-grp">
         <div class="tb interact" id="btn-interact">E</div>
+        <div class="tb interact" id="btn-thread" style="background:rgba(60,60,100,.06);border-color:rgba(60,60,100,.1);color:rgba(100,100,160,.35)">T</div>
         <div class="tb dash" id="btn-dash">D</div>
         <div class="tb jump" id="btn-jump">▲</div>
       </div>
@@ -254,6 +257,89 @@ var LEVELS=[
     fallingPlatforms:[
       {x:1550,y:620,w:80,h:16},{x:1750,y:550,w:80,h:16},
     ],
+  },
+  {
+    name:'Нить',story:'Из темноты появляется мерцающая нить — тонкая, почти невидимая. Но если потянуть за неё, она выдержит. Она станет мостом через пропасть, верёвкой для спуска, путём наверх. Тяни — и держись.',
+    width:5000,height:1000,spawn:{x:80,y:600},exit:{x:4800,y:250,w:40,h:80},
+    platforms:[
+      {x:0,y:750,w:500,h:40},{x:700,y:750,w:300,h:40},{x:1200,y:750,w:300,h:40},
+      {x:1700,y:750,w:300,h:40},{x:2200,y:750,w:300,h:40},{x:2700,y:750,w:400,h:40},
+      {x:3400,y:750,w:300,h:40},{x:3900,y:750,w:300,h:40},{x:4400,y:750,w:600,h:40},
+      // Navigation
+      {x:300,y:600,w:100,h:16},{x:500,y:500,w:80,h:16},
+      {x:900,y:580,w:80,h:16},
+      {x:1300,y:550,w:80,h:16},
+      // After first swing
+      {x:1800,y:500,w:80,h:16},{x:2000,y:420,w:80,h:16},
+      // Middle platforms
+      {x:2400,y:500,w:100,h:16},
+      {x:2800,y:420,w:80,h:16},
+      // After second swing
+      {x:3100,y:350,w:80,h:16},{x:3250,y:280,w:80,h:16},
+      // Upper path
+      {x:3500,y:350,w:80,h:16},{x:3700,y:300,w:80,h:16},
+      {x:3950,y:350,w:80,h:16},
+      {x:4200,y:400,w:80,h:16},
+      {x:4600,y:250,w:160,h:16},
+    ],
+    spikes:[{x:540,y:730,w:60},{x:1050,y:730,w:60},{x:1560,y:730,w:80},{x:2580,y:730,w:60}],
+    saws:[{x:2050,y:680,r:28},{x:3850,y:680,r:25}],
+    anchors:[
+      {x:700,y:350},{x:1150,y:300},
+      {x:1700,y:250},{x:2300,y:200},
+      {x:2850,y:180},{x:3400,y:150},
+      {x:3950,y:200},
+    ],
+  },
+  {
+    name:'Качели',story:'Тьма учит новому: если раскачаться посильнее, можно долететь туда, куда не добраться пешком. Нить — не только путь, но и разбег. Главное — вовремя отпустить.',
+    width:5500,height:1100,spawn:{x:80,y:650},exit:{x:5300,y:200,w:40,h:80},
+    platforms:[
+      {x:0,y:800,w:400,h:40},{x:600,y:800,w:300,h:40},{x:1100,y:800,w:300,h:40},
+      {x:1600,y:800,w:400,h:40},{x:2200,y:800,w:300,h:40},{x:2700,y:800,w:300,h:40},
+      {x:3200,y:800,w:400,h:40},{x:3800,y:800,w:300,h:40},
+      {x:4300,y:800,w:300,h:40},{x:4800,y:800,w:300,h:40},{x:5100,y:800,w:400,h:40},
+      // Navigation platforms
+      {x:250,y:650,w:100,h:16},
+      {x:800,y:600,w:80,h:16},
+      {x:1200,y:550,w:80,h:16},
+      // Thread area 1: swing across gap
+      {x:1700,y:550,w:80,h:16},
+      // Thread area 2: swing up
+      {x:2300,y:500,w:100,h:16},
+      {x:2500,y:420,w:80,h:16},
+      // Wall section
+      {x:2800,y:300,w:20,h:300},{x:2930,y:300,w:20,h:300},
+      {x:2820,y:450,w:60,h:16},{x:2890,y:370,w:60,h:16},
+      // Thread area 3: long swing
+      {x:3100,y:500,w:80,h:16},
+      // Upper path
+      {x:3400,y:450,w:80,h:16},{x:3600,y:380,w:80,h:16},
+      {x:3850,y:350,w:100,h:16},
+      // Moving platform + thread combo
+      {x:4100,y:400,w:80,h:16},
+      // Final climb
+      {x:4500,y:400,w:80,h:16},
+      {x:4700,y:320,w:80,h:16},
+      {x:4900,y:250,w:80,h:16},
+      {x:5100,y:200,w:160,h:16},
+    ],
+    spikes:[{x:440,y:780,w:60},{x:940,y:780,w:60},{x:1450,y:780,w:80},{x:2560,y:780,w:60},{x:3070,y:780,w:80},{x:4250,y:780,w:60}],
+    saws:[{x:2000,y:730,r:30},{x:2950,y:730,r:25},{x:4450,y:730,r:28}],
+    enemies:[
+      {x:1700,y:760,range:180,speed:1.5},
+      {x:3300,y:760,range:200,speed:1.8},
+    ],
+    movingPlatforms:[
+      {x:4100,y:550,w:100,h:16,axis:'y',range:150,speed:0.8},
+    ],
+    anchors:[
+      {x:600,y:350},{x:1050,y:280},
+      {x:1550,y:200},{x:2050,y:150},
+      {x:2500,y:180},{x:2900,y:100},
+      {x:3350,y:120},{x:3800,y:150},
+      {x:4350,y:200},{x:4750,y:150},
+    ],
   }
 ];
 
@@ -287,7 +373,7 @@ function updateParticles(dt){for(var i=particles.length-1;i>=0;i--){var p=partic
 function clearParticles(){for(var i=0;i<particles.length;i++){if(particles[i].sprite)particles[i].sprite.destroy()}particles=[]}
 
 // ═══ PLAYER ═══
-var player={body:null,sprite:null,speed:6.5,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:18,dashDuration:0.12,dashCooldown:0.6,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null};
+var player={body:null,sprite:null,speed:6.5,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:18,dashDuration:0.12,dashCooldown:0.6,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null};
 var playerSensorGround=null,playerSensorLeft=null,playerSensorRight=null;
 var COYOTE_DURATION=0.08,JUMP_BUFFER_DURATION=0.1,WALL_SLIDE_SPEED=2.2,PLAYER_W=18,PLAYER_H=34;
 
@@ -324,7 +410,7 @@ player.sprite.addChild(g)}
 function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,-1)}}
-function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
+function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
 function checkSpecialCollision(a,b){if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(player.alive)winLevel()}if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}}
 
 function updatePlayer(dt){
@@ -338,6 +424,8 @@ function updatePlayer(dt){
 
   // Interact (levers)
   if(player.inputInteractPressed&&player.nearLever){activateLever(player.nearLever);player.inputInteractPressed=false}else player.inputInteractPressed=false;
+  // Thread (T key) - attach/detach
+  if(player.inputThreadPressed){player.inputThreadPressed=false;if(thread.active){detachThread()}else{shootThread()}}
   // Check nearby levers
   player.nearLever=null;
   for(var i=0;i<levelLevers.length;i++){var lv=levelLevers[i];if(!lv.activated){var dx=player.body.position.x-(lv.x+8);var dy=player.body.position.y-(lv.y+8);if(Math.sqrt(dx*dx+dy*dy)<50){player.nearLever=lv;break}}}
@@ -346,6 +434,11 @@ function updatePlayer(dt){
   // Dash
   player.dashCooldownTimer-=dt;
   if(player.dashing){player.dashTimer-=dt;if(player.dashTimer<=0)player.dashing=false;else{MBody.setVelocity(player.body,{x:player.dashDir*player.dashSpeed,y:0});if(Math.random()<0.5)spawnParticles(player.body.position.x-player.dashDir*10,player.body.position.y,1,0x5a5a8a,{angle:Math.PI+player.dashDir*0.5,spread:0.5,speed:1,life:0.2,size:2,gravity:0})}}
+  else if(thread.active){
+    // While on thread: allow swinging with left/right (add angular force)
+    var swingForce=player.inputX*0.15;
+    MBody.applyForce(player.body,player.body.position,{x:swingForce,y:0});
+  }
   else{var pvx=player.inputX*player.speed;MBody.setVelocity(player.body,{x:pvx,y:player.body.velocity.y});if(player.onGround&&Math.abs(pvx)>3&&Math.random()<0.15)spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.5})}
   if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');spawnParticles(player.body.position.x,player.body.position.y,6,0x5a5a8a,{angle:Math.PI+player.dashDir,spread:1,speed:2,life:0.3,size:2.5,gravity:0})}
   player.inputDashPressed=false;
@@ -355,16 +448,29 @@ function updatePlayer(dt){
   player.wallSliding=false;if(!player.onGround&&(player.onWallLeft||player.onWallRight)){if((player.onWallLeft&&player.inputX<0)||(player.onWallRight&&player.inputX>0)){player.wallSliding=true;var vy2=player.body.velocity.y;if(vy2>WALL_SLIDE_SPEED)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:WALL_SLIDE_SPEED});if(Math.random()<0.1){var wx=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:player.onWallLeft?0:Math.PI,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.3})}}}
 
   // Jump
-  if(player.jumpBuffer>0){if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1})}else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;MBody.setVelocity(player.body,{x:wd*player.wallJumpForceX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,5,0x4a4a5a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2,life:0.3,size:2,gravity:0.5})}}
+  if(player.jumpBuffer>0){
+    if(thread.active){
+      // Swing-jump: detach thread with upward boost
+      var cvx=player.body.velocity.x;var cvy=player.body.velocity.y;
+      detachThread();
+      MBody.setVelocity(player.body,{x:cvx*1.1,y:Math.min(cvy,player.jumpForce*0.7)});
+      player.jumpBuffer=0;player.coyoteTime=0;
+      tgHaptic('medium');
+      spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,5,0x4a4a8a,{angle:-Math.PI/2,spread:2,speed:2,life:0.3,size:2,gravity:1});
+    }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1})}else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;MBody.setVelocity(player.body,{x:wd*player.wallJumpForceX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,5,0x4a4a5a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2,life:0.3,size:2,gravity:0.5})}
+  }
   if(!player.inputJump&&player.body.velocity.y<-4)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.85});
 
   player.animTime+=dt;if(player.onGround&&Math.abs(player.body.velocity.x)>0.5)player.runCycle+=dt*Math.abs(player.body.velocity.x)*0.15;
   player.sprite.x=player.body.position.x;player.sprite.y=player.body.position.y;drawPlayerParts();
   var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+100)killPlayer('fall');
   var dashReady=player.dashCooldownTimer<=0&&!player.dashing;document.getElementById('hud-dash').style.color=dashReady?'#3a5a6a':'#1a2a3a';
+  var threadReady=!thread.active&&levelAnchors.length>0;var nearAnchor=false;
+  if(threadReady&&player.body){for(var ai=0;ai<levelAnchors.length;ai++){var adx=player.body.position.x-levelAnchors[ai].x,ady=player.body.position.y-levelAnchors[ai].y;if(Math.sqrt(adx*adx+ady*ady)<thread.range){nearAnchor=true;break}}}
+  document.getElementById('hud-thread').style.color=(thread.active||nearAnchor)?'#4a4a7a':'#1a1a2a';
 }
 
-function killPlayer(cause){if(!player.alive)return;player.alive=false;state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x2a2a3a;spawnParticles(px,py,20,dc,{speed:3,life:0.8,size:3,gravity:0.5});spawnParticles(px,py,5,0x6a6a9a,{speed:1.5,life:0.5,size:5,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
+function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x2a2a3a;spawnParticles(px,py,20,dc,{speed:3,life:0.8,size:3,gravity:0.5});spawnParticles(px,py,5,0x6a6a9a,{speed:1.5,life:0.5,size:5,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
 
 function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];createPlayer(lvl.spawn.x,lvl.spawn.y);state.levelStartTime=performance.now()}
 
@@ -524,6 +630,128 @@ function updatePendulums(){
   }
 }
 
+// ═══ THREAD / ROPE SYSTEM (Unravel mechanic) ═══
+var thread={active:false,constraint:null,anchorX:0,anchorY:0,sprite:null,length:0,targetLength:0,minLength:40,maxLength:400,climbSpeed:120,range:380};
+var levelAnchors=[];
+function createAnchor(data){
+  var body=MBodies.circle(data.x,data.y,10,{isStatic:true,isSensor:true,label:'anchor'});
+  MWorld.add(world,body);
+  var spr=new PIXI.Container();gameContainer.addChild(spr);
+  levelAnchors.push({body:body,sprite:spr,x:data.x,y:data.y});
+}
+function updateAnchors(){
+  for(var i=0;i<levelAnchors.length;i++){
+    var an=levelAnchors[i];an.sprite.removeChildren();var g=new PIXI.Graphics();
+    // Ring visual
+    g.circle(0,0,7);g.stroke({width:2,color:0x2a2a4a});
+    g.circle(0,0,3);g.fill(0x3a3a5a);
+    // Glow hint if player nearby and thread not active
+    if(!thread.active&&player.alive&&player.body){
+      var dx=player.body.position.x-an.x,dy=player.body.position.y-an.y;
+      var dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<thread.range){
+        var glowA=0.08+Math.sin(player.animTime*3)*0.04;
+        g.circle(0,0,12);g.fill({color:0x4a4a7a,alpha:glowA});
+        g.circle(0,0,7);g.stroke({width:2,color:0x4a4a7a,alpha:0.5+Math.sin(player.animTime*3)*0.2});
+      }
+    }
+    an.sprite.x=an.x;an.sprite.y=an.y;an.sprite.addChild(g);
+  }
+}
+function shootThread(){
+  if(thread.active||!player.alive||!player.body)return;
+  // Find nearest anchor within range
+  var nearest=null,nearestDist=thread.range;
+  for(var i=0;i<levelAnchors.length;i++){
+    var an=levelAnchors[i];
+    var dx=player.body.position.x-an.x,dy=player.body.position.y-an.y;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<nearestDist){nearestDist=dist;nearest=an}
+  }
+  if(!nearest)return;
+  thread.active=true;
+  thread.anchorX=nearest.x;thread.anchorY=nearest.y;
+  thread.length=nearestDist;thread.targetLength=nearestDist;
+  // Create constraint from anchor point to player
+  thread.constraint=MConstraint.create({
+    pointA:{x:nearest.x,y:nearest.y},
+    bodyB:player.body,pointB:{x:0,y:-PLAYER_H/4},
+    length:nearestDist,stiffness:0.6,damping:0.02
+  });
+  MWorld.add(world,thread.constraint);
+  // Visual container
+  thread.sprite=new PIXI.Container();gameContainer.addChild(thread.sprite);
+  tgHaptic('medium');
+  var shootAngle=Math.atan2(nearest.y-player.body.position.y,nearest.x-player.body.position.x);
+  spawnParticles(player.body.position.x,player.body.position.y-PLAYER_H/4,6,0x4a4a8a,{angle:shootAngle,spread:0.5,speed:2.5,life:0.4,size:2,gravity:0});
+  spawnParticles(nearest.x,nearest.y,4,0x5a5a9a,{speed:1.5,life:0.3,size:2,gravity:0});
+}
+function detachThread(){
+  if(!thread.active)return;
+  thread.active=false;
+  if(thread.constraint){MWorld.remove(world,thread.constraint);thread.constraint=null}
+  if(thread.sprite){thread.sprite.destroy();thread.sprite=null}
+  tgHaptic('light');
+}
+function updateThread(dt){
+  if(!thread.active||!player.alive){
+    if(thread.active)detachThread();
+    return;
+  }
+  // Climb: adjust rope length with up/down
+  var climbInput=0;
+  if(keys['ArrowUp']||keys['KeyW'])climbInput=-1;
+  if(keys['ArrowDown']||keys['KeyS'])climbInput=1;
+  // Don't climb when also trying to jump (W = jump on some layouts)
+  if(keys['Space']||keys['ArrowUp'])climbInput=0;
+  if(climbInput!==0){
+    thread.targetLength=Math.max(thread.minLength,Math.min(thread.maxLength,thread.targetLength+climbInput*thread.climbSpeed*dt));
+  }
+  // Smoothly adjust constraint length
+  thread.length+=(thread.targetLength-thread.length)*0.12;
+  if(thread.constraint)thread.constraint.length=thread.length;
+  // Draw thread visual
+  if(thread.sprite){
+    thread.sprite.removeChildren();var g=new PIXI.Graphics();
+    var px=player.body.position.x,py=player.body.position.y-PLAYER_H/4;
+    // Curved thread with catenary sag
+    var segs=14;var prevX=thread.anchorX,prevY=thread.anchorY;
+    for(var i=1;i<=segs;i++){
+      var t=i/segs;
+      var tx=thread.anchorX+(px-thread.anchorX)*t;
+      var ty=thread.anchorY+(py-thread.anchorY)*t;
+      // Catenary sag
+      var sag=Math.sin(t*Math.PI)*thread.length*0.06;
+      ty+=sag;
+      var alpha=0.5+Math.sin(player.animTime*6+i*0.5)*0.15;
+      g.moveTo(prevX,prevY);g.lineTo(tx,ty);
+      g.stroke({width:2,color:0x3a3a6a,alpha:alpha});
+      prevX=tx;prevY=ty;
+    }
+    // Glow line
+    g.moveTo(thread.anchorX,thread.anchorY);g.lineTo(px,py);
+    g.stroke({width:5,color:0x2a2a5a,alpha:0.1});
+    // Anchor point glow
+    g.circle(thread.anchorX,thread.anchorY,4);
+    g.fill({color:0x5a5a8a,alpha:0.4+Math.sin(player.animTime*4)*0.15});
+    // Attachment point on player
+    g.circle(px,py,3);
+    g.fill({color:0x5a5a8a,alpha:0.3});
+    thread.sprite.addChild(g);
+  }
+  // Thread particles
+  if(Math.random()<0.1){
+    var rt=Math.random();
+    var rpx=thread.anchorX+(player.body.position.x-thread.anchorX)*rt;
+    var rpy=thread.anchorY+(player.body.position.y-PLAYER_H/4-thread.anchorY)*rt;
+    rpy+=Math.sin(rt*Math.PI)*thread.length*0.06;
+    spawnParticles(rpx,rpy,1,0x4a4a7a,{speed:0.2,life:0.25,size:1,gravity:0});
+  }
+  // Auto-detach if too far
+  var dx=player.body.position.x-thread.anchorX,dy=player.body.position.y-thread.anchorY;
+  if(Math.sqrt(dx*dx+dy*dy)>thread.maxLength*1.5)detachThread();
+}
+
 // ═══ LEVEL LOADING ═══
 var levelBodies=[],levelSprites=[];
 function loadLevel(n){
@@ -547,11 +775,13 @@ function loadLevel(n){
   levelEnemies=[];if(lvl.enemies)for(var i=0;i<lvl.enemies.length;i++)createEnemy(lvl.enemies[i]);
   // Pendulums
   pendulums=[];if(lvl.pendulums)for(var i=0;i<lvl.pendulums.length;i++)createPendulum(lvl.pendulums[i]);
+  // Anchors
+  levelAnchors=[];if(lvl.anchors)for(var i=0;i<lvl.anchors.length;i++)createAnchor(lvl.anchors[i]);
   // Exit
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Graphics();espr.rect(0,0,lvl.exit.w,lvl.exit.h);espr.fill({color:0x1a2a1a,alpha:0.5});espr.rect(0,0,lvl.exit.w,3);espr.fill({color:0x3a6a3a,alpha:0.7});espr.rect(0,0,2,lvl.exit.h);espr.fill({color:0x2a4a2a,alpha:0.5});espr.rect(lvl.exit.w-2,0,2,lvl.exit.h);espr.fill({color:0x2a4a2a,alpha:0.5});espr.x=lvl.exit.x;espr.y=lvl.exit.y;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];clearParticles();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];if(thread.active)detachThread();clearParticles();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
 
 // ═══ CAMERA ═══
 var camera={x:0,y:0};
@@ -565,13 +795,15 @@ function updateBackground(){for(var i=0;i<bgLayers.length;i++){bgLayers[i].sprit
 // ═══ INPUT ═══
 var keys={},touchState={left:false,right:false,jump:false};
 function initInput(){
-  window.addEventListener('keydown',function(e){if(e.repeat)return;keys[e.code]=true;if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'){player.inputJumpPressed=true;e.preventDefault()}if(e.code==='KeyX'||e.code==='KeyL'||e.code==='ShiftLeft'){player.inputDashPressed=true;e.preventDefault()}if(e.code==='KeyE'||e.code==='ShiftRight'){player.inputInteractPressed=true;e.preventDefault()}if(e.code==='Escape')togglePause()});
+  window.addEventListener('keydown',function(e){if(e.repeat)return;keys[e.code]=true;if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'){player.inputJumpPressed=true;e.preventDefault()}if(e.code==='KeyX'||e.code==='KeyL'||e.code==='ShiftLeft'){player.inputDashPressed=true;e.preventDefault()}if(e.code==='KeyE'||e.code==='ShiftRight'){player.inputInteractPressed=true;e.preventDefault()}if(e.code==='KeyT'||e.code==='KeyR'){player.inputThreadPressed=true;e.preventDefault()}if(e.code==='Escape')togglePause()});
   window.addEventListener('keyup',function(e){keys[e.code]=false});
   setupTouchButton('btn-left','left');setupTouchButton('btn-right','right');setupTouchButton('btn-jump','jump');
   // Dash button
   var db=document.getElementById('btn-dash');if(db){db.addEventListener('touchstart',function(e){e.preventDefault();player.inputDashPressed=true;db.classList.add('pressed')},{passive:false});db.addEventListener('touchend',function(e){e.preventDefault();db.classList.remove('pressed')},{passive:false});db.addEventListener('touchcancel',function(){db.classList.remove('pressed')})}
   // Interact button
   var ib=document.getElementById('btn-interact');if(ib){ib.addEventListener('touchstart',function(e){e.preventDefault();player.inputInteractPressed=true;ib.classList.add('pressed')},{passive:false});ib.addEventListener('touchend',function(e){e.preventDefault();ib.classList.remove('pressed')},{passive:false});ib.addEventListener('touchcancel',function(){ib.classList.remove('pressed')})}
+  // Thread button
+  var tb=document.getElementById('btn-thread');if(tb){tb.addEventListener('touchstart',function(e){e.preventDefault();player.inputThreadPressed=true;tb.classList.add('pressed')},{passive:false});tb.addEventListener('touchend',function(e){e.preventDefault();tb.classList.remove('pressed')},{passive:false});tb.addEventListener('touchcancel',function(){tb.classList.remove('pressed')})}
 }
 function setupTouchButton(id,action){var el=document.getElementById(id);if(!el)return;el.addEventListener('touchstart',function(e){e.preventDefault();touchState[action]=true;el.classList.add('pressed');if(action==='jump')player.inputJumpPressed=true},{passive:false});el.addEventListener('touchend',function(e){e.preventDefault();touchState[action]=false;el.classList.remove('pressed')},{passive:false});el.addEventListener('touchcancel',function(){touchState[action]=false;el.classList.remove('pressed')})}
 function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.left)ix-=1;if(keys['ArrowRight']||keys['KeyD']||touchState.right)ix+=1;player.inputX=ix;player.inputJump=keys['Space']||keys['ArrowUp']||keys['KeyW']||touchState.jump}
@@ -592,7 +824,7 @@ function gameLoop(timestamp){
   if(state.slowMoTimer>0){state.slowMoTimer-=rawDt;if(state.slowMoTimer<=0)state.slowMo=1}
   var dt=rawDt*state.slowMo;
   if(state.shakeTime>0){state.shakeTime-=rawDt;if(state.shakeTime<=0){state.shakeAmount=0;state.shakeTime=0}}
-  if(state.screen==='playing'){readInput();updatePlayer(dt);MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateCamera();updateBackground();updateParticles(rawDt);var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
+  if(state.screen==='playing'){readInput();updatePlayer(dt);MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateThread(dt);updateCamera();updateBackground();updateParticles(rawDt);var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
   if(state.screen==='story'){updateCamera();updateBackground()}
   if(state.screen!=='playing')updateParticles(rawDt);
 }
