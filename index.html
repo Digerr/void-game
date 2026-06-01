@@ -7,6 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a1a2e">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#0e0e1e;font-family:'Courier New',monospace;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -217,6 +218,31 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .ch-level{font-size:.65rem;color:#6a6a7a;letter-spacing:.08em;margin-bottom:4px}
 .ch-result{font-size:.45rem;color:#4a5a6a;letter-spacing:.06em;margin-top:8px}
 .ch-best{font-size:.35rem;color:#3a4a5a;letter-spacing:.06em;margin-top:2px}
+/* Leaderboard */
+#leaderboard-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,1);flex-direction:column;align-items:center;justify-content:flex-start;z-index:50;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:28px}
+#leaderboard-screen.active{display:flex}
+.lb-tabs{display:flex;gap:0;width:100%;max-width:380px;margin-bottom:12px;border:1px solid rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.lb-tab{flex:1;padding:8px 0;font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;color:#4a4a5a;background:rgba(255,255,255,.02);border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.lb-tab.active{color:#9ac0e0;background:rgba(60,100,160,.08)}
+.lb-list{width:100%;max-width:380px;flex:1;overflow-y:auto;padding:0 10px}
+.lb-row{display:flex;align-items:center;padding:8px 10px;margin-bottom:4px;border-radius:4px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.03);transition:all .15s}
+.lb-row:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.06)}
+.lb-row.self{background:rgba(60,100,160,.08);border-color:rgba(100,140,200,.15)}
+.lb-row.top1{background:rgba(180,160,60,.06);border-color:rgba(180,160,60,.12)}
+.lb-row.top2{background:rgba(140,140,160,.05);border-color:rgba(140,140,160,.1)}
+.lb-row.top3{background:rgba(160,100,60,.05);border-color:rgba(160,100,60,.1)}
+.lb-rank{width:32px;font-size:.65rem;font-weight:900;color:#4a4a5a;text-align:center;flex-shrink:0}
+.lb-row.top1 .lb-rank{color:#eaba3a}
+.lb-row.top2 .lb-rank{color:#8a8aaa}
+.lb-row.top3 .lb-rank{color:#ba7a3a}
+.lb-name{flex:1;font-size:.55rem;color:#8a8aaa;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0 8px}
+.lb-row.self .lb-name{color:#9ac0e0;font-weight:700}
+.lb-stars{font-size:.5rem;color:#6a6a3a;margin-right:8px;flex-shrink:0;min-width:32px;text-align:center}
+.lb-time{font-size:.5rem;color:#5a6a5a;flex-shrink:0;min-width:44px;text-align:right;letter-spacing:.04em}
+.lb-empty{text-align:center;padding:40px 20px;color:#3a3a4a;font-size:.6rem;letter-spacing:.1em}
+.lb-loading{text-align:center;padding:40px 20px;color:#4a4a5a;font-size:.55rem;letter-spacing:.1em;animation:pulse 1.5s infinite}
+.lb-my-rank{width:100%;max-width:380px;padding:10px;text-align:center;font-size:.5rem;color:#5a6a8a;letter-spacing:.1em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.04);margin-top:4px;flex-shrink:0}
+.lb-sub{font-size:.35rem;color:#2a2a3a;letter-spacing:.06em;margin-top:2px}
 #level-select{overflow:hidden;justify-content:flex-start;padding-top:28px}
 .ls-summary{font-size:.4rem;color:#5a5a6a;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
 .ls-progress{width:300px;height:5px;background:rgba(255,255,255,.04);border-radius:3px;margin-bottom:12px;overflow:hidden;position:relative}
@@ -321,6 +347,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
         <button class="btn" id="btn-levels">уровни</button>
         <button class="btn" id="btn-records">рекорды</button>
       </div>
+      <button class="btn" id="btn-leaderboard" style="border-color:#2a3a5a;color:#6a9aba;margin-top:4px">лидерборд</button>
       <button class="menu-challenge" id="btn-challenge">
         <span class="ch-label">испытание дня</span>
         <span class="ch-sub" id="ch-sub">ежедневный вызов</span>
@@ -497,6 +524,21 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       <button class="btn" id="btn-ch-back">назад</button>
     </div>
   </div>
+  <div id="leaderboard-screen">
+    <div class="ls-title">лидерборд</div>
+    <div class="lb-tabs" id="lb-tabs">
+      <button class="lb-tab active" data-tab="global">мир</button>
+      <button class="lb-tab" data-tab="speed">скорость</button>
+      <button class="lb-tab" data-tab="stars">звёзды</button>
+    </div>
+    <div class="lb-list" id="lb-list">
+      <div class="lb-loading">загрузка...</div>
+    </div>
+    <div class="lb-my-rank" id="lb-my-rank"></div>
+    <div style="padding:12px 0;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <button class="btn" id="btn-lb-back">назад</button>
+    </div>
+  </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.9.2/dist/pixi.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
@@ -512,7 +554,7 @@ if('serviceWorker' in navigator){
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — Beta 0.9.7 — Cloud Save & Level Fix
+// VOID — Beta 0.9.8 — Leaderboard
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
@@ -1110,6 +1152,148 @@ function migrateCloudV1(data){
   syncProgressUnlocked();
   if(changed)saveProgress();
   console.log('[VOID] Cloud v1 data migrated');
+}
+
+// ═══ SUPABASE LEADERBOARD ═══
+var sbClient=null;
+var lbSubscription=null;
+var lbCurrentTab='global';
+var lbMyRank=-1;
+var lbData=[];
+var LB_SUPABASE_URL='https://jibtmyuxbeckanmkhuik.supabase.co';
+var LB_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnRteXV4YmVja2FubWtodWlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjA0MTAsImV4cCI6MjA5NTg5NjQxMH0.x1oT9Lym80rZNj9dJA39nA-pBSWzKhAOJGHZisOoFok';
+var LB_API_URL='https://void-game-api.vercel.app/api/leaderboard';
+
+function initSupabase(){
+  try{
+    if(!window.supabase||sbClient)return;
+    sbClient=supabase.createClient(LB_SUPABASE_URL,LB_SUPABASE_KEY);
+    console.log('[VOID] Supabase initialized');
+  }catch(e){console.warn('[VOID] Supabase init error:',e)}
+}
+function getMyLBId(){
+  if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)return'tg_'+tg.initDataUnsafe.user.id;
+  return'local_'+(localStorage.getItem('void_device_id')||function(){var id='d_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);localStorage.setItem('void_device_id',id);return id}());
+}
+function computeLBScore(){
+  var completed=0,totalStars=0,totalTime=0;
+  for(var i=0;i<LEVELS.length;i++){
+    var s=getLevelStars(i);if(s>0){completed++;totalStars+=s}
+    var bt=getLevelBestTime(i);if(bt<Infinity)totalTime+=bt;
+  }
+  var score=completed*10000+totalStars*100-Math.round(totalTime);
+  return{score:score,completed:completed,totalStars:totalStars,totalTime:totalTime};
+}
+function submitLB(){
+  var data=computeLBScore();
+  if(data.completed===0)return;
+  var initData=tg?tg.initData:'';
+  if(!initData){console.log('[VOID] No initData, skip LB submit');return}
+  var levelData={};
+  for(var k in progress.levels){
+    if(progress.levels.hasOwnProperty(k)){
+      var lvl=progress.levels[k];
+      levelData[k]={stars:lvl.stars,bestTime:lvl.bestTime||0};
+    }
+  }
+  fetch(LB_API_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({initData:initData,levelData:levelData})
+  }).then(function(r){return r.json()}).then(function(d){
+    if(d.ok)console.log('[VOID] LB submitted, rank:',d.rank);
+    else console.log('[VOID] LB submit response:',d.error||d.message||d);
+  }).catch(function(e){console.warn('[VOID] LB submit error:',e)});
+}
+function showLeaderboard(tab){
+  if(tab)lbCurrentTab=tab;
+  if(!sbClient)initSupabase();
+  showScreen('leaderboard');
+  loadLB();
+}
+function loadLB(){
+  if(!sbClient){renderLBOffline();return}
+  var listEl=document.getElementById('lb-list');
+  if(listEl)listEl.innerHTML='<div class="lb-loading">загрузка...</div>';
+  sbClient.from('leaderboard').select('*').order('score',{ascending:false}).limit(120).then(function(res){
+    if(res.error){console.warn('[VOID] LB load error:',res.error);renderLBOffline();return}
+    lbData=res.data||[];
+    renderLB();
+  }).catch(function(e){console.warn('[VOID] LB load catch:',e);renderLBOffline()});
+  // Subscribe to real-time
+  if(!lbSubscription&&sbClient){
+    lbSubscription=sbClient.channel('lb-changes').on('postgres_changes',{event:'*',schema:'public',table:'leaderboard'},function(){
+      // Reload on any change
+      sbClient.from('leaderboard').select('*').order('score',{ascending:false}).limit(120).then(function(res){
+        if(!res.error){lbData=res.data||[];renderLB()}
+      });
+    }).subscribe();
+  }
+}
+function renderLBOffline(){
+  var listEl=document.getElementById('lb-list');
+  if(!listEl)return;
+  listEl.innerHTML='<div class="lb-empty">нет подключения<br><div class="lb-sub">играй через Telegram для доступа к лидерборду</div></div>';
+  var rankEl=document.getElementById('lb-my-rank');if(rankEl)rankEl.textContent='';
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function renderLB(){
+  var listEl=document.getElementById('lb-list');
+  var rankEl=document.getElementById('lb-my-rank');
+  if(!listEl)return;
+  if(!lbData||lbData.length===0){
+    listEl.innerHTML='<div class="lb-empty">пока никого нет<br><div class="lb-sub">стань первым во тьме</div></div>';
+    if(rankEl)rankEl.textContent='';
+    return;
+  }
+  var myId=getMyLBId();
+  var sorted=lbData.slice();
+  // Sort by tab
+  if(lbCurrentTab==='speed'){
+    sorted=sorted.filter(function(d){return d.completed>0&&d.total_time>0});
+    sorted.sort(function(a,b){return a.total_time-b.total_time||b.total_stars-a.total_stars});
+  }else if(lbCurrentTab==='stars'){
+    sorted.sort(function(a,b){return b.total_stars-a.total_stars||b.completed-a.completed||a.total_time-b.total_time});
+  }else{
+    sorted.sort(function(a,b){return b.score-a.score});
+  }
+  var top100=sorted.slice(0,100);
+  var myIdx=-1;
+  for(var i=0;i<sorted.length;i++){if(sorted[i].id===myId){myIdx=i;break}}
+  lbMyRank=myIdx>=0?myIdx+1:-1;
+  var html='';
+  for(var i=0;i<top100.length;i++){
+    var entry=top100[i];
+    var rank=i+1;
+    var isSelf=entry.id===myId;
+    var rowCls='lb-row';
+    if(isSelf)rowCls+=' self';
+    if(rank===1)rowCls+=' top1';
+    else if(rank===2)rowCls+=' top2';
+    else if(rank===3)rowCls+=' top3';
+    var rankStr=rank<=3?['I','II','III'][rank-1]:rank;
+    var timeStr=entry.total_time&&entry.total_time<99999?formatTime(entry.total_time*1000):'--:--';
+    html+='<div class="'+rowCls+'">'+
+      '<div class="lb-rank">'+rankStr+'</div>'+
+      '<div class="lb-name">'+escHtml(entry.name||'???')+'</div>'+
+      '<div class="lb-stars">'+(entry.total_stars||0)+'★</div>'+
+      '<div class="lb-time">'+timeStr+'</div>'+
+      '</div>';
+  }
+  listEl.innerHTML=html;
+  if(rankEl){
+    if(lbMyRank>0){
+      var myD=computeLBScore();
+      rankEl.innerHTML='твой ранг: <b style="color:#9ac0e0">#'+lbMyRank+'</b> — '+myD.completed+'/'+LEVELS.length+' | '+myD.totalStars+'★ | '+formatTime(myD.totalTime*1000);
+    }else if(computeLBScore().completed>0){
+      rankEl.innerHTML='твой ранг: ещё не в таблице';
+    }else{
+      rankEl.textContent='пройди уровень чтобы попасть в лидерборд';
+    }
+  }
+  // Update tabs
+  var tabs=document.querySelectorAll('.lb-tab');
+  for(var i=0;i<tabs.length;i++){tabs[i].classList.toggle('active',tabs[i].getAttribute('data-tab')===lbCurrentTab)}
 }
 
 // ═══ LEVEL DATA ═══
@@ -3054,7 +3238,7 @@ function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.lef
 function showScreen(name){
   state.screen=name;
   // Hide ALL overlay screens first to prevent any mixing
-  var overlays=['level-select','settings-screen','faq-screen','records-screen','challenge-screen','story-screen','pause-screen','death-screen','win-screen'];
+  var overlays=['level-select','settings-screen','faq-screen','records-screen','challenge-screen','leaderboard-screen','story-screen','pause-screen','death-screen','win-screen'];
   for(var i=0;i<overlays.length;i++){document.getElementById(overlays[i]).classList.remove('active')}
   // Now show only the target
   document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');
@@ -3069,7 +3253,8 @@ function showScreen(name){
   if(name==='faq')document.getElementById('faq-screen').classList.add('active');
   if(name==='records')document.getElementById('records-screen').classList.add('active');
   if(name==='challenge')document.getElementById('challenge-screen').classList.add('active');
-  var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen',challenge:'challenge-screen'};
+  if(name==='leaderboard')document.getElementById('leaderboard-screen').classList.add('active');
+  var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen',challenge:'challenge-screen',leaderboard:'leaderboard-screen'};
   if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}
   if(name==='menu'){updateMenuStats();saveProgress();debouncedCloudSave()};
   if(name==='settings')updateSettingsUI();
@@ -3088,7 +3273,7 @@ function winLevel(){player.alive=false;spawnParticles(player.body.position.x,pla
     if(mid==='max3'&&state.deaths>3)chComplete=false;
     endChallenge(chComplete);
   }
-  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');state.slowMo=0.2;state.slowMoTimer=0.8;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a2a5a;state.flashAlpha=0.2;state.flashTimer=0.4;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
+  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');submitLB();state.slowMo=0.2;state.slowMoTimer=0.8;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a2a5a;state.flashAlpha=0.2;state.flashTimer=0.4;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
@@ -3506,6 +3691,13 @@ function bindUI(){
   document.getElementById('btn-challenge').addEventListener('click',function(){showChallengeScreen()});
   document.getElementById('btn-ch-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-ch-play').addEventListener('click',function(){startChallenge()});
+  document.getElementById('btn-leaderboard').addEventListener('click',function(){showLeaderboard('global')});
+  document.getElementById('btn-lb-back').addEventListener('click',function(){showScreen('menu')});
+  // LB tab clicks
+  document.querySelectorAll('.lb-tab').forEach(function(tab){
+    tab.addEventListener('click',function(){lbCurrentTab=this.getAttribute('data-tab');renderLB()});
+    tab.addEventListener('touchstart',function(e){e.preventDefault();lbCurrentTab=this.getAttribute('data-tab');renderLB();tgHaptic('light')},{passive:false});
+  });
   document.getElementById('btn-sfx-toggle').addEventListener('click',function(){toggleSound();saveSettings();updateSettingsUI()});
   document.getElementById('btn-music-toggle').addEventListener('click',function(){toggleMusic();saveSettings();updateSettingsUI()});
   document.getElementById('btn-haptic-toggle').addEventListener('click',function(){settings.hapticEnabled=!settings.hapticEnabled;saveSettings();updateSettingsUI()});
@@ -4278,7 +4470,7 @@ function showAwakening(){
 }
 
 // ═══ INIT ═══
-async function init(){try{loadProgress();loadSettings();loadFromCloud();await initPixi();initInput();bindUI();initTelegramPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
+async function init(){try{loadProgress();loadSettings();loadFromCloud();initSupabase();await initPixi();initInput();bindUI();initTelegramPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
 init();
 </script>
 </body>
