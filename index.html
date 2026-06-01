@@ -1333,7 +1333,7 @@ var profileData=null;
 function registerPlayer(){
   if(!tg||!tg.initData)return;
   var chatId=tg.initDataUnsafe&&tg.initDataUnsafe.user?tg.initDataUnsafe.user.id:0;
-  fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register',initData:tg.initData,chatId:chatId})}).then(function(r){return r.json()}).then(function(d){if(d.ok)console.log('[VOID] Player registered')}).catch(function(e){console.warn('[VOID] Register error:',e)});
+  fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register',initData:tg.initData,chatId:chatId})}).then(function(r){return r.json()}).then(function(d){console.log('[VOID] Register response:',JSON.stringify(d));if(d.ok)console.log('[VOID] Player registered')}).catch(function(e){console.warn('[VOID] Register error:',e)});
 }
 function loadProfile(){
   var c=document.getElementById('prof-content');
@@ -1341,7 +1341,8 @@ function loadProfile(){
   if(!tg||!tg.initData){c.innerHTML='<div class="lb-empty">играй через Telegram<br><div class="lb-sub">для доступа к профилю</div></div>';return}
   c.innerHTML='<div class="lb-loading">загрузка...</div>';
   fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'profile',initData:tg.initData})}).then(function(r){return r.json()}).then(function(d){
-    if(!d.ok){c.innerHTML='<div class="lb-empty">ошибка загрузки</div>';return}
+    console.log('[VOID] Profile response:',JSON.stringify(d));
+    if(!d.ok){c.innerHTML='<div class="lb-empty">ошибка: '+(d.error||'неизвестно')+'</div>';return}
     profileData=d;
     renderProfile(d);
   }).catch(function(e){console.warn('[VOID] Profile error:',e);c.innerHTML='<div class="lb-empty">нет подключения</div>'});
