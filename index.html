@@ -228,7 +228,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .ls-shard{font-size:.35rem;color:#4a5a6a;margin-top:1px;letter-spacing:.04em}
 .ls-cell.best-time{font-size:.28rem;color:#3a4a5a;margin-top:1px;letter-spacing:.03em}
 .ls-cell.locked::after{content:none}
-.menu-top{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.menu-top{display:flex;flex-direction:column;align-items:center;flex-shrink:0;position:relative;z-index:1}
 .menu-mid{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;justify-content:center}
 .menu-bottom-row{display:flex;align-items:center;justify-content:space-between;width:280px;flex-shrink:0}
 .menu-progress{width:280px;height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
@@ -297,18 +297,16 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   <div id="main-menu">
     <canvas class="logo-canvas" id="logo-canvas"></canvas>
     <div class="menu-content">
-    <!-- TOP: Logo area -->
-    <div class="menu-top">
-      <div style="height:50px"></div>
-      <div class="logo-sub">во тьму</div>
-      <div class="logo-ver">alpha 2.2</div>
+    <!-- TOP: Logo area — VOID letters + sub-text rendered on logo-canvas -->
+    <div class="menu-top" id="menu-top">
+      <!-- Height set dynamically by logoAnim to match canvas letter area -->
+    </div>
+    <!-- MID: Stats + Buttons -->
+    <div class="menu-mid">
       <div class="player-info" id="player-info" style="display:none">
         <div class="player-avatar" id="player-avatar"></div>
         <div class="player-name" id="player-name"></div>
       </div>
-    </div>
-    <!-- MID: Stats + Buttons -->
-    <div class="menu-mid">
       <div class="menu-stats" id="menu-stats">
         <span class="stat-item" id="menu-rank-wrap"><span id="menu-rank" style="font-weight:900;color:#6a5a6a"></span></span>
         <span class="stat-item"><span class="stat-val" id="menu-completed">0/20</span></span>
@@ -3306,6 +3304,11 @@ var logoAnim={
       {x:startX+slotW*2,y:topY,w:slotW*0.45,h:letterH,label:'I'},
       {x:startX+slotW*3,y:topY-H*0.006,w:slotW*0.72,h:letterH*1.02,label:'D'},
     ];
+    // Set menu-top height so mid section starts below sub-text
+    var subTextSpace=42; // "во тьму" + "alpha 2.2" + margins
+    var topHeight=topY+letterH+subTextSpace;
+    var menuTop=document.getElementById('menu-top');
+    if(menuTop)menuTop.style.height=topHeight+'px';
     // Fly-around waypoints: smooth arc around letters only (upper portion)
     var pl=this.platforms;
     var vCenter={x:pl[0].x+pl[0].w/2,y:pl[0].y-18};
@@ -3591,6 +3594,24 @@ var logoAnim={
         this.addSparkles(L.x+L.w/2+(Math.random()-0.5)*L.w*0.6,L.y+L.h*0.3,1,'letter');
       }
       ctx.restore();
+    }
+    // Sub-text below VOID letters: "во тьму" and "alpha 2.2"
+    if(this.platforms.length>=4){
+      var bottomY=Math.max(this.platforms[0].y+this.platforms[0].h,this.platforms[1].y+this.platforms[1].h,this.platforms[2].y+this.platforms[2].h,this.platforms[3].y+this.platforms[3].h);
+      ctx.textAlign='center';ctx.textBaseline='top';
+      // "во тьму"
+      ctx.shadowColor='rgba(100,120,180,0.15)';ctx.shadowBlur=8;
+      ctx.fillStyle='rgba(122,122,138,'+(0.7+Math.sin(this.time*0.5)*0.1)+')';
+      ctx.font=''+Math.max(9,W*0.022)+'px "Courier New",monospace';
+      ctx.letterSpacing='0.5em';
+      ctx.fillText('ВО ТЬМУ',W/2,bottomY+10);
+      // "alpha 2.2"
+      ctx.shadowBlur=0;
+      ctx.fillStyle='rgba(90,90,106,'+(0.5+Math.sin(this.time*0.3)*0.08)+')';
+      ctx.font=''+Math.max(8,W*0.017)+'px "Courier New",monospace';
+      ctx.letterSpacing='0.15em';
+      ctx.fillText('ALPHA 2.2',W/2,bottomY+26);
+      ctx.letterSpacing='0px';
     }
     // Character
     this.drawCharacter(ctx);
