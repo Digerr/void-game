@@ -19,7 +19,7 @@
 
 ## 📋 ТЕКУЩИЙ СТАТУС
 
-- **Версия**: beta 0.9.4 (Phaser 3)
+- **Версия**: beta 0.9.5 (Phaser 3)
 - **Файл**: index.html (единый файл)
 - **Хостинг**: GitHub Pages → https://digerr.github.io/void-game/
 - **Telegram бот**: @voide_game_bot (id: 8858889318)
@@ -47,7 +47,7 @@
 - JavaScript:
   - Settings: качество, язык(RU/EN), сложность(3), яркость, музыка
   - i18n: полная двуязычность RU/EN (все причины смерти, подсказки, FAQ)
-  - Audio: процедурная музыка и SFX через Web Audio API (14 типов SFX)
+  - Audio: процедурная музыка и SFX через Web Audio API (15 типов SFX, +land)
   - Config: физика Phaser (гравитация, прыжок, скорость)
   - Levels: 30 уровней в 4 актах (bL0–bL29, switch dispatcher)
   - Механики: move, jump, wall slide, wall jump, falling platforms, moving platforms,
@@ -55,10 +55,12 @@
     breakable platforms, ropes, stalactites, flood, chase, ice, vines, portals, wind
   - Текстуры: 16 программных текстур (player, platform, spikes, saw, pendulum,
     enemy, lever, door, box, rope, stalactite, breakable, pressurePlate, vine, checkpoint, torch)
-  - Визуал: параллакс фон (3 слоя), частицы смерти (по типу), screen shake, fade transitions
-  - Telegram: MainButton, имя игрока, share, expand
-  - HUD: таймер уровня, лучший рекорд, прогресс X/30
-  - Прогресс: localStorage (completed, deaths, bestDist, bestTime)
+  - Визуал: параллакс фон (3 слоя), погодные частицы (дождь, пепел, листья, кристаллы, ветер),
+    туман, частицы смерти (по типу), screen shake, slow-mo при смерти, fade transitions
+  - Telegram: MainButton, имя игрока, share с результатами, CloudStorage, theme params, expand
+  - HUD: таймер уровня, лучший рекорд, прогресс X/30, рейтинг осколков ★★★/★★/★
+  - Прогресс: localStorage (completed, deaths, bestDist, bestTime, shards) + TG CloudStorage
+  - Настройки: сохраняются в localStorage (язык, качество, сложность, громкость, яркость)
   - Тач-контролы для мобильных
   - Кастомный рендеринг через Phaser Graphics (аура, шарф, частицы, виньетка)
   - Ежедневное испытание (сид по дате)
@@ -124,6 +126,7 @@
 | 2026-06-01 | 0.9.2 | Пачка 2: Telegram SDK (ready, expand, MainButton, share, имя игрока) |
 | 2026-06-01 | 0.9.3 | Пачка 3: таймер уровня в HUD, лучший рекорд, прогресс X/30, bestTime в localStorage |
 | 2026-06-01 | 0.9.4 | Пачка 4: порталы, ветер, ежедневное испытание, фоторежим (P) |
+| 2026-06-01 | 0.9.5 | Пачки 1-4 (v2): погодные частицы + туман, slow-mo смерть, привязка рычагов к дверям, сохранение настроек, TG CloudStorage, share с результатами, рейтинг осколков ★, ветер частицы, landing SFX |
 
 ---
 
