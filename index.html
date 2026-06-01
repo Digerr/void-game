@@ -111,8 +111,9 @@ canvas{display:block}
 <div class="hang-wrap"><div class="swing-anchor"><div class="scarf-line"></div><div class="scarf-knot"></div><div class="char-body"><div class="char-head"><div class="char-eye l"></div><div class="char-eye r"></div></div><div class="char-torso"></div><div class="char-arms"><div class="char-arm left"></div><div class="char-arm right"></div></div><div class="char-legs"><div class="char-leg left"></div><div class="char-leg right"></div></div></div></div></div>
 <div class="logo">VOID</div>
 <div class="logo-sub" id="ui-sub">во тьму</div>
-<div class="ver">beta 0.9.5 phaser</div>
+<div class="ver">beta 0.9.6 phaser</div>
 <div class="made-by">made by SERGO</div>
+<div id="completion-pct" style="font-size:.55rem;color:#5a5a6a;letter-spacing:.1em;margin-top:4px"></div>
 <div class="tabs">
 <button class="tab active" onclick="showTab('play',this)" id="tab-play">играть</button>
 <button class="tab" onclick="showTab('progress',this)" id="tab-prog">прогресс</button>
@@ -122,6 +123,7 @@ canvas{display:block}
 </div>
 <div class="tab-content active" id="tc-play">
 <button class="btn primary" onclick="startGame()" id="ui-start">спуститься</button>
+<button class="btn" onclick="skipLevel()" id="ui-skip" style="font-size:.6rem;display:none"></button>
 <button class="btn" onclick="startDaily()" id="ui-daily" style="font-size:.65rem"></button>
 <button class="btn" onclick="tgShare()" id="ui-share" style="font-size:.65rem">пригласить</button>
 <div class="hints" id="ui-hints"></div>
@@ -192,6 +194,7 @@ canvas{display:block}
 </div></div>
 <div class="tb pause" id="btn-pause" style="display:none">❚❚</div>
 <div class="interact-hint" id="interact-hint">E</div>
+<div id="ach-toast" style="position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(10px);z-index:50;background:rgba(16,16,28,0.95);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:10px 18px;text-align:center;display:none;transition:opacity .3s,transform .3s;pointer-events:none"></div>
 <script>
 'use strict';
 
@@ -310,6 +313,15 @@ hintsEl.innerHTML=l.controls.split('|').map(h=>'<p>'+h+'</p>').join('');
 const shareBtn=document.getElementById('ui-share');if(shareBtn)shareBtn.textContent=l.share;
 const dailyBtn=document.getElementById('ui-daily');if(dailyBtn)dailyBtn.textContent=l.daily;
 updateProgress();updateLevelList();updateFAQ();
+// Completion percentage
+const completed=levelProgress.filter(p=>p.completed).length;
+const pctEl=document.getElementById('completion-pct');
+if(pctEl)pctEl.textContent=(lang==='ru'?'пройдено':'completed')+' '+Math.round(completed/30*100)+'% ('+completed+'/30)';
+// Skip button (mercy — show if current level has 15+ deaths)
+const skipBtn=document.getElementById('ui-skip');
+if(skipBtn){
+const nextUncompleted=levelProgress.findIndex(p=>!p.completed);
+if(nextUncompleted>=0&&levelProgress[nextUncompleted].deaths>=15){skipBtn.style.display='block';skipBtn.textContent=lang==='ru'?'пропустить уровень':'skip level'}else{skipBtn.style.display='none'}}
 }
 function hideAll(){['start-screen','death-screen','win-screen','pause-screen','touch-controls','victory-screen'].forEach(id=>document.getElementById(id).style.display='none')}
 function togglePause(){if(storyShown||transState||!gameScene||!gameScene.playerAlive)return;paused=!paused;document.getElementById('pause-screen').style.display=paused?'flex':'none';if(gameScene){paused?gameScene.physics.pause():gameScene.physics.resume()}}
@@ -321,6 +333,7 @@ function doTransition(n){transState=2;transAlpha=1;const lv=LEVELS[n];document.g
 function dismissStory(){if(!storyShown)return;storyShown=false;transState=0;transAlpha=0;clearTimeout(storyAutoTimer);const ts=document.getElementById('transition-screen');ts.style.display='none';ts.style.opacity='0';ts.onclick=null;ts.ontouchstart=null;ts.onmousedown=null;ts.style.cursor='default'}
 function respawn(){if(gameScene)gameScene.doRespawn();document.getElementById('death-screen').style.display='none';tgHideMainBtn()}
 function nextLevel(){document.getElementById('win-screen').style.display='none';tgHideMainBtn();if(curLvl<LEVELS.length-1){curLvl++;launchLevel(curLvl,false)}}
+function skipLevel(){const nextUncompleted=levelProgress.findIndex(p=>!p.completed);if(nextUncompleted>=0&&levelProgress[nextUncompleted].deaths>=15){levelProgress[nextUncompleted].completed=true;levelProgress[nextUncompleted].shards=0;saveProgress();updateProgress();updateUI();tgHaptic('warning')}}
 function formatTime(ms){const s=Math.floor(ms/1000);const m=Math.floor(s/60);return m+':'+(s%60<10?'0':'')+(s%60)}
 
 // ═══ PROGRESS ═══
@@ -331,6 +344,26 @@ function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(
 function updateProgress(){const grid=document.getElementById('prog-grid');if(!grid)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const p=levelProgress[i];const unlocked=i===0||levelProgress[i-1].completed;const status=!unlocked?0:(p.completed?2:1);const cls=!unlocked?'locked':'';const statusText=l.progress[status];const statusCls=status===2?'done':status===1?'cur':'lock';const bt=p.bestTime?' | '+formatTime(p.bestTime):'';const shards=p.shards?'★'.repeat(p.shards)+'☆'.repeat(3-p.shards):'';html+='<div class="prog-card '+cls+'"><div class="prog-num">'+(i+1)+'/30</div><div class="prog-name">'+LEVELS[i].name[lang]+'</div><div class="prog-stat">'+l.deathsL+': '+p.deaths+bt+'</div><div class="prog-status '+statusCls+'">'+statusText+(shards?' '+shards:'')+'</div></div>'}grid.innerHTML=html}
 function updateLevelList(){const list=document.getElementById('lvl-list');if(!list)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const lv=LEVELS[i];const actIdx=i<8?0:i<16?1:i<24?2:3;const actName=l.actNames[actIdx];html+='<div class="lvl-item"><div class="lvl-num">'+(i+1)+'</div><div class="lvl-info"><div class="lvl-name">'+lv.name[lang]+'</div><div class="lvl-desc">'+lv.story[lang].substring(0,80)+(lv.story[lang].length>80?'...':'')+'</div><div class="lvl-act">'+actName+'</div></div></div>'}list.innerHTML=html}
 function updateFAQ(){const el=document.getElementById('faq-content');if(!el)return;const l=L[lang];let html='';for(const item of l.faq){html+='<div class="faq-item"><div class="faq-q">'+item.q+'</div><div class="faq-a">'+item.a+'</div></div>'}el.innerHTML=html}
+
+// ═══ ACHIEVEMENTS ═══
+const ACHIEVEMENTS=[
+{id:'first_death',name:{ru:'Первая смерть',en:'First Death'},desc:{ru:'Умри во тьме',en:'Die in the darkness'},check:()=>totalDeaths>=1},
+{id:'death_10',name:{ru:'Не сдавайся',en:'Don\'t Give Up'},desc:{ru:'10 смертей',en:'10 deaths'},check:()=>totalDeaths>=10},
+{id:'death_50',name:{ru:'Привыкший к тьме',en:'Used to the Dark'},desc:{ru:'50 смертей',en:'50 deaths'},check:()=>totalDeaths>=50},
+{id:'death_100',name:{ru:'Бессмертная душа',en:'Immortal Soul'},desc:{ru:'100 смертей',en:'100 deaths'},check:()=>totalDeaths>=100},
+{id:'lvl5',name:{ru:'Исследователь',en:'Explorer'},desc:{ru:'Пройди 5 уровней',en:'Complete 5 levels'},check:()=>levelProgress.filter(p=>p.completed).length>=5},
+{id:'lvl15',name:{ru:'Путник',en:'Wanderer'},desc:{ru:'Пройди 15 уровней',en:'Complete 15 levels'},check:()=>levelProgress.filter(p=>p.completed).length>=15},
+{id:'lvl30',name:{ru:'Свет',en:'The Light'},desc:{ru:'Пройди все уровни',en:'Complete all levels'},check:()=>levelProgress.filter(p=>p.completed).length>=30},
+{id:'shard3',name:{ru:'Совершенство',en:'Perfection'},desc:{ru:'Получи 3 звезды',en:'Get 3 stars'},check:()=>levelProgress.some(p=>p.shards===3)},
+{id:'shard10',name:{ru:'Мастер',en:'Master'},desc:{ru:'10 уровней с 3 звездами',en:'10 levels with 3 stars'},check:()=>levelProgress.filter(p=>p.shards===3).length>=10},
+{id:'speedrun',name:{ru:'Скорость',en:'Speed'},desc:{ru:'Пройди уровень за 30 сек',en:'Complete a level in 30s'},check:()=>levelProgress.some(p=>p.completed&&p.bestTime&&p.bestTime<30000)}
+];
+let unlockedAch=[];
+function loadAchievements(){try{const d=JSON.parse(localStorage.getItem('void_ach'));if(d&&Array.isArray(d))unlockedAch=d}catch(e){}}
+function saveAchievements(){try{localStorage.setItem('void_ach',JSON.stringify(unlockedAch))}catch(e){}}
+function checkAchievements(){let newUnlocks=false;ACHIEVEMENTS.forEach(a=>{if(!unlockedAch.includes(a.id)&&a.check()){unlockedAch.push(a.id);newUnlocks=true;showAchievementToast(a)}});if(newUnlocks)saveAchievements()}
+let achToastTimer=null;
+function showAchievementToast(a){const toast=document.getElementById('ach-toast');if(!toast)return;toast.innerHTML='<div style="font-size:.5rem;color:#5a5a6a;text-transform:uppercase;letter-spacing:.15em">'+(lang==='ru'?'достижение':'achievement')+'</div><div style="font-size:.7rem;color:#8a8a9a;font-weight:700;margin-top:2px">'+a.name[lang]+'</div><div style="font-size:.5rem;color:#5a5a6a;margin-top:1px">'+a.desc[lang]+'</div>';toast.style.display='block';toast.style.opacity='1';toast.style.transform='translateX(-50%) translateY(0)';clearTimeout(achToastTimer);achToastTimer=setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateX(-50%) translateY(10px)';setTimeout(()=>toast.style.display='none',300)},3000);tgHaptic('success')}
 
 // ═══ AUDIO SYSTEM ═══
 let audioCtx=null,musicGain=null,sfxGain=null,musicPlaying=false;
@@ -1537,9 +1570,8 @@ this.cameras.main.shake(shakeDur,shakeInt);
 this.timeScale=0.3;this.slowMoTimer=12;
 sfx('death');tgHaptic('heavy');
 this.lastCause=cause;this.spawnDeathParticles(cause);
-levelProgress[curLvl].deaths=lvlDeaths;saveProgress();
+levelProgress[curLvl].deaths=lvlDeaths;saveProgress();checkAchievements();
 const causes=t('causes');document.getElementById('death-cause').textContent=causes[cause]||causes.fall;
-// Delayed death screen (let particles play)
 this.deathScreenTimer=40;
 document.getElementById('ds-lvl').textContent=(curLvl+1)+'';document.getElementById('ds-deaths').textContent=totalDeaths+'';document.getElementById('ds-dist').textContent=this.score+'m';
 this.player.setVisible(false);
@@ -1568,7 +1600,7 @@ const pt=Date.now()-startTime;if(!levelProgress[curLvl].bestTime||pt<levelProgre
 const prevShards=levelProgress[curLvl].shards||0;
 const newShards=lvlDeaths===0?3:lvlDeaths<=3?2:1;
 if(newShards>prevShards)levelProgress[curLvl].shards=newShards;
-saveProgress();updateProgress();
+saveProgress();updateProgress();checkAchievements();
 tgHaptic('success');
 playTime=Date.now()-startTime;const tm=formatTime(playTime);
 const shardStr='★'.repeat(newShards)+'☆'.repeat(3-newShards);
@@ -1931,7 +1963,7 @@ running=true;
 
 // ═══ INIT ═══
 setupTouch('btn-left','l');setupTouch('btn-right','r');setupTouch('btn-jump','j');setupTouch('btn-interact','e');setupTouch('btn-pause','pause');
-initProgress();loadProgress();tgLoadCloud();
+initProgress();loadProgress();tgLoadCloud();loadAchievements();
 // Load saved settings
 try{const sl=localStorage.getItem('void_lang');if(sl){lang=sl;document.querySelectorAll('.sbtns').forEach(g=>{g.querySelectorAll('.sb').forEach(b=>{b.classList.remove('on');if(b.textContent===(sl==='ru'?'RU':'EN'))b.classList.add('on')})})}}catch(e){}
 try{const sq=localStorage.getItem('void_quality');if(sq){quality=parseInt(sq)}}catch(e){}
