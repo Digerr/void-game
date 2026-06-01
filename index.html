@@ -24,8 +24,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .btn:active{transform:scale(.97)}
 .btn.primary{border-color:#3a5a7a;color:#7ab0d0}
 .btn.primary:hover{border-color:#4a7a9a;color:#9ac0e0;background:rgba(60,100,160,.04)}
-#level-select,#settings-screen,#faq-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center}
-#level-select.active,#settings-screen.active,#faq-screen.active{display:flex}
+#level-select,#settings-screen,#faq-screen,#records-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center}
+#level-select.active,#settings-screen.active,#faq-screen.active,#records-screen.active{display:flex}
 #level-select{background:linear-gradient(180deg,rgba(6,6,14,.98) 0%,rgba(10,10,20,.97) 100%)}
 .ls-title{font-size:1.1rem;font-weight:900;color:#7a7a8a;letter-spacing:.2em;margin-bottom:12px}
 .ls-grid{display:flex;flex-direction:column;gap:12px;max-width:380px;width:100%;padding:0 8px}
@@ -215,6 +215,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       <button class="btn" id="btn-settings" style="width:126px;font-size:.6rem;letter-spacing:.15em">настройки</button>
       <button class="btn" id="btn-faq" style="width:126px;font-size:.6rem;letter-spacing:.15em">faq</button>
     </div>
+    <button class="btn" id="btn-records" style="width:260px;font-size:.55rem;letter-spacing:.2em;margin-top:6px">рекорды</button>
     </div>
   </div>
   <div id="game-hud">
@@ -362,6 +363,11 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       </div>
     </div>
     <button class="btn" id="btn-faq-back">назад</button>
+  </div>
+  <div id="records-screen">
+    <div class="ls-title">рекорды</div>
+    <div id="records-list" style="max-width:340px;max-height:60vh;overflow-y:auto;width:100%;padding:0 8px;margin-bottom:16px"></div>
+    <button class="btn" id="btn-records-back">назад</button>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.9.2/dist/pixi.min.js"></script>
@@ -2623,7 +2629,7 @@ function setupTouchButton(id,action){var el=document.getElementById(id);if(!el)r
 function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.left)ix-=1;if(keys['ArrowRight']||keys['KeyD']||touchState.right)ix+=1;player.inputX=ix;player.inputJump=keys['Space']||keys['ArrowUp']||keys['KeyW']||touchState.jump}
 
 // ═══ SCREEN MANAGEMENT ═══
-function showScreen(name){state.screen=name;document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');document.getElementById('touch-controls').classList.toggle('active',name==='playing');document.getElementById('story-screen').classList.toggle('active',name==='story');document.getElementById('pause-screen').classList.toggle('active',name==='paused');document.getElementById('death-screen').classList.toggle('active',name==='dead');document.getElementById('win-screen').classList.toggle('active',name==='win');document.getElementById('level-select').classList.toggle('active',name==='levels');document.getElementById('settings-screen').classList.toggle('active',name==='settings');document.getElementById('faq-screen').classList.toggle('active',name==='faq');var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen'};if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}if(name==='menu')updateMenuStats();if(name==='settings')updateSettingsUI()}
+function showScreen(name){state.screen=name;document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');document.getElementById('touch-controls').classList.toggle('active',name==='playing');document.getElementById('story-screen').classList.toggle('active',name==='story');document.getElementById('pause-screen').classList.toggle('active',name==='paused');document.getElementById('death-screen').classList.toggle('active',name==='dead');document.getElementById('win-screen').classList.toggle('active',name==='win');document.getElementById('level-select').classList.toggle('active',name==='levels');document.getElementById('settings-screen').classList.toggle('active',name==='settings');document.getElementById('faq-screen').classList.toggle('active',name==='faq');document.getElementById('records-screen').classList.toggle('active',name==='records');var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen'};if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}if(name==='menu')updateMenuStats();if(name==='settings')updateSettingsUI();if(name==='records')showRecords()}
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
@@ -2796,6 +2802,55 @@ function shareResult(){
   }
   tgHaptic('light');
 }
+function showRecords(){
+  var list=document.getElementById('records-list');
+  if(!list)return;list.innerHTML='';
+  var acts=[
+    {name:'Пробуждение',color:'#5a7a9a',levels:[0,1,2,3,4]},
+    {name:'Глубины',color:'#7a5a9a',levels:[5,6,7,8,9]},
+    {name:'Нити',color:'#9a7a3a',levels:[10,11,12,13,14]},
+    {name:'Пустота',color:'#6a4a5a',levels:[15,16,17,18,19]}
+  ];
+  for(var a=0;a<acts.length;a++){
+    var act=acts[a];
+    var actDiv=document.createElement('div');
+    actDiv.style.cssText='margin-bottom:12px';
+    var actHeader=document.createElement('div');
+    actHeader.style.cssText='font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+act.color+';margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid rgba(255,255,255,.04)';
+    actHeader.textContent=act.name;
+    actDiv.appendChild(actHeader);
+    for(var li=0;li<act.levels.length;li++){
+      var idx=act.levels[li];
+      var lvl=LEVELS[idx];
+      var best=getLevelBestTime(idx);
+      var stars=getLevelStars(idx);
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:3px 4px;border-bottom:1px solid rgba(255,255,255,.02)';
+      var left=document.createElement('div');
+      left.style.cssText='display:flex;align-items:center;gap:6px';
+      var numSpan=document.createElement('span');
+      numSpan.style.cssText='font-size:.65rem;font-weight:700;color:'+(stars>0?'#7a8aaa':'#3a3a4a')+';min-width:20px';
+      numSpan.textContent=idx+1;
+      var nameSpan=document.createElement('span');
+      nameSpan.style.cssText='font-size:.5rem;color:#6a6a7a;letter-spacing:.04em';
+      nameSpan.textContent=lvl.name;
+      left.appendChild(numSpan);left.appendChild(nameSpan);
+      var right=document.createElement('div');
+      right.style.cssText='display:flex;align-items:center;gap:8px';
+      var starSpan=document.createElement('span');
+      starSpan.style.cssText='font-size:.35rem';
+      var starStr='';for(var j=0;j<3;j++)starStr+='<span style="color:'+(j<stars?'#8ac070':'#2a2a3a')+'">★</span>';
+      starSpan.innerHTML=starStr;
+      var timeSpan=document.createElement('span');
+      timeSpan.style.cssText='font-size:.45rem;color:'+(best<Infinity?'#5a7a6a':'#3a3a4a')+';font-variant-numeric:tabular-nums;min-width:35px;text-align:right';
+      timeSpan.textContent=best<Infinity?formatTime(best*1000):'--:--';
+      right.appendChild(starSpan);right.appendChild(timeSpan);
+      row.appendChild(left);row.appendChild(right);
+      actDiv.appendChild(row);
+    }
+    list.appendChild(actDiv);
+  }
+}
 function updateMenuStats(){
   var completed=0,totalStars=0;
   for(var i=0;i<LEVELS.length;i++){var s=getLevelStars(i);if(s>0){completed++;totalStars+=s}}
@@ -2899,6 +2954,8 @@ function bindUI(){
   document.getElementById('btn-faq').addEventListener('click',function(){showScreen('faq')});
   document.getElementById('btn-settings-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-faq-back').addEventListener('click',function(){showScreen('menu')});
+  document.getElementById('btn-records').addEventListener('click',function(){showScreen('records')});
+  document.getElementById('btn-records-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-sfx-toggle').addEventListener('click',function(){toggleSound();saveSettings();updateSettingsUI()});
   document.getElementById('btn-music-toggle').addEventListener('click',function(){toggleMusic();saveSettings();updateSettingsUI()});
   document.getElementById('btn-haptic-toggle').addEventListener('click',function(){settings.hapticEnabled=!settings.hapticEnabled;saveSettings();updateSettingsUI()});
