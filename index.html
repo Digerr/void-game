@@ -660,7 +660,7 @@ function updatePlayer(dt){
   if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
   // Wall slide
-  player.wallSliding=false;if(!player.onGround&&(player.onWallLeft||player.onWallRight)){if((player.onWallLeft&&player.inputX<0)||(player.onWallRight&&player.inputX>0)){player.wallSliding=true;var vy2=player.body.velocity.y;if(vy2>WALL_SLIDE_SPEED)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:WALL_SLIDE_SPEED});if(Math.random()<0.1){var wx=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:player.onWallLeft?0:Math.PI,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.3});sfxWallSlide()}}}}
+  player.wallSliding=false;if(!player.onGround&&(player.onWallLeft||player.onWallRight)){if((player.onWallLeft&&player.inputX<0)||(player.onWallRight&&player.inputX>0)){player.wallSliding=true;var vy2=player.body.velocity.y;if(vy2>WALL_SLIDE_SPEED)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:WALL_SLIDE_SPEED});if(Math.random()<0.1){var wx=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:player.onWallLeft?0:Math.PI,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.3});sfxWallSlide()}}}
 
   // Jump
   if(player.jumpBuffer>0){
