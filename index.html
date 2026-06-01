@@ -26,19 +26,44 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .btn.primary:hover{border-color:#4a7a9a;color:#9ac0e0;background:rgba(60,100,160,.04)}
 #level-select,#settings-screen,#faq-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center}
 #level-select.active,#settings-screen.active,#faq-screen.active{display:flex}
-.ls-title{font-size:1.1rem;font-weight:900;color:#7a7a8a;letter-spacing:.2em;margin-bottom:16px}
-.ls-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:340px;margin-bottom:16px}
-.ls-cell{width:60px;height:60px;background:rgba(255,255,255,.03);border:1px solid #1a1a2a;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
-.ls-cell:hover{border-color:#3a3a4a;background:rgba(255,255,255,.05)}
-.ls-cell.locked{opacity:.3;cursor:default;pointer-events:none}
-.ls-cell.current{border-color:#3a5a6a;background:rgba(60,100,160,.06)}
-.ls-cell.completed{border-color:#2a4a2a}
-.ls-num{font-size:.9rem;font-weight:700;color:#8a8a9a}
-.ls-cell.completed .ls-num{color:#5a8a5a}
-.ls-cell.current .ls-num{color:#5a8aaa}
-.ls-stars-row{display:flex;gap:1px;font-size:.4rem}
-.ls-star-lit{color:#7aaa7a}
-.ls-star-dim{color:#4a4a5a}
+.ls-title{font-size:1.1rem;font-weight:900;color:#7a7a8a;letter-spacing:.2em;margin-bottom:8px}
+.ls-grid{display:flex;flex-direction:column;gap:16px;max-width:360px;width:100%;padding:0 8px}
+.ls-act{display:flex;flex-direction:column;gap:6px}
+.ls-act-header{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:2px}
+.ls-act-name{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.ls-act-progress{font-size:.4rem;letter-spacing:.08em;opacity:.5}
+.ls-act-bar{height:2px;background:rgba(255,255,255,.04);border-radius:1px;overflow:hidden;margin-bottom:4px}
+.ls-act-bar-fill{height:100%;border-radius:1px;transition:width .4s}
+.ls-act-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.ls-act0 .ls-act-name{color:#5a7a9a}
+.ls-act0 .ls-act-bar-fill{background:linear-gradient(90deg,#2a4a6a,#5a8aba)}
+.ls-act1 .ls-act-name{color:#7a5a9a}
+.ls-act1 .ls-act-bar-fill{background:linear-gradient(90deg,#4a2a6a,#8a5aba)}
+.ls-act2 .ls-act-name{color:#9a7a3a}
+.ls-act2 .ls-act-bar-fill{background:linear-gradient(90deg,#6a4a1a,#ba8a2a)}
+.ls-act3 .ls-act-name{color:#6a4a5a}
+.ls-act3 .ls-act-bar-fill{background:linear-gradient(90deg,#3a1a2a,#8a3a5a)}
+.ls-cell{aspect-ratio:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.ls-cell:active{transform:scale(.93)}
+.ls-cell.locked{opacity:.2;cursor:default;pointer-events:none;filter:grayscale(1)}
+.ls-cell.current{border-color:rgba(100,140,200,.4);background:rgba(60,100,160,.08);box-shadow:0 0 12px rgba(80,120,180,.12)}
+.ls-cell.current::after{content:'';position:absolute;inset:0;border-radius:5px;animation:ls-pulse 2s infinite;pointer-events:none}
+.ls-cell.completed{border-color:rgba(90,140,90,.3);background:rgba(60,120,60,.06)}
+.ls-cell.perfect{border-color:rgba(180,140,60,.4);background:rgba(140,110,30,.08)}
+.ls-num{font-size:.85rem;font-weight:700;color:#7a7a8a}
+.ls-cell.completed .ls-num{color:#6aaa6a}
+.ls-cell.current .ls-num{color:#7aAaca}
+.ls-cell.perfect .ls-num{color:#caba4a}
+.ls-cell.locked .ls-num{color:#3a3a4a}
+.ls-stars-row{display:flex;gap:1px;font-size:.35rem;margin-top:1px}
+.ls-star-lit{color:#8ac070}
+.ls-star-dim{color:#3a3a4a}
+.ls-cell-name{font-size:.28rem;color:#5a5a6a;margin-top:2px;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ls-cell.completed .ls-cell-name{color:#4a7a4a}
+.ls-cell.current .ls-cell-name{color:#4a6a8a}
+.ls-cell.locked .ls-cell-name{color:#2a2a3a}
+.ls-cell.locked::before{content:'🔒';font-size:.45rem;opacity:.4;position:absolute;top:3px;right:3px}
+@keyframes ls-pulse{0%,100%{box-shadow:inset 0 0 8px rgba(80,120,180,.1)}50%{box-shadow:inset 0 0 12px rgba(80,120,180,.2)}}
 .player-info{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .player-avatar{width:32px;height:32px;border-radius:50%;border:1px solid #2a2a3a;overflow:hidden}
 .player-avatar img{width:100%;height:100%;object-fit:cover}
@@ -106,10 +131,13 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .win-total-stats{display:flex;gap:16px;margin-top:6px;margin-bottom:8px;justify-content:center}
 .win-total-stat{font-size:.4rem;color:#2a3a3a;letter-spacing:.08em;text-transform:uppercase}
 #level-select{overflow:hidden;justify-content:flex-start;padding-top:40px}
-.ls-summary{font-size:.45rem;color:#6a6a7a;letter-spacing:.08em;margin-bottom:12px;text-transform:uppercase}
-.ls-progress{width:260px;height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-bottom:16px;overflow:hidden}
-.ls-progress-fill{height:100%;background:#3a5a3a;border-radius:2px;transition:width .3s}
-.ls-cell-name{font-size:.3rem;color:#6a6a7a;margin-top:1px;max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ls-summary{font-size:.4rem;color:#5a5a6a;letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase}
+.ls-progress{width:260px;height:3px;background:rgba(255,255,255,.04);border-radius:2px;margin-bottom:12px;overflow:hidden}
+.ls-progress-fill{height:100%;background:linear-gradient(90deg,#3a5a7a,#5a8aba);border-radius:2px;transition:width .5s}
+.ls-stats{display:flex;gap:16px;margin-bottom:8px}
+.ls-stat{display:flex;flex-direction:column;align-items:center;gap:2px}
+.ls-stat-val{font-size:.75rem;font-weight:700;color:#7a8aaa}
+.ls-stat-label{font-size:.3rem;color:#4a4a5a;letter-spacing:.08em;text-transform:uppercase}
 .ls-cell.locked::after{content:'';position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .menu-progress{width:200px;height:2px;background:rgba(255,255,255,.04);border-radius:2px;margin-bottom:20px;overflow:hidden}
 .menu-progress-fill{height:100%;background:#2a3a4a;border-radius:2px;transition:width .5s}
@@ -204,7 +232,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   </div>
   <div id="level-select">
     <div class="ls-title">уровни</div>
-    <div class="ls-summary" id="ls-summary">0/20 уровней</div>
+    <div class="ls-stats" id="ls-stats"></div>
     <div class="ls-progress"><div class="ls-progress-fill" id="ls-progress-fill"></div></div>
     <div style="flex:1;overflow-y:auto;width:100%;display:flex;justify-content:center">
       <div class="ls-grid" id="ls-grid"></div>
@@ -1568,9 +1596,9 @@ function updatePlayer(dt){
       if(Math.abs(player.velocityX)<0.1)player.velocityX=0;
     }
     MBody.setVelocity(player.body,{x:player.velocityX,y:player.body.velocity.y});
-    if(player.onGround&&Math.abs(player.velocityX)>3&&Math.random()<0.15)spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.5});
+    if(player.onGround&&Math.abs(player.velocityX)>3&&Math.random()<0.3)spawnParticles(player.body.position.x-player.facing*4,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2+player.facing*0.3,spread:0.6,speed:0.8,life:0.25,size:1.8,gravity:0.5});
   }
-  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();spawnParticles(player.body.position.x,player.body.position.y,8,0x5a5a8a,{angle:Math.PI+player.dashDir,spread:1,speed:2.5,life:0.35,size:3,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1}
+  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();spawnParticles(player.body.position.x,player.body.position.y,10,0x6a6aaa,{angle:Math.PI+player.dashDir,spread:1.2,speed:3,life:0.4,size:3.5,gravity:0});spawnParticles(player.body.position.x,player.body.position.y,5,0x8a8acc,{angle:Math.PI+player.dashDir,spread:0.5,speed:2,life:0.3,size:2,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1;state.slowMo=0.1;state.slowMoTimer=0.04;state.shakeAmount=2;state.shakeTime=0.08}
   player.inputDashPressed=false;
   if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
@@ -2268,7 +2296,7 @@ function showScreen(name){state.screen=name;document.getElementById('main-menu')
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
-function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x6a5aaa,{speed:2,life:0.8,size:3,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,8,0x8a7aca,{speed:3,life:1.0,size:2,gravity:0.1});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;recordLevelComplete(state.level,state.deaths,elapsed);setTimeout(function(){showWinScreen(elapsed)},300)}
+function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x6a5aaa,{speed:2,life:0.8,size:3,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,8,0x8a7aca,{speed:3,life:1.0,size:2,gravity:0.1});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;recordLevelComplete(state.level,state.deaths,elapsed);state.slowMo=0.3;state.slowMoTimer=0.6;state.shakeAmount=3;state.shakeTime=0.2;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},800)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
@@ -2301,22 +2329,56 @@ function showLevelSelect(){
   var grid=document.getElementById('ls-grid');grid.innerHTML='';
   var completedCount=0,totalStars=0,possibleStars=LEVELS.length*3;
   for(var i=0;i<LEVELS.length;i++){var s=getLevelStars(i);if(s>0){completedCount++;totalStars+=s}}
-  var summaryEl=document.getElementById('ls-summary');
-  if(summaryEl)summaryEl.textContent=completedCount+'/'+LEVELS.length+' уровней | '+totalStars+'/'+possibleStars+' звёзд';
+  // Stats row
+  var statsEl=document.getElementById('ls-stats');
+  if(statsEl)statsEl.innerHTML=
+    '<div class="ls-stat"><div class="ls-stat-val">'+completedCount+'/'+LEVELS.length+'</div><div class="ls-stat-label">пройдено</div></div>'+
+    '<div class="ls-stat"><div class="ls-stat-val">'+totalStars+'/'+possibleStars+'</div><div class="ls-stat-label">звёзд</div></div>'+
+    '<div class="ls-stat"><div class="ls-stat-val">'+state.totalDeaths+'</div><div class="ls-stat-label">смертей</div></div>';
   var progressFill=document.getElementById('ls-progress-fill');
   if(progressFill)progressFill.style.width=(LEVELS.length>0?((completedCount/LEVELS.length)*100):0)+'%';
-  for(var i=0;i<LEVELS.length;i++){
-    var cell=document.createElement('div');cell.className='ls-cell';
-    var isUnlocked=i<progress.unlocked;
-    var stars=getLevelStars(i);
-    if(!isUnlocked)cell.classList.add('locked');
-    else if(stars>0)cell.classList.add('completed');
-    else cell.classList.add('current');
-    var numDiv=document.createElement('div');numDiv.className='ls-num';numDiv.textContent=i+1;cell.appendChild(numDiv);
-    var nameDiv=document.createElement('div');nameDiv.className='ls-cell-name';nameDiv.textContent=LEVELS[i].name;cell.appendChild(nameDiv);
-    if(isUnlocked&&stars>0){var row=document.createElement('div');row.className='ls-stars-row';for(var j=0;j<3;j++){var s=document.createElement('span');s.className=j<stars?'ls-star-lit':'ls-star-dim';s.textContent='★';row.appendChild(s)}cell.appendChild(row)}
-    if(isUnlocked){(function(idx){cell.addEventListener('click',function(){state.level=idx;state.deaths=0;if(engine)clearLevel();initMatter();loadLevel(idx);showStoryScreen(idx)})})(i)}
-    grid.appendChild(cell);
+
+  // Acts
+  var acts=[
+    {name:'Пробуждение',cls:'ls-act0',levels:[0,1,2,3,4]},
+    {name:'Глубины',cls:'ls-act1',levels:[5,6,7,8,9]},
+    {name:'Нити',cls:'ls-act2',levels:[10,11,12,13,14]},
+    {name:'Пустота',cls:'ls-act3',levels:[15,16,17,18,19]}
+  ];
+
+  for(var a=0;a<acts.length;a++){
+    var act=acts[a];
+    var actDiv=document.createElement('div');actDiv.className='ls-act '+act.cls;
+    // Act header
+    var actCompleted=0,actStars=0;
+    for(var li=0;li<act.levels.length;li++){var ls=getLevelStars(act.levels[li]);if(ls>0){actCompleted++;actStars+=ls}}
+    var actPct=Math.round((actCompleted/act.levels.length)*100);
+    var header=document.createElement('div');header.className='ls-act-header';
+    header.innerHTML='<span class="ls-act-name">'+act.name+'</span><span class="ls-act-progress">'+actPct+'%</span>';
+    actDiv.appendChild(header);
+    // Act progress bar
+    var bar=document.createElement('div');bar.className='ls-act-bar';
+    var barFill=document.createElement('div');barFill.className='ls-act-bar-fill';
+    barFill.style.width=actPct+'%';bar.appendChild(barFill);actDiv.appendChild(bar);
+    // Level grid
+    var actGrid=document.createElement('div');actGrid.className='ls-act-grid';
+    for(var li=0;li<act.levels.length;li++){
+      var idx=act.levels[li];
+      var cell=document.createElement('div');cell.className='ls-cell';
+      var isUnlocked=idx<progress.unlocked;
+      var stars=getLevelStars(idx);
+      if(!isUnlocked)cell.classList.add('locked');
+      else if(stars===3)cell.classList.add('perfect');
+      else if(stars>0)cell.classList.add('completed');
+      else cell.classList.add('current');
+      var numDiv=document.createElement('div');numDiv.className='ls-num';numDiv.textContent=idx+1;cell.appendChild(numDiv);
+      var nameDiv=document.createElement('div');nameDiv.className='ls-cell-name';nameDiv.textContent=LEVELS[idx].name;cell.appendChild(nameDiv);
+      if(isUnlocked){var row=document.createElement('div');row.className='ls-stars-row';for(var j=0;j<3;j++){var se=document.createElement('span');se.className=j<stars?'ls-star-lit':'ls-star-dim';se.textContent='★';row.appendChild(se)}cell.appendChild(row)}
+      if(isUnlocked){(function(iidx){cell.addEventListener('click',function(){state.level=iidx;state.deaths=0;if(engine)clearLevel();initMatter();loadLevel(iidx);showStoryScreen(iidx)});cell.addEventListener('touchstart',function(e){e.preventDefault();tgHaptic('light')},{passive:false})})(idx)}
+      actGrid.appendChild(cell);
+    }
+    actDiv.appendChild(actGrid);
+    grid.appendChild(actDiv);
   }
   showScreen('levels');
 }
