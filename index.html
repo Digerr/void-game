@@ -70,7 +70,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   <div id="main-menu">
     <div class="logo">VOID</div>
     <div class="logo-sub">во тьму</div>
-    <div class="logo-ver">alpha 1.6</div>
+    <div class="logo-ver">alpha 1.7</div>
     <div class="made-by">made by SERGO</div>
     <button class="btn primary" id="btn-play">спуститься</button>
   </div>
@@ -81,6 +81,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="hud-dash" id="hud-dash">dash</div>
     <div class="hud-thread" id="hud-thread">нить</div>
     <div class="hud-pause" id="hud-pause">❚❚</div>
+    <div class="hud-sound" id="hud-sound" style="position:absolute;top:10px;right:52px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;transition:all .15s">♪</div>
     <div class="hud-interact" id="hud-interact">E</div>
   </div>
   <div id="touch-controls">
@@ -105,6 +106,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   <div id="pause-screen">
     <div class="pause-title">пауза</div>
     <button class="btn" id="btn-resume">продолжить</button>
+    <button class="btn" id="btn-music" style="font-size:.6rem;letter-spacing:.15em">музыка: вкл</button>
     <button class="btn" id="btn-quit" style="border-color:#3a1a1a;color:#6a3535">выйти в меню</button>
   </div>
   <div id="death-screen">
@@ -124,7 +126,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — Alpha 1.2
+// VOID — Alpha 1.6
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
@@ -134,6 +136,165 @@ window.addEventListener('unhandledrejection',function(e){console.error('REJ:',e.
 var tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;
 if(tg){tg.ready();tg.expand()}
 function tgHaptic(t){if(!tg||!tg.HapticFeedback)return;try{if(t==='light')tg.HapticFeedback.impactOccurred('light');else if(t==='medium')tg.HapticFeedback.impactOccurred('medium');else if(t==='heavy')tg.HapticFeedback.impactOccurred('heavy')}catch(e){}}
+
+// ═══ AUDIO ENGINE ═══
+var audioCtx=null,masterGain=null,musicGain=null,sfxGain=null,musicPlaying=false;
+var audioInited=false,soundMuted=false,musicMuted=false;
+
+function initAudio(){
+  if(audioInited)return;
+  try{
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    masterGain=audioCtx.createGain();masterGain.gain.value=1;masterGain.connect(audioCtx.destination);
+    sfxGain=audioCtx.createGain();sfxGain.gain.value=0.6;sfxGain.connect(masterGain);
+    musicGain=audioCtx.createGain();musicGain.gain.value=0.15;musicGain.connect(masterGain);
+    audioInited=true;
+    console.log('[VOID] Audio initialized');
+  }catch(e){console.warn('[VOID] Audio failed:',e)}
+}
+
+function resumeAudio(){if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume()}
+
+// ——— SFX Synthesizers ———
+
+function playTone(freq,dur,type,vol,freqEnd){
+  if(!audioInited||soundMuted)return;resumeAudio();
+  var osc=audioCtx.createOscillator();var g=audioCtx.createGain();
+  osc.type=type||'sine';osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
+  if(freqEnd)osc.frequency.exponentialRampToValueAtTime(Math.max(1,freqEnd),audioCtx.currentTime+dur);
+  g.gain.setValueAtTime(vol||0.3,audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
+  osc.connect(g);g.connect(sfxGain);
+  osc.start(audioCtx.currentTime);osc.stop(audioCtx.currentTime+dur+0.05);
+}
+
+function playNoise(dur,vol,freqQ){
+  if(!audioInited||soundMuted)return;resumeAudio();
+  var bufSize=audioCtx.sampleRate*dur;
+  var buf=audioCtx.createBuffer(1,Math.max(1,Math.floor(bufSize)),audioCtx.sampleRate);
+  var data=buf.getChannelData(0);
+  for(var i=0;i<data.length;i++)data[i]=(Math.random()*2-1);
+  var src=audioCtx.createBufferSource();src.buffer=buf;
+  var g=audioCtx.createGain();g.gain.setValueAtTime(vol||0.2,audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
+  if(freqQ){
+    var filt=audioCtx.createBiquadFilter();filt.type='bandpass';filt.frequency.value=freqQ;filt.Q.value=1;
+    src.connect(filt);filt.connect(g);
+  }else{src.connect(g)}
+  g.connect(sfxGain);src.start(audioCtx.currentTime);src.stop(audioCtx.currentTime+dur+0.05);
+}
+
+// ——— Sound Effects ———
+
+function sfxJump(){
+  playTone(280,0.15,'sine',0.2,560);
+  playTone(420,0.1,'triangle',0.1,700);
+}
+function sfxLand(heavy){
+  if(heavy){playNoise(0.15,0.25,200);playTone(80,0.12,'sine',0.15,40)}
+  else{playNoise(0.08,0.12,300);playTone(120,0.06,'sine',0.08,60)}
+}
+function sfxDash(){
+  playNoise(0.1,0.2,1500);playTone(200,0.08,'sawtooth',0.1,400);
+}
+function sfxDeath(cause){
+  playTone(200,0.4,'sawtooth',0.2,30);playNoise(0.5,0.25,800);
+  if(cause==='fall'){playTone(150,0.6,'sine',0.15,20)}
+  else if(cause==='spikes'){playNoise(0.3,0.3,3000)}
+  else if(cause==='saw'){playTone(400,0.3,'square',0.12,50)}
+}
+function sfxWallSlide(){
+  playNoise(0.06,0.06,600);
+}
+function sfxWallJump(){
+  playTone(300,0.1,'sine',0.15,500);playNoise(0.05,0.1,800);
+}
+function sfxThreadAttach(){
+  playTone(500,0.2,'sine',0.15,800);playTone(700,0.15,'triangle',0.08,900);
+}
+function sfxThreadDetach(){
+  playTone(600,0.15,'sine',0.12,300);
+}
+function sfxLever(){
+  playTone(350,0.15,'square',0.12,500);playTone(500,0.2,'sine',0.1,600);
+}
+function sfxLevelComplete(){
+  playTone(400,0.2,'sine',0.2,600);
+  setTimeout(function(){playTone(500,0.2,'sine',0.2,700)},120);
+  setTimeout(function(){playTone(600,0.3,'sine',0.25,800)},240);
+  setTimeout(function(){playTone(800,0.5,'triangle',0.2,1000)},380);
+}
+function sfxSpikeHit(){
+  playNoise(0.1,0.2,4000);playTone(100,0.1,'square',0.1,50);
+}
+
+// ——— Ambient Music (procedural dark drone) ———
+var musicNodes=[];
+function startMusic(){
+  if(!audioInited||musicPlaying)return;resumeAudio();musicPlaying=true;
+  // Low drone pad
+  var drone1=audioCtx.createOscillator();drone1.type='sine';drone1.frequency.value=55;
+  var droneG1=audioCtx.createGain();droneG1.gain.value=0.3;
+  drone1.connect(droneG1);droneG1.connect(musicGain);drone1.start();
+
+  var drone2=audioCtx.createOscillator();drone2.type='sine';drone2.frequency.value=82.4;
+  var droneG2=audioCtx.createGain();droneG2.gain.value=0.15;
+  // Slow LFO on drone2 volume for breathing effect
+  var lfo=audioCtx.createOscillator();lfo.type='sine';lfo.frequency.value=0.15;
+  var lfoG=audioCtx.createGain();lfoG.gain.value=0.08;
+  lfo.connect(lfoG);lfoG.connect(droneG2.gain);lfo.start();
+
+  drone2.connect(droneG2);droneG2.connect(musicGain);drone2.start();
+
+  // Sub bass
+  var sub=audioCtx.createOscillator();sub.type='sine';sub.frequency.value=36;
+  var subG=audioCtx.createGain();subG.gain.value=0.2;
+  // Slow pitch drift
+  var lfo2=audioCtx.createOscillator();lfo2.type='sine';lfo2.frequency.value=0.07;
+  var lfo2G=audioCtx.createGain();lfo2G.gain.value=2;
+  lfo2.connect(lfo2G);lfo2G.connect(sub.frequency);lfo2.start();
+
+  sub.connect(subG);subG.connect(musicGain);sub.start();
+
+  // Ethereal high pad (very quiet, shifts slowly)
+  var pad=audioCtx.createOscillator();pad.type='triangle';pad.frequency.value=220;
+  var padG=audioCtx.createGain();padG.gain.value=0.03;
+  // Slow detuning for eerie feel
+  var lfo3=audioCtx.createOscillator();lfo3.type='sine';lfo3.frequency.value=0.04;
+  var lfo3G=audioCtx.createGain();lfo3G.gain.value=8;
+  lfo3.connect(lfo3G);lfo3G.connect(pad.frequency);lfo3.start();
+
+  pad.connect(padG);padG.connect(musicGain);pad.start();
+
+  // Filtered noise for atmosphere (wind/void)
+  var windBuf=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*4)),audioCtx.sampleRate);
+  var windData=windBuf.getChannelData(0);
+  for(var i=0;i<windData.length;i++)windData[i]=(Math.random()*2-1);
+  var windSrc=audioCtx.createBufferSource();windSrc.buffer=windBuf;windSrc.loop=true;
+  var windFilt=audioCtx.createBiquadFilter();windFilt.type='lowpass';windFilt.frequency.value=300;windFilt.Q.value=0.5;
+  // LFO on wind filter for gusts
+  var windLfo=audioCtx.createOscillator();windLfo.type='sine';windLfo.frequency.value=0.08;
+  var windLfoG=audioCtx.createGain();windLfoG.gain.value=150;
+  windLfo.connect(windLfoG);windLfoG.connect(windFilt.frequency);windLfo.start();
+  var windG=audioCtx.createGain();windG.gain.value=0.04;
+  windSrc.connect(windFilt);windFilt.connect(windG);windG.connect(musicGain);windSrc.start();
+
+  musicNodes=[drone1,drone2,sub,pad,lfo,lfo2,lfo3,windSrc,windLfo];
+}
+
+function stopMusic(){
+  for(var i=0;i<musicNodes.length;i++){try{musicNodes[i].stop()}catch(e){}}
+  musicNodes=[];musicPlaying=false;
+}
+
+function toggleMusic(){
+  musicMuted=!musicMuted;
+  if(musicGain){musicGain.gain.value=musicMuted?0:0.15}
+}
+function toggleSound(){
+  soundMuted=!soundMuted;
+  if(sfxGain){sfxGain.gain.value=soundMuted?0:0.6}
+}
 
 // ═══ GAME STATE ═══
 var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0};
@@ -440,7 +601,7 @@ function updatePlayer(dt){
   if(player.onGround&&!player.wasOnGround){player.justLanded=true;var fd=player.lastGroundY-player.body.position.y;
     // Squash & stretch on landing
     if(fd>20){player.squashX=1.3;player.squashY=0.7;player.squashTimer=0.15}
-    if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.4,size:3,gravity:1});state.shakeAmount=Math.min(fd*0.02,4);state.shakeTime=0.15}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1})}player.lastGroundY=player.body.position.y;tgHaptic('light')}
+    if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.4,size:3,gravity:1});state.shakeAmount=Math.min(fd*0.02,4);state.shakeTime=0.15;sfxLand(true)}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1});sfxLand(false)}player.lastGroundY=player.body.position.y;tgHaptic('light')}
   if(player.onGround)player.lastGroundY=player.body.position.y;
   if(player.onGround)player.coyoteTime=COYOTE_DURATION;else player.coyoteTime-=dt;
   if(player.inputJumpPressed){player.jumpBuffer=JUMP_BUFFER_DURATION;player.inputJumpPressed=false}else player.jumpBuffer-=dt;
@@ -481,12 +642,12 @@ function updatePlayer(dt){
     MBody.setVelocity(player.body,{x:player.velocityX,y:player.body.velocity.y});
     if(player.onGround&&Math.abs(player.velocityX)>3&&Math.random()<0.15)spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.5});
   }
-  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');spawnParticles(player.body.position.x,player.body.position.y,8,0x5a5a8a,{angle:Math.PI+player.dashDir,spread:1,speed:2.5,life:0.35,size:3,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1}
+  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();spawnParticles(player.body.position.x,player.body.position.y,8,0x5a5a8a,{angle:Math.PI+player.dashDir,spread:1,speed:2.5,life:0.35,size:3,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1}
   player.inputDashPressed=false;
   if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
   // Wall slide
-  player.wallSliding=false;if(!player.onGround&&(player.onWallLeft||player.onWallRight)){if((player.onWallLeft&&player.inputX<0)||(player.onWallRight&&player.inputX>0)){player.wallSliding=true;var vy2=player.body.velocity.y;if(vy2>WALL_SLIDE_SPEED)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:WALL_SLIDE_SPEED});if(Math.random()<0.1){var wx=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:player.onWallLeft?0:Math.PI,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.3})}}}
+  player.wallSliding=false;if(!player.onGround&&(player.onWallLeft||player.onWallRight)){if((player.onWallLeft&&player.inputX<0)||(player.onWallRight&&player.inputX>0)){player.wallSliding=true;var vy2=player.body.velocity.y;if(vy2>WALL_SLIDE_SPEED)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:WALL_SLIDE_SPEED});if(Math.random()<0.1){var wx=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:player.onWallLeft?0:Math.PI,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.3});sfxWallSlide()}}}}
 
   // Jump
   if(player.jumpBuffer>0){
@@ -496,12 +657,12 @@ function updatePlayer(dt){
       detachThread();
       MBody.setVelocity(player.body,{x:cvx*1.1,y:Math.min(cvy,player.jumpForce*0.7)});
       player.jumpBuffer=0;player.coyoteTime=0;
-      tgHaptic('medium');
+      tgHaptic('medium');sfxJump();
       spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,5,0x4a4a8a,{angle:-Math.PI/2,spread:2,speed:2,life:0.3,size:2,gravity:1});
-    }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.velocityX,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1});
+    }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.velocityX,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');sfxJump();spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1});
     // Jump stretch
     player.squashX=0.75;player.squashY=1.3;player.squashTimer=0.1;
-    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,5,0x4a4a5a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2,life:0.3,size:2,gravity:0.5});
+    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');sfxWallJump();var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,5,0x4a4a5a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2,life:0.3,size:2,gravity:0.5});
     // Wall jump squash
     player.squashX=0.7;player.squashY=1.2;player.squashTimer=0.1;
     }
@@ -529,7 +690,7 @@ function updatePlayer(dt){
   engine.gravity.y=1.5;
 }
 
-function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
+function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
 
 function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];createPlayer(lvl.spawn.x,lvl.spawn.y);state.levelStartTime=performance.now()}
 
@@ -623,7 +784,7 @@ function updateLevers(){
   }
 }
 function activateLever(lv){
-  if(lv.activated)return;lv.activated=true;tgHaptic('medium');
+  if(lv.activated)return;lv.activated=true;tgHaptic('medium');sfxLever();
   // Open door - animate it rising
   spawnParticles(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,8,0x5a5a72,{speed:1.5,life:0.5,size:2,gravity:0.3});
   MWorld.remove(world,lv.doorBody);
@@ -740,7 +901,7 @@ function shootThread(){
   MWorld.add(world,thread.constraint);
   // Visual container
   thread.sprite=new PIXI.Container();gameContainer.addChild(thread.sprite);
-  tgHaptic('medium');
+  tgHaptic('medium');sfxThreadAttach();
   var shootAngle=Math.atan2(nearest.y-player.body.position.y,nearest.x-player.body.position.x);
   spawnParticles(player.body.position.x,player.body.position.y-PLAYER_H/4,6,0x4a4a8a,{angle:shootAngle,spread:0.5,speed:2.5,life:0.4,size:2,gravity:0});
   spawnParticles(nearest.x,nearest.y,4,0x5a5a9a,{speed:1.5,life:0.3,size:2,gravity:0});
@@ -750,7 +911,7 @@ function detachThread(){
   thread.active=false;
   if(thread.constraint){MWorld.remove(world,thread.constraint);thread.constraint=null}
   if(thread.sprite){thread.sprite.destroy();thread.sprite=null}
-  tgHaptic('light');
+  tgHaptic('light');sfxThreadDetach();
 }
 function updateThread(dt){
   if(!thread.active||!player.alive){
@@ -1056,7 +1217,7 @@ bgMoonSprite.circle(moonX-3,moonY+10,3);bgMoonSprite.fill({color:0x28284a,alpha:
 // ═══ INPUT ═══
 var keys={},touchState={left:false,right:false,jump:false};
 function initInput(){
-  window.addEventListener('keydown',function(e){if(e.repeat)return;keys[e.code]=true;if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'){player.inputJumpPressed=true;e.preventDefault()}if(e.code==='KeyX'||e.code==='KeyL'||e.code==='ShiftLeft'){player.inputDashPressed=true;e.preventDefault()}if(e.code==='KeyE'||e.code==='ShiftRight'){player.inputInteractPressed=true;e.preventDefault()}if(e.code==='KeyT'||e.code==='KeyR'){player.inputThreadPressed=true;e.preventDefault()}if(e.code==='Escape')togglePause()});
+  window.addEventListener('keydown',function(e){if(e.repeat)return;keys[e.code]=true;if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'){player.inputJumpPressed=true;e.preventDefault()}if(e.code==='KeyX'||e.code==='KeyL'||e.code==='ShiftLeft'){player.inputDashPressed=true;e.preventDefault()}if(e.code==='KeyE'||e.code==='ShiftRight'){player.inputInteractPressed=true;e.preventDefault()}if(e.code==='KeyT'||e.code==='KeyR'){player.inputThreadPressed=true;e.preventDefault()}if(e.code==='Escape')togglePause();if(e.code==='KeyM'){toggleSound();updateSoundButton()}});
   window.addEventListener('keyup',function(e){keys[e.code]=false});
   setupTouchButton('btn-left','left');setupTouchButton('btn-right','right');setupTouchButton('btn-jump','jump');
   // Dash button
@@ -1074,7 +1235,7 @@ function showScreen(name){state.screen=name;document.getElementById('main-menu')
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;showScreen('dead')}
-function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x3a6a3a,{speed:2,life:0.8,size:3,gravity:0.3});tgHaptic('success');setTimeout(function(){showScreen('win')},300)}
+function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x3a6a3a,{speed:2,life:0.8,size:3,gravity:0.3});tgHaptic('success');sfxLevelComplete();setTimeout(function(){showScreen('win')},300)}
 function togglePause(){if(state.screen==='playing')showScreen('paused');else if(state.screen==='paused')showScreen('playing')}
 
 // ═══ GAME LOOP ═══
@@ -1099,13 +1260,18 @@ function gameLoop(timestamp){
 }
 
 // ═══ UI BINDINGS ═══
+function updateSoundButton(){var btn=document.getElementById('hud-sound');if(btn)btn.textContent=soundMuted?'✕':'♪';btn.style.color=soundMuted?'rgba(255,100,100,.3)':'rgba(255,255,255,.3)'}
+
 function bindUI(){
-  document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');state.level=0;state.deaths=0;initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
+  document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');state.level=0;state.deaths=0;initAudio();startMusic();initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
   document.getElementById('story-screen').addEventListener('click',function(){if(state.screen==='story')startPlaying()});
   document.getElementById('story-screen').addEventListener('touchstart',function(e){e.preventDefault();if(state.screen==='story')startPlaying()},{passive:false});
   document.getElementById('hud-pause').addEventListener('click',togglePause);
+  document.getElementById('hud-sound').addEventListener('click',function(){toggleSound();updateSoundButton()});
+  document.getElementById('hud-sound').addEventListener('touchstart',function(e){e.preventDefault();toggleSound();updateSoundButton()},{passive:false});
   document.getElementById('btn-resume').addEventListener('click',function(){showScreen('playing')});
-  document.getElementById('btn-quit').addEventListener('click',function(){clearLevel();showScreen('menu')});
+  document.getElementById('btn-music').addEventListener('click',function(){toggleMusic();document.getElementById('btn-music').textContent='музыка: '+(musicMuted?'выкл':'вкл')});
+  document.getElementById('btn-quit').addEventListener('click',function(){clearLevel();stopMusic();showScreen('menu')});
   document.getElementById('btn-retry').addEventListener('click',function(){respawnPlayer();startPlaying()});
   document.getElementById('btn-next').addEventListener('click',function(){state.level++;state.deaths=0;if(state.level<LEVELS.length){clearLevel();loadLevel(state.level);showStoryScreen(state.level)}else{clearLevel();showScreen('menu')}});
 }
