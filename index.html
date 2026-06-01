@@ -344,7 +344,7 @@ var LEVELS=[
 ];
 
 // ═══ PIXIJS SETUP ═══
-var pixiApp=null,gameContainer=null,bgContainer=null,fxContainer=null,vignetteOverlay=null,lightOverlay=null,fogOverlay=null;
+var pixiApp=null,gameContainer=null,bgContainer=null,fxContainer=null,vignetteOverlay=null,lightCanvas=null,lightCtx=null,lightTexture=null,lightSprite=null,playerGlow=null,fogOverlay=null;
 
 function initPixi(){
   pixiApp=new PIXI.Application();
@@ -353,8 +353,15 @@ function initPixi(){
     ui.parentNode.insertBefore(pixiApp.canvas,ui);
     bgContainer=new PIXI.Container();gameContainer=new PIXI.Container();fxContainer=new PIXI.Container();
     pixiApp.stage.addChild(bgContainer);pixiApp.stage.addChild(gameContainer);pixiApp.stage.addChild(fxContainer);
-    // Light overlay - darkness with a hole cut around player
-    lightOverlay=new PIXI.Graphics();pixiApp.stage.addChild(lightOverlay);
+    // Light overlay - canvas-based darkness with proper radial hole
+    lightCanvas=document.createElement('canvas');
+    lightCanvas.width=Math.max(1,Math.floor(pixiApp.screen.width));
+    lightCanvas.height=Math.max(1,Math.floor(pixiApp.screen.height));
+    lightCtx=lightCanvas.getContext('2d');
+    lightTexture=PIXI.Texture.from(lightCanvas);
+    lightSprite=new PIXI.Sprite(lightTexture);pixiApp.stage.addChild(lightSprite);
+    // Player glow - additive blending for warm light effects
+    playerGlow=new PIXI.Graphics();playerGlow.blendMode='add';pixiApp.stage.addChild(playerGlow);
     // Fog overlay - subtle depth mist at bottom
     fogOverlay=new PIXI.Graphics();pixiApp.stage.addChild(fogOverlay);
     vignetteOverlay=new PIXI.Graphics();pixiApp.stage.addChild(vignetteOverlay);drawVignette();
@@ -362,7 +369,7 @@ function initPixi(){
   });
 }
 function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);for(var i=0;i<8;i++){g.circle(cx,cy,mr*(1-i*0.08));g.fill({color:0x06060e,alpha:i*0.04})}}
-function onResize(){if(!pixiApp)return;pixiApp.renderer.resize(window.innerWidth,window.innerHeight);drawVignette()}
+function onResize(){if(!pixiApp)return;pixiApp.renderer.resize(window.innerWidth,window.innerHeight);drawVignette();if(lightCanvas){var sw=Math.max(1,Math.floor(pixiApp.screen.width)),sh=Math.max(1,Math.floor(pixiApp.screen.height));if(lightCanvas.width!==sw||lightCanvas.height!==sh){lightCanvas.width=sw;lightCanvas.height=sh;lightTexture=PIXI.Texture.from(lightCanvas);lightSprite.texture=lightTexture}}}
 
 // ═══ MATTER.JS SETUP ═══
 var engine=null,world=null;
@@ -840,52 +847,79 @@ function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.w
 var lightTime=0;
 function updateLightAndFog(dt){
   lightTime+=dt;
-  if(!lightOverlay||!fogOverlay||!pixiApp)return;
+  if(!lightCtx||!fogOverlay||!pixiApp)return;
   var sw=pixiApp.screen.width,sh=pixiApp.screen.height;
   // Player screen position
   var px=player.body?(player.body.position.x-camera.x):sw/2;
   var py=player.body?(player.body.position.y-camera.y):sh/2;
-  // Light: draw darkness with radial hole around player
-  lightOverlay.clear();
-  var lightR=200+Math.sin(lightTime*1.5)*10;
-  var darkAlpha=0.55;
-  // Full dark rectangle
-  lightOverlay.rect(0,0,sw,sh);lightOverlay.fill({color:0x020208,alpha:darkAlpha});
-  // Cut out light circle using overlapping lighter circles
-  for(var i=6;i>=0;i--){
-    var r=lightR*(1-i*0.12);
-    var a=1-((i+1)/7);
-    a=a*a; // quadratic falloff for softer edge
-    lightOverlay.circle(px,py,r);
-    lightOverlay.fill({color:0x020208,alpha:darkAlpha*(1-a)});
-  }
-  // Warm glow at center
-  lightOverlay.circle(px,py,30);lightOverlay.fill({color:0x0a0a14,alpha:0.08});
-  // Subtle pulsing eye light
+
+  // ═══ DARK OVERLAY WITH PROPER LIGHT HOLE ═══
+  // Uses canvas destination-out to actually cut light through darkness
+  lightCtx.clearRect(0,0,sw,sh);
+  // 1. Fill everything with darkness
+  lightCtx.globalCompositeOperation='source-over';
+  lightCtx.fillStyle='rgba(2,2,8,0.5)';
+  lightCtx.fillRect(0,0,sw,sh);
+  // 2. Cut radial gradient hole around player (destination-out ERASES existing pixels)
+  var lightR=240+Math.sin(lightTime*1.5)*15;
+  lightCtx.globalCompositeOperation='destination-out';
+  var grad=lightCtx.createRadialGradient(px,py,0,px,py,lightR);
+  grad.addColorStop(0,'rgba(255,255,255,1)');
+  grad.addColorStop(0.25,'rgba(255,255,255,0.95)');
+  grad.addColorStop(0.5,'rgba(255,255,255,0.7)');
+  grad.addColorStop(0.75,'rgba(255,255,255,0.3)');
+  grad.addColorStop(0.9,'rgba(255,255,255,0.08)');
+  grad.addColorStop(1,'rgba(255,255,255,0)');
+  lightCtx.fillStyle=grad;
+  lightCtx.beginPath();lightCtx.arc(px,py,lightR,0,Math.PI*2);lightCtx.fill();
+  // 3. Subtle warm tint in the light area (source-atop = only on existing dark pixels)
+  lightCtx.globalCompositeOperation='source-atop';
+  var warmGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*0.5);
+  warmGrad.addColorStop(0,'rgba(15,25,50,0.35)');
+  warmGrad.addColorStop(1,'rgba(0,0,0,0)');
+  lightCtx.fillStyle=warmGrad;
+  lightCtx.fillRect(0,0,sw,sh);
+  lightCtx.globalCompositeOperation='source-over';
+  // 4. Update PixiJS texture from canvas
+  lightTexture.source.update();
+
+  // ═══ ADDITIVE GLOW EFFECTS (warm light on top of darkness) ═══
+  playerGlow.clear();
   if(player.alive){
-    var eyeGlow=6+Math.sin(lightTime*3)*2;
-    lightOverlay.circle(px+player.facing*3,py-PLAYER_H/2-7,eyeGlow);
-    lightOverlay.fill({color:0x1a2a3a,alpha:0.05+Math.sin(lightTime*3)*0.02});
+    // Broad warm aura
+    playerGlow.circle(px,py,80);playerGlow.fill({color:0x060c1a,alpha:0.2});
+    playerGlow.circle(px,py,45);playerGlow.fill({color:0x0a1428,alpha:0.15});
+    // Close glow
+    playerGlow.circle(px,py,20);playerGlow.fill({color:0x101c34,alpha:0.1});
+    // Eye light — pulsing blue glow
+    var eyeR=10+Math.sin(lightTime*3)*4;
+    playerGlow.circle(px+player.facing*3,py-PLAYER_H/2-7,eyeR);
+    playerGlow.fill({color:0x2a4a7a,alpha:0.25+Math.sin(lightTime*3)*0.1});
+    playerGlow.circle(px+player.facing*3,py-PLAYER_H/2-7,4);
+    playerGlow.fill({color:0x4a7aba,alpha:0.3});
   }
-  // Thread glow: if thread active, light up the anchor point
+  // Thread glow
   if(thread.active){
     var ax=thread.anchorX-camera.x,ay=thread.anchorY-camera.y;
-    lightOverlay.circle(ax,ay,40);lightOverlay.fill({color:0x0a0a18,alpha:0.06});
+    playerGlow.circle(ax,ay,30);playerGlow.fill({color:0x1a1a5a,alpha:0.2});
+    playerGlow.circle(ax,ay,12);playerGlow.fill({color:0x2a2a8a,alpha:0.25});
   }
-  // Exit glow: extra light around exit
+  // Exit glow
   var lvl=LEVELS[state.level];
   if(lvl&&lvl.exit){
     var ex=lvl.exit.x+lvl.exit.w/2-camera.x,ey=lvl.exit.y+lvl.exit.h/2-camera.y;
-    var exitPulse=0.04+Math.sin(lightTime*3)*0.02;
-    lightOverlay.circle(ex,ey,60);lightOverlay.fill({color:0x0a140a,alpha:exitPulse});
+    var exitPulse=0.15+Math.sin(lightTime*3)*0.08;
+    playerGlow.circle(ex,ey,60);playerGlow.fill({color:0x0a2a0a,alpha:exitPulse});
+    playerGlow.circle(ex,ey,30);playerGlow.fill({color:0x1a5a1a,alpha:exitPulse*0.7});
+    playerGlow.circle(ex,ey,12);playerGlow.fill({color:0x2a8a2a,alpha:exitPulse*0.4});
   }
-  // Fog: subtle depth mist at bottom of screen
+
+  // ═══ FOG: subtle depth mist at bottom ═══
   fogOverlay.clear();
   var fogY=sh*0.65;
   for(var i=0;i<4;i++){
     var fy=fogY+i*30;
     var fa=0.02+i*0.015;
-    // Wavy fog
     fogOverlay.moveTo(0,fy);
     for(var x=0;x<sw;x+=40){
       var wave=Math.sin((x+lightTime*15+i*80)*0.008)*15+Math.sin((x-lightTime*10+i*50)*0.012)*8;
