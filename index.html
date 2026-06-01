@@ -26,7 +26,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .btn:active{transform:scale(.97)}
 .btn.primary{border-color:#3a5a7a;color:#7ab0d0}
 .btn.primary:hover{border-color:#4a7a9a;color:#9ac0e0;background:rgba(60,100,160,.04)}
-#level-select,#settings-screen,#faq-screen,#records-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center}
+#level-select,#settings-screen,#faq-screen,#records-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,1);flex-direction:column;align-items:center;justify-content:center;z-index:50}
 #level-select.active,#settings-screen.active,#faq-screen.active,#records-screen.active{display:flex}
 #level-select{background:linear-gradient(180deg,rgba(6,6,14,.98) 0%,rgba(10,10,20,.97) 100%)}
 .ls-title{font-size:1.1rem;font-weight:900;color:#8a8a9a;letter-spacing:.25em;margin-bottom:4px}
@@ -207,7 +207,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .aw-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;font-size:.4rem;color:#2a2a3a;letter-spacing:.15em;text-transform:uppercase;z-index:2;opacity:0;transition:opacity 1s ease-out}
 .aw-hint.visible{opacity:1;animation:pulse 2s infinite}
 /* Challenge screen */
-#challenge-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:28px}
+#challenge-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,1);flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:28px;z-index:50}
 #challenge-screen.active{display:flex}
 .ch-card{max-width:340px;width:100%;padding:0 8px;text-align:center}
 .ch-day{font-size:.35rem;color:#4a4a5a;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
@@ -476,7 +476,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">прогресс не сохраняется?</div>
-        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Прогресс автоматически сохраняется в Telegram CloudStorage. Убедись, что играешь через Telegram-бота @voide_game_bot. Если играешь в браузере — прогресс хранится в localStorage.</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Прогресс автоматически сохраняется в Telegram CloudStorage — полный прогресс включая пройденные уровни, звёзды, осколки и достижения. Убедись, что играешь через Telegram-бота @voide_game_bot. Если играешь в браузере — прогресс хранится в localStorage.</div>
       </div>
     </div>
     <button class="btn" id="btn-faq-back">назад</button>
@@ -512,7 +512,7 @@ if('serviceWorker' in navigator){
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — Alpha 2.2
+// VOID — Beta 0.9.7 — Cloud Save & Level Fix
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
@@ -826,6 +826,19 @@ var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAm
 
 // ═══ PROGRESS / SAVE ═══
 var progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},firstLaunch:false};
+// Derive unlocked from completed levels — ensures sync even if progress.unlocked gets corrupted
+function syncProgressUnlocked(){
+  var maxCompleted=-1;
+  for(var k in progress.levels){
+    if(progress.levels.hasOwnProperty(k)){
+      var n=parseInt(k);
+      if(progress.levels[n]&&progress.levels[n].stars>0&&n>maxCompleted)maxCompleted=n;
+    }
+  }
+  var shouldUnlock=Math.max(1,maxCompleted+2);
+  if(shouldUnlock>LEVELS.length)shouldUnlock=LEVELS.length;
+  if(!progress.unlocked||shouldUnlock>progress.unlocked)progress.unlocked=shouldUnlock;
+}
 var SKINS=[
   {name:'пустота',scarf:0x7a5a9a,scarf2:0x6a4a8a,aura:0x6a6aaa,body:0x5a5a7e,head:0x5a5a80,req:'default'},
   {name:'рассвет',scarf:0xaa5a3a,scarf2:0x8a4a2a,aura:0xaa6a3a,body:0x6a5a5a,head:0x6a5a5a,req:'act1'},
@@ -939,7 +952,7 @@ function showShardToast(text){
   setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast)},3500);
 }
 
-function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false}}catch(e){}}
+function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};syncProgressUnlocked()}}catch(e){console.warn('[VOID] loadProgress error:',e)}}
 function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(progress))}catch(e){}}
 function getLevelStars(n){var p=progress.levels[n];return p?p.stars:0}
 function getLevelBestTime(n){var p=progress.levels[n];return p?p.bestTime:Infinity}
@@ -956,8 +969,9 @@ function recordLevelComplete(n,deaths,time){
   }
   if(stars===3)progress.stats.perfectLevels=(progress.stats.perfectLevels||0)+1;
   if(n+1>=progress.unlocked&&n+1<LEVELS.length)progress.unlocked=n+2;
+  syncProgressUnlocked(); // ensure sync
   saveProgress();
-  saveToCloud();
+  debouncedCloudSave();
 }
 function formatTime(ms){var secs=Math.floor(ms/1000);var mins=Math.floor(secs/60);return mins+':'+(secs%60<10?'0':'')+(secs%60)}
 
@@ -975,39 +989,127 @@ function initTelegramPlayer(){
   }
 }
 
-// ═══ TELEGRAM CLOUD STORAGE LEADERBOARD ═══
+// ═══ TELEGRAM CLOUD STORAGE ═══
 var leaderboard=[];
+var _cloudSaveTimer=0;
 function saveToCloud(){
   if(!tg||!tg.CloudStorage)return;
   try{
-    var data={totalStars:0,completed:0,bestTimes:{},totalDeaths:state.totalDeaths};
-    for(var i=0;i<LEVELS.length;i++){var s=getLevelStars(i);if(s>0){data.completed++;data.totalStars+=s}var bt=getLevelBestTime(i);if(bt<Infinity)data.bestTimes[i]=bt}
-    tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){if(err)console.warn('[VOID] Cloud save error:',err)});
+    // Save the FULL progress object to cloud so nothing is lost
+    var data={
+      v:2, // version for migration
+      unlocked:progress.unlocked||1,
+      levels:progress.levels||{},
+      skin:progress.skin||0,
+      shards:progress.shards||[],
+      stats:progress.stats||{},
+      achievements:progress.achievements||[],
+      challenges:progress.challenges||{},
+      firstLaunch:progress.firstLaunch||false,
+      totalDeaths:state.totalDeaths
+    };
+    tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){if(err)console.warn('[VOID] Cloud save error:',err);else console.log('[VOID] Cloud saved')});
   }catch(e){console.warn('[VOID] CloudStorage error:',e)}
+}
+function debouncedCloudSave(){
+  if(!tg||!tg.CloudStorage)return;
+  clearTimeout(_cloudSaveTimer);
+  _cloudSaveTimer=setTimeout(saveToCloud,2000); // debounce 2s
 }
 function loadFromCloud(){
   if(!tg||!tg.CloudStorage)return;
   try{
     tg.CloudStorage.getItem('void_data',function(err,val){
-      if(err||!val)return;
+      if(err||!val){console.log('[VOID] No cloud data');return}
       try{
         var data=JSON.parse(val);
-        if(data.totalDeaths&&data.totalDeaths>state.totalDeaths){state.totalDeaths=data.totalDeaths}
-        if(data.bestTimes){
-          for(var k in data.bestTimes){
-            if(data.bestTimes.hasOwnProperty(k)){
-              var n=parseInt(k);
-              if(!progress.levels[n]||data.bestTimes[n]<progress.levels[n].bestTime){
-                progress.levels[n]=progress.levels[n]||{stars:0,bestTime:Infinity};
-                progress.levels[n].bestTime=Math.min(progress.levels[n].bestTime,data.bestTimes[n]);
-                saveProgress();
-              }
-            }
-          }
+        if(data.v===2){
+          // Full progress sync — merge cloud data with local
+          mergeCloudData(data);
+        }else{
+          // Legacy format (v1) — migrate
+          migrateCloudV1(data);
         }
-      }catch(e2){}
+      }catch(e2){console.warn('[VOID] Cloud parse error:',e2)}
     });
   }catch(e){console.warn('[VOID] CloudStorage load error:',e)}
+}
+function mergeCloudData(cloud){
+  var changed=false;
+  // Merge levels: take best stars and best time for each level
+  if(cloud.levels){
+    for(var k in cloud.levels){
+      if(cloud.levels.hasOwnProperty(k)){
+        var n=parseInt(k);
+        var cl=cloud.levels[k];
+        if(!cl||cl.stars===undefined)continue;
+        var local=progress.levels[n];
+        if(!local){
+          progress.levels[n]={stars:cl.stars,bestTime:cl.bestTime||Infinity};
+          changed=true;
+        }else{
+          if(cl.stars>local.stars){local.stars=cl.stars;changed=true}
+          if(cl.bestTime&&cl.bestTime<local.bestTime){local.bestTime=cl.bestTime;changed=true}
+        }
+      }
+    }
+  }
+  // Merge shards
+  if(cloud.shards&&cloud.shards.length>0){
+    for(var i=0;i<cloud.shards.length;i++){
+      if(progress.shards.indexOf(cloud.shards[i])<0){progress.shards.push(cloud.shards[i]);changed=true}
+    }
+  }
+  // Merge achievements
+  if(cloud.achievements&&cloud.achievements.length>0){
+    for(var i=0;i<cloud.achievements.length;i++){
+      if(progress.achievements.indexOf(cloud.achievements[i])<0){progress.achievements.push(cloud.achievements[i]);changed=true}
+    }
+  }
+  // Merge challenges
+  if(cloud.challenges){
+    for(var k in cloud.challenges){
+      if(cloud.challenges.hasOwnProperty(k)&&!progress.challenges[k]){
+        progress.challenges[k]=cloud.challenges[k];changed=true
+      }
+    }
+  }
+  // Take higher unlocked value
+  if(cloud.unlocked&&cloud.unlocked>(progress.unlocked||1)){progress.unlocked=cloud.unlocked;changed=true}
+  // Take higher totalDeaths
+  if(cloud.totalDeaths&&cloud.totalDeaths>state.totalDeaths){state.totalDeaths=cloud.totalDeaths;changed=true}
+  // Merge stats — take max of each
+  if(cloud.stats){
+    var stKeys=['jumps','dashes','wallJumps','threadsUsed','playTime','perfectLevels'];
+    for(var i=0;i<stKeys.length;i++){
+      var sk=stKeys[i];
+      if(cloud.stats[sk]&&cloud.stats[sk]>(progress.stats[sk]||0)){progress.stats[sk]=cloud.stats[sk];changed=true}
+    }
+  }
+  // Re-sync unlocked based on completed levels
+  syncProgressUnlocked();
+  if(changed)saveProgress();
+  console.log('[VOID] Cloud data merged, changed:',changed);
+}
+function migrateCloudV1(data){
+  // Legacy format had: totalStars, completed, bestTimes, totalDeaths
+  var changed=false;
+  if(data.totalDeaths&&data.totalDeaths>state.totalDeaths){state.totalDeaths=data.totalDeaths;changed=true}
+  if(data.bestTimes){
+    for(var k in data.bestTimes){
+      if(data.bestTimes.hasOwnProperty(k)){
+        var n=parseInt(k);
+        if(!progress.levels[n]||data.bestTimes[n]<progress.levels[n].bestTime){
+          progress.levels[n]=progress.levels[n]||{stars:0,bestTime:Infinity};
+          progress.levels[n].bestTime=Math.min(progress.levels[n].bestTime,data.bestTimes[n]);
+          changed=true;
+        }
+      }
+    }
+  }
+  syncProgressUnlocked();
+  if(changed)saveProgress();
+  console.log('[VOID] Cloud v1 data migrated');
 }
 
 // ═══ LEVEL DATA ═══
@@ -2949,7 +3051,30 @@ function setupTouchButton(id,action){var el=document.getElementById(id);if(!el)r
 function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.left)ix-=1;if(keys['ArrowRight']||keys['KeyD']||touchState.right)ix+=1;player.inputX=ix;player.inputJump=keys['Space']||keys['ArrowUp']||keys['KeyW']||touchState.jump}
 
 // ═══ SCREEN MANAGEMENT ═══
-function showScreen(name){state.screen=name;document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');document.getElementById('touch-controls').classList.toggle('active',name==='playing');document.getElementById('story-screen').classList.toggle('active',name==='story');document.getElementById('pause-screen').classList.toggle('active',name==='paused');document.getElementById('death-screen').classList.toggle('active',name==='dead');document.getElementById('win-screen').classList.toggle('active',name==='win');document.getElementById('level-select').classList.toggle('active',name==='levels');document.getElementById('settings-screen').classList.toggle('active',name==='settings');document.getElementById('faq-screen').classList.toggle('active',name==='faq');document.getElementById('records-screen').classList.toggle('active',name==='records');document.getElementById('challenge-screen').classList.toggle('active',name==='challenge');var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen',challenge:'challenge-screen'};if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}if(name==='menu'){updateMenuStats();saveProgress()};if(name==='settings')updateSettingsUI();if(name==='records')showRecords()}
+function showScreen(name){
+  state.screen=name;
+  // Hide ALL overlay screens first to prevent any mixing
+  var overlays=['level-select','settings-screen','faq-screen','records-screen','challenge-screen','story-screen','pause-screen','death-screen','win-screen'];
+  for(var i=0;i<overlays.length;i++){document.getElementById(overlays[i]).classList.remove('active')}
+  // Now show only the target
+  document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');
+  document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');
+  document.getElementById('touch-controls').classList.toggle('active',name==='playing');
+  if(name==='story')document.getElementById('story-screen').classList.add('active');
+  if(name==='paused')document.getElementById('pause-screen').classList.add('active');
+  if(name==='dead')document.getElementById('death-screen').classList.add('active');
+  if(name==='win')document.getElementById('win-screen').classList.add('active');
+  if(name==='levels')document.getElementById('level-select').classList.add('active');
+  if(name==='settings')document.getElementById('settings-screen').classList.add('active');
+  if(name==='faq')document.getElementById('faq-screen').classList.add('active');
+  if(name==='records')document.getElementById('records-screen').classList.add('active');
+  if(name==='challenge')document.getElementById('challenge-screen').classList.add('active');
+  var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen',challenge:'challenge-screen'};
+  if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}
+  if(name==='menu'){updateMenuStats();saveProgress();debouncedCloudSave()};
+  if(name==='settings')updateSettingsUI();
+  if(name==='records')showRecords();
+}
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
@@ -3044,6 +3169,7 @@ function showActIntro(actIdx,callback){
   el.ontouchstart=function(e){e.preventDefault();clearTimeout(timer);dismiss()};
 }
 function showLevelSelect(){
+  syncProgressUnlocked(); // always re-sync before showing
   var grid=document.getElementById('ls-grid');grid.innerHTML='';
   var completedCount=0,totalStars=0,possibleStars=LEVELS.length*3;
   for(var i=0;i<LEVELS.length;i++){var s=getLevelStars(i);if(s>0){completedCount++;totalStars+=s}}
@@ -3343,7 +3469,7 @@ function gameLoop(timestamp){
 function updateSoundButton(){var btn=document.getElementById('hud-sound');if(btn)btn.textContent=soundMuted?'✕':'♪';btn.style.color=soundMuted?'rgba(255,100,100,.3)':'rgba(255,255,255,.3)'}
 
 function bindUI(){
-  document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');state.level=0;state.deaths=0;initAudio();startMusic();initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
+  document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');syncProgressUnlocked();state.level=Math.min(progress.unlocked-1,LEVELS.length-1);state.deaths=0;initAudio();startMusic();initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
   document.getElementById('btn-levels').addEventListener('click',function(){showLevelSelect()});
   document.getElementById('btn-ls-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-ls-back').addEventListener('touchstart',function(e){e.preventDefault();showScreen('menu')},{passive:false});
@@ -3384,7 +3510,7 @@ function bindUI(){
   document.getElementById('btn-music-toggle').addEventListener('click',function(){toggleMusic();saveSettings();updateSettingsUI()});
   document.getElementById('btn-haptic-toggle').addEventListener('click',function(){settings.hapticEnabled=!settings.hapticEnabled;saveSettings();updateSettingsUI()});
   document.getElementById('btn-autograb-toggle').addEventListener('click',function(){settings.autoGrab=!settings.autoGrab;saveSettings();updateSettingsUI()});
-  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem('void_progress');progress={unlockedLevels:1,levelStars:{},levelTimes:{},totalDeaths:0};saveProgress();updateMenuStats();showScreen('menu')}});
+  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem('void_progress');if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},achievements:[],challenges:{},firstLaunch:true};saveProgress();updateMenuStats();showScreen('menu')}});
 }
 
 // ═══ LOGO ANIMATION — Choreographed Sequence ═══
@@ -3964,7 +4090,7 @@ function generateDailyChallenge(){
   return{level:levelIdx,modifier:CHALLENGE_MODIFIERS[modIdx],seed:seed,date:new Date().toLocaleDateString('ru-RU')};
 }
 function getChallengeResult(){var key='ch_'+getDaySeed();return progress.challenges&&progress.challenges[key]?progress.challenges[key]:null}
-function saveChallengeResult(result){if(!progress.challenges)progress.challenges={};var key='ch_'+getDaySeed();progress.challenges[key]=result;saveProgress();saveToCloud()}
+function saveChallengeResult(result){if(!progress.challenges)progress.challenges={};var key='ch_'+getDaySeed();progress.challenges[key]=result;saveProgress();debouncedCloudSave()}
 function showChallengeScreen(){
   currentChallenge=generateDailyChallenge();
   var card=document.getElementById('ch-card');
@@ -4143,7 +4269,7 @@ function showAwakening(){
   // Dismiss on click/touch
   function dismiss(){
     el.classList.remove('active');
-    progress.firstLaunch=true;saveProgress();saveToCloud();
+    progress.firstLaunch=true;saveProgress();debouncedCloudSave();
     awakeningShown=true;
     if(bc){var bctx2=bc.getContext('2d');bctx2.clearRect(0,0,bc.width,bc.height)}
     el.removeEventListener('click',dismiss);
