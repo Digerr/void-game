@@ -310,7 +310,7 @@ function togglePause(){if(storyShown||transState||!gameScene||!gameScene.playerA
 function resumeGame(){paused=false;document.getElementById('pause-screen').style.display='none';if(gameScene)gameScene.physics.resume()}
 function quitToMenu(){paused=false;running=false;hideAll();document.getElementById('start-screen').style.display='flex';document.getElementById('btn-pause').style.display='none';curLvl=0;initProgress();updateProgress();fadeMusicOut();tgHideMainBtn();if(phaserGame){phaserGame.destroy(true);phaserGame=null}gameScene=null}
 let storyAutoTimer=null;
-function showStory(n){const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent=lang==='ru'?'нажмите чтобы продолжить':'click to continue';const ts=document.getElementById('transition-screen');ts.style.display='flex';ts.style.opacity='1';ts.onclick=dismissStory;ts.ontouchstart=function(e){e.preventDefault();e.stopPropagation();dismissStory()};ts.onmousedown=function(){dismissStory()};ts.style.cursor='pointer';storyShown=true;clearTimeout(storyAutoTimer);storyAutoTimer=setTimeout(function(){if(storyShown)dismissStory()},8000)}
+function showStory(n){const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent=lang==='ru'?'нажмите чтобы продолжить':'click to continue';const ts=document.getElementById('transition-screen');ts.style.display='flex';ts.style.opacity='1';ts.onclick=dismissStory;ts.ontouchstart=function(e){e.preventDefault();e.stopPropagation();if(Date.now()-storyShownTime>400)dismissStory()};ts.onmousedown=function(){if(Date.now()-storyShownTime>400)dismissStory()};ts.style.cursor='pointer';storyShown=true;storyShownTime=Date.now();clearTimeout(storyAutoTimer);storyAutoTimer=setTimeout(function(){if(storyShown)dismissStory()},8000)}
 function doTransition(n){transState=2;transAlpha=1;const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent='';document.getElementById('transition-screen').style.display='flex';document.getElementById('transition-screen').style.opacity='1';document.getElementById('transition-screen').onclick=null;setTimeout(()=>{transState=2},2500)}
 function dismissStory(){if(!storyShown)return;storyShown=false;transState=0;transAlpha=0;clearTimeout(storyAutoTimer);const ts=document.getElementById('transition-screen');ts.style.display='none';ts.style.opacity='0';ts.onclick=null;ts.ontouchstart=null;ts.onmousedown=null;ts.style.cursor='default'}
 function respawn(){if(gameScene)gameScene.doRespawn();document.getElementById('death-screen').style.display='none';tgHideMainBtn()}
@@ -391,7 +391,7 @@ const LEVELS=[
 ];
 
 // ═══ GAME STATE ═══
-let curLvl=0,storyShown=false,transAlpha=0,transState=0;
+let curLvl=0,storyShown=false,transAlpha=0,transState=0,storyShownTime=0;
 let gameScene=null,phaserGame=null,running=false;
 const touch={l:false,r:false,j:false,e:false};
 function setupTouch(id,k){const el=document.getElementById(id);if(!el)return;el.addEventListener('touchstart',e=>{e.preventDefault();touch[k]=true;if(k==='pause')togglePause()},{passive:false});el.addEventListener('touchend',e=>{e.preventDefault();touch[k]=false},{passive:false});el.addEventListener('touchcancel',()=>touch[k]=false);el.addEventListener('mousedown',()=>{touch[k]=true;if(k==='pause')togglePause()});el.addEventListener('mouseup',()=>touch[k]=false);el.addEventListener('mouseleave',()=>touch[k]=false)}
@@ -399,8 +399,8 @@ const keys=new Set();
 document.addEventListener('keydown',e=>{keys.add(e.code);if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(storyShown){dismissStory();return}if(e.code==='Escape'&&gameScene&&gameScene.playerAlive)togglePause();if(e.code==='KeyM')toggleMusicMute();if(e.code==='KeyP'&&gameScene)takeScreenshot()});
 document.addEventListener('keyup',e=>keys.delete(e.code));
 let _lastSfxClick=0;
-document.addEventListener('click',e=>{ensureAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(storyShown){e.preventDefault();dismissStory();return}if(e.target.matches('button,.btn,.sb,.tab')&&Date.now()-_lastSfxClick>80){sfx('click');_lastSfxClick=Date.now()}});
-document.addEventListener('touchstart',e=>{ensureAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(storyShown){dismissStory();return}if(e.target.matches('button,.btn,.sb,.tab')&&Date.now()-_lastSfxClick>80){sfx('click');_lastSfxClick=Date.now()}},{passive:true});
+document.addEventListener('click',e=>{ensureAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(storyShown&&Date.now()-storyShownTime>400){e.preventDefault();dismissStory();return}if(e.target.matches('button,.btn,.sb,.tab')&&Date.now()-_lastSfxClick>80){sfx('click');_lastSfxClick=Date.now()}});
+document.addEventListener('touchstart',e=>{ensureAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(storyShown&&Date.now()-storyShownTime>400){dismissStory();return}if(e.target.matches('button,.btn,.sb,.tab')&&Date.now()-_lastSfxClick>80){sfx('click');_lastSfxClick=Date.now()}},{passive:true});
 function getInput(){return{l:keys.has('ArrowLeft')||keys.has('KeyA')||touch.l,r:keys.has('ArrowRight')||keys.has('KeyD')||touch.r,j:keys.has('Space')||keys.has('ArrowUp')||keys.has('KeyW')||touch.j,e:keys.has('KeyE')||keys.has('ShiftLeft')||keys.has('ShiftRight')||touch.e}}
 // ═══ PHASER BOOT SCENE ═══
 class BootScene extends Phaser.Scene{
@@ -573,7 +573,7 @@ this.parallaxLayers=this.buildParallaxLayers();this.renderParallax();
 this.scale.on('resize',this.onResize,this);
 
 // Story dismissal via Phaser input (most reliable on mobile)
-this.input.on('pointerdown',function(){if(storyShown)dismissStory()},this);
+this.input.on('pointerdown',function(){if(storyShown&&Date.now()-storyShownTime>400)dismissStory()},this);
 }
 
 buildLevel(n){
