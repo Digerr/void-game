@@ -524,6 +524,7 @@ this.deathParticles=[];this.fadeAlpha=1;this.fadeDir=-1;this.lastCause='';
 this.flood={active:false,level:800,speed:0,maxLevel:800,grace:0,isLava:false};
 this.chase={active:false,x:0,speed:0};
 this.weatherParticles=[];this.weatherTimer=0;
+this.timeScale=1;this.slowMoTimer=0;this.deathScreenTimer=0;
 
 this.physics.world.setBounds(0,-500,12000,1500);
 
@@ -1217,7 +1218,13 @@ update(time,delta){
 if(transState===2){transAlpha-=0.025;if(transAlpha<=0){transAlpha=0;transState=0;document.getElementById('transition-screen').style.display='none';document.getElementById('transition-screen').style.opacity='0'}document.getElementById('transition-screen').style.opacity=transAlpha}
 // === FADE-IN (must run even when paused/story) ===
 if(this.fadeAlpha>0&&this.fadeDir<0){this.fadeAlpha=Math.max(0,this.fadeAlpha-0.03)}
-if(!this.playerAlive||paused||storyShown||transAlpha>0)return;
+// === SLOW-MO ===
+if(this.slowMoTimer>0){this.slowMoTimer--;this.timeScale=Math.min(1,this.timeScale+0.06);this.physics.world.timeScale=this.timeScale}
+// === DELAYED DEATH SCREEN ===
+if(this.deathScreenTimer>0){this.deathScreenTimer--;if(this.deathScreenTimer<=0){document.getElementById('death-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'попробовать снова':'try again')}}
+// === DEATH PARTICLES (render even when dead) ===
+if(!this.playerAlive){this.deathParticles.forEach(dp=>{dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=dp.grav;dp.vx*=0.96;dp.life--});this.deathParticles=this.deathParticles.filter(dp=>dp.life>0);this.weatherParticles.forEach(wp=>{wp.life--;if(wp.type==='rain'){wp.x+=wp.vx;wp.y+=wp.vy}else if(wp.type==='ash'){wp.x+=wp.vx;wp.y+=wp.vy}else if(wp.type==='leaf'){wp.x+=wp.vx;wp.y+=wp.vy}else if(wp.type==='crystal'){wp.y+=wp.vy}});this.weatherParticles=this.weatherParticles.filter(wp=>wp.life>0);this.renderForeground();return}
+if(paused||storyShown||transAlpha>0)return;
 const dt=delta/1000;this.gameTime+=delta;
 const input=getInput();const dm=DIFF_MULT[difficulty];const lv=this.levelData;
 const grounded=this.player.body.touching.down||this.player.body.blocked.down;
@@ -1492,15 +1499,20 @@ if(platform.getData('type')==='breakable'&&!platform.getData('breaking')&&!platf
 
 kill(cause){
 if(!this.playerAlive)return;this.playerAlive=false;totalDeaths++;lvlDeaths++;this.flash=1;
-const shakeMap={spikes:0.015,saw:0.025,pendulum:0.02,crush:0.02,enemy:0.012,flood:0.008,chase:0.01,stalactite:0.02,lava:0.02,ice:0.01,fall:0.008};
-const shakeInt=shakeMap[cause]||0.015;const shakeDur=cause==='saw'?400:300;
-this.cameras.main.shake(shakeDur,shakeInt);sfx('death');
+// Intense screen shake + slow-mo
+const shakeMap={spikes:0.02,saw:0.04,pendulum:0.03,crush:0.03,enemy:0.018,flood:0.012,chase:0.015,stalactite:0.025,lava:0.03,ice:0.015,fall:0.01};
+const shakeInt=shakeMap[cause]||0.02;const shakeDur=cause==='saw'?500:400;
+this.cameras.main.shake(shakeDur,shakeInt);
+// Brief slow-mo (time scale dip)
+this.timeScale=0.3;this.slowMoTimer=12;
+sfx('death');
 this.lastCause=cause;this.spawnDeathParticles(cause);
 levelProgress[curLvl].deaths=lvlDeaths;saveProgress();
 const causes=t('causes');document.getElementById('death-cause').textContent=causes[cause]||causes.fall;
+// Delayed death screen (let particles play)
+this.deathScreenTimer=40;
 document.getElementById('ds-lvl').textContent=(curLvl+1)+'';document.getElementById('ds-deaths').textContent=totalDeaths+'';document.getElementById('ds-dist').textContent=this.score+'m';
-document.getElementById('death-screen').style.display='flex';this.player.setVisible(false);
-tgShowMainBtn(lang==='ru'?'попробовать снова':'try again');
+this.player.setVisible(false);
 if(this.grabbedBox){this.grabbedBox.setData('grabbed',false);this.grabbedBox=null}
 }
 
@@ -1510,6 +1522,7 @@ const cp=this.checkpointObjects.find(c=>c.getData('id')===this.checkpointId)||th
 if(cp){spawnX=cp.x;spawnY=cp.y+19}
 this.player.setPosition(spawnX,spawnY-CFG.PH);this.player.body.velocity.set(0,0);
 this.playerAlive=true;this.player.setVisible(true);this.flash=0;this.onRope=-1;this.grabbedBox=null;this.deathParticles=[];this.fadeAlpha=0.6;this.fadeDir=-1;
+this.timeScale=1;this.slowMoTimer=0;this.deathScreenTimer=0;this.physics.world.timeScale=1;
 this.fallingPlatforms.forEach(p=>{p.y=p.getData('oy')+7;p.setData('falling',false);p.setData('fv',0);p.setData('st',0)});
 this.breakablePlatforms.forEach(p=>{if(p.getData('broken')||p.getData('breaking')){p.setData('broken',false);p.setData('breaking',false);p.setData('bt',0);p.setVisible(true);p.body.enable=true;p.y=p.getData('oy')+7}});
 this.stalactites.forEach(s=>{if(s.getData('broken')){s.setData('broken',false);s.setData('falling',false);s.setData('triggered',false);s.y=s.getData('oy');s.setData('fv',0);s.setData('warnT',0)}});
