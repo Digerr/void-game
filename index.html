@@ -89,7 +89,7 @@ canvas{display:block}
 .st-l{font-size:.5rem;color:#3a3a3a;text-transform:uppercase;letter-spacing:.08em}
 .st-v{font-size:1rem;font-weight:700;color:#555}
 .st-v.red{color:#4a2020}.st-v.grn{color:#2a4a2a}
-#transition-screen{position:fixed;inset:0;z-index:30;display:none;background:#06060e;align-items:center;justify-content:center;flex-direction:column}
+#transition-screen{position:fixed;inset:0;z-index:30;display:none;background:#06060e;align-items:center;justify-content:center;flex-direction:column;touch-action:none;pointer-events:auto;-webkit-tap-highlight-color:transparent}
 .trans-text{font-size:.85rem;color:#4a4a5a;letter-spacing:.05em;max-width:340px;line-height:1.9;text-align:center}
 .trans-level{font-size:.65rem;color:#333;text-transform:uppercase;letter-spacing:.2em;margin-bottom:16px}
 .trans-hint{font-size:.5rem;color:#2a2a3a;letter-spacing:.15em;margin-top:24px;text-transform:uppercase;animation:pulse 1.5s infinite}
@@ -304,9 +304,10 @@ function hideAll(){['start-screen','death-screen','win-screen','pause-screen','t
 function togglePause(){if(storyShown||transState||!gameScene||!gameScene.playerAlive)return;paused=!paused;document.getElementById('pause-screen').style.display=paused?'flex':'none';if(gameScene){paused?gameScene.physics.pause():gameScene.physics.resume()}}
 function resumeGame(){paused=false;document.getElementById('pause-screen').style.display='none';if(gameScene)gameScene.physics.resume()}
 function quitToMenu(){paused=false;running=false;hideAll();document.getElementById('start-screen').style.display='flex';document.getElementById('btn-pause').style.display='none';curLvl=0;initProgress();updateProgress();fadeMusicOut();tgHideMainBtn();if(phaserGame){phaserGame.destroy(true);phaserGame=null}gameScene=null}
-function showStory(n){const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent=lang==='ru'?'нажмите чтобы продолжить':'click to continue';const ts=document.getElementById('transition-screen');ts.style.display='flex';ts.style.opacity='1';ts.onclick=dismissStory;ts.ontouchstart=function(e){e.preventDefault();dismissStory()};ts.style.cursor='pointer';storyShown=true}
+let storyAutoTimer=null;
+function showStory(n){const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent=lang==='ru'?'нажмите чтобы продолжить':'click to continue';const ts=document.getElementById('transition-screen');ts.style.display='flex';ts.style.opacity='1';ts.onclick=dismissStory;ts.ontouchstart=function(e){e.preventDefault();e.stopPropagation();dismissStory()};ts.onmousedown=function(){dismissStory()};ts.style.cursor='pointer';storyShown=true;clearTimeout(storyAutoTimer);storyAutoTimer=setTimeout(function(){if(storyShown)dismissStory()},8000)}
 function doTransition(n){transState=2;transAlpha=1;const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent='';document.getElementById('transition-screen').style.display='flex';document.getElementById('transition-screen').style.opacity='1';document.getElementById('transition-screen').onclick=null;setTimeout(()=>{transState=2},2500)}
-function dismissStory(){if(!storyShown)return;storyShown=false;transState=0;transAlpha=0;const ts=document.getElementById('transition-screen');ts.style.display='none';ts.style.opacity='0';ts.onclick=null;ts.ontouchstart=null;ts.style.cursor='default'}
+function dismissStory(){if(!storyShown)return;storyShown=false;transState=0;transAlpha=0;clearTimeout(storyAutoTimer);const ts=document.getElementById('transition-screen');ts.style.display='none';ts.style.opacity='0';ts.onclick=null;ts.ontouchstart=null;ts.onmousedown=null;ts.style.cursor='default'}
 function respawn(){if(gameScene)gameScene.doRespawn();document.getElementById('death-screen').style.display='none';tgHideMainBtn()}
 function nextLevel(){document.getElementById('win-screen').style.display='none';tgHideMainBtn();if(curLvl<LEVELS.length-1){curLvl++;launchLevel(curLvl,false)}}
 function formatTime(ms){const s=Math.floor(ms/1000);const m=Math.floor(s/60);return m+':'+(s%60<10?'0':'')+(s%60)}
@@ -392,8 +393,8 @@ const keys=new Set();
 document.addEventListener('keydown',e=>{keys.add(e.code);if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(storyShown){dismissStory();return}if(e.code==='Escape'&&gameScene&&gameScene.playerAlive)togglePause();if(e.code==='KeyM')toggleMusicMute();if(e.code==='KeyP'&&gameScene)takeScreenshot()});
 document.addEventListener('keyup',e=>keys.delete(e.code));
 let _lastSfxClick=0;
-document.addEventListener('click',e=>{ensureAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(storyShown){dismissStory();return}if(e.target.matches('button,.btn,.sb,.tab')&&Date.now()-_lastSfxClick>80){sfx('click');_lastSfxClick=Date.now()}});
-document.addEventListener('touchstart',e=>{ensureAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(storyShown){dismissStory();return}if(e.target.matches('button,.btn,.sb,.tab')&&Date.now()-_lastSfxClick>80){sfx('click');_lastSfxClick=Date.now()}},{passive:false});
+document.addEventListener('click',e=>{ensureAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(storyShown){e.preventDefault();dismissStory();return}if(e.target.matches('button,.btn,.sb,.tab')&&Date.now()-_lastSfxClick>80){sfx('click');_lastSfxClick=Date.now()}});
+document.addEventListener('touchstart',e=>{ensureAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(storyShown){dismissStory();return}if(e.target.matches('button,.btn,.sb,.tab')&&Date.now()-_lastSfxClick>80){sfx('click');_lastSfxClick=Date.now()}},{passive:true});
 function getInput(){return{l:keys.has('ArrowLeft')||keys.has('KeyA')||touch.l,r:keys.has('ArrowRight')||keys.has('KeyD')||touch.r,j:keys.has('Space')||keys.has('ArrowUp')||keys.has('KeyW')||touch.j,e:keys.has('KeyE')||keys.has('ShiftLeft')||keys.has('ShiftRight')||touch.e}}
 // ═══ PHASER BOOT SCENE ═══
 class BootScene extends Phaser.Scene{
@@ -562,6 +563,9 @@ this.hudDeaths=this.add.text(0,0,'',{fontFamily:'"Courier New",monospace',fontSi
 
 this.parallaxLayers=this.buildParallaxLayers();this.renderParallax();
 this.scale.on('resize',this.onResize,this);
+
+// Story dismissal via Phaser input (most reliable on mobile)
+this.input.on('pointerdown',function(){if(storyShown)dismissStory()},this);
 }
 
 buildLevel(n){
