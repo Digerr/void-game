@@ -166,6 +166,30 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 @keyframes starPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.4);opacity:1}100%{transform:scale(1);opacity:1}}
 .win-total-stats{display:flex;gap:16px;margin-top:6px;margin-bottom:8px;justify-content:center}
 .win-total-stat{font-size:.4rem;color:#2a3a3a;letter-spacing:.08em;text-transform:uppercase}
+/* Records / Leaderboard */
+#records-screen{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:28px;padding-bottom:20px}
+.rec-hero{display:flex;flex-direction:column;align-items:center;margin-bottom:12px}
+.rec-rank{font-size:2.2rem;font-weight:900;letter-spacing:.05em;line-height:1;margin-bottom:2px;text-shadow:0 0 20px currentColor}
+.rec-rank-label{font-size:.35rem;letter-spacing:.15em;text-transform:uppercase;opacity:.5;margin-bottom:8px}
+.rec-time{font-size:.75rem;color:#8a9aba;font-variant-numeric:tabular-nums;letter-spacing:.06em;margin-bottom:2px}
+.rec-time-label{font-size:.3rem;color:#4a4a5a;letter-spacing:.1em;text-transform:uppercase}
+.rank-S{color:#eaba3a}.rank-A{color:#8ac070}.rank-B{color:#5a8aba}.rank-C{color:#7a5aba}.rank-D{color:#6a5a6a}
+.rec-share{font-size:.45rem;color:#3a5a6a;letter-spacing:.1em;text-transform:uppercase;margin-top:6px;cursor:pointer;padding:4px 12px;border:1px solid #1a2a3a;border-radius:3px;transition:all .15s}
+.rec-share:hover{border-color:#3a5a6a;color:#5a8a9a}
+.rec-acts{max-width:360px;width:100%;padding:0 8px}
+.rec-act{margin-bottom:12px}
+.rec-act-header{display:flex;align-items:center;justify-content:space-between;padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:4px}
+.rec-act-name{font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.rec-act-time{font-size:.42rem;color:#5a6a7a;font-variant-numeric:tabular-nums;letter-spacing:.05em}
+.rec-row{display:flex;align-items:center;justify-content:space-between;padding:3px 6px;border-radius:4px;transition:background .15s}
+.rec-row:hover{background:rgba(255,255,255,.02)}
+.rec-row-left{display:flex;align-items:center;gap:6px}
+.rec-row-num{font-size:.6rem;font-weight:700;min-width:18px;color:#5a5a6a}
+.rec-row-name{font-size:.45rem;color:#6a6a7a;letter-spacing:.04em}
+.rec-row-right{display:flex;align-items:center;gap:6px}
+.rec-row-stars{font-size:.32rem}
+.rec-row-time{font-size:.42rem;color:#5a7a6a;font-variant-numeric:tabular-nums;min-width:32px;text-align:right}
+.rec-row-time.na{color:#2a2a3a}
 #level-select{overflow:hidden;justify-content:flex-start;padding-top:28px}
 .ls-summary{font-size:.4rem;color:#5a5a6a;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
 .ls-progress{width:300px;height:5px;background:rgba(255,255,255,.04);border-radius:3px;margin-bottom:12px;overflow:hidden;position:relative}
@@ -233,6 +257,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     </div>
     <div class="made-by">made by SERGO</div>
     <div class="menu-stats" id="menu-stats">
+      <span id="menu-rank" style="font-weight:900;color:#6a5a6a"></span>
       <span id="menu-completed">0/20</span>
       <span id="menu-stars-total">0 звёзд</span>
       <span id="menu-deaths-total">0 смертей</span>
@@ -396,8 +421,11 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   </div>
   <div id="records-screen">
     <div class="ls-title">рекорды</div>
-    <div id="records-list" style="max-width:340px;max-height:60vh;overflow-y:auto;width:100%;padding:0 8px;margin-bottom:16px"></div>
-    <button class="btn" id="btn-records-back">назад</button>
+    <div id="records-hero" class="rec-hero"></div>
+    <div id="records-list" class="rec-acts"></div>
+    <div style="padding:12px 0;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <button class="btn" id="btn-records-back">назад</button>
+    </div>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.9.2/dist/pixi.min.js"></script>
@@ -2876,62 +2904,96 @@ function shareResult(){
   tgHaptic('light');
 }
 function showRecords(){
-  var list=document.getElementById('records-list');
-  if(!list)return;list.innerHTML='';
+  var heroEl=document.getElementById('records-hero');
+  var listEl=document.getElementById('records-list');
+  if(!heroEl||!listEl)return;
+  heroEl.innerHTML='';listEl.innerHTML='';
+  // Calculate total time and rank
+  var totalTime=0,completedCount=0,totalStars=0;
+  for(var i=0;i<LEVELS.length;i++){
+    var bt=getLevelBestTime(i);
+    if(bt<Infinity){totalTime+=bt;completedCount++}
+    totalStars+=getLevelStars(i);
+  }
+  // Rank system based on total time (only completed levels count)
+  var rank='D',rankName='странник';
+  if(completedCount===LEVELS.length){
+    if(totalTime<300){rank='S';rankName='пустотный мастер'}
+    else if(totalTime<480){rank='A';rankName='ткач тьмы'}
+    else if(totalTime<720){rank='B';rankName='искатель'}
+    else if(totalTime<1200){rank='C';rankName='выживший'}
+    else{rank='D';rankName='странник'}
+  } else if(completedCount>=15){rank='C';rankName='выживший'}
+  else if(completedCount>=10){rank='C';rankName='искатель'}
+  else if(completedCount>=5){rank='D';rankName='бродяга'}
+  else if(completedCount>0){rank='D';rankName='новичок'}
+  else{rank='D';rankName='неизвестный'}
+  // Hero section
+  heroEl.innerHTML=
+    '<div class="rec-rank rank-'+rank+'">'+rank+'</div>'+
+    '<div class="rec-rank-label">'+rankName+'</div>'+
+    '<div class="rec-time">'+(completedCount>0?formatTime(totalTime*1000):'--:--')+'</div>'+
+    '<div class="rec-time-label">общее время</div>'+
+    '<div class="rec-share" id="btn-rec-share">поделиться</div>';
+  var shareBtn=document.getElementById('btn-rec-share');
+  if(shareBtn)shareBtn.addEventListener('click',function(){
+    var starStr='';for(var j=0;j<totalStars;j++)starStr+='★';
+    var text='🌑 VOID — рекорды\nРанг: '+rank+' — '+rankName+'\nОбщее время: '+(completedCount>0?formatTime(totalTime*1000):'--:--')+'\nПройдено: '+completedCount+'/'+LEVELS.length+'\nЗвёзды: '+totalStars+'/'+(LEVELS.length*3)+'\n\nСпустись во тьму → @voide_game_bot';
+    if(tg){try{tg.switchInlineQuery(text)}catch(e){}try{navigator.clipboard.writeText(text)}catch(e2){}}else{try{navigator.clipboard.writeText(text)}catch(e){}}
+    tgHaptic('light');
+  });
+  // Act breakdown
   var acts=[
-    {name:'Пробуждение',color:'#5a7a9a',levels:[0,1,2,3,4]},
-    {name:'Глубины',color:'#7a5a9a',levels:[5,6,7,8,9]},
-    {name:'Нити',color:'#9a7a3a',levels:[10,11,12,13,14]},
-    {name:'Пустота',color:'#6a4a5a',levels:[15,16,17,18,19]}
+    {name:'Пробуждение',color:'#5a8aba',levels:[0,1,2,3,4]},
+    {name:'Глубины',color:'#8a5aba',levels:[5,6,7,8,9]},
+    {name:'Нити',color:'#ba8a2a',levels:[10,11,12,13,14]},
+    {name:'Пустота',color:'#8a3a5a',levels:[15,16,17,18,19]}
   ];
   for(var a=0;a<acts.length;a++){
     var act=acts[a];
-    var actDiv=document.createElement('div');
-    actDiv.style.cssText='margin-bottom:12px';
-    var actHeader=document.createElement('div');
-    actHeader.style.cssText='font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+act.color+';margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid rgba(255,255,255,.04)';
-    actHeader.textContent=act.name;
-    actDiv.appendChild(actHeader);
+    var actDiv=document.createElement('div');actDiv.className='rec-act';
+    // Act header
+    var actTime=0,actCompleted=0;
+    for(var li=0;li<act.levels.length;li++){var bt=getLevelBestTime(act.levels[li]);if(bt<Infinity){actTime+=bt;actCompleted++}}
+    var header=document.createElement('div');header.className='rec-act-header';
+    header.innerHTML='<span class="rec-act-name" style="color:'+act.color+'">'+act.name+'</span><span class="rec-act-time">'+(actCompleted>0?formatTime(actTime*1000):'--:--')+'</span>';
+    actDiv.appendChild(header);
+    // Level rows
     for(var li=0;li<act.levels.length;li++){
       var idx=act.levels[li];
       var lvl=LEVELS[idx];
       var best=getLevelBestTime(idx);
       var stars=getLevelStars(idx);
-      var row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:3px 4px;border-bottom:1px solid rgba(255,255,255,.02)';
-      var left=document.createElement('div');
-      left.style.cssText='display:flex;align-items:center;gap:6px';
-      var numSpan=document.createElement('span');
-      numSpan.style.cssText='font-size:.65rem;font-weight:700;color:'+(stars>0?'#7a8aaa':'#3a3a4a')+';min-width:20px';
-      numSpan.textContent=idx+1;
-      var nameSpan=document.createElement('span');
-      nameSpan.style.cssText='font-size:.5rem;color:#6a6a7a;letter-spacing:.04em';
-      nameSpan.textContent=lvl.name;
-      left.appendChild(numSpan);left.appendChild(nameSpan);
-      var right=document.createElement('div');
-      right.style.cssText='display:flex;align-items:center;gap:8px';
-      var starSpan=document.createElement('span');
-      starSpan.style.cssText='font-size:.35rem';
-      var starStr='';for(var j=0;j<3;j++)starStr+='<span style="color:'+(j<stars?'#8ac070':'#2a2a3a')+'">★</span>';
-      starSpan.innerHTML=starStr;
-      var timeSpan=document.createElement('span');
-      timeSpan.style.cssText='font-size:.45rem;color:'+(best<Infinity?'#5a7a6a':'#3a3a4a')+';font-variant-numeric:tabular-nums;min-width:35px;text-align:right';
-      timeSpan.textContent=best<Infinity?formatTime(best*1000):'--:--';
-      right.appendChild(starSpan);right.appendChild(timeSpan);
-      row.appendChild(left);row.appendChild(right);
+      var row=document.createElement('div');row.className='rec-row';
+      var starHtml='';for(var j=0;j<3;j++)starHtml+='<span style="color:'+(j<stars?'#8ac070':'#2a2a3a')+'">★</span>';
+      row.innerHTML='<div class="rec-row-left"><span class="rec-row-num" style="color:'+(stars>0?act.color:'#3a3a4a')+'">'+(idx+1)+'</span><span class="rec-row-name">'+lvl.name+'</span></div><div class="rec-row-right"><span class="rec-row-stars">'+starHtml+'</span><span class="rec-row-time'+(best>=Infinity?' na':'')+'">'+(best<Infinity?formatTime(best*1000):'--:--')+'</span></div>';
       actDiv.appendChild(row);
     }
-    list.appendChild(actDiv);
+    listEl.appendChild(actDiv);
   }
 }
 function updateMenuStats(){
   var completed=0,totalStars=0;
   for(var i=0;i<LEVELS.length;i++){var s=getLevelStars(i);if(s>0){completed++;totalStars+=s}}
   var shardCount=progress.shards?progress.shards.length:0;
+  // Calculate rank for menu display
+  var totalTime=0;
+  for(var i=0;i<LEVELS.length;i++){var bt=getLevelBestTime(i);if(bt<Infinity)totalTime+=bt}
+  var rank='D',rankColor='#6a5a6a';
+  if(completed===LEVELS.length){
+    if(totalTime<300){rank='S';rankColor='#eaba3a'}
+    else if(totalTime<480){rank='A';rankColor='#8ac070'}
+    else if(totalTime<720){rank='B';rankColor='#5a8aba'}
+    else if(totalTime<1200){rank='C';rankColor='#7a5aba'}
+  }else if(completed>=15){rank='C';rankColor='#7a5aba'}
+  else if(completed>=10){rank='C';rankColor='#7a5aba'}
+  else if(completed>=5){rank='D';rankColor='#6a5a6a'}
+  var rEl=document.getElementById('menu-rank');
   var cEl=document.getElementById('menu-completed');
   var sEl=document.getElementById('menu-stars-total');
   var dEl=document.getElementById('menu-deaths-total');
   var pEl=document.getElementById('menu-progress-fill');
+  if(rEl){rEl.textContent=rank;rEl.style.color=rankColor}
   if(cEl)cEl.textContent=completed+'/'+LEVELS.length;
   if(sEl)sEl.textContent=totalStars+' звёзд | '+shardCount+' осколков';
   if(dEl)dEl.textContent=state.totalDeaths+' смертей';
