@@ -142,45 +142,50 @@ var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAm
 var LEVELS=[
   {
     name:'Пробуждение',story:'Ты очнулся во тьме. Не помнишь кто ты, не помнишь откуда. Только одно чувство — нужно двигаться. Вперёд. Туда, где мерцает далёкий свет.',
-    width:3200,height:800,spawn:{x:80,y:500},exit:{x:3000,y:350,w:40,h:80},
+    width:3200,height:800,spawn:{x:80,y:500},exit:{x:3000,y:430,w:40,h:80},
     platforms:[
       {x:0,y:650,w:700,h:40},{x:850,y:650,w:500,h:40},{x:1550,y:650,w:400,h:40},{x:2100,y:650,w:500,h:40},{x:2750,y:650,w:450,h:40},
       {x:300,y:540,w:120,h:16},{x:500,y:440,w:120,h:16},{x:700,y:520,w:100,h:16},
       {x:1000,y:490,w:130,h:16},{x:1250,y:400,w:120,h:16},{x:1450,y:530,w:100,h:16},
       {x:1700,y:460,w:120,h:16},{x:1950,y:380,w:100,h:16},
-      {x:2900,y:350,w:160,h:16},
+      {x:2500,y:550,w:80,h:16},{x:2700,y:490,w:80,h:16},
+      {x:2900,y:430,w:160,h:16},
     ],
     spikes:[{x:740,y:630,w:80},{x:1400,y:630,w:60}],
   },
   {
     name:'Стены',story:'Тьма сжимается. Стены становятся ближе. Но стены — не только преграда. Они могут стать путём наверх.',
-    width:3600,height:900,spawn:{x:80,y:650},exit:{x:3400,y:200,w:40,h:80},
+    width:3600,height:900,spawn:{x:80,y:650},exit:{x:3400,y:350,w:40,h:80},
     platforms:[
       {x:0,y:750,w:500,h:40},{x:700,y:750,w:300,h:40},{x:1200,y:750,w:300,h:40},{x:1700,y:750,w:400,h:40},{x:2300,y:750,w:300,h:40},{x:2800,y:750,w:300,h:40},{x:3200,y:750,w:400,h:40},
       {x:550,y:400,w:20,h:350},{x:680,y:400,w:20,h:350},{x:600,y:550,w:60,h:16},
       {x:1050,y:600,w:100,h:16},{x:1050,y:350,w:20,h:250},{x:1200,y:350,w:20,h:250},{x:1070,y:450,w:130,h:16},
       {x:1600,y:600,w:80,h:16},{x:1850,y:550,w:80,h:16},
       {x:2150,y:200,w:20,h:350},{x:2280,y:200,w:20,h:350},{x:2170,y:400,w:60,h:16},
-      {x:2500,y:350,w:120,h:16},{x:2700,y:280,w:100,h:16},{x:3300,y:200,w:160,h:16},
+      {x:2500,y:400,w:120,h:16},{x:2750,y:480,w:80,h:16},
+      {x:3000,y:420,w:80,h:16},{x:3200,y:380,w:80,h:16},
+      {x:3300,y:350,w:160,h:16},
     ],
     spikes:[{x:620,y:730,w:60},{x:1120,y:730,w:60},{x:2000,y:730,w:80},{x:2600,y:730,w:80}],
   },
   {
     name:'Пилы',story:'Тишина нарушена. Вдали слышен скрежет — что-то вращается, что-то ждёт. Механизмы тьмы не знают пощады.',
-    width:4000,height:900,spawn:{x:80,y:650},exit:{x:3800,y:350,w:40,h:80},
+    width:4000,height:900,spawn:{x:80,y:650},exit:{x:3800,y:450,w:40,h:80},
     platforms:[
       {x:0,y:750,w:600,h:40},{x:800,y:750,w:400,h:40},{x:1400,y:750,w:300,h:40},{x:1900,y:750,w:400,h:40},{x:2500,y:750,w:300,h:40},{x:3000,y:750,w:400,h:40},{x:3550,y:750,w:450,h:40},
       {x:350,y:600,w:100,h:16},{x:550,y:500,w:100,h:16},{x:700,y:580,w:80,h:16},{x:950,y:550,w:100,h:16},
       {x:1200,y:480,w:80,h:16},{x:1550,y:520,w:100,h:16},{x:1750,y:430,w:80,h:16},
       {x:2100,y:550,w:80,h:16},{x:2300,y:480,w:80,h:16},
-      {x:2700,y:500,w:120,h:16},{x:2900,y:420,w:100,h:16},{x:3100,y:350,w:100,h:16},{x:3700,y:350,w:160,h:16},
+      {x:2700,y:500,w:120,h:16},{x:2900,y:420,w:100,h:16},
+      {x:3300,y:550,w:80,h:16},{x:3500,y:500,w:80,h:16},
+      {x:3700,y:450,w:160,h:16},
     ],
     spikes:[{x:640,y:730,w:60},{x:1230,y:730,w:60},{x:1820,y:730,w:60}],
     saws:[{x:1100,y:680,r:30},{x:1650,y:660,r:35},{x:2200,y:650,r:30},{x:2650,y:680,r:25}],
   },
   {
     name:'Бездна',story:'Дно исчезло. Остались лишь платформы, парящие в пустоте. Один неверный шаг — и тьма примет тебя.',
-    width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:250,w:40,h:80},
+    width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:400,w:40,h:80},
     platforms:[
       {x:0,y:800,w:400,h:40},
       {x:500,y:720,w:100,h:16},{x:700,y:640,w:80,h:16},{x:900,y:700,w:100,h:16},
@@ -189,14 +194,15 @@ var LEVELS=[
       {x:2050,y:650,w:200,h:40},
       {x:2350,y:500,w:20,h:300},{x:2500,y:400,w:20,h:400},{x:2370,y:550,w:60,h:16},{x:2430,y:420,w:60,h:16},
       {x:2700,y:380,w:100,h:16},{x:2900,y:320,w:100,h:16},{x:3100,y:400,w:80,h:16},{x:3300,y:330,w:100,h:16},
-      {x:3500,y:380,w:80,h:16},{x:4200,y:250,w:160,h:16},
+      {x:3500,y:380,w:80,h:16},{x:3700,y:480,w:80,h:16},{x:3900,y:440,w:80,h:16},
+      {x:4200,y:400,w:160,h:16},
     ],
     spikes:[{x:430,y:780,w:50},{x:2000,y:630,w:40}],
     saws:[{x:1500,y:650,r:30},{x:1750,y:580,r:25},{x:3000,y:340,r:25},{x:3700,y:400,r:30}],
   },
   {
     name:'Механизмы',story:'Древние механизмы ещё работают. Рычаги открывают двери, платформы движутся по рельсам. Но и тьма научилась пользоваться механизмами.',
-    width:4200,height:900,spawn:{x:80,y:600},exit:{x:4000,y:300,w:40,h:80},
+    width:4200,height:900,spawn:{x:80,y:600},exit:{x:4000,y:450,w:40,h:80},
     platforms:[
       {x:0,y:750,w:600,h:40},{x:800,y:750,w:400,h:40},{x:1400,y:750,w:300,h:40},
       {x:1900,y:750,w:400,h:40},{x:2500,y:750,w:400,h:40},{x:3100,y:750,w:300,h:40},
@@ -211,9 +217,9 @@ var LEVELS=[
       {x:2100,y:500,w:80,h:16},
       // Upper exit path
       {x:2800,y:500,w:120,h:16},{x:3000,y:420,w:100,h:16},
-      {x:3200,y:350,w:80,h:16},
-      {x:3500,y:400,w:100,h:16},
-      {x:3900,y:300,w:160,h:16},
+      {x:3400,y:550,w:80,h:16},{x:3600,y:500,w:80,h:16},
+      {x:3800,y:480,w:80,h:16},
+      {x:3900,y:450,w:160,h:16},
     ],
     spikes:[{x:640,y:730,w:80},{x:1230,y:730,w:60},{x:1830,y:730,w:60}],
     saws:[{x:2700,y:680,r:28},{x:3350,y:680,r:30}],
@@ -227,7 +233,7 @@ var LEVELS=[
   },
   {
     name:'Тени',story:'Ты не один во тьме. Что-то движется в глубине — тёмные силуэты, патрулирующие свои владения. Они не видят, но чувствуют.',
-    width:4800,height:900,spawn:{x:80,y:650},exit:{x:4600,y:250,w:40,h:80},
+    width:4800,height:900,spawn:{x:80,y:650},exit:{x:4600,y:400,w:40,h:80},
     platforms:[
       {x:0,y:750,w:500,h:40},{x:700,y:750,w:400,h:40},{x:1300,y:750,w:400,h:40},
       {x:1900,y:750,w:400,h:40},{x:2500,y:750,w:300,h:40},{x:3000,y:750,w:400,h:40},
@@ -242,9 +248,11 @@ var LEVELS=[
       {x:2650,y:400,w:100,h:16},
       // Wall climb
       {x:2850,y:250,w:20,h:300},{x:2980,y:250,w:20,h:300},{x:2870,y:400,w:60,h:16},{x:2940,y:320,w:60,h:16},
-      // Exit
-      {x:3200,y:350,w:100,h:16},{x:3400,y:280,w:80,h:16},{x:3600,y:350,w:100,h:16},
-      {x:3800,y:420,w:80,h:16},{x:4000,y:350,w:80,h:16},{x:4400,y:250,w:160,h:16},
+      // Exit path
+      {x:3200,y:400,w:100,h:16},{x:3400,y:350,w:80,h:16},{x:3600,y:420,w:100,h:16},
+      {x:3800,y:480,w:80,h:16},{x:4000,y:450,w:80,h:16},
+      {x:4200,y:430,w:80,h:16},
+      {x:4400,y:400,w:160,h:16},
     ],
     spikes:[{x:540,y:730,w:60},{x:1170,y:730,w:60},{x:1750,y:730,w:80},{x:2420,y:730,w:60}],
     saws:[{x:2050,y:680,r:28},{x:3150,y:680,r:30}],
@@ -260,7 +268,7 @@ var LEVELS=[
   },
   {
     name:'Нить',story:'Из темноты появляется мерцающая нить — тонкая, почти невидимая. Но если потянуть за неё, она выдержит. Она станет мостом через пропасть, верёвкой для спуска, путём наверх. Тяни — и держись.',
-    width:5000,height:1000,spawn:{x:80,y:600},exit:{x:4800,y:250,w:40,h:80},
+    width:5000,height:1000,spawn:{x:80,y:600},exit:{x:4800,y:380,w:40,h:80},
     platforms:[
       {x:0,y:750,w:500,h:40},{x:700,y:750,w:300,h:40},{x:1200,y:750,w:300,h:40},
       {x:1700,y:750,w:300,h:40},{x:2200,y:750,w:300,h:40},{x:2700,y:750,w:400,h:40},
@@ -276,11 +284,10 @@ var LEVELS=[
       {x:2800,y:420,w:80,h:16},
       // After second swing
       {x:3100,y:350,w:80,h:16},{x:3250,y:280,w:80,h:16},
-      // Upper path
-      {x:3500,y:350,w:80,h:16},{x:3700,y:300,w:80,h:16},
-      {x:3950,y:350,w:80,h:16},
-      {x:4200,y:400,w:80,h:16},
-      {x:4600,y:250,w:160,h:16},
+      // Exit path with stepping stones
+      {x:3500,y:450,w:80,h:16},{x:3700,y:420,w:80,h:16},
+      {x:3950,y:480,w:80,h:16},{x:4200,y:440,w:80,h:16},
+      {x:4600,y:380,w:160,h:16},
     ],
     spikes:[{x:540,y:730,w:60},{x:1050,y:730,w:60},{x:1560,y:730,w:80},{x:2580,y:730,w:60}],
     saws:[{x:2050,y:680,r:28},{x:3850,y:680,r:25}],
@@ -293,7 +300,7 @@ var LEVELS=[
   },
   {
     name:'Качели',story:'Тьма учит новому: если раскачаться посильнее, можно долететь туда, куда не добраться пешком. Нить — не только путь, но и разбег. Главное — вовремя отпустить.',
-    width:5500,height:1100,spawn:{x:80,y:650},exit:{x:5300,y:200,w:40,h:80},
+    width:5500,height:1100,spawn:{x:80,y:650},exit:{x:5300,y:400,w:40,h:80},
     platforms:[
       {x:0,y:800,w:400,h:40},{x:600,y:800,w:300,h:40},{x:1100,y:800,w:300,h:40},
       {x:1600,y:800,w:400,h:40},{x:2200,y:800,w:300,h:40},{x:2700,y:800,w:300,h:40},
@@ -315,14 +322,13 @@ var LEVELS=[
       {x:3100,y:500,w:80,h:16},
       // Upper path
       {x:3400,y:450,w:80,h:16},{x:3600,y:380,w:80,h:16},
-      {x:3850,y:350,w:100,h:16},
+      {x:3850,y:450,w:100,h:16},
       // Moving platform + thread combo
-      {x:4100,y:400,w:80,h:16},
-      // Final climb
-      {x:4500,y:400,w:80,h:16},
-      {x:4700,y:320,w:80,h:16},
-      {x:4900,y:250,w:80,h:16},
-      {x:5100,y:200,w:160,h:16},
+      {x:4100,y:500,w:80,h:16},
+      // Final climb with stepping stones
+      {x:4500,y:550,w:80,h:16},{x:4700,y:500,w:80,h:16},
+      {x:4900,y:450,w:80,h:16},
+      {x:5100,y:400,w:160,h:16},
     ],
     spikes:[{x:440,y:780,w:60},{x:940,y:780,w:60},{x:1450,y:780,w:80},{x:2560,y:780,w:60},{x:3070,y:780,w:80},{x:4250,y:780,w:60}],
     saws:[{x:2000,y:730,r:30},{x:2950,y:730,r:25},{x:4450,y:730,r:28}],
@@ -858,17 +864,17 @@ function updateLightAndFog(dt){
   lightCtx.clearRect(0,0,sw,sh);
   // 1. Fill everything with darkness
   lightCtx.globalCompositeOperation='source-over';
-  lightCtx.fillStyle='rgba(2,2,8,0.5)';
+  lightCtx.fillStyle='rgba(2,2,8,0.35)';
   lightCtx.fillRect(0,0,sw,sh);
   // 2. Cut radial gradient hole around player (destination-out ERASES existing pixels)
-  var lightR=240+Math.sin(lightTime*1.5)*15;
+  var lightR=320+Math.sin(lightTime*1.5)*20;
   lightCtx.globalCompositeOperation='destination-out';
   var grad=lightCtx.createRadialGradient(px,py,0,px,py,lightR);
   grad.addColorStop(0,'rgba(255,255,255,1)');
-  grad.addColorStop(0.25,'rgba(255,255,255,0.95)');
-  grad.addColorStop(0.5,'rgba(255,255,255,0.7)');
-  grad.addColorStop(0.75,'rgba(255,255,255,0.3)');
-  grad.addColorStop(0.9,'rgba(255,255,255,0.08)');
+  grad.addColorStop(0.3,'rgba(255,255,255,0.95)');
+  grad.addColorStop(0.55,'rgba(255,255,255,0.7)');
+  grad.addColorStop(0.75,'rgba(255,255,255,0.35)');
+  grad.addColorStop(0.9,'rgba(255,255,255,0.1)');
   grad.addColorStop(1,'rgba(255,255,255,0)');
   lightCtx.fillStyle=grad;
   lightCtx.beginPath();lightCtx.arc(px,py,lightR,0,Math.PI*2);lightCtx.fill();
@@ -887,16 +893,16 @@ function updateLightAndFog(dt){
   playerGlow.clear();
   if(player.alive){
     // Broad warm aura
-    playerGlow.circle(px,py,80);playerGlow.fill({color:0x060c1a,alpha:0.2});
-    playerGlow.circle(px,py,45);playerGlow.fill({color:0x0a1428,alpha:0.15});
+    playerGlow.circle(px,py,100);playerGlow.fill({color:0x0a1428,alpha:0.25});
+    playerGlow.circle(px,py,60);playerGlow.fill({color:0x0e1c34,alpha:0.2});
     // Close glow
-    playerGlow.circle(px,py,20);playerGlow.fill({color:0x101c34,alpha:0.1});
-    // Eye light — pulsing blue glow
-    var eyeR=10+Math.sin(lightTime*3)*4;
+    playerGlow.circle(px,py,30);playerGlow.fill({color:0x142844,alpha:0.15});
+    // Eye light — pulsing blue glow (the main light source!)
+    var eyeR=14+Math.sin(lightTime*3)*5;
     playerGlow.circle(px+player.facing*3,py-PLAYER_H/2-7,eyeR);
-    playerGlow.fill({color:0x2a4a7a,alpha:0.25+Math.sin(lightTime*3)*0.1});
-    playerGlow.circle(px+player.facing*3,py-PLAYER_H/2-7,4);
-    playerGlow.fill({color:0x4a7aba,alpha:0.3});
+    playerGlow.fill({color:0x3a5a9a,alpha:0.35+Math.sin(lightTime*3)*0.12});
+    playerGlow.circle(px+player.facing*3,py-PLAYER_H/2-7,6);
+    playerGlow.fill({color:0x5a8ada,alpha:0.4});
   }
   // Thread glow
   if(thread.active){
