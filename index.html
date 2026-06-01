@@ -1340,6 +1340,7 @@ function loadProfile(){
   if(!c)return;
   if(!tg||!tg.initData){c.innerHTML='<div class="lb-empty">играй через Telegram<br><div class="lb-sub">для доступа к профилю</div></div>';return}
   c.innerHTML='<div class="lb-loading">загрузка...</div>';
+  console.log('[VOID] initData preview:', tg.initData.substring(0, 80) + '...');
   fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'profile',initData:tg.initData})}).then(function(r){return r.json()}).then(function(d){
     console.log('[VOID] Profile response:',JSON.stringify(d));
     if(!d.ok){
