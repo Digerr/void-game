@@ -196,17 +196,21 @@ canvas{display:block}
 
 // ═══ TELEGRAM WEBAPP SDK ═══
 const tg=window.Telegram&&window.Telegram.WebApp?window.Telegram.WebApp:null;
-let tgPlayerName='';
+let tgPlayerName='';let tgUserId='';
 if(tg){
 tg.ready();tg.expand();
-if(tg.initDataUnsafe&&tg.initDataUnsafe.user){tgPlayerName=tg.initDataUnsafe.user.first_name||''}
+if(tg.initDataUnsafe&&tg.initDataUnsafe.user){tgPlayerName=tg.initDataUnsafe.user.first_name||'';tgUserId=tg.initDataUnsafe.user.id?String(tg.initDataUnsafe.user.id):''}
 // MainButton — shows "play again" on death/victory
 tg.MainButton.setParams({color:'#1a1a2e',text_color:'#7a7a9a',is_visible:false});
 tg.MainButton.onClick(()=>{if(document.getElementById('death-screen').style.display==='flex')respawn();else if(document.getElementById('victory-screen').style.display==='flex'||document.getElementById('win-screen').style.display==='flex'){document.getElementById('win-screen').style.display='none';document.getElementById('victory-screen').style.display='none';startGame()}else if(document.getElementById('start-screen').style.display==='flex')startGame();tg.MainButton.hide()});
+// Apply TG theme colors
+try{if(tg.themeParams){const tp=tg.themeParams;if(tp.bg_color)document.body.style.background=tp.bg_color;if(tp.text_color){document.documentElement.style.setProperty('--tg-text',tp.text_color)}}}catch(e){}
 }
 function tgShowMainBtn(text){if(tg){tg.MainButton.setText(text);tg.MainButton.show()}}
 function tgHideMainBtn(){if(tg)tg.MainButton.hide()}
-function tgShare(){if(tg){tg.openTelegramLink('https://t.me/share/url?url=https://t.me/voide_game_bot&text='+encodeURIComponent(lang==='ru'?'Загляни во тьму — VOID':'Step into the void — VOID'))}else{window.open('https://t.me/share/url?url=https://t.me/voide_game_bot','_blank')}}
+function tgShare(){const completedCount=levelProgress.filter(p=>p.completed).length;const shareText=lang==='ru'?`Я добрался до ${completedCount}/30 уровней во тьме VOID. А ты?`:`I reached ${completedCount}/30 levels in the VOID. Can you beat me?`;if(tg){tg.openTelegramLink('https://t.me/share/url?url=https://t.me/voide_game_bot&text='+encodeURIComponent(shareText))}else{window.open('https://t.me/share/url?url=https://t.me/voide_game_bot&text='+encodeURIComponent(shareText),'_blank')}}
+function tgSaveCloud(){if(!tg||!tg.CloudStorage)return;try{const data={progress:levelProgress,deaths:totalDeaths,startTime:startTime};tg.CloudStorage.setItem('void_save',JSON.stringify(data),function(err){if(err)console.warn('Cloud save error:',err)})}catch(e){}}
+function tgLoadCloud(){if(!tg||!tg.CloudStorage)return new Promise(function(){});return new Promise(function(resolve){try{tg.CloudStorage.getItem('void_save',function(err,val){if(!err&&val){try{const d=JSON.parse(val);if(d&&d.progress&&d.progress.length>0){if(d.deaths>totalDeaths)totalDeaths=d.deaths;for(let i=0;i<Math.min(d.progress.length,30);i++){if(d.progress[i].completed&&!levelProgress[i].completed)levelProgress[i].completed=true;if(d.progress[i].bestTime&&(!levelProgress[i].bestTime||d.progress[i].bestTime<levelProgress[i].bestTime))levelProgress[i].bestTime=d.progress[i].bestTime}saveProgress();updateProgress()}}catch(e){}}resolve()})}catch(e){resolve()}})}
 
 // ═══ SETTINGS ═══
 let quality=2,lang='ru',difficulty=0,paused=false;
@@ -316,7 +320,7 @@ function formatTime(ms){const s=Math.floor(ms/1000);const m=Math.floor(s/60);ret
 let levelProgress=[],totalDeaths=0,lvlDeaths=0,startTime=0,playTime=0;
 function initProgress(){levelProgress=[];for(let i=0;i<30;i++)levelProgress.push({completed:false,deaths:0,bestDist:0,bestTime:0})}
 function loadProgress(){try{const d=JSON.parse(localStorage.getItem('void_progress'));if(d&&d.length>0){levelProgress=d;if(d.length<30)for(let i=d.length;i<30;i++)levelProgress.push({completed:false,deaths:0,bestDist:0,bestTime:0});totalDeaths=parseInt(localStorage.getItem('void_deaths')||'0');startTime=parseInt(localStorage.getItem('void_startTime')||'0');return true}}catch(e){}return false}
-function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(levelProgress));localStorage.setItem('void_deaths',totalDeaths+'');localStorage.setItem('void_startTime',startTime+'')}catch(e){}}
+function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(levelProgress));localStorage.setItem('void_deaths',totalDeaths+'');localStorage.setItem('void_startTime',startTime+'')}catch(e){}tgSaveCloud()}
 function updateProgress(){const grid=document.getElementById('prog-grid');if(!grid)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const p=levelProgress[i];const unlocked=i===0||levelProgress[i-1].completed;const status=!unlocked?0:(p.completed?2:1);const cls=!unlocked?'locked':'';const statusText=l.progress[status];const statusCls=status===2?'done':status===1?'cur':'lock';const bt=p.bestTime?' | '+formatTime(p.bestTime):'';html+='<div class="prog-card '+cls+'"><div class="prog-num">'+(i+1)+'/30</div><div class="prog-name">'+LEVELS[i].name[lang]+'</div><div class="prog-stat">'+l.deathsL+': '+p.deaths+bt+'</div><div class="prog-status '+statusCls+'">'+statusText+'</div></div>'}grid.innerHTML=html}
 function updateLevelList(){const list=document.getElementById('lvl-list');if(!list)return;const l=L[lang];let html='';for(let i=0;i<30;i++){const lv=LEVELS[i];const actIdx=i<8?0:i<16?1:i<24?2:3;const actName=l.actNames[actIdx];html+='<div class="lvl-item"><div class="lvl-num">'+(i+1)+'</div><div class="lvl-info"><div class="lvl-name">'+lv.name[lang]+'</div><div class="lvl-desc">'+lv.story[lang].substring(0,80)+(lv.story[lang].length>80?'...':'')+'</div><div class="lvl-act">'+actName+'</div></div></div>'}list.innerHTML=html}
 function updateFAQ(){const el=document.getElementById('faq-content');if(!el)return;const l=L[lang];let html='';for(const item of l.faq){html+='<div class="faq-item"><div class="faq-q">'+item.q+'</div><div class="faq-a">'+item.a+'</div></div>'}el.innerHTML=html}
@@ -1877,7 +1881,7 @@ running=true;
 
 // ═══ INIT ═══
 setupTouch('btn-left','l');setupTouch('btn-right','r');setupTouch('btn-jump','j');setupTouch('btn-interact','e');setupTouch('btn-pause','pause');
-initProgress();loadProgress();
+initProgress();loadProgress();tgLoadCloud();
 // Load saved settings
 try{const sl=localStorage.getItem('void_lang');if(sl){lang=sl;document.querySelectorAll('.sbtns').forEach(g=>{g.querySelectorAll('.sb').forEach(b=>{b.classList.remove('on');if(b.textContent===(sl==='ru'?'RU':'EN'))b.classList.add('on')})})}}catch(e){}
 try{const sq=localStorage.getItem('void_quality');if(sq){quality=parseInt(sq)}}catch(e){}
