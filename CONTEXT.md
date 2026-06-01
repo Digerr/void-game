@@ -22,7 +22,7 @@
 
 ## ТЕКУЩИЙ СТАТУС
 
-- **Версия**: Beta 0.9.9 (profile + notifications)
+- **Версия**: Beta 0.9.9 (profile + notifications) ✅ РЕАЛИЗОВАНО
 - **Стек**: PixiJS 8.9.2 + Matter.js 0.20.0 + Supabase JS 2.x
 - **Файл**: index.html (единый файл, ~4477 строк)
 - **Хостинг**: Vercel → https://void-game-ruddy.vercel.app
@@ -61,7 +61,11 @@ index.html (единый файл)
 
 ```
 void-game-api/ (Vercel Serverless)
-├── api/leaderboard.js — POST endpoint (verify initData, compute score, upsert Supabase)
+├── api/leaderboard.js — POST endpoint (verify initData, actions: score/submit, register, profile, toggle_notifications)
+│   ├── score submit: compute score, upsert leaderboard, register player, check rank change → notify via Bot API
+│   ├── register: upsert player (id, chat_id, name)
+│   ├── profile: return player info + leaderboard stats + rank
+│   └── toggle_notifications: enable/disable notifications for player
 ├── package.json — @supabase/supabase-js dependency
 └── vercel.json — CORS headers, rewrites
 ```
@@ -110,6 +114,20 @@ score = completed × 10000 + totalStars × 100 − round(totalTime)
 - **anon**: SELECT только (чтение)
 - **service_role**: полный доступ (запись через Vercel API)
 
+### Supabase таблица players
+| Колонка | Тип | Описание |
+|---------|-----|----------|
+| id | text PK | tg_{userId} (совпадает с leaderboard.id) |
+| chat_id | bigint | Telegram user ID (для отправки уведомлений) |
+| name | text | Имя из Telegram (first_name только, без username) |
+| notifications_enabled | boolean | Уведомления вкл/выкл (default: true) |
+| best_rank | integer | Лучший ранг за всё время |
+| created | timestamptz | Дата регистрации |
+
+### RLS политика (players)
+- **anon**: SELECT, INSERT, UPDATE (публичный доступ)
+- **service_role**: полный доступ
+
 ### Ключевые функции в index.html
 - `initSupabase()` — создаёт Supabase клиент
 - `computeLBScore()` — считает score на клиенте (для отображения)
@@ -118,6 +136,10 @@ score = completed × 10000 + totalStars × 100 − round(totalTime)
 - `loadLB()` — загружает данные + подписка на Realtime
 - `renderLB()` — рендерит список, учитывает вкладку
 - `getMyLBId()` — возвращает ID текущего игрока
+- `registerPlayer()` — регистрирует игрока при запуске (POST action=register)
+- `loadProfile()` — загружает данные профиля с сервера
+- `renderProfile(d)` — рендерит экран профиля
+- `toggleNotifications()` — переключает уведомления
 
 ### Вызов submitLB()
 Срабатывает автоматически при завершении уровня (в функции win-level).
@@ -190,7 +212,7 @@ score = completed × 10000 + totalStars × 100 − round(totalTime)
 | 0-12. Фундамент → PWA | ✅ |
 | 13. Лидерборд (Supabase + Vercel) | ✅ |
 | 14. 30+ уровней | ⬜ |
-| 15. Социальное | ⬜ |
+| 15. Социальное (профиль + уведомления) | ✅ |
 | 16. Полировка | ⬜ |
 
 ---
@@ -207,4 +229,4 @@ score = completed × 10000 + totalStars × 100 − round(totalTime)
 | alpha 2.3 | Фикс: персонаж не залезает на текст, существо на заставке = меню, меню на весь экран |
 | beta 0.9.7 | Pre-release полировка |
 | beta 0.9.8 | Лидерборд: Supabase + Vercel API, 3 вкладки, real-time, anti-cheat (HMAC initData) |
-| beta 0.9.9 | Профиль игрока (аватарка, ранг, статистика, достижения), уведомления при обгоне в лидерборде |
+| beta 0.9.9 | Профиль игрока (аватарка из TG, ранг, статы, достижения, дни в игре), уведомления при обгоне в лидерборде (Telegram Bot API), toggle уведомлений, players таблица в Supabase |
