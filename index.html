@@ -1661,7 +1661,7 @@ function initPixi(){
     window.addEventListener('resize',onResize);onResize();
   });
 }
-function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);for(var i=0;i<4;i++){g.circle(cx,cy,mr*(1-i*0.12));g.fill({color:0x222240,alpha:i*0.008})}}
+function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);var act=getCurrentAct();var theme=ACT_THEMES[act]||ACT_THEMES[0];var vc=theme.skyTop;for(var i=0;i<4;i++){g.circle(cx,cy,mr*(1-i*0.12));g.fill({color:vc,alpha:i*0.008})}}
 function onResize(){if(!pixiApp)return;pixiApp.renderer.resize(window.innerWidth,window.innerHeight);drawVignette();if(lightCanvas){var sw=Math.max(1,Math.floor(pixiApp.screen.width)),sh=Math.max(1,Math.floor(pixiApp.screen.height));if(lightCanvas.width!==sw||lightCanvas.height!==sh){lightCanvas.width=sw;lightCanvas.height=sh;lightTexture=PIXI.Texture.from(lightCanvas);lightSprite.texture=lightTexture}}}
 
 // ═══ MATTER.JS SETUP ═══
@@ -2716,55 +2716,219 @@ var bgStars=[]; // Store star positions for twinkling
 var bgStarSprite=null;
 var bgMoonSprite=null;
 var bgTime=0;
-function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();bgLayers=[];bgStars=[];
-// Layer 0: Stars (dynamic — redrawn each frame for twinkling)
+var bgSkySprite=null;
+var bgDistantLights=[];
+var bgFogSprites=[];
+var bgFgSprite=null;
+// Act themes: colors and atmosphere
+var ACT_THEMES=[
+  {name:'awakening',skyTop:0x0a0a1e,skyMid:0x141432,skyBot:0x1e2a4a,horizonGlow:0x2a4a6a,silColor:0x161630,silColor2:0x1c1c3a,silColor3:0x222244,fogColor:0x1a1a34,fgColor:0x0e0e20,moonTint:0x2a2a55,lightColor:0x4a6a9a,desc:'Ruins and arches'},
+  {name:'depths',skyTop:0x0a0a18,skyMid:0x12102a,skyBot:0x1e1840,horizonGlow:0x3a2a5a,silColor:0x141228,silColor2:0x1a1638,silColor3:0x201a44,fogColor:0x161230,fgColor:0x0c0c1a,moonTint:0x3a2a55,lightColor:0x6a4a8a,desc:'Industrial and pipes'},
+  {name:'threads',skyTop:0x0e0c0a,skyMid:0x1a1610,skyBot:0x2a2418,horizonGlow:0x4a3a1a,silColor:0x161410,silColor2:0x1e1a14,silColor3:0x28221a,fogColor:0x1a1810,fgColor:0x0e0c08,moonTint:0x3a3228,lightColor:0x8a7a4a,desc:'Bridges and ropes'},
+  {name:'void',skyTop:0x06060e,skyMid:0x0a0a16,skyBot:0x14101e,horizonGlow:0x2a1a2a,silColor:0x0c0c18,silColor2:0x101020,silColor3:0x161628,fogColor:0x0e0e1a,fgColor:0x08080e,moonTint:0x2a1a2a,lightColor:0x7a3a5a,desc:'Void and cracks'}
+];
+function getCurrentAct(){return Math.floor(state.level/5)}
+function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();bgLayers=[];bgStars=[];bgDistantLights=[];bgFogSprites=[];
+var act=getCurrentAct();
+var theme=ACT_THEMES[act]||ACT_THEMES[0];
+// Update PIXI background color to match act theme
+if(pixiApp&&pixiApp.renderer){pixiApp.renderer.background.color=theme.skyTop}
+// === SKY GRADIENT ===
+bgSkySprite=new PIXI.Graphics();
+var sw=Math.max(4000,LEVELS[state.level]?LEVELS[state.level].width+400:4000);
+var sh=800;
+// Vertical gradient — draw horizontal strips
+for(var gy=0;gy<sh;gy+=4){
+  var t=gy/sh;
+  var c;
+  if(t<0.4){c=lerpColor(theme.skyTop,theme.skyMid,t/0.4)}
+  else if(t<0.7){c=lerpColor(theme.skyMid,theme.skyBot,(t-0.4)/0.3)}
+  else{c=lerpColor(theme.skyBot,theme.horizonGlow,(t-0.7)/0.3)}
+  bgSkySprite.rect(0,gy,sw,4);bgSkySprite.fill(c);
+}
+// Horizon glow — subtle radial glow at horizon line
+bgSkySprite.circle(sw/2,sh*0.72,180);bgSkySprite.fill({color:theme.horizonGlow,alpha:0.08});
+bgSkySprite.circle(sw/2,sh*0.72,90);bgSkySprite.fill({color:theme.horizonGlow,alpha:0.05});
+bgContainer.addChild(bgSkySprite);bgLayers.push({sprite:bgSkySprite,speed:0.01});
+// === STARS ===
 bgStarSprite=new PIXI.Graphics();
 bgContainer.addChild(bgStarSprite);bgLayers.push({sprite:bgStarSprite,speed:0.03});
-// Pre-generate star data
 for(var i=0;i<120;i++){bgStars.push({x:Math.random()*6000,y:Math.random()*400,size:0.3+Math.random()*1.5,baseAlpha:0.25+Math.random()*0.55,twinkleSpeed:1.5+Math.random()*4,twinkleOffset:Math.random()*Math.PI*2})}
-// Layer 0b: Moon (separate so stars can be behind it)
+// === MOON ===
 bgMoonSprite=new PIXI.Graphics();
 bgContainer.addChild(bgMoonSprite);bgLayers.push({sprite:bgMoonSprite,speed:0.03});
-// Layer 1: Far mountains with peaks and misty valleys
+// === ACT-SPECIFIC SILHOUETTES ===
 var l1=new PIXI.Graphics();
-for(var i=0;i<18;i++){var bx=i*160+Math.random()*60;var bh=80+Math.random()*200;var peakW=30+Math.random()*50;l1.moveTo(bx,780);l1.lineTo(bx+peakW*0.3,780-bh*0.8);l1.lineTo(bx+peakW*0.5,780-bh);l1.lineTo(bx+peakW*0.7,780-bh*0.75);l1.lineTo(bx+peakW+Math.random()*30,780);l1.closePath();l1.fill(0x1e1e34)}
-// Mountain mist between peaks
-for(var i=0;i<6;i++){var mx=i*500+Math.random()*200;var my=600+Math.random()*80;l1.circle(mx,my,40+Math.random()*30);l1.fill({color:0x1a1a30,alpha:0.15})}
-bgContainer.addChild(l1);bgLayers.push({sprite:l1,speed:0.08});
-// Layer 2: Mid buildings/towers with more detail
 var l2=new PIXI.Graphics();
-for(var i=0;i<22;i++){var bx=i*110+Math.random()*40;var bh=40+Math.random()*140;var bw=16+Math.random()*22;l2.rect(bx,680-bh,bw,bh);l2.fill(0x222244)}
-// Window lights (more of them, some flickering)
-for(var i=0;i<14;i++){var wx=i*200+Math.random()*100;var wy=560+Math.random()*80;l2.rect(wx,wy,3,4);l2.fill({color:0x5a5a7a,alpha:0.3+Math.random()*0.4})}
-// Rooftop details
-for(var i=0;i<6;i++){var rx=i*400+Math.random()*150;var ry=530+Math.random()*60;l2.moveTo(rx,ry);l2.lineTo(rx+6,ry-12);l2.lineTo(rx+12,ry);l2.closePath();l2.fill(0x2a2a4a)}
-bgContainer.addChild(l2);bgLayers.push({sprite:l2,speed:0.25});
-// Layer 3: Near towers with more detail
 var l3=new PIXI.Graphics();
-for(var i=0;i<12;i++){var bx=i*220+Math.random()*80;var bh=80+Math.random()*220;var bw=10+Math.random()*14;l3.rect(bx,660-bh,bw,bh);l3.fill(0x2a2a4a)}
-// Dripping particles / falling debris
-for(var i=0;i<6;i++){var dx=i*400+Math.random()*200;var dy=480+Math.random()*120;l3.circle(dx,dy,1.5);l3.fill({color:0x5a5a7a,alpha:0.4})}
-// Small windows on near towers
-for(var i=0;i<4;i++){var wx=i*600+Math.random()*200;var wy=560+Math.random()*40;l3.rect(wx,wy,2,3);l3.fill({color:0x4a4a6a,alpha:0.5})}
-bgContainer.addChild(l3);bgLayers.push({sprite:l3,speed:0.45})}
+if(act===0){
+  // AWAKENING: Ruins, arches, columns
+  // Far layer: broken arches and distant ruins
+  for(var i=0;i<12;i++){var bx=i*200+Math.random()*80;var bh=100+Math.random()*180;l1.moveTo(bx,780);l1.lineTo(bx+20,780-bh*0.5);l1.quadraticCurveTo(bx+40,780-bh*0.9,bx+60,780-bh*0.5);l1.lineTo(bx+80,780);l1.closePath();l1.fill(theme.silColor);
+    // Broken arch tops
+    if(Math.random()>0.4){l1.moveTo(bx+15,780-bh*0.5);l1.quadraticCurveTo(bx+40,780-bh-10+Math.random()*20,bx+65,780-bh*0.5);l1.stroke({color:theme.silColor2,width:3})}
+  }
+  // Columns
+  for(var i=0;i<8;i++){var cx=i*300+Math.random()*100;var ch=120+Math.random()*200;l1.rect(cx,780-ch,8,ch);l1.fill(theme.silColor);
+    l1.rect(cx-4,780-ch,16,6);l1.fill(theme.silColor2)}
+  // Mid layer: crumbling walls, window holes
+  for(var i=0;i<16;i++){var bx=i*140+Math.random()*50;var bh=50+Math.random()*120;var bw=20+Math.random()*30;l2.rect(bx,780-bh,bw,bh);l2.fill(theme.silColor2);
+    if(bh>70&&Math.random()>0.3){l2.rect(bx+bw/2-3,780-bh+15,6,8);l2.fill({color:theme.horizonGlow,alpha:0.06})}
+  }
+  // Near layer: rubble, fallen pillars
+  for(var i=0;i<10;i++){var bx=i*240+Math.random()*80;var bh=30+Math.random()*80;var bw=14+Math.random()*20;l3.rect(bx,780-bh,bw,bh);l3.fill(theme.silColor3);
+    // Fallen piece
+    if(Math.random()>0.5){l3.moveTo(bx+bw,780-bh);l3.lineTo(bx+bw+Math.random()*30,780-bh+5+Math.random()*10);l3.lineTo(bx+bw,780-bh+10);l3.closePath();l3.fill(theme.silColor3)}
+  }
+}else if(act===1){
+  // DEPTHS: Industrial — pipes, towers, chains
+  // Far: smokestacks and factory silhouettes
+  for(var i=0;i<14;i++){var bx=i*180+Math.random()*60;var bh=80+Math.random()*200;var bw=20+Math.random()*30;l1.rect(bx,780-bh,bw,bh);l1.fill(theme.silColor);
+    // Smokestack top
+    l1.rect(bx-3,780-bh-8,bw+6,10);l1.fill(theme.silColor2);
+    // Pipe sticking out
+    if(Math.random()>0.5){l1.rect(bx+bw,780-bh*0.4,30,4);l1.fill(theme.silColor)}
+  }
+  // Horizontal pipes
+  for(var i=0;i<5;i++){var py=400+Math.random()*200;l1.rect(0,py,6000,3);l1.fill({color:theme.silColor2,alpha:0.3})}
+  // Mid: machinery and cables
+  for(var i=0;i<18;i++){var bx=i*120+Math.random()*40;var bh=40+Math.random()*100;var bw=16+Math.random()*20;l2.rect(bx,780-bh,bw,bh);l2.fill(theme.silColor2);
+    // Gear circle
+    if(Math.random()>0.6){l2.circle(bx+bw/2,780-bh/2,8+Math.random()*6);l2.stroke({color:theme.silColor3,width:2})}
+  }
+  // Chains
+  for(var i=0;i<8;i++){var cx=i*250+Math.random()*100;l2.moveTo(cx,0);l2.lineTo(cx+Math.random()*10-5,780);l2.stroke({color:theme.silColor,alpha:0.15,width:1})}
+  // Near: large pipes and tanks
+  for(var i=0;i<8;i++){var bx=i*300+Math.random()*100;var bh=60+Math.random()*160;var bw=24+Math.random()*30;l3.rect(bx,780-bh,bw,bh);l3.fill(theme.silColor3);
+    // Tank rounded top
+    l3.circle(bx+bw/2,780-bh,bw/2);l3.fill(theme.silColor3);
+    // Rivets
+    for(var r=0;r<3;r++){l3.circle(bx+4,780-bh+10+r*20,1.5);l3.fill({color:theme.horizonGlow,alpha:0.1})}
+  }
+}else if(act===2){
+  // THREADS: Bridges, ropes, anchors
+  // Far: suspension pillars and distant bridges
+  for(var i=0;i<10;i++){var bx=i*250+Math.random()*80;var bh=150+Math.random()*250;l1.moveTo(bx,780);l1.lineTo(bx+6,780-bh);l1.lineTo(bx+12,780);l1.closePath();l1.fill(theme.silColor);
+    // Cross beams
+    l1.moveTo(bx,780-bh*0.5);l1.lineTo(bx+12,780-bh*0.3);l1.stroke({color:theme.silColor2,width:2});
+  }
+  // Rope spans between pillars
+  for(var i=0;i<8;i++){var rx=i*300+50;l1.moveTo(rx,780-200-Math.random()*100);
+    for(var s=0;s<6;s++){l1.lineTo(rx+25*(s+0.5),780-180+Math.sin(s*0.8)*20+Math.random()*10)}
+    l1.stroke({color:theme.silColor2,alpha:0.4,width:1.5})}
+  // Mid: wooden platforms, anchors
+  for(var i=0;i<14;i++){var bx=i*150+Math.random()*50;var bh=30+Math.random()*80;var bw=25+Math.random()*35;l2.rect(bx,780-bh,bw,bh);l2.fill(theme.silColor2);
+    // Planks
+    l2.rect(bx,780-bh,bw,3);l2.fill(theme.silColor3);
+    if(Math.random()>0.5){l2.moveTo(bx+bw/2,780-bh);l2.lineTo(bx+bw/2+Math.random()*6-3,780-bh-20-Math.random()*30);l2.stroke({color:theme.silColor,alpha:0.3,width:1})}
+  }
+  // Giant anchors
+  for(var i=0;i<4;i++){var ax=i*500+Math.random()*150;var ay=600+Math.random()*100;
+    l2.moveTo(ax,ay);l2.lineTo(ax-8,ay+20);l2.lineTo(ax+8,ay+20);l2.closePath();l2.fill(theme.silColor2);
+    l2.circle(ax,ay-5,4);l2.stroke({color:theme.silColor2,width:2})}
+  // Near: thick ropes and planks
+  for(var i=0;i<8;i++){var bx=i*280+Math.random()*80;var bh=50+Math.random()*120;var bw=18+Math.random()*24;l3.rect(bx,780-bh,bw,bh);l3.fill(theme.silColor3);
+    // Rope hanging down
+    l3.moveTo(bx+bw/2,780-bh);l3.quadraticCurveTo(bx+bw/2+Math.random()*8-4,780-bh-25,bx+bw/2+Math.random()*4-2,780-bh-40-Math.random()*30);l3.stroke({color:theme.silColor2,width:2})
+  }
+}else{
+  // VOID: Cracks, crystals, emptiness
+  // Far: very sparse — floating debris, cracks
+  for(var i=0;i<6;i++){var bx=i*400+Math.random()*200;var bh=40+Math.random()*80;l1.moveTo(bx,780);l1.lineTo(bx+10,780-bh);l1.lineTo(bx+25,780);l1.closePath();l1.fill({color:theme.silColor,alpha:0.5})}
+  // Reality cracks — thin glowing lines
+  for(var i=0;i<8;i++){var cx=i*350+Math.random()*150;var cy=200+Math.random()*300;
+    l1.moveTo(cx,cy);l1.lineTo(cx+Math.random()*40-20,cy+30+Math.random()*50);l1.lineTo(cx+Math.random()*60-30,cy+80+Math.random()*80);l1.stroke({color:theme.horizonGlow,alpha:0.08,width:1.5})}
+  // Mid: almost nothing — floating shards
+  for(var i=0;i<10;i++){var bx=i*300+Math.random()*100;var by=400+Math.random()*200;
+    l2.moveTo(bx,by);l2.lineTo(bx+8,by-12);l2.lineTo(bx+16,by);l2.lineTo(bx+8,by+5);l2.closePath();l2.fill({color:theme.silColor2,alpha:0.4})}
+  // Near: void crystals
+  for(var i=0;i<6;i++){var bx=i*350+Math.random()*120;var by=500+Math.random()*150;
+    l3.moveTo(bx,by);l3.lineTo(bx+5,by-20);l3.lineTo(bx+10,by);l3.closePath();l3.fill({color:theme.silColor3,alpha:0.3});
+    l3.moveTo(bx+5,by-20);l3.lineTo(bx+3,by-25);l3.stroke({color:theme.horizonGlow,alpha:0.15,width:1})}
+}
+bgContainer.addChild(l1);bgLayers.push({sprite:l1,speed:0.08});
+bgContainer.addChild(l2);bgLayers.push({sprite:l2,speed:0.25});
+bgContainer.addChild(l3);bgLayers.push({sprite:l3,speed:0.45});
+// === DISTANT LIGHTS ===
+for(var i=0;i<5+Math.floor(Math.random()*4);i++){
+  var dl={x:200+Math.random()*5500,y:200+Math.random()*350,r:8+Math.random()*20,pulseSpeed:0.5+Math.random()*1.5,pulseOffset:Math.random()*Math.PI*2,baseAlpha:0.04+Math.random()*0.06};
+  bgDistantLights.push(dl);
+}
+// === FOG LAYERS (3 depths) ===
+for(var f=0;f<3;f++){
+  var fogSpr=new PIXI.Graphics();
+  var fogAlpha=0.02+f*0.015;
+  for(var fy=0;fy<800;fy+=6){
+    var fogBand=Math.sin(fy*0.02+f*2)*0.5+0.5;
+    if(fogBand>0.3){fogSpr.rect(0,fy,6000,6);fogSpr.fill({color:theme.fogColor,alpha:fogAlpha*fogBand})}
+  }
+  bgFogSprites.push(fogSpr);
+  bgContainer.addChild(fogSpr);bgLayers.push({sprite:fogSpr,speed:0.15+f*0.12});
+}
+// === FOREGROUND SILHOUETTES ===
+bgFgSprite=new PIXI.Graphics();
+var screenW=window.innerWidth;
+// Left edge branches/vines
+for(var i=0;i<6;i++){
+  var fy=100+i*110+Math.random()*40;
+  var len=30+Math.random()*50;
+  bgFgSprite.moveTo(0,fy);bgFgSprite.quadraticCurveTo(len*0.3,fy-15+Math.random()*30,len,fy-5+Math.random()*10);
+  bgFgSprite.stroke({color:theme.fgColor,width:1.5+Math.random()*2});
+  // Leaves
+  if(Math.random()>0.4){var lx=len*0.5+Math.random()*len*0.3;var ly=fy-5;bgFgSprite.moveTo(lx,ly);bgFgSprite.quadraticCurveTo(lx+8,ly-6,lx+12,ly+2);bgFgSprite.quadraticCurveTo(lx+6,ly+4,lx,ly);bgFgSprite.fill({color:theme.fgColor,alpha:0.3})}
+}
+// Right edge branches
+for(var i=0;i<5;i++){
+  var fy=80+i*130+Math.random()*40;
+  var len=25+Math.random()*45;
+  bgFgSprite.moveTo(screenW,fy);bgFgSprite.quadraticCurveTo(screenW-len*0.3,fy-10+Math.random()*20,screenW-len,fy-3+Math.random()*8);
+  bgFgSprite.stroke({color:theme.fgColor,width:1+Math.random()*2});
+}
+// Grass at bottom
+for(var i=0;i<40;i++){
+  var gx=i*screenW/40+Math.random()*10;
+  var gh=8+Math.random()*18;
+  bgFgSprite.moveTo(gx,780);bgFgSprite.quadraticCurveTo(gx+Math.random()*6-3,780-gh*0.6,gx+Math.random()*4-2,780-gh);
+  bgFgSprite.stroke({color:theme.fgColor,alpha:0.2+Math.random()*0.15,width:1});
+}
+// Thin grass strands
+for(var i=0;i<20;i++){
+  var gx=Math.random()*screenW;
+  var gh=15+Math.random()*25;
+  bgFgSprite.moveTo(gx,780);bgFgSprite.lineTo(gx+Math.random()*4-2,780-gh);
+  bgFgSprite.stroke({color:theme.fgColor,alpha:0.12,width:0.5});
+}
+bgContainer.addChild(bgFgSprite);bgLayers.push({sprite:bgFgSprite,speed:0.6});
+}
+function lerpColor(c1,c2,t){
+  var r1=(c1>>16)&0xff,g1=(c1>>8)&0xff,b1=c1&0xff;
+  var r2=(c2>>16)&0xff,g2=(c2>>8)&0xff,b2=c2&0xff;
+  var r=Math.round(r1+(r2-r1)*t),g=Math.round(g1+(g2-g1)*t),b=Math.round(b1+(b2-b1)*t);
+  return(r<<16)|(g<<8)|b;
+}
 function updateBackground(){bgTime+=0.016;
+var act=getCurrentAct();
+var theme=ACT_THEMES[act]||ACT_THEMES[0];
 for(var i=0;i<bgLayers.length;i++){bgLayers[i].sprite.x=-camera.x*bgLayers[i].speed;bgLayers[i].sprite.y=-camera.y*bgLayers[i].speed*0.3}
-// Twinkling stars — redraw every frame
+// Twinkling stars
 if(bgStarSprite){bgStarSprite.clear();for(var i=0;i<bgStars.length;i++){var s=bgStars[i];var twinkle=Math.sin(bgTime*s.twinkleSpeed+s.twinkleOffset);var alpha=Math.max(0.05,s.baseAlpha+twinkle*0.3);var size=s.size+twinkle*0.3;bgStarSprite.circle(s.x,s.y,Math.max(0.2,size));bgStarSprite.fill({color:0x9a9abb,alpha:alpha})}}
 // Moon with pulsing halo
 if(bgMoonSprite){bgMoonSprite.clear();var moonX=2200,moonY=80;var haloPulse=Math.sin(bgTime*0.5)*0.03;
-// Outer halo
-bgMoonSprite.circle(moonX,moonY,110);bgMoonSprite.fill({color:0x1a1a38,alpha:0.04+haloPulse});
-bgMoonSprite.circle(moonX,moonY,85);bgMoonSprite.fill({color:0x1e1e40,alpha:0.07+haloPulse});
-bgMoonSprite.circle(moonX,moonY,60);bgMoonSprite.fill({color:0x222248,alpha:0.12+haloPulse});
-// Moon body
-bgMoonSprite.circle(moonX,moonY,35);bgMoonSprite.fill({color:0x2a2a55,alpha:0.8});
-bgMoonSprite.circle(moonX,moonY,33);bgMoonSprite.fill({color:0x3a3a65,alpha:0.65});
-// Moon highlight
-bgMoonSprite.circle(moonX-5,moonY-5,12);bgMoonSprite.fill({color:0x4a4a78,alpha:0.15});
-// Moon craters
-bgMoonSprite.circle(moonX+8,moonY+4,5);bgMoonSprite.fill({color:0x28284a,alpha:0.3});
-bgMoonSprite.circle(moonX-3,moonY+10,3);bgMoonSprite.fill({color:0x28284a,alpha:0.2})}}
+bgMoonSprite.circle(moonX,moonY,110);bgMoonSprite.fill({color:theme.moonTint,alpha:0.04+haloPulse});
+bgMoonSprite.circle(moonX,moonY,85);bgMoonSprite.fill({color:theme.moonTint,alpha:0.07+haloPulse});
+bgMoonSprite.circle(moonX,moonY,60);bgMoonSprite.fill({color:theme.moonTint,alpha:0.12+haloPulse});
+bgMoonSprite.circle(moonX,moonY,35);bgMoonSprite.fill({color:theme.moonTint,alpha:0.8});
+bgMoonSprite.circle(moonX,moonY,33);bgMoonSprite.fill({color:lerpColor(theme.moonTint,0xffffff,0.15),alpha:0.65});
+bgMoonSprite.circle(moonX-5,moonY-5,12);bgMoonSprite.fill({color:lerpColor(theme.moonTint,0xffffff,0.3),alpha:0.15});
+bgMoonSprite.circle(moonX+8,moonY+4,5);bgMoonSprite.fill({color:theme.moonTint,alpha:0.3});
+bgMoonSprite.circle(moonX-3,moonY+10,3);bgMoonSprite.fill({color:theme.moonTint,alpha:0.2})}
+// Distant lights pulsing
+for(var i=0;i<bgDistantLights.length;i++){var dl=bgDistantLights[i];var pulse=Math.sin(bgTime*dl.pulseSpeed+dl.pulseOffset);var a=dl.baseAlpha+pulse*0.03;
+  // Draw on the far layer (l1) or a separate sprite — for simplicity, draw on star sprite
+  if(bgStarSprite){bgStarSprite.circle(dl.x,dl.y,dl.r+pulse*3);bgStarSprite.fill({color:theme.lightColor,alpha:Math.max(0,a)});
+    bgStarSprite.circle(dl.x,dl.y,dl.r*0.3);bgStarSprite.fill({color:lerpColor(theme.lightColor,0xffffff,0.3),alpha:Math.max(0,a*2)})}
+}
+}
 
 // ═══ INPUT ═══
 var keys={},touchState={left:false,right:false,jump:false};
@@ -2978,7 +3142,7 @@ function showLevelSelect(){
         lockDiv.textContent='🔒';
         cell.appendChild(lockDiv);
       }
-      if(isUnlocked){(function(iidx){cell.addEventListener('click',function(){state.level=iidx;state.deaths=0;if(engine)clearLevel();initMatter();loadLevel(iidx);showStoryScreen(iidx)});cell.addEventListener('touchstart',function(e){e.preventDefault();tgHaptic('light')},{passive:false})})(idx)}
+      if(isUnlocked){(function(iidx){cell.addEventListener('click',function(){state.level=iidx;state.deaths=0;if(engine)clearLevel();initMatter();createBackground();loadLevel(iidx);showStoryScreen(iidx)});cell.addEventListener('touchstart',function(e){e.preventDefault();tgHaptic('light')},{passive:false})})(idx)}
       actGrid.appendChild(cell);
     }
     inner.appendChild(actGrid);
