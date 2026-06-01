@@ -144,6 +144,9 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .menu-stats{display:flex;gap:20px;margin-bottom:16px;font-size:.45rem;color:#6a6a7a;letter-spacing:.08em;text-transform:uppercase}
 @keyframes screenFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .screen-fadein{animation:screenFadeIn .3s ease-out}
+.tutorial-tip{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(10,10,20,.85);border:1px solid rgba(100,120,180,.2);border-radius:8px;padding:8px 14px;font-size:.55rem;color:#8a9aba;letter-spacing:.06em;text-align:center;pointer-events:none;z-index:25;white-space:nowrap;animation:tipFade 0.4s ease-out;backdrop-filter:blur(4px)}
+.tutorial-tip .tip-key{display:inline-block;background:rgba(100,120,180,.15);border:1px solid rgba(100,120,180,.3);border-radius:3px;padding:1px 5px;font-weight:700;color:#aabbdd;margin:0 2px;font-size:.6rem}
+@keyframes tipFade{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 </style>
 </head>
 <body>
@@ -183,6 +186,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="hud-pause" id="hud-pause">❚❚</div>
     <div class="hud-sound" id="hud-sound" style="position:absolute;top:10px;right:52px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;transition:all .15s">♪</div>
     <div class="hud-interact" id="hud-interact">✋</div>
+    <div class="tutorial-tip" id="tutorial-tip" style="display:none"></div>
   </div>
   <div id="touch-controls">
     <div class="touch-row">
@@ -2037,7 +2041,49 @@ function loadLevel(n){
 }
 function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelCheckpoints=[];state.lastCheckpoint=null;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
 
-// ═══ WEATHER SYSTEM ═══
+// ═══ TUTORIAL SYSTEM ═══
+var tutorial={
+  shown:{},tips:[
+    {id:'move',level:0,trigger:'time',delay:1.5,text:'используй <span class="tip-key">◀</span> <span class="tip-key">▶</span> для движения'},
+    {id:'jump',level:0,trigger:'time',delay:4,text:'нажми <span class="tip-key">▲</span> чтобы прыгнуть'},
+    {id:'dash',level:1,trigger:'time',delay:2,text:'нажми <span class="tip-key">D</span> для рывка'},
+    {id:'wall',level:1,trigger:'wall',delay:0,text:'прижмись к стене — <span class="tip-key">◀</span> или <span class="tip-key">▶</span> — и прыгни <span class="tip-key">▲</span>'},
+    {id:'saw',level:2,trigger:'time',delay:2,text:'опасайся пил — они не прощают'},
+    {id:'lever',level:4,trigger:'lever',delay:0,text:'подойди к рычагу и нажми <span class="tip-key">✋</span>'},
+    {id:'thread',level:10,trigger:'time',delay:2,text:'нажми <span class="tip-key">↗</span> чтобы привязать нить к якорю'},
+    {id:'swing',level:10,trigger:'thread',delay:0,text:'раскачивайся <span class="tip-key">◀</span> <span class="tip-key">▶</span> и прыгай <span class="tip-key">▲</span>'},
+  ],
+  timer:0,activeTip:null
+};
+function updateTutorial(dt){
+  if(state.screen!=='playing')return;
+  tutorial.timer+=dt;
+  var tipEl=document.getElementById('tutorial-tip');
+  if(!tipEl)return;
+  // Check triggers
+  for(var i=0;i<tutorial.tips.length;i++){
+    var tip=tutorial.tips[i];
+    if(tutorial.shown[tip.id])continue;
+    if(tip.level!==state.level)continue;
+    var shouldShow=false;
+    if(tip.trigger==='time'&&tutorial.timer>=tip.delay)shouldShow=true;
+    if(tip.trigger==='wall'&&player.wallSliding)shouldShow=true;
+    if(tip.trigger==='lever'&&player.nearLever)shouldShow=true;
+    if(tip.trigger==='thread'&&thread.active)shouldShow=true;
+    if(shouldShow){
+      tutorial.shown[tip.id]=true;
+      tipEl.innerHTML=tip.text;
+      tipEl.style.display='block';
+      tutorial.activeTip=tip.id;
+      tgHaptic('light');
+      // Auto-hide after 4s
+      setTimeout(function(){if(tutorial.activeTip===tip.id){tipEl.style.display='none';tutorial.activeTip=null}},4000);
+      break;
+    }
+  }
+}
+
+
 var weatherParticles=[];
 var weatherTime=0;
 function updateWeather(dt){
@@ -2342,7 +2388,7 @@ function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.lef
 // ═══ SCREEN MANAGEMENT ═══
 function showScreen(name){state.screen=name;document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');document.getElementById('touch-controls').classList.toggle('active',name==='playing');document.getElementById('story-screen').classList.toggle('active',name==='story');document.getElementById('pause-screen').classList.toggle('active',name==='paused');document.getElementById('death-screen').classList.toggle('active',name==='dead');document.getElementById('win-screen').classList.toggle('active',name==='win');document.getElementById('level-select').classList.toggle('active',name==='levels');document.getElementById('settings-screen').classList.toggle('active',name==='settings');document.getElementById('faq-screen').classList.toggle('active',name==='faq');var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen'};if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}if(name==='menu')updateMenuStats();if(name==='settings')updateSettingsUI()}
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
-function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
+function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
 function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x6a5aaa,{speed:2,life:0.8,size:3,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,8,0x8a7aca,{speed:3,life:1.0,size:2,gravity:0.1});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;recordLevelComplete(state.level,state.deaths,elapsed);state.slowMo=0.3;state.slowMoTimer=0.6;state.shakeAmount=3;state.shakeTime=0.2;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},800)}
 function showWinScreen(elapsed){
@@ -2474,7 +2520,7 @@ function gameLoop(timestamp){
     else if(pvy>0)engine.gravity.y=player.gravityDown;
     if(!player.onGround&&Math.abs(pvy)<player.apexThreshold)engine.gravity.y*=player.apexGravityMult;
   }
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateCheckpoints(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateCheckpoints(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
   if(state.screen==='story'){updateCamera();updateBackground()}
   if(state.screen!=='playing')updateParticles(rawDt);
   // Logo animation (menu only)
