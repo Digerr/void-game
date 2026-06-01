@@ -147,11 +147,28 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .tutorial-tip{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(10,10,20,.85);border:1px solid rgba(100,120,180,.2);border-radius:8px;padding:8px 14px;font-size:.55rem;color:#8a9aba;letter-spacing:.06em;text-align:center;pointer-events:none;z-index:25;white-space:nowrap;animation:tipFade 0.4s ease-out;backdrop-filter:blur(4px)}
 .tutorial-tip .tip-key{display:inline-block;background:rgba(100,120,180,.15);border:1px solid rgba(100,120,180,.3);border-radius:3px;padding:1px 5px;font-weight:700;color:#aabbdd;margin:0 2px;font-size:.6rem}
 @keyframes tipFade{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.act-intro{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(2,2,8,.95);z-index:100}
+.act-intro.active{display:flex}
+.act-intro-num{font-size:.4rem;color:#4a4a6a;letter-spacing:.3em;text-transform:uppercase;margin-bottom:8px;animation:actFadeIn 1s ease-out}
+.act-intro-name{font-size:1.2rem;font-weight:900;letter-spacing:.15em;margin-bottom:16px;animation:actFadeIn 1.2s ease-out}
+.act-intro-text{font-size:.55rem;color:#6a6a8a;max-width:280px;text-align:center;line-height:1.7;animation:actFadeIn 1.5s ease-out}
+.act-intro-line{width:40px;height:1px;background:rgba(255,255,255,.1);margin:12px 0;animation:actFadeIn 1.3s ease-out}
+.act-intro0 .act-intro-name{color:#5a8aba}
+.act-intro1 .act-intro-name{color:#8a5aba}
+.act-intro2 .act-intro-name{color:#ba8a2a}
+.act-intro3 .act-intro-name{color:#8a3a5a}
+@keyframes actFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <div id="loading"><div class="loading-text">загрузка</div></div>
 <div id="ui-layer">
+  <div class="act-intro" id="act-intro">
+    <div class="act-intro-num" id="act-intro-num"></div>
+    <div class="act-intro-name" id="act-intro-name"></div>
+    <div class="act-intro-line"></div>
+    <div class="act-intro-text" id="act-intro-text"></div>
+  </div>
   <div id="main-menu">
     <canvas class="logo-canvas" id="logo-canvas"></canvas>
     <div class="menu-content">
@@ -2419,6 +2436,26 @@ function showWinScreen(elapsed){
     })(j);
   }
 }
+var actIntros=[
+  {num:'акт I',name:'Пробуждение',text:'Ты очнулся во тьме. Не помнишь кто ты, не помнишь откуда. Только одно чувство — нужно двигаться. Вперёд. Туда, где мерцает далёкий свет.'},
+  {num:'акт II',name:'Глубины',text:'Тьма сжимается. Стены становятся ближе. Но стены — не только преграда. Они могут стать путём наверх. В глубине тьма обретает форму — и она живая.'},
+  {num:'акт III',name:'Нити',text:'Из темноты появляется мерцающая нить — тонкая, почти невидимая. Но если потянуть за неё, она выдержит. Она станет мостом через пропасть, верёвкой для спуска, путём наверх.'},
+  {num:'акт IV',name:'Пустота',text:'Последний рубеж. Тьма здесь — не отсутствие света. Она — сущность. И она знает, что ты идёшь. Каждое движение — выбор между падением и спасением.'}
+];
+function showActIntro(actIdx,callback){
+  var intro=actIntros[actIdx%actIntros.length];
+  var el=document.getElementById('act-intro');
+  el.className='act-intro act-intro'+actIdx+' active';
+  document.getElementById('act-intro-num').textContent=intro.num;
+  document.getElementById('act-intro-name').textContent=intro.name;
+  document.getElementById('act-intro-text').textContent=intro.text;
+  tgHaptic('medium');
+  var dismissed=false;
+  function dismiss(){if(dismissed)return;dismissed=true;el.classList.remove('active');if(callback)callback()}
+  var timer=setTimeout(dismiss,4500);
+  el.onclick=function(){clearTimeout(timer);dismiss()};
+  el.ontouchstart=function(e){e.preventDefault();clearTimeout(timer);dismiss()};
+}
 function showLevelSelect(){
   var grid=document.getElementById('ls-grid');grid.innerHTML='';
   var completedCount=0,totalStars=0,possibleStars=LEVELS.length*3;
@@ -2544,7 +2581,18 @@ function bindUI(){
   document.getElementById('btn-music').addEventListener('click',function(){toggleMusic();document.getElementById('btn-music').textContent='музыка: '+(musicMuted?'выкл':'вкл')});
   document.getElementById('btn-quit').addEventListener('click',function(){clearLevel();stopMusic();showScreen('menu')});
   document.getElementById('btn-retry').addEventListener('click',function(){respawnPlayer();startPlaying()});
-  document.getElementById('btn-next').addEventListener('click',function(){state.level++;state.deaths=0;if(state.level<LEVELS.length){clearLevel();loadLevel(state.level);showStoryScreen(state.level)}else{clearLevel();showScreen('menu')}});
+  document.getElementById('btn-next').addEventListener('click',function(){
+    state.level++;state.deaths=0;
+    if(state.level>=LEVELS.length){clearLevel();showScreen('menu');return}
+    // Show act intro when entering a new act
+    var prevAct=Math.floor((state.level-1)/5);
+    var newAct=Math.floor(state.level/5);
+    if(newAct>prevAct){
+      showActIntro(newAct,function(){clearLevel();loadLevel(state.level);showStoryScreen(state.level)});
+    }else{
+      clearLevel();loadLevel(state.level);showStoryScreen(state.level);
+    }
+  });
   document.getElementById('btn-share').addEventListener('click',shareResult);
   document.getElementById('btn-share').addEventListener('touchstart',function(e){e.preventDefault();shareResult()},{passive:false});
   // Settings & FAQ
