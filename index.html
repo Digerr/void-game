@@ -190,6 +190,20 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .rec-row-stars{font-size:.32rem}
 .rec-row-time{font-size:.42rem;color:#5a7a6a;font-variant-numeric:tabular-nums;min-width:32px;text-align:right}
 .rec-row-time.na{color:#2a2a3a}
+/* Awakening cutscene */
+#awakening{position:absolute;inset:0;display:none;background:#020208;z-index:150;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+#awakening.active{display:flex}
+.aw-dark{position:absolute;inset:0;background:#020208;opacity:1;transition:opacity 2s ease-out;pointer-events:none}
+.aw-dark.fade{opacity:0}
+.aw-creature{position:relative;z-index:2;opacity:0;transform:scale(0.5);transition:all 2s cubic-bezier(.2,0,.2,1)}
+.aw-creature.visible{opacity:1;transform:scale(1)}
+.aw-creature.awake{transform:scale(1.05)}
+.aw-glow{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(90,90,170,.15) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0;transition:opacity 2.5s ease-out;z-index:1}
+.aw-glow.visible{opacity:1}
+.aw-text{position:relative;z-index:2;font-size:.75rem;color:#5a5a7a;letter-spacing:.1em;text-align:center;opacity:0;transform:translateY(12px);transition:all 1.5s ease-out;line-height:2;max-width:300px;margin-top:30px}
+.aw-text.visible{opacity:1;transform:translateY(0)}
+.aw-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;font-size:.4rem;color:#2a2a3a;letter-spacing:.15em;text-transform:uppercase;z-index:2;opacity:0;transition:opacity 1s ease-out}
+.aw-hint.visible{opacity:1;animation:pulse 2s infinite}
 #level-select{overflow:hidden;justify-content:flex-start;padding-top:28px}
 .ls-summary{font-size:.4rem;color:#5a5a6a;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
 .ls-progress{width:300px;height:5px;background:rgba(255,255,255,.04);border-radius:3px;margin-bottom:12px;overflow:hidden;position:relative}
@@ -244,6 +258,15 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="act-intro-line"></div>
     <div class="act-intro-text" id="act-intro-text"></div>
     <div class="act-intro-hint" id="act-intro-hint">нажми чтобы продолжить</div>
+  </div>
+  <div id="awakening">
+    <canvas id="aw-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0"></canvas>
+    <div class="aw-glow" id="aw-glow"></div>
+    <div class="aw-creature" id="aw-creature">
+      <canvas id="aw-creature-canvas" width="60" height="60" style="width:60px;height:60px"></canvas>
+    </div>
+    <div class="aw-text" id="aw-text">ты очнулся во тьме<br>не помнишь кто ты<br>но нужно двигаться</div>
+    <div class="aw-hint" id="aw-hint">нажми чтобы продолжить</div>
   </div>
   <div id="main-menu">
     <canvas class="logo-canvas" id="logo-canvas"></canvas>
@@ -3638,8 +3661,99 @@ var logoAnim={
   }
 };
 
+// ═══ AWAKENING CUTSCENE ═══
+var awakeningShown=false;
+function showAwakening(){
+  if(progress.firstLaunch)return; // already seen
+  var el=document.getElementById('awakening');
+  if(!el)return;
+  el.classList.add('active');
+  // Draw creature on mini canvas
+  var cc=document.getElementById('aw-creature-canvas');
+  if(cc){
+    var ctx=cc.getContext('2d');
+    ctx.clearRect(0,0,60,60);
+    var skin=getCurrentSkin();
+    // Body
+    ctx.fillStyle='#'+skin.body.toString(16).padStart(6,'0');
+    ctx.beginPath();ctx.ellipse(30,35,9,11,0,0,Math.PI*2);ctx.fill();
+    // Head
+    ctx.fillStyle='#'+skin.head.toString(16).padStart(6,'0');
+    ctx.beginPath();ctx.arc(30,22,8,0,Math.PI*2);ctx.fill();
+    // Eyes (closed at first, then open)
+    ctx.fillStyle='#1a1a3a';
+    ctx.beginPath();ctx.ellipse(26,22,2.5,0.5,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(34,22,2.5,0.5,0,0,Math.PI*2);ctx.fill();
+    // Scarf
+    ctx.strokeStyle='#'+skin.scarf.toString(16).padStart(6,'0');
+    ctx.lineWidth=2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(24,30);ctx.quadraticCurveTo(20,38,18,44);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(36,30);ctx.quadraticCurveTo(38,36,40,42);ctx.stroke();
+  }
+  // Draw floating particles on background canvas
+  var bc=document.getElementById('aw-canvas');
+  if(bc){
+    bc.width=window.innerWidth;bc.height=window.innerHeight;
+    var bctx=bc.getContext('2d');
+    var parts=[];for(var i=0;i<50;i++){parts.push({x:Math.random()*bc.width,y:Math.random()*bc.height,vx:(Math.random()-0.5)*0.3,vy:-0.15-Math.random()*0.3,r:0.5+Math.random()*1.5,a:0.1+Math.random()*0.15})}
+    var bgAnim;
+    function drawBg(){
+      if(!el.classList.contains('active'))return;
+      bctx.clearRect(0,0,bc.width,bc.height);
+      for(var i=0;i<parts.length;i++){
+        var p=parts[i];p.x+=p.vx;p.y+=p.vy;
+        if(p.y<-10){p.y=bc.height+10;p.x=Math.random()*bc.width}
+        bctx.beginPath();bctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        bctx.fillStyle='rgba(90,90,160,'+p.a+')';bctx.fill();
+      }
+      bgAnim=requestAnimationFrame(drawBg);
+    }
+    drawBg();
+  }
+  // Sequence: dark → glow → creature → text → hint
+  setTimeout(function(){document.getElementById('aw-glow').classList.add('visible')},500);
+  setTimeout(function(){
+    document.getElementById('aw-creature').classList.add('visible');
+    // Open eyes on creature canvas
+    var cc2=document.getElementById('aw-creature-canvas');
+    if(cc2){
+      var ctx2=cc2.getContext('2d');
+      ctx2.clearRect(0,0,60,60);
+      var skin2=getCurrentSkin();
+      ctx2.fillStyle='#'+skin2.body.toString(16).padStart(6,'0');
+      ctx2.beginPath();ctx2.ellipse(30,35,9,11,0,0,Math.PI*2);ctx2.fill();
+      ctx2.fillStyle='#'+skin2.head.toString(16).padStart(6,'0');
+      ctx2.beginPath();ctx2.arc(30,22,8,0,Math.PI*2);ctx2.fill();
+      // Eyes OPEN
+      ctx2.fillStyle='#1a1a3a';
+      ctx2.beginPath();ctx2.ellipse(26,22,2.5,3,0,0,Math.PI*2);ctx2.fill();
+      ctx2.beginPath();ctx2.ellipse(34,22,2.5,3,0,0,Math.PI*2);ctx2.fill();
+      // Eye highlights
+      ctx2.fillStyle='#ccddef';
+      ctx2.beginPath();ctx2.arc(27,21,1,0,Math.PI*2);ctx2.fill();
+      ctx2.beginPath();ctx2.arc(35,21,1,0,Math.PI*2);ctx2.fill();
+      // Scarf
+      ctx2.strokeStyle='#'+skin2.scarf.toString(16).padStart(6,'0');
+      ctx2.lineWidth=2;ctx2.lineCap='round';
+      ctx2.beginPath();ctx2.moveTo(24,30);ctx2.quadraticCurveTo(20,38,18,44);ctx2.stroke();
+      ctx2.beginPath();ctx2.moveTo(36,30);ctx2.quadraticCurveTo(38,36,40,42);ctx2.stroke();
+    }
+  },2500);
+  setTimeout(function(){document.getElementById('aw-text').classList.add('visible')},4000);
+  setTimeout(function(){document.getElementById('aw-hint').classList.add('visible')},6000);
+  // Dismiss on click/touch
+  function dismiss(){
+    el.classList.remove('active');
+    progress.firstLaunch=true;saveProgress();saveToCloud();
+    awakeningShown=true;
+    if(bc){var bctx2=bc.getContext('2d');bctx2.clearRect(0,0,bc.width,bc.height)}
+    el.removeEventListener('click',dismiss);
+  }
+  el.addEventListener('click',dismiss);
+}
+
 // ═══ INIT ═══
-async function init(){try{loadProgress();loadSettings();loadFromCloud();await initPixi();initInput();bindUI();initTelegramPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized')}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
+async function init(){try{loadProgress();loadSettings();loadFromCloud();await initPixi();initInput();bindUI();initTelegramPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
 init();
 </script>
 </body>
