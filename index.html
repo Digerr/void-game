@@ -11,9 +11,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0e0e1e;font-family:
 canvas{display:block;position:fixed;inset:0;z-index:1}
 #ui-layer{position:fixed;inset:0;z-index:10;pointer-events:none}
 #ui-layer *{pointer-events:auto}
-#main-menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,6,14,0.97)}
+#main-menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,6,14,0.97);overflow:hidden}
 #main-menu.hidden{display:none}
-.logo-canvas{width:320px;height:220px;margin-bottom:0px;margin-top:20px}
+.logo-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#main-menu>.menu-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;pointer-events:none}
+#main-menu>.menu-content>*{pointer-events:auto}
 .logo-sub{font-size:.65rem;color:#7a7a8a;letter-spacing:.5em;text-transform:uppercase;margin-bottom:2px}
 .logo-ver{font-size:.5rem;color:#5a5a6a;letter-spacing:.15em;margin-bottom:20px}
 .made-by{font-size:.55rem;color:#6a6a7a;letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px}
@@ -120,7 +122,9 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 <div id="loading"><div class="loading-text">загрузка</div></div>
 <div id="ui-layer">
   <div id="main-menu">
-    <canvas class="logo-canvas" id="logo-canvas" width="640" height="400"></canvas>
+    <canvas class="logo-canvas" id="logo-canvas"></canvas>
+    <div class="menu-content">
+    <div style="height:60px"></div><!-- spacer for logo area -->
     <div class="logo-sub">во тьму</div>
     <div class="logo-ver">alpha 2.0</div>
     <div class="player-info" id="player-info" style="display:none">
@@ -139,6 +143,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn" id="btn-settings" style="width:126px;font-size:.6rem;letter-spacing:.15em">настройки</button>
       <button class="btn" id="btn-faq" style="width:126px;font-size:.6rem;letter-spacing:.15em">faq</button>
+    </div>
     </div>
   </div>
   <div id="game-hud">
@@ -2157,455 +2162,388 @@ function bindUI(){
   document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem('void_progress');progress={unlockedLevels:1,levelStars:{},levelTimes:{},totalDeaths:0};saveProgress();updateMenuStats();showScreen('menu')}});
 }
 
-// ═══ LOGO ANIMATION ═══
+// ═══ LOGO ANIMATION — Choreographed Sequence ═══
 var logoAnim={
-  canvas:null,ctx:null,time:0,
-  // Letter positions (platform rectangles) — V O I D
-  letters:[
-    {ch:'V',x:80,y:180,w:70,h:90,angle:-0.05},
-    {ch:'O',x:210,y:175,w:75,h:95,angle:0.03},
-    {ch:'I',x:345,y:178,w:45,h:90,angle:-0.02},
-    {ch:'D',x:445,y:176,w:70,h:92,angle:0.04}
+  canvas:null,ctx:null,time:0,W:0,H:0,
+  // Platforms: V(0), O(1), I(2), D(3), version(4), button(5)
+  platforms:[],
+  // Character state
+  char:{x:0,y:0,facing:1,eyeBlink:0,blinkTimer:3,emotion:'neutral',emotionTimer:0,squashX:1,squashY:1,sparkles:[],startX:0,startY:0},
+  // Rope visualization
+  rope:{active:false,x1:0,y1:0,x2:0,y2:0},
+  // Sequence
+  seqStep:0,seqTimer:0,
+  sequence:[
+    {type:'idle',platform:0,duration:1.8},
+    {type:'jump',toPlatform:1,duration:0.55},
+    {type:'idle',platform:1,duration:0.3},
+    {type:'jump',toPlatform:2,duration:0.55},
+    {type:'idle',platform:2,duration:0.3},
+    {type:'jump',toPlatform:3,duration:0.55},
+    {type:'idle',platform:3,duration:0.6,emotion:'curious'},
+    {type:'swing',fromPlatform:3,toPlatform:4,duration:1.6},
+    {type:'idle',platform:4,duration:0.4},
+    {type:'jump',toPlatform:5,duration:0.6},
+    {type:'wave',platform:5,duration:2.0},
+    {type:'throw_rope',toPlatform:0,duration:0.6},
+    {type:'climb',toPlatform:0,duration:1.6},
+    {type:'idle',platform:0,duration:1.2},
   ],
-  // Ropes between letters (swing points)
-  ropes:[
-    {x1:150,y1:170,x2:210,y2:165,swing:0,swingSpeed:1.2},
-    {x1:285,y1:165,x2:345,y2:170,swing:0,swingSpeed:0.9},
-    {x1:390,y1:170,x2:445,y2:165,swing:0,swingSpeed:1.5}
-  ],
-  // Character state machine
-  char:{
-    x:100,y:80,vx:0,vy:0,
-    state:'idle',// idle, run, jump, fall, swing, hang, wave
-    stateTimer:0,
-    facing:1,
-    eyeBlink:0,
-    blinkTimer:3,
-    emotion:'neutral',// neutral, happy, surprised, scared
-    emotionTimer:0,
-    squashX:1,squashY:1,
-    // Swing animation vars
-    swingAngle:0,
-    swingRope:-1,
-    hangTimer:0,
-    // Particles for sparkle trail
-    sparkles:[]
-  },
-  // Star particles in background
+  // Stars
   stars:[],
   init:function(){
     this.canvas=document.getElementById('logo-canvas');
     if(!this.canvas)return;
     this.ctx=this.canvas.getContext('2d');
-    // Generate background stars (spread across full canvas)
-    for(var i=0;i<50;i++){
-      this.stars.push({
-        x:Math.random()*640,y:30+Math.random()*340,
-        r:Math.random()*1.5+0.3,
-        speed:Math.random()*0.5+0.2,
-        phase:Math.random()*Math.PI*2
-      });
+    this.resize();
+    var self=this;
+    window.addEventListener('resize',function(){self.resize()});
+    // Stars
+    for(var i=0;i<55;i++){
+      this.stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.2+0.3,speed:Math.random()*0.4+0.2,phase:Math.random()*Math.PI*2});
     }
-    // Place character on first letter
-    var L=this.letters[0];
-    this.char.x=L.x+L.w/2;
-    this.char.y=L.y-18;
-    this.char.state='idle';
-    this.char.stateTimer=2;
+    // Start on V
+    var p=this.platforms[0];
+    this.char.x=p.x+p.w/2;this.char.y=p.y-18;
+    this.char.startX=this.char.x;this.char.startY=this.char.y;
+  },
+  resize:function(){
+    if(!this.canvas)return;
+    var rect=this.canvas.parentElement.getBoundingClientRect();
+    this.W=Math.floor(rect.width);this.H=Math.floor(rect.height);
+    this.canvas.width=this.W;this.canvas.height=this.H;
+    this.calcPositions();
+  },
+  calcPositions:function(){
+    var W=this.W,H=this.H;
+    // VOID letters — centered, ~18% from top
+    var letterH=Math.max(40,H*0.13);
+    var topY=H*0.15;
+    var totalW=W*0.62;
+    var startX=(W-totalW)/2;
+    var slotW=totalW/4;
+    this.platforms=[
+      {x:startX,y:topY,w:slotW*0.72,h:letterH,label:'V'},
+      {x:startX+slotW,y:topY-H*0.01,w:slotW*0.78,h:letterH*1.04,label:'O'},
+      {x:startX+slotW*2,y:topY,w:slotW*0.45,h:letterH,label:'I'},
+      {x:startX+slotW*3,y:topY-H*0.008,w:slotW*0.72,h:letterH*1.02,label:'D'},
+      // Version platform — find HTML element or use proportional
+      {x:W*0.25,y:H*0.46,w:W*0.5,h:Math.max(16,H*0.03),label:'version'},
+      // Button platform
+      {x:W*0.15,y:H*0.62,w:W*0.7,h:Math.max(40,H*0.06),label:'button'},
+    ];
+    // Try to match actual HTML element positions
+    var cRect=this.canvas.getBoundingClientRect();
+    var verEl=document.getElementById('logo-ver');
+    if(verEl){var r=verEl.getBoundingClientRect();this.platforms[4]={x:r.left-cRect.left-10,y:r.top-cRect.top-8,w:r.width+20,h:r.height+16,label:'version'};}
+    var btnEl=document.getElementById('btn-play');
+    if(btnEl){var r2=btnEl.getBoundingClientRect();this.platforms[5]={x:r2.left-cRect.left,y:r2.top-cRect.top-8,w:r2.width,h:r2.height+16,label:'button'};}
+  },
+  easeInOut:function(t){return t<0.5?2*t*t:-1+(4-2*t)*t},
+  easeOut:function(t){return 1-Math.pow(1-t,3)},
+  nextStep:function(){
+    this.seqStep++;this.seqTimer=0;
+    if(this.seqStep>=this.sequence.length)this.seqStep=0;
+    this.char.startX=this.char.x;this.char.startY=this.char.y;
+    var step=this.sequence[this.seqStep];
+    if(step.emotion){this.char.emotion=step.emotion;this.char.emotionTimer=step.duration||1;}
+  },
+  addSparkles:function(x,y,count){
+    for(var i=0;i<count;i++){
+      this.char.sparkles.push({x:x,y:y,vx:(Math.random()-0.5)*50,vy:-Math.random()*35-10,life:0.4+Math.random()*0.4,maxLife:0.8,r:1+Math.random()*1.5});
+    }
   },
   update:function(dt){
     this.time+=dt;
     var c=this.char;
-    // Blink timer
+    // Blink
     c.blinkTimer-=dt;
-    if(c.blinkTimer<=0){
-      c.eyeBlink=1;
-      c.blinkTimer=2.5+Math.random()*3;
-      setTimeout(function(){logoAnim.char.eyeBlink=0},120);
-    }
+    if(c.blinkTimer<=0){c.eyeBlink=1;c.blinkTimer=2.5+Math.random()*3;var self=this;setTimeout(function(){self.char.eyeBlink=0},120);}
     // Emotion timer
     if(c.emotionTimer>0){c.emotionTimer-=dt;if(c.emotionTimer<=0)c.emotion='neutral';}
     // Squash recovery
-    c.squashX+=(1-c.squashX)*8*dt;
-    c.squashY+=(1-c.squashY)*8*dt;
-    // Update sparkles
-    for(var i=c.sparkles.length-1;i>=0;i--){
-      var sp=c.sparkles[i];
-      sp.life-=dt;sp.x+=sp.vx*dt;sp.y+=sp.vy*dt;sp.vy+=20*dt;
-      if(sp.life<=0)c.sparkles.splice(i,1);
-    }
-    // Update rope swing
-    for(var r=0;r<this.ropes.length;r++){
-      this.ropes[r].swing+=this.ropes[r].swingSpeed*dt;
-    }
-    // State machine
-    c.stateTimer-=dt;
-    switch(c.state){
+    c.squashX+=(1-c.squashX)*8*dt;c.squashY+=(1-c.squashY)*8*dt;
+    // Sparkles
+    for(var i=c.sparkles.length-1;i>=0;i--){var sp=c.sparkles[i];sp.life-=dt;sp.x+=sp.vx*dt;sp.y+=sp.vy*dt;sp.vy+=30*dt;if(sp.life<=0)c.sparkles.splice(i,1);}
+    // Sequence step
+    var step=this.sequence[this.seqStep];
+    this.seqTimer+=dt;
+    var t=step.duration>0?Math.min(1,this.seqTimer/step.duration):0;
+    var p,p2,anchorX,anchorY,targetX,targetY,ropeLen,angle,startAngle,endAngle,et;
+    switch(step.type){
       case 'idle':
-        // Bobbing animation
-        c.y+=Math.sin(this.time*2)*0.15;
-        if(c.stateTimer<=0){
-          // Decide next action
-          var roll=Math.random();
-          if(roll<0.35){c.state='run';c.stateTimer=1.2+Math.random()*0.8;}
-          else if(roll<0.55){c.state='wave';c.stateTimer=1.5;c.emotion='happy';c.emotionTimer=1.5;}
-          else if(roll<0.75){c.state='run';c.stateTimer=0.8;}// run to swing
-          else{c.state='idle';c.stateTimer=2+Math.random()*2;}
-        }
-        break;
-      case 'run':
-        // Run across current letter or toward next
-        var targetX=c.x+c.facing*60;
-        c.vx=c.facing*50;
-        c.x+=c.vx*dt;
-        // Check if reached edge of current letter
-        var onLetter=this.getLetterAt(c.x,c.y+20);
-        if(!onLetter&&c.stateTimer>0.3){
-          // Jump!
-          c.state='jump';c.vy=-120;c.stateTimer=1.2;
-          c.emotion='surprised';c.emotionTimer=0.4;
-          c.squashX=0.8;c.squashY=1.2;
-          this.addSparkles(c.x,c.y+15,3);
-        }
-        if(c.stateTimer<=0){c.state='idle';c.stateTimer=1;c.vx=0;}
+        p=this.platforms[step.platform];
+        c.x=p.x+p.w/2;c.y=p.y-18+Math.sin(this.time*2.5)*1.5;
+        if(t>=1)this.nextStep();
         break;
       case 'jump':
-        c.vy+=250*dt;// gravity
-        c.x+=c.vx*dt;
-        c.y+=c.vy*dt;
-        // Check landing on a letter
-        var landed=this.getLetterAt(c.x,c.y+20);
-        if(landed&&c.vy>0){
-          c.y=landed.y-18;
-          c.vy=0;c.vx=0;
-          c.state='idle';c.stateTimer=1.5;
-          c.squashX=1.3;c.squashY=0.7;
-          c.emotion='happy';c.emotionTimer=0.5;
-          this.addSparkles(c.x,c.y+15,5);
-        }
-        // Check if near a rope — grab it!
-        if(c.vy>0){
-          for(var ri=0;ri<this.ropes.length;ri++){
-            var rp=this.ropes[ri];
-            var midX=(rp.x1+rp.x2)/2,midY=(rp.y1+rp.y2)/2-15+Math.sin(rp.swing)*8;
-            var dx=c.x-midX,dy=c.y-midY;
-            if(Math.sqrt(dx*dx+dy*dy)<30){
-              c.state='swing';c.swingRope=ri;c.stateTimer=2.5;
-              c.swingAngle=0;c.emotion='happy';c.emotionTimer=1;
-              c.vy=0;c.vx=0;
-              this.addSparkles(c.x,c.y,4);
-              break;
-            }
-          }
-        }
-        if(c.y>350){// fell off — reset
-          var L0=this.letters[0];
-          c.x=L0.x+L0.w/2;c.y=L0.y-18;c.vy=0;c.vx=0;
-          c.state='idle';c.stateTimer=1;
-          c.emotion='scared';c.emotionTimer=0.5;
-        }
-        if(c.stateTimer<=0){c.state='fall';c.stateTimer=1;}
-        break;
-      case 'fall':
-        c.vy+=250*dt;c.y+=c.vy*dt;
-        if(c.y>350){
-          var L1=this.letters[Math.floor(Math.random()*4)];
-          c.x=L1.x+L1.w/2;c.y=L1.y-18;c.vy=0;c.vx=0;
-          c.state='idle';c.stateTimer=1;
-          c.squashX=1.3;c.squashY=0.7;
+        p=this.platforms[step.toPlatform];
+        targetX=p.x+p.w/2;targetY=p.y-18;
+        et=this.easeInOut(t);
+        c.x=c.startX+(targetX-c.startX)*et;
+        var peakH=30+Math.abs(targetY-c.startY)*0.35;
+        c.y=c.startY+(targetY-c.startY)*et-peakH*4*t*(1-t);
+        c.facing=targetX>c.startX?1:-1;
+        if(t>0.1&&t<0.9)c.emotion='surprised';
+        else c.emotion='neutral';
+        if(t>=1){
+          c.x=targetX;c.y=targetY;
+          c.squashX=1.25;c.squashY=0.75;
+          c.emotion='happy';c.emotionTimer=0.4;
+          this.addSparkles(c.x,c.y+15,4);
+          this.nextStep();
         }
         break;
       case 'swing':
-        var rp2=this.ropes[c.swingRope];
-        if(rp2){
-          c.swingAngle+=2.5*dt;
-          var swingAmp=0.6;
-          var anchorX=(rp2.x1+rp2.x2)/2;
-          var anchorY=(rp2.y1+rp2.y2)/2-5;
-          var ropeLen=45;
-          c.x=anchorX+Math.sin(c.swingAngle)*ropeLen*Math.cos(swingAmp*Math.sin(c.swingAngle*0.7));
-          c.y=anchorY+Math.cos(c.swingAngle*0.8)*ropeLen*0.5+ropeLen*0.5;
-          c.facing=Math.cos(c.swingAngle)>0?1:-1;
-          // Emit sparkles while swinging
-          if(Math.random()<0.3)this.addSparkles(c.x,c.y+5,1);
-          if(c.stateTimer<=0){
-            // Let go — launch with momentum
-            c.vy=-80-Math.random()*40;
-            c.vx=(Math.random()>0.5?1:-1)*(60+Math.random()*30);
-            c.facing=c.vx>0?1:-1;
-            c.state='jump';c.stateTimer=1.5;
-            c.emotion='surprised';c.emotionTimer=0.6;
-            this.addSparkles(c.x,c.y,6);
-          }
-        }else{c.state='idle';c.stateTimer=1;}
+        p=this.platforms[step.fromPlatform];
+        p2=this.platforms[step.toPlatform];
+        anchorX=p.x+p.w/2;anchorY=p.y+p.h;
+        targetX=p2.x+p2.w/2;targetY=p2.y-18;
+        ropeLen=Math.sqrt((targetX-anchorX)*(targetX-anchorX)+(targetY-anchorY)*(targetY-anchorY))*1.05;
+        // Swing from left of anchor to target angle
+        startAngle=-0.4;
+        endAngle=Math.atan2(targetX-anchorX,targetY-anchorY);
+        angle=startAngle+(endAngle-startAngle)*this.easeOut(t);
+        c.x=anchorX+Math.sin(angle)*ropeLen;
+        c.y=anchorY+Math.cos(angle)*ropeLen;
+        c.facing=Math.sin(angle)>0?1:-1;
+        this.rope={active:true,x1:anchorX,y1:anchorY,x2:c.x,y2:c.y-10};
+        c.emotion='happy';
+        if(Math.random()<0.15)this.addSparkles(c.x,c.y,1);
+        if(t>=1){
+          c.x=targetX;c.y=targetY;
+          c.squashX=1.2;c.squashY=0.8;
+          this.rope.active=false;
+          this.addSparkles(c.x,c.y+10,3);
+          this.nextStep();
+        }
         break;
       case 'wave':
-        c.y+=Math.sin(this.time*3)*0.3;
-        if(c.stateTimer<=0){c.state='idle';c.stateTimer=1.5+Math.random();}
+        p=this.platforms[step.platform];
+        c.x=p.x+p.w/2;c.y=p.y-18+Math.sin(this.time*3)*0.8;
+        c.emotion='happy';c.facing=1;
+        if(t>=1){c.emotion='neutral';this.nextStep();}
         break;
-    }
-  },
-  getLetterAt:function(px,py){
-    for(var i=0;i<this.letters.length;i++){
-      var L=this.letters[i];
-      if(px>=L.x-5&&px<=L.x+L.w+5&&py>=L.y-5&&py<=L.y+L.h+5)return L;
-    }
-    return null;
-  },
-  addSparkles:function(x,y,count){
-    for(var i=0;i<count;i++){
-      this.char.sparkles.push({
-        x:x,y:y,
-        vx:(Math.random()-0.5)*60,
-        vy:-Math.random()*40-10,
-        life:0.4+Math.random()*0.4,
-        maxLife:0.8,
-        r:1+Math.random()*2
-      });
+      case 'throw_rope':
+        p=this.platforms[step.toPlatform];
+        targetX=p.x+p.w/2;targetY=p.y+p.h;
+        var fromX=c.x,fromY=c.y-12;
+        this.rope={active:true,x1:fromX,y1:fromY,x2:fromX+(targetX-fromX)*this.easeOut(t),y2:fromY+(targetY-fromY)*this.easeOut(t)};
+        c.emotion='curious';
+        if(t>=1){this.rope={active:true,x1:fromX,y1:fromY,x2:targetX,y2:targetY};this.nextStep();}
+        break;
+      case 'climb':
+        p=this.platforms[step.toPlatform];
+        targetX=p.x+p.w/2;targetY=p.y-18;
+        et=this.easeInOut(t);
+        c.x=c.startX+(targetX-c.startX)*et;
+        c.y=c.startY+(targetY-c.startY)*et;
+        c.facing=c.x<targetX?1:-1;
+        // Rope from top anchor to character
+        var topAnchor=this.platforms[step.toPlatform];
+        this.rope.x2=c.x;this.rope.y2=c.y-10;
+        c.emotion='happy';
+        if(Math.random()<0.1)this.addSparkles(c.x,c.y,1);
+        if(t>=1){
+          c.x=targetX;c.y=targetY;
+          c.squashX=1.2;c.squashY=0.8;
+          this.rope.active=false;
+          this.addSparkles(c.x,c.y+10,4);
+          this.nextStep();
+        }
+        break;
     }
   },
   draw:function(){
     var ctx=this.ctx;if(!ctx)return;
-    var W=640,H=400;
+    var W=this.W,H=this.H;
     ctx.clearRect(0,0,W,H);
-    // Background subtle gradient
-    var bg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,320);
-    bg.addColorStop(0,'rgba(15,15,30,0.3)');
-    bg.addColorStop(1,'rgba(6,6,14,0)');
+    // Background gradient
+    var bg=ctx.createRadialGradient(W/2,H*0.3,0,W/2,H*0.3,H*0.8);
+    bg.addColorStop(0,'rgba(15,15,35,0.3)');bg.addColorStop(1,'rgba(6,6,14,0)');
     ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
     // Stars
     for(var i=0;i<this.stars.length;i++){
       var s=this.stars[i];
-      var alpha=0.3+Math.sin(this.time*s.speed+s.phase)*0.25;
+      var alpha=0.25+Math.sin(this.time*s.speed+s.phase)*0.2;
       ctx.fillStyle='rgba(160,170,210,'+alpha+')';
-      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);ctx.fill();
     }
-    // Draw ropes
-    for(var r=0;r<this.ropes.length;r++){
-      var rp=this.ropes[r];
-      var midX=(rp.x1+rp.x2)/2;
-      var midY=(rp.y1+rp.y2)/2-10+Math.sin(rp.swing)*12;
-      ctx.strokeStyle='rgba(90,90,130,0.5)';
-      ctx.lineWidth=2;
-      ctx.beginPath();
-      ctx.moveTo(rp.x1,rp.y1);
-      ctx.quadraticCurveTo(midX,midY,rp.x2,rp.y2);
+    // Rope
+    if(this.rope.active){
+      ctx.strokeStyle='rgba(100,80,140,0.7)';ctx.lineWidth=2.5;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(this.rope.x1,this.rope.y1);
+      // Slight curve
+      var midX=(this.rope.x1+this.rope.x2)/2+5;
+      var midY=(this.rope.y1+this.rope.y2)/2+10;
+      ctx.quadraticCurveTo(midX,midY,this.rope.x2,this.rope.y2);
       ctx.stroke();
-      // Glow on rope
-      ctx.strokeStyle='rgba(100,120,180,0.15)';
-      ctx.lineWidth=5;
-      ctx.beginPath();
-      ctx.moveTo(rp.x1,rp.y1);
-      ctx.quadraticCurveTo(midX,midY,rp.x2,rp.y2);
+      // Glow
+      ctx.strokeStyle='rgba(120,100,180,0.15)';ctx.lineWidth=6;
+      ctx.beginPath();ctx.moveTo(this.rope.x1,this.rope.y1);
+      ctx.quadraticCurveTo(midX,midY,this.rope.x2,this.rope.y2);
       ctx.stroke();
     }
-    // Draw letters (as platform blocks with glowing text)
-    for(var i=0;i<this.letters.length;i++){
-      var L=this.letters[i];
+    // VOID Letters
+    for(var i=0;i<4;i++){
+      var L=this.platforms[i];
       ctx.save();
       ctx.translate(L.x+L.w/2,L.y+L.h/2);
-      ctx.rotate(L.angle+Math.sin(this.time*0.8+i)*0.01);
-      // Letter glow
-      ctx.shadowColor='rgba(100,130,200,0.3)';
-      ctx.shadowBlur=20;
-      // Letter fill
-      ctx.fillStyle='rgba(80,85,120,0.15)';
+      var wobble=Math.sin(this.time*0.8+i*1.5)*0.008;
+      ctx.rotate(wobble);
+      // Letter block
+      ctx.shadowColor='rgba(100,130,200,0.25)';ctx.shadowBlur=15;
+      ctx.fillStyle='rgba(70,75,110,0.1)';
       ctx.fillRect(-L.w/2,-L.h/2,L.w,L.h);
-      // Letter border
-      ctx.strokeStyle='rgba(120,125,170,0.4)';
-      ctx.lineWidth=1.5;
+      ctx.strokeStyle='rgba(110,115,160,0.35)';ctx.lineWidth=1.2;
       ctx.strokeRect(-L.w/2,-L.h/2,L.w,L.h);
       // Top edge highlight
-      ctx.fillStyle='rgba(140,145,190,0.3)';
-      ctx.fillRect(-L.w/2,-L.h/2,L.w,2);
+      ctx.fillStyle='rgba(130,135,180,0.25)';ctx.fillRect(-L.w/2,-L.h/2,L.w,2);
       // Letter text
-      ctx.shadowColor='rgba(150,170,240,0.6)';
-      ctx.shadowBlur=25;
-      ctx.fillStyle='rgba(180,185,220,0.9)';
-      ctx.font='bold 58px "Courier New", monospace';
+      var fontSize=Math.max(24,Math.min(52,L.h*0.6));
+      ctx.shadowColor='rgba(140,160,230,0.5)';ctx.shadowBlur=20;
+      ctx.fillStyle='rgba(170,175,215,0.85)';
+      ctx.font='bold '+fontSize+'px "Courier New",monospace';
       ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(L.ch,0,4);
-      // Second pass for brighter center
-      ctx.shadowBlur=10;
-      ctx.fillStyle='rgba(200,205,235,0.5)';
-      ctx.fillText(L.ch,0,4);
+      ctx.fillText(L.label,0,3);
+      ctx.shadowBlur=8;
+      ctx.fillStyle='rgba(195,200,230,0.4)';
+      ctx.fillText(L.label,0,3);
       ctx.shadowBlur=0;
       ctx.restore();
     }
-    // Draw character
+    // Character
     this.drawCharacter(ctx);
-    // Draw sparkles
-    var c2=this.char;
-    for(var i=0;i<c2.sparkles.length;i++){
-      var sp=c2.sparkles[i];
+    // Sparkles
+    for(var i=0;i<this.char.sparkles.length;i++){
+      var sp=this.char.sparkles[i];
       var sa=sp.life/sp.maxLife;
-      ctx.fillStyle='rgba(170,190,240,'+sa*0.8+')';
+      ctx.fillStyle='rgba(160,180,230,'+sa*0.8+')';
       ctx.beginPath();ctx.arc(sp.x,sp.y,sp.r*sa,0,Math.PI*2);ctx.fill();
     }
   },
   drawCharacter:function(ctx){
-    var c=this.char;
-    var x=c.x,y=c.y;
-    ctx.save();
-    ctx.translate(x,y);
-    ctx.scale(c.facing*c.squashX,c.squashY);
+    var c=this.char,x=c.x,y=c.y;
+    ctx.save();ctx.translate(x,y);
+    var sc=Math.max(0.8,Math.min(1.2,this.W/400));
+    ctx.scale(c.facing*c.squashX*sc,c.squashY*sc);
     var t=this.time;
-    var isRunning=c.state==='run';
-    var isJumping=c.state==='jump'&&c.vy<-10;
-    var isFalling=c.state==='jump'&&c.vy>10||c.state==='fall';
-    var isSwinging=c.state==='swing';
-    var isWaving=c.state==='wave';
-    var isIdle=c.state==='idle';
-    // Body bob
+    var step=this.sequence[this.seqStep];
+    var isJumping=step.type==='jump';
+    var isSwinging=step.type==='swing';
+    var isWaving=step.type==='wave';
+    var isClimbing=step.type==='climb';
+    var isIdle=step.type==='idle';
     var bob=0;
-    if(isIdle)bob=Math.sin(t*2.5)*1;
-    if(isRunning)bob=Math.sin(t*12)*2;
-    // === SCARF (drawn first, behind body) ===
-    ctx.strokeStyle='rgba(130,100,160,0.8)';ctx.lineWidth=2.5;ctx.lineCap='round';
-    var scarfWave=isRunning?Math.sin(t*10-1)*0.4:Math.sin(t*1.5)*0.15;
-    var scarfEndX=-6+Math.sin(scarfWave)*6;
-    var scarfEndY=bob-4+Math.sin(t*2)*2;
-    ctx.beginPath();ctx.moveTo(0,bob-8);ctx.quadraticCurveTo(scarfEndX,scarfEndY,scarfEndX-4,scarfEndY+8);ctx.stroke();
-    // Second scarf strand
-    ctx.strokeStyle='rgba(110,85,140,0.6)';ctx.lineWidth=2;
-    ctx.beginPath();ctx.moveTo(1,bob-7);ctx.quadraticCurveTo(scarfEndX+3,scarfEndY+2,scarfEndX-1,scarfEndY+10);ctx.stroke();
-    // === BODY (cute rounded) ===
-    ctx.fillStyle='rgba(90,90,130,0.9)';
-    ctx.beginPath();
-    // Rounded body shape
-    ctx.ellipse(0,bob+2,7,9,0,0,Math.PI*2);
-    ctx.fill();
-    // Body highlight
-    ctx.fillStyle='rgba(120,120,160,0.3)';
-    ctx.beginPath();ctx.ellipse(-1,bob-1,4,5,0,0,Math.PI*2);ctx.fill();
-    // === HEAD (big and cute) ===
-    var headY=bob-12;
-    ctx.fillStyle='rgba(100,100,145,0.95)';
-    ctx.beginPath();ctx.arc(0,headY,10,0,Math.PI*2);ctx.fill();
-    // Head highlight (cute shine)
-    ctx.fillStyle='rgba(150,150,190,0.25)';
-    ctx.beginPath();ctx.arc(-2,headY-3,5,0,Math.PI*2);ctx.fill();
-    // === EARS (cute little pointy) ===
-    ctx.fillStyle='rgba(100,100,145,0.9)';
-    // Left ear
-    ctx.beginPath();ctx.moveTo(-7,headY-6);ctx.lineTo(-11,headY-16);ctx.lineTo(-3,headY-9);ctx.closePath();ctx.fill();
-    // Right ear
-    ctx.beginPath();ctx.moveTo(7,headY-6);ctx.lineTo(11,headY-16);ctx.lineTo(3,headY-9);ctx.closePath();ctx.fill();
-    // Ear inner
-    ctx.fillStyle='rgba(140,110,160,0.5)';
-    ctx.beginPath();ctx.moveTo(-6,headY-7);ctx.lineTo(-9,headY-14);ctx.lineTo(-4,headY-9);ctx.closePath();ctx.fill();
-    ctx.beginPath();ctx.moveTo(6,headY-7);ctx.lineTo(9,headY-14);ctx.lineTo(4,headY-9);ctx.closePath();ctx.fill();
-    // === EYES (big, expressive, cute) ===
-    var eyeY=headY+0;
-    var blinkScale=c.eyeBlink?0.1:1;
-    // Left eye
-    ctx.fillStyle='rgba(30,35,60,0.9)';
-    ctx.beginPath();ctx.ellipse(-4,eyeY,3.5,3.5*blinkScale,0,0,Math.PI*2);ctx.fill();
-    // Right eye
-    ctx.beginPath();ctx.ellipse(4,eyeY,3.5,3.5*blinkScale,0,0,Math.PI*2);ctx.fill();
+    if(isIdle)bob=Math.sin(t*2.5)*1.5;
+    // === SCARF ===
+    ctx.strokeStyle='rgba(120,80,160,0.8)';ctx.lineWidth=2.5;ctx.lineCap='round';
+    var scarfWave=isSwinging||isClimbing?Math.sin(t*6)*0.5:Math.sin(t*1.5)*0.15;
+    var sx=-5+Math.sin(scarfWave)*5,sy=bob-3+Math.sin(t*2)*1.5;
+    ctx.beginPath();ctx.moveTo(0,bob-8);ctx.quadraticCurveTo(sx,sy+3,sx-3,sy+8);ctx.stroke();
+    ctx.strokeStyle='rgba(100,65,140,0.5)';ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(1,bob-7);ctx.quadraticCurveTo(sx+2,sy+5,sx-1,sy+10);ctx.stroke();
+    // === BODY ===
+    ctx.fillStyle='rgba(85,85,125,0.9)';
+    ctx.beginPath();ctx.ellipse(0,bob+2,6.5,8.5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(115,115,155,0.25)';
+    ctx.beginPath();ctx.ellipse(-1,bob,3.5,4.5,0,0,Math.PI*2);ctx.fill();
+    // === HEAD ===
+    var headY=bob-11;
+    ctx.fillStyle='rgba(90,90,135,0.95)';
+    ctx.beginPath();ctx.arc(0,headY,8.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(140,140,185,0.2)';
+    ctx.beginPath();ctx.arc(-1.5,headY-2.5,4,0,Math.PI*2);ctx.fill();
+    // === EARS ===
+    ctx.fillStyle='rgba(90,90,135,0.9)';
+    ctx.beginPath();ctx.moveTo(-5,headY-5);ctx.lineTo(-9,headY-14);ctx.lineTo(-2,headY-7);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(5,headY-5);ctx.lineTo(9,headY-14);ctx.lineTo(2,headY-7);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(130,100,160,0.45)';
+    ctx.beginPath();ctx.moveTo(-4,headY-6);ctx.lineTo(-7,headY-12);ctx.lineTo(-3,headY-7);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(4,headY-6);ctx.lineTo(7,headY-12);ctx.lineTo(3,headY-7);ctx.closePath();ctx.fill();
+    // === EYES ===
+    var eyeY=headY;var blinkScale=c.eyeBlink?0.1:1;
+    ctx.fillStyle='rgba(25,30,55,0.9)';
+    ctx.beginPath();ctx.ellipse(-3.5,eyeY,3,3*blinkScale,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(3.5,eyeY,3,3*blinkScale,0,0,Math.PI*2);ctx.fill();
     if(!c.eyeBlink){
-      // Eye shine (big cute highlight)
-      ctx.fillStyle='rgba(200,210,240,0.9)';
-      ctx.beginPath();ctx.arc(-3,eyeY-1.5,1.5,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.arc(5,eyeY-1.5,1.5,0,Math.PI*2);ctx.fill();
-      // Smaller shine
-      ctx.fillStyle='rgba(230,235,255,0.6)';
-      ctx.beginPath();ctx.arc(-5,eyeY+0.5,0.8,0,Math.PI*2);ctx.fill();
-      ctx.beginPath();ctx.arc(3,eyeY+0.5,0.8,0,Math.PI*2);ctx.fill();
-      // Emotion-specific eye modifiers
+      ctx.fillStyle='rgba(195,205,240,0.9)';
+      ctx.beginPath();ctx.arc(-2.5,eyeY-1.2,1.2,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(4.5,eyeY-1.2,1.2,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(220,225,255,0.5)';
+      ctx.beginPath();ctx.arc(-4.5,eyeY+0.3,0.6,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.arc(2.5,eyeY+0.3,0.6,0,Math.PI*2);ctx.fill();
       if(c.emotion==='happy'){
-        // Squinted happy eyes
-        ctx.fillStyle='rgba(100,100,145,0.95)';
-        ctx.beginPath();ctx.ellipse(-4,eyeY+2,4,2,0,0,Math.PI);ctx.fill();
-        ctx.beginPath();ctx.ellipse(4,eyeY+2,4,2,0,0,Math.PI);ctx.fill();
+        ctx.fillStyle='rgba(90,90,135,0.95)';
+        ctx.beginPath();ctx.ellipse(-3.5,eyeY+1.5,3.2,1.3,0,0,Math.PI);ctx.fill();
+        ctx.beginPath();ctx.ellipse(3.5,eyeY+1.5,3.2,1.3,0,0,Math.PI);ctx.fill();
       }
       if(c.emotion==='surprised'){
-        // Wide eyes (already big, make pupils smaller)
-        ctx.fillStyle='rgba(30,35,60,0.9)';
-        ctx.beginPath();ctx.arc(-4,eyeY,2,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.arc(4,eyeY,2,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle='rgba(200,210,240,0.9)';
-        ctx.beginPath();ctx.arc(-3,eyeY-1,1,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.arc(5,eyeY-1,1,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='rgba(25,30,55,0.9)';
+        ctx.beginPath();ctx.arc(-3.5,eyeY,1.8,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.arc(3.5,eyeY,1.8,0,Math.PI*2);ctx.fill();
       }
     }
     // === MOUTH ===
     if(c.emotion==='happy'||isWaving){
-      // Happy smile
-      ctx.strokeStyle='rgba(60,65,100,0.7)';ctx.lineWidth=1.5;ctx.lineCap='round';
-      ctx.beginPath();ctx.arc(0,headY+3,3,0.2,Math.PI-0.2);ctx.stroke();
+      ctx.strokeStyle='rgba(55,60,95,0.65)';ctx.lineWidth=1.3;ctx.lineCap='round';
+      ctx.beginPath();ctx.arc(0,headY+3,2.5,0.2,Math.PI-0.2);ctx.stroke();
     }else if(c.emotion==='surprised'){
-      // O mouth
-      ctx.fillStyle='rgba(50,55,90,0.6)';
-      ctx.beginPath();ctx.ellipse(0,headY+4,2,2.5,0,0,Math.PI*2);ctx.fill();
-    }else if(c.emotion==='scared'){
-      // Wavy mouth
-      ctx.strokeStyle='rgba(60,65,100,0.6)';ctx.lineWidth=1.2;ctx.lineCap='round';
-      ctx.beginPath();ctx.moveTo(-3,headY+4);
-      ctx.quadraticCurveTo(-1,headY+3,0,headY+4);
-      ctx.quadraticCurveTo(1,headY+5,3,headY+4);ctx.stroke();
+      ctx.fillStyle='rgba(45,50,85,0.5)';
+      ctx.beginPath();ctx.ellipse(0,headY+3.5,1.5,2,0,0,Math.PI*2);ctx.fill();
+    }else if(c.emotion==='curious'){
+      ctx.strokeStyle='rgba(55,60,95,0.5)';ctx.lineWidth=1;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(-2,headY+3.5);ctx.lineTo(1,headY+3);ctx.lineTo(2,headY+4);ctx.stroke();
     }else{
-      // Neutral small line
-      ctx.strokeStyle='rgba(60,65,100,0.5)';ctx.lineWidth=1.2;ctx.lineCap='round';
-      ctx.beginPath();ctx.moveTo(-2,headY+4);ctx.lineTo(2,headY+4);ctx.stroke();
+      ctx.strokeStyle='rgba(55,60,95,0.4)';ctx.lineWidth=1;ctx.lineCap='round';
+      ctx.beginPath();ctx.moveTo(-1.5,headY+3.5);ctx.lineTo(1.5,headY+3.5);ctx.stroke();
     }
     // === ARMS ===
-    ctx.strokeStyle='rgba(90,90,130,0.8)';ctx.lineWidth=2.5;ctx.lineCap='round';
-    var armBaseY=bob+0;
-    if(isRunning){
-      var runCycle=Math.sin(t*12);
-      ctx.beginPath();ctx.moveTo(-6,armBaseY);ctx.lineTo(-10,armBaseY+8+runCycle*4);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(6,armBaseY);ctx.lineTo(10,armBaseY+8-runCycle*4);ctx.stroke();
-    }else if(isSwinging){
-      // Arms up holding rope
-      ctx.beginPath();ctx.moveTo(-5,armBaseY);ctx.lineTo(-3,armBaseY-12);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(5,armBaseY);ctx.lineTo(3,armBaseY-12);ctx.stroke();
+    ctx.strokeStyle='rgba(85,85,125,0.8)';ctx.lineWidth=2.2;ctx.lineCap='round';
+    var armY=bob;
+    if(isSwinging||isClimbing){
+      ctx.beginPath();ctx.moveTo(-4,armY);ctx.lineTo(-2,armY-10);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(4,armY);ctx.lineTo(2,armY-10);ctx.stroke();
     }else if(isWaving){
-      // One arm waving
-      var waveA=Math.sin(t*6)*0.4;
-      ctx.beginPath();ctx.moveTo(-6,armBaseY);ctx.lineTo(-9,armBaseY+8);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(6,armBaseY);ctx.lineTo(10+Math.sin(waveA)*3,armBaseY-8+Math.sin(t*8)*3);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-5,armY);ctx.lineTo(-8,armY+7);ctx.stroke();
+      var wa=Math.sin(t*7)*3;
+      ctx.beginPath();ctx.moveTo(5,armY);ctx.lineTo(9,armY-7+wa);ctx.stroke();
+    }else if(isJumping){
+      ctx.beginPath();ctx.moveTo(-5,armY);ctx.lineTo(-7,armY-4);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(5,armY);ctx.lineTo(7,armY-4);ctx.stroke();
     }else{
-      // Idle arms
-      ctx.beginPath();ctx.moveTo(-6,armBaseY);ctx.lineTo(-8,armBaseY+7+Math.sin(t*1.5)*1);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(6,armBaseY);ctx.lineTo(8,armBaseY+7-Math.sin(t*1.5)*1);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-5,armY);ctx.lineTo(-7,armY+6+Math.sin(t*1.5));ctx.stroke();
+      ctx.beginPath();ctx.moveTo(5,armY);ctx.lineTo(7,armY+6-Math.sin(t*1.5));ctx.stroke();
     }
     // === LEGS ===
-    ctx.strokeStyle='rgba(80,80,120,0.8)';ctx.lineWidth=2.5;ctx.lineCap='round';
-    var legBaseY=bob+9;
-    if(isRunning){
-      var ls=Math.sin(t*12);
-      ctx.beginPath();ctx.moveTo(-3,legBaseY);ctx.lineTo(-3+ls*5,legBaseY+9);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(3,legBaseY);ctx.lineTo(3-ls*5,legBaseY+9);ctx.stroke();
+    ctx.strokeStyle='rgba(75,75,115,0.8)';ctx.lineWidth=2.2;ctx.lineCap='round';
+    var legY=bob+8;
+    if(isSwinging){
+      ctx.beginPath();ctx.moveTo(-3,legY);ctx.lineTo(-4+Math.sin(t*3)*3,legY+8);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(3,legY);ctx.lineTo(4+Math.sin(t*3+1)*3,legY+8);ctx.stroke();
+    }else if(isClimbing){
+      var cl=Math.sin(t*8)*3;
+      ctx.beginPath();ctx.moveTo(-3,legY);ctx.lineTo(-3,legY+6+cl);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(3,legY);ctx.lineTo(3,legY+6-cl);ctx.stroke();
     }else if(isJumping){
-      ctx.beginPath();ctx.moveTo(-3,legBaseY);ctx.lineTo(-5,legBaseY+5);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(3,legBaseY);ctx.lineTo(5,legBaseY+5);ctx.stroke();
-    }else if(isFalling){
-      ctx.beginPath();ctx.moveTo(-3,legBaseY);ctx.lineTo(-5,legBaseY+10);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(3,legBaseY);ctx.lineTo(5,legBaseY+10);ctx.stroke();
-    }else if(isSwinging){
-      // Legs dangling
-      ctx.beginPath();ctx.moveTo(-3,legBaseY);ctx.lineTo(-4+Math.sin(t*3)*3,legBaseY+9);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(3,legBaseY);ctx.lineTo(4+Math.sin(t*3+1)*3,legBaseY+9);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-3,legY);ctx.lineTo(-4,legY+4);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(3,legY);ctx.lineTo(4,legY+4);ctx.stroke();
     }else{
-      ctx.beginPath();ctx.moveTo(-3,legBaseY);ctx.lineTo(-3,legBaseY+8+Math.sin(t*1.2)*0.5);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(3,legBaseY);ctx.lineTo(3,legBaseY+8-Math.sin(t*1.2)*0.5);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(-3,legY);ctx.lineTo(-3,legY+7+Math.sin(t*1.2)*0.5);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(3,legY);ctx.lineTo(3,legY+7-Math.sin(t*1.2)*0.5);ctx.stroke();
     }
-    // === GLOW aura ===
-    ctx.globalAlpha=0.08+Math.sin(t*1.5)*0.03;
-    var aura=ctx.createRadialGradient(0,bob,5,0,bob,25);
-    aura.addColorStop(0,'rgba(130,150,220,1)');
-    aura.addColorStop(1,'rgba(130,150,220,0)');
-    ctx.fillStyle=aura;
-    ctx.beginPath();ctx.arc(0,bob,25,0,Math.PI*2);ctx.fill();
+    // === AURA ===
+    ctx.globalAlpha=0.06+Math.sin(t*1.5)*0.02;
+    var aura=ctx.createRadialGradient(0,bob,4,0,bob,22);
+    aura.addColorStop(0,'rgba(120,140,210,1)');aura.addColorStop(1,'rgba(120,140,210,0)');
+    ctx.fillStyle=aura;ctx.beginPath();ctx.arc(0,bob,22,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=1;
     ctx.restore();
   },
   tick:function(dt){
     if(!this.canvas)return;
     if(document.getElementById('main-menu').classList.contains('hidden'))return;
-    this.update(dt);
-    this.draw();
+    this.update(dt);this.draw();
   }
 };
 
