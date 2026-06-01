@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>VOID</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1a2e">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -372,6 +374,14 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.9.2/dist/pixi.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+<script>
+// Service Worker for offline caching
+if('serviceWorker' in navigator){
+  var swCode='var CACHE=\"void-v7\";var URLS=[\"/void-game/\",\"/void-game/index.html\",\"/void-game/manifest.json\",\"https://cdn.jsdelivr.net/npm/pixi.js@8.9.2/dist/pixi.min.js\",\"https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js\"];self.addEventListener(\"install\",function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(URLS)}));self.skipWaiting()});self.addEventListener(\"activate\",function(e){e.waitUntil(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k!==CACHE}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener(\"fetch\",function(e){e.respondWith(caches.match(e.request).then(function(r){if(r)return r;return fetch(e.request).then(function(resp){if(resp.status===200){var rc=resp.clone();caches.open(CACHE).then(function(c){c.put(e.request,rc)})}return resp}).catch(function(){return caches.match(\"/void-game/index.html\")})}))})';
+  var blob=new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).then(function(){console.log('[VOID] SW registered')}).catch(function(){console.warn('[VOID] SW failed')});
+}
+</script>
 <script>
 'use strict';
 
