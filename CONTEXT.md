@@ -28,7 +28,7 @@
 - **Хостинг**: Vercel → https://void-game-ruddy.vercel.app
 - **GitHub**: https://github.com/Digerr/void-game/
 - **API GitHub**: https://github.com/Digerr/void-game-api/
-- **API хостинг**: Vercel → https://void-game-api-sergo-s-projects1.vercel.app
+- **API хостинг**: Vercel → https://api-deploy2.vercel.app (Project ID: prj_Mkp1a4elZu0GvOUBQGaE2KkHBHcU)
 - **Telegram бот**: @voide_game_bot (id: 8858889318)
 - **Локальный путь**: /home/z/my-project/void-game/
 - **API локальный путь**: /home/z/my-project/void-game-api/
