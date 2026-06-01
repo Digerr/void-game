@@ -245,7 +245,7 @@ causes:{fall:'пустота поглотила тебя',spikes:'пронзён
 hints:{move:'← → для движения',jump:'ПРОБЕЛ — прыжок',walljump:'Стена + прыжок = прыжок от стены',
 push:'E — схватить ящик, затем ← →',lever:'E — активировать рычаг',rope:'E — схватить верёвку',
 falling:'Беги — платформа рухнет!',saw:'Рассчитай время',breakable:'Пол крошится!',
-enemy:'Избегай теней',flood:'Вода поднимается!',chase:'БЕГИ!',vine:'Лианы можно обхватить',lava:'Лава смертельна!',slippery:'Лёд скользкий!'},
+enemy:'Избегай теней',flood:'Вода поднимается!',chase:'БЕГИ!',vine:'Лианы можно обхватить',lava:'Лава смертельна!',slippery:'Лёд скользкий!',bouncy:'Прыгучая платформа!'},
 controls:'← → или A D — движение|ПРОБЕЛ или ↑ — прыжок|E или Shift — взаимодействие|R — респавн|ESC — пауза|M — музыка',
 progress:['закрыт','текущий','пройден'],deathsL:'смертей',shardL:'рейтинг',
 actNames:['Акт I: Пробуждение','Акт II: Погружение','Акт III: Бездна','Акт IV: Возрождение'],
@@ -262,7 +262,7 @@ causes:{fall:'the void consumed you',spikes:'impaled on spikes',saw:'torn apart'
 hints:{move:'← → to move',jump:'SPACE — jump',walljump:'Wall + jump = wall jump',
 push:'E — grab box, then ← →',lever:'E — activate lever',rope:'E — grab rope',
 falling:'Run — it will fall!',saw:'Time the saws',breakable:'The floor is crumbling!',
-enemy:'Avoid the shadows',flood:'Water is rising!',chase:'RUN!',vine:'Vines can be grabbed',lava:'Lava is deadly!',slippery:'Ice is slippery!'},
+enemy:'Avoid the shadows',flood:'Water is rising!',chase:'RUN!',vine:'Vines can be grabbed',lava:'Lava is deadly!',slippery:'Ice is slippery!',bouncy:'Bouncy platform!'},
 controls:'← → or A D — move|SPACE or ↑ — jump|E or Shift — interact|R — respawn|ESC — pause|M — music',
 progress:['locked','current','completed'],deathsL:'deaths',shardL:'rating',
 actNames:['Act I: Awakening','Act II: Descent','Act III: The Abyss','Act IV: Rebirth'],
@@ -385,6 +385,9 @@ else if(type==='chase'){const o=ctx.createOscillator();o.type='square';o.frequen
 else if(type==='lightning'){const buf=ctx.createBuffer(1,ctx.sampleRate*0.3,ctx.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.08));const s=ctx.createBufferSource();s.buffer=buf;const g=ctx.createGain();g.gain.setValueAtTime(0.2,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.3);s.connect(g);g.connect(sfxGain);s.start(tt)}
 else if(type==='stalactite'){const o=ctx.createOscillator();o.type='square';o.frequency.setValueAtTime(600,tt);o.frequency.linearRampToValueAtTime(200,tt+0.15);const g=ctx.createGain();g.gain.setValueAtTime(0.08,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.2);o.connect(g);g.connect(sfxGain);o.start(tt);o.stop(tt+0.25)}
 else if(type==='land'){const o=ctx.createOscillator();o.type='triangle';o.frequency.setValueAtTime(120,tt);o.frequency.exponentialRampToValueAtTime(40,tt+0.12);const g=ctx.createGain();g.gain.setValueAtTime(0.06,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.15);o.connect(g);g.connect(sfxGain);o.start(tt);o.stop(tt+0.2)}
+else if(type==='bouncy'){const o=ctx.createOscillator();o.type='sine';o.frequency.setValueAtTime(300,tt);o.frequency.linearRampToValueAtTime(600,tt+0.1);o.frequency.linearRampToValueAtTime(400,tt+0.2);const g=ctx.createGain();g.gain.setValueAtTime(0.12,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.25);o.connect(g);g.connect(sfxGain);o.start(tt);o.stop(tt+0.3)}
+else if(type==='walljump'){const o=ctx.createOscillator();o.type='triangle';o.frequency.setValueAtTime(200,tt);o.frequency.linearRampToValueAtTime(450,tt+0.08);const g=ctx.createGain();g.gain.setValueAtTime(0.08,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.12);o.connect(g);g.connect(sfxGain);o.start(tt);o.stop(tt+0.15)}
+else if(type==='portal'){const o=ctx.createOscillator();o.type='sine';o.frequency.setValueAtTime(400,tt);o.frequency.linearRampToValueAtTime(800,tt+0.15);o.frequency.exponentialRampToValueAtTime(200,tt+0.4);const g=ctx.createGain();g.gain.setValueAtTime(0.1,tt);g.gain.exponentialRampToValueAtTime(0.001,tt+0.45);o.connect(g);g.connect(sfxGain);o.start(tt);o.stop(tt+0.5)}
 }
 function fadeMusicIn(){if(!musicGain||!audioCtx)return;musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setValueAtTime(musicGain.gain.value,audioCtx.currentTime);musicGain.gain.linearRampToValueAtTime(musicMuted?0:musicVolume,audioCtx.currentTime+2)}
 function fadeMusicOut(){if(!musicGain||!audioCtx)return;musicGain.gain.cancelScheduledValues(audioCtx.currentTime);musicGain.gain.setValueAtTime(musicGain.gain.value,audioCtx.currentTime);musicGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+1.5);musicPlaying=false}
@@ -650,6 +653,7 @@ if(t==='falling'){p.setData('falling',false);p.setData('fv',0);p.setData('st',0)
 if(t==='ice'){p.setData('slippery',true);p.setData('falling',false);p.setData('fv',0);p.setData('st',0);this.physics.world.remove(p.body);p.body.enable=true;p.body.setImmovable(true);p.body.setAllowGravity(false);p.body.moves=false}
 if(t==='breakable'){p.setData('breaking',false);p.setData('bt',0);p.setData('broken',false);p.setData('rt',0);this.breakablePlatforms.push(p)}
 if(t==='vine'){p.setData('type','vine');this.physics.world.remove(p.body);p.body.enable=true;p.body.setImmovable(true);p.body.setAllowGravity(false);p.body.moves=false}
+if(t==='bouncy'){p.setData('bouncy',true);p.setData('platTop','#6a4a8a');this.physics.world.remove(p.body);p.body.enable=true;p.body.setImmovable(true);p.body.setAllowGravity(false);p.body.moves=false}
 }
 aSp(x,y,w){const s=this.trapGroup.create(x+w/2,y+8,'spikes');s.setDisplaySize(w,16);s.setSize(w,16);s.refreshBody();s.setData('type','spikes');s.setData('killType','spikes')}
 aSaw(x,y,r,a,s){const sw=this.sawGroup.create(x,y,'saw');sw.setDisplaySize(28,28);sw.setSize(28,28);sw.setOrigin(0.5,0.5);sw.setData('ox',x);sw.setData('oy',y);sw.setData('mr',r||200);sw.setData('ms',s||1);sw.setData('ma',a||'y');sw.body.setImmovable(true);sw.body.setAllowGravity(false);sw.setDepth(6)}
@@ -687,7 +691,7 @@ this.aG(6300,500,300);this.aF(6600,440,100,'moving',80,.5,'y');this.aG(6750,500,
 
 // L1
 bL1(){this.aG(0,500,600);this.aBox(200,464);this.aTorch(100,470);this.aTorch(400,470);this.aCP(250)
-this.aG(700,500,300);this.aPP(850,496,40);this.aDoor(950,380,20,120);this.aTorch(710,470);this.aCP(750)
+this.aG(700,500,300);this.aF(780,440,60,'bouncy');this.aPP(850,496,40);this.aDoor(950,380,20,120);this.aTorch(710,470);this.aCP(750)
 this.aF(1100,440,100,'falling');this.aF(1250,400,100,'falling');this.aF(1400,440,100,'solid');this.aTorch(1110,410);this.aCP(1200)
 this.aG(1550,500,300);this.aPend(1700,80,300,.025);this.aTorch(1560,470);this.aCP(1600)
 this.aBox(1900,464);this.aPP(2000,496,40);this.aDoor(2100,380,20,120);this.aG(1900,500,400);this.aTorch(1910,470);this.aCP(1950)
@@ -1335,7 +1339,7 @@ if(input.j&&this.canWallJump&&!grounded&&this.wallDir!==0){
 this.player.body.velocity.x=this.wallDir>0?-CFG.WALL_JUMP_X:CFG.WALL_JUMP_X;
 this.player.body.velocity.y=CFG.WALL_JUMP_Y*dm[1];this.canWallJump=false;
 this.lastJumpPress=0;this.lastGrounded=0;this.facingRight=this.player.body.velocity.x>0;
-sfx('jump');tgHaptic('light');this.spawnDust(this.player.x+(this.wallDir>0?CFG.PW/2:-CFG.PW/2),this.player.y,-this.wallDir*2);
+sfx('jump');sfx('walljump');tgHaptic('light');this.spawnDust(this.player.x+(this.wallDir>0?CFG.PW/2:-CFG.PW/2),this.player.y,-this.wallDir*2);
 }else if(jumpBuffer&&coyoteTime&&!this.isWallSliding){
 this.player.body.velocity.y=CFG.JUMP_FORCE*dm[1];this.lastGrounded=0;this.lastJumpPress=0;sfx('jump');tgHaptic('light');
 }
@@ -1466,7 +1470,7 @@ if(p.cooldown>0){p.cooldown--;continue}
 const dx=this.player.x-p.x;const dy=this.player.y-p.y;
 if(Math.abs(dx)<p.r&&Math.abs(dy)<p.r+16){
 this.player.setPosition(p.tx,p.ty-CFG.PH);this.player.body.velocity.set(0,0);
-p.cooldown=30;sfx('interact');this.spawnDust(p.tx,p.ty,0);this.fadeAlpha=0.3;this.fadeDir=-1;
+p.cooldown=30;sfx('portal');tgHaptic('medium');this.spawnDust(p.tx,p.ty,0);this.fadeAlpha=0.3;this.fadeDir=-1;
 }}}
 
 // === DEATH BY VOID ===
@@ -1556,6 +1560,7 @@ spawnDust(x,y,vx){if(quality===0)return;const count=quality===1?2:3;for(let i=0;
 spawnLand(x,y,imp){if(quality===0)return;for(let i=0;i<(quality===1?3:5);i++)this.dustParticles.push({x:x+(Math.random()*14-7),y:y,vx:Math.random()*(imp||2)-0.5,vy:-Math.random()*(imp||2),life:12+Math.random()*10,ml:22,size:1.5+Math.random()*2.5})}
 
 onLand(player,platform){
+if(platform.getData('bouncy')){this.player.body.velocity.y=CFG.JUMP_FORCE*1.4;sfx('bouncy');tgHaptic('medium');this.spawnDust(this.player.x,this.player.y+CFG.PH/2);return}
 if(platform.getData('type')==='falling'&&!platform.getData('falling'))platform.setData('st',40);
 if(platform.getData('type')==='breakable'&&!platform.getData('breaking')&&!platform.getData('broken')){platform.setData('breaking',true);platform.setData('bt',25)}
 }
@@ -1923,13 +1928,18 @@ launchLevel(lvlIdx,true);
 // ═══ PHOTO MODE ═══
 function takeScreenshot(){
 const c=document.querySelector('canvas');if(!c)return;
-c.toBlob(blob=>{if(!blob)return;
-if(tg){
-// Try sharing via TG WebApp
-try{const file=new File([blob],'void_'+Date.now()+'.png',{type:'image/png'});tg.showPopup({title:lang==='ru'?'Фоторежим':'Photo Mode',message:lang==='ru'?'Скриншот сохранён!':'Screenshot saved!'})}catch(e){}
-}
-// Always also download
-const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='void_'+Date.now()+'.png';a.click();URL.revokeObjectURL(url)},'image/png');
+// Hide UI overlays for clean screenshot
+const hiddenEls=['touch-controls','btn-pause','interact-hint','ach-toast'];
+const prevDisplay={};hiddenEls.forEach(id=>{const el=document.getElementById(id);if(el){prevDisplay[id]=el.style.display;el.style.display='none'}});
+if(gameScene&&gameScene.hudText){gameScene.hudText.setAlpha(0);gameScene.hudText2.setAlpha(0);gameScene.hudDeaths.setAlpha(0);gameScene.hudGraphics.setAlpha(0)}
+setTimeout(()=>{
+c.toBlob(blob=>{
+// Restore UI
+hiddenEls.forEach(id=>{const el=document.getElementById(id);if(el&&prevDisplay[id]!==undefined)el.style.display=prevDisplay[id]});
+if(gameScene&&gameScene.hudText){gameScene.hudText.setAlpha(1);gameScene.hudText2.setAlpha(1);gameScene.hudDeaths.setAlpha(1);gameScene.hudGraphics.setAlpha(1)}
+if(!blob)return;
+if(tg){try{tg.showPopup({title:lang==='ru'?'Фоторежим':'Photo Mode',message:lang==='ru'?'Скриншот сохранён!':'Screenshot saved!'})}catch(e){}}
+const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='void_'+Date.now()+'.png';a.click();URL.revokeObjectURL(url);tgHaptic('success')},'image/png')},100);
 }
 
 function startGame(){
