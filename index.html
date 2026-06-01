@@ -394,7 +394,7 @@ function updateSettingsUI(){
       var isUnlocked=unlocked.indexOf(s)>=0;
       var isActive=(progress.skin||0)===s;
       var btn=document.createElement('div');
-      btn.style.cssText='width:36px;height:36px;border-radius:50%;border:2px solid '+(isActive?'#6a8aba:rgba(255,255,255,.1)')+';display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;position:relative;overflow:hidden';
+      btn.style.cssText='width:36px;height:36px;border-radius:50%;border:2px solid '+(isActive?'#6a8aba':'rgba(255,255,255,.1)')+';display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;position:relative;overflow:hidden';
       if(!isUnlocked)btn.style.opacity='0.25';
       // Color preview: scarf color as circle fill
       var preview=document.createElement('div');
