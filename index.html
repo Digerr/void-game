@@ -350,7 +350,7 @@ var LEVELS=[
 ];
 
 // ═══ PIXIJS SETUP ═══
-var pixiApp=null,gameContainer=null,bgContainer=null,fxContainer=null,vignetteOverlay=null,lightCanvas=null,lightCtx=null,lightTexture=null,lightSprite=null,playerGlow=null,fogOverlay=null;
+var pixiApp=null,gameContainer=null,bgContainer=null,fxContainer=null,vignetteOverlay=null,lightCanvas=null,lightCtx=null,lightTexture=null,lightSprite=null,fogOverlay=null;
 
 function initPixi(){
   pixiApp=new PIXI.Application();
@@ -366,8 +366,8 @@ function initPixi(){
     lightCtx=lightCanvas.getContext('2d');
     lightTexture=PIXI.Texture.from(lightCanvas);
     lightSprite=new PIXI.Sprite(lightTexture);pixiApp.stage.addChild(lightSprite);
-    // Player glow - additive blending for warm light effects
-    playerGlow=new PIXI.Graphics();playerGlow.blendMode='add';pixiApp.stage.addChild(playerGlow);
+    // Player glow - canvas-based for smoothness (no visible circles)
+    // playerGlow removed - all lighting done via canvas overlay
     // Fog overlay - subtle depth mist at bottom
     fogOverlay=new PIXI.Graphics();pixiApp.stage.addChild(fogOverlay);
     vignetteOverlay=new PIXI.Graphics();pixiApp.stage.addChild(vignetteOverlay);drawVignette();
@@ -406,6 +406,10 @@ function createPlayer(x,y){
   MComposite.add(comp,MConstraint.create({bodyA:player.body,pointA:{x:PLAYER_W/2,y:0},bodyB:playerSensorRight,pointB:{x:0,y:0},stiffness:1,damping:0,length:0}));
   MWorld.add(world,comp);
   player.sprite=new PIXI.Container();gameContainer.addChild(player.sprite);
+  // Reusable graphics object — no GC thrashing
+  player._gfx=new PIXI.Graphics();player.sprite.addChild(player._gfx);
+  // Smooth visual position (interpolated)
+  player._vx=player.body.position.x;player._vy=player.body.position.y;
   player.onGround=false;player.wasOnGround=false;player.onWallLeft=false;player.onWallRight=false;
   player.wallSliding=false;player.alive=true;player.coyoteTime=0;player.jumpBuffer=0;player.facing=1;
   player.dashing=false;player.dashTimer=0;player.dashCooldownTimer=0;player.animTime=0;player.runCycle=0;
@@ -413,16 +417,15 @@ function createPlayer(x,y){
   setupPlayerSensors();
 }
 
-function drawPlayerParts(){if(!player.sprite)return;player.sprite.removeChildren();var g=new PIXI.Graphics();var vx=player.body.velocity.x,vy=player.body.velocity.y,t=player.animTime;var isRunning=player.onGround&&Math.abs(vx)>0.5;var isJumping=!player.onGround&&vy<-1;var isFalling=!player.onGround&&vy>1;var isIdle=player.onGround&&Math.abs(vx)<0.5;var bodyBob=0;if(isRunning)bodyBob=Math.sin(player.runCycle*12)*1.5;if(isIdle)bodyBob=Math.sin(t*2)*0.5;
+function drawPlayerParts(){if(!player.sprite||!player._gfx)return;var g=player._gfx;g.clear();var vx=player.body.velocity.x,vy=player.body.velocity.y,t=player.animTime;var isRunning=player.onGround&&Math.abs(vx)>0.5;var isJumping=!player.onGround&&vy<-1;var isFalling=!player.onGround&&vy>1;var isIdle=player.onGround&&Math.abs(vx)<0.5;var bodyBob=0;if(isRunning)bodyBob=Math.sin(player.runCycle*12)*1.5;if(isIdle)bodyBob=Math.sin(t*2)*0.5;
 var headY=-PLAYER_H/2-7+bodyBob*0.5;g.circle(0,headY,7);g.fill(0x282838);
 var ex=player.facing*3,eyeY=headY-0.5;var blinkPhase=t%4;var eyeH=(blinkPhase>3.8&&blinkPhase<3.95)?0.3:1.5;g.ellipse(ex,eyeY,1.5,eyeH);g.fill(0x99aacc);
 var scarfY=-PLAYER_H/2+1+bodyBob*0.3;g.rect(-2,scarfY,4,6);g.fill(0x3a3a5a);var tailAngle=isRunning?Math.sin(player.runCycle*10-1)*0.3:Math.sin(t*1.5)*0.1;var tailX=-player.facing*5+Math.sin(tailAngle)*4;var tailY=scarfY+4;g.moveTo(-1,scarfY+3);g.quadraticCurveTo(tailX,tailY+6,tailX-player.facing*2,tailY+10);g.stroke({width:2,color:0x3a3a5a});
 var torsoY=-PLAYER_H/2+6+bodyBob;g.rect(-5,torsoY,10,12);g.fill(0x282838);
 var armBaseY=torsoY+2;if(isRunning){g.moveTo(-5,armBaseY);g.lineTo(-8,armBaseY+10+Math.sin(player.runCycle*12+Math.PI)*3);g.stroke({width:3,color:0x282838});g.moveTo(5,armBaseY);g.lineTo(8,armBaseY+10+Math.sin(player.runCycle*12)*3);g.stroke({width:3,color:0x282838})}else if(player.wallSliding){var ws=player.onWallLeft?-1:1;g.moveTo(0,armBaseY);g.lineTo(ws*8,armBaseY-8);g.stroke({width:3,color:0x282838});g.moveTo(0,armBaseY+2);g.lineTo(ws*6,armBaseY-4);g.stroke({width:3,color:0x282838})}else{g.moveTo(-5,armBaseY);g.lineTo(-7,armBaseY+(isJumping?4:8));g.stroke({width:3,color:0x282838});g.moveTo(5,armBaseY);g.lineTo(7,armBaseY+(isJumping?4:8));g.stroke({width:3,color:0x282838})}
 var legBaseY=torsoY+11;if(isRunning){var ls=Math.sin(player.runCycle*12);g.moveTo(-3,legBaseY);g.lineTo(-3+ls*5,legBaseY+10);g.stroke({width:3,color:0x282838});g.moveTo(3,legBaseY);g.lineTo(3-ls*5,legBaseY+10);g.stroke({width:3,color:0x282838})}else if(player.wallSliding){var ws2=player.onWallLeft?-1:1;g.moveTo(-2,legBaseY);g.lineTo(ws2*4,legBaseY+8);g.stroke({width:3,color:0x282838});g.moveTo(2,legBaseY);g.lineTo(ws2*2,legBaseY+10);g.stroke({width:3,color:0x282838})}else if(isJumping){g.moveTo(-3,legBaseY);g.lineTo(-5,legBaseY+6);g.stroke({width:3,color:0x282838});g.moveTo(3,legBaseY);g.lineTo(5,legBaseY+6);g.stroke({width:3,color:0x282838})}else{g.moveTo(-3,legBaseY);g.lineTo(-3,legBaseY+(isFalling?12:10));g.stroke({width:3,color:0x282838});g.moveTo(3,legBaseY);g.lineTo(3,legBaseY+(isFalling?12:10));g.stroke({width:3,color:0x282838})}
-if(player.alive){g.circle(0,0,24);g.fill({color:0x4a4a6a,alpha:0.04+Math.sin(t*3)*0.01})}
 if(player.dashing){g.circle(0,0,20);g.fill({color:0x6a6a9a,alpha:0.15})}
-player.sprite.addChild(g)}
+}
 
 function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
@@ -495,7 +498,12 @@ function updatePlayer(dt){
   if(!player.inputJump&&player.body.velocity.y<-4)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.85});
 
   player.animTime+=dt;if(player.onGround&&Math.abs(player.body.velocity.x)>0.5)player.runCycle+=dt*Math.abs(player.body.velocity.x)*0.15;
-  player.sprite.x=player.body.position.x;player.sprite.y=player.body.position.y;drawPlayerParts();
+  // Smooth visual position (lerp towards physics position, snap if far)
+  var dx=player.body.position.x-player._vx,dy=player.body.position.y-player._vy;
+  var dist=Math.sqrt(dx*dx+dy*dy);
+  var lerpRate=dist>20?0.8:0.35; // snap if teleporting, smooth otherwise
+  player._vx+=dx*lerpRate;player._vy+=dy*lerpRate;
+  player.sprite.x=player._vx;player.sprite.y=player._vy;drawPlayerParts();
   var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+100)killPlayer('fall');
   var dashReady=player.dashCooldownTimer<=0&&!player.dashing;document.getElementById('hud-dash').style.color=dashReady?'#3a5a6a':'#1a2a3a';
   var threadReady=!thread.active&&levelAnchors.length>0;var nearAnchor=false;
@@ -859,66 +867,73 @@ function updateLightAndFog(dt){
   var px=player.body?(player.body.position.x-camera.x):sw/2;
   var py=player.body?(player.body.position.y-camera.y):sh/2;
 
-  // ═══ DARK OVERLAY WITH PROPER LIGHT HOLE ═══
-  // Uses canvas destination-out to actually cut light through darkness
+  // ═══ GLOBAL LIGHTING — all in one smooth canvas pass ═══
   lightCtx.clearRect(0,0,sw,sh);
-  // 1. Fill everything with darkness
-  lightCtx.globalCompositeOperation='source-over';
-  lightCtx.fillStyle='rgba(2,2,8,0.35)';
-  lightCtx.fillRect(0,0,sw,sh);
-  // 2. Cut radial gradient hole around player (destination-out ERASES existing pixels)
-  var lightR=320+Math.sin(lightTime*1.5)*20;
-  lightCtx.globalCompositeOperation='destination-out';
-  var grad=lightCtx.createRadialGradient(px,py,0,px,py,lightR);
-  grad.addColorStop(0,'rgba(255,255,255,1)');
-  grad.addColorStop(0.3,'rgba(255,255,255,0.95)');
-  grad.addColorStop(0.55,'rgba(255,255,255,0.7)');
-  grad.addColorStop(0.75,'rgba(255,255,255,0.35)');
-  grad.addColorStop(0.9,'rgba(255,255,255,0.1)');
-  grad.addColorStop(1,'rgba(255,255,255,0)');
-  lightCtx.fillStyle=grad;
-  lightCtx.beginPath();lightCtx.arc(px,py,lightR,0,Math.PI*2);lightCtx.fill();
-  // 3. Subtle warm tint in the light area (source-atop = only on existing dark pixels)
-  lightCtx.globalCompositeOperation='source-atop';
-  var warmGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*0.5);
-  warmGrad.addColorStop(0,'rgba(15,25,50,0.35)');
-  warmGrad.addColorStop(1,'rgba(0,0,0,0)');
-  lightCtx.fillStyle=warmGrad;
-  lightCtx.fillRect(0,0,sw,sh);
-  lightCtx.globalCompositeOperation='source-over';
-  // 4. Update PixiJS texture from canvas
-  lightTexture.source.update();
 
-  // ═══ ADDITIVE GLOW EFFECTS (warm light on top of darkness) ═══
-  playerGlow.clear();
-  if(player.alive){
-    // Broad warm aura
-    playerGlow.circle(px,py,100);playerGlow.fill({color:0x0a1428,alpha:0.25});
-    playerGlow.circle(px,py,60);playerGlow.fill({color:0x0e1c34,alpha:0.2});
-    // Close glow
-    playerGlow.circle(px,py,30);playerGlow.fill({color:0x142844,alpha:0.15});
-    // Eye light — pulsing blue glow (the main light source!)
-    var eyeR=14+Math.sin(lightTime*3)*5;
-    playerGlow.circle(px+player.facing*3,py-PLAYER_H/2-7,eyeR);
-    playerGlow.fill({color:0x3a5a9a,alpha:0.35+Math.sin(lightTime*3)*0.12});
-    playerGlow.circle(px+player.facing*3,py-PLAYER_H/2-7,6);
-    playerGlow.fill({color:0x5a8ada,alpha:0.4});
-  }
-  // Thread glow
-  if(thread.active){
-    var ax=thread.anchorX-camera.x,ay=thread.anchorY-camera.y;
-    playerGlow.circle(ax,ay,30);playerGlow.fill({color:0x1a1a5a,alpha:0.2});
-    playerGlow.circle(ax,ay,12);playerGlow.fill({color:0x2a2a8a,alpha:0.25});
-  }
-  // Exit glow
+  // Step 1: Fill everything with a soft darkness (ambient)
+  lightCtx.globalCompositeOperation='source-over';
+  lightCtx.fillStyle='rgba(3,3,10,0.4)';
+  lightCtx.fillRect(0,0,sw,sh);
+
+  // Step 2: Cut smooth radial hole around player (destination-out erases darkness)
+  lightCtx.globalCompositeOperation='destination-out';
+  var lightR=350+Math.sin(lightTime*1.2)*15;
+  var mainGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR);
+  mainGrad.addColorStop(0,'rgba(255,255,255,1)');
+  mainGrad.addColorStop(0.15,'rgba(255,255,255,0.98)');
+  mainGrad.addColorStop(0.35,'rgba(255,255,255,0.85)');
+  mainGrad.addColorStop(0.55,'rgba(255,255,255,0.5)');
+  mainGrad.addColorStop(0.75,'rgba(255,255,255,0.18)');
+  mainGrad.addColorStop(0.9,'rgba(255,255,255,0.04)');
+  mainGrad.addColorStop(1,'rgba(255,255,255,0)');
+  lightCtx.fillStyle=mainGrad;
+  lightCtx.beginPath();lightCtx.arc(px,py,lightR,0,Math.PI*2);lightCtx.fill();
+
+  // Step 3: Cut smaller holes for exit and thread (soft light sources)
   var lvl=LEVELS[state.level];
+  // Exit glow
   if(lvl&&lvl.exit){
     var ex=lvl.exit.x+lvl.exit.w/2-camera.x,ey=lvl.exit.y+lvl.exit.h/2-camera.y;
-    var exitPulse=0.15+Math.sin(lightTime*3)*0.08;
-    playerGlow.circle(ex,ey,60);playerGlow.fill({color:0x0a2a0a,alpha:exitPulse});
-    playerGlow.circle(ex,ey,30);playerGlow.fill({color:0x1a5a1a,alpha:exitPulse*0.7});
-    playerGlow.circle(ex,ey,12);playerGlow.fill({color:0x2a8a2a,alpha:exitPulse*0.4});
+    var exitR=100+Math.sin(lightTime*2.5)*20;
+    var exitGrad=lightCtx.createRadialGradient(ex,ey,0,ex,ey,exitR);
+    exitGrad.addColorStop(0,'rgba(255,255,255,0.6)');
+    exitGrad.addColorStop(0.4,'rgba(255,255,255,0.3)');
+    exitGrad.addColorStop(0.7,'rgba(255,255,255,0.08)');
+    exitGrad.addColorStop(1,'rgba(255,255,255,0)');
+    lightCtx.fillStyle=exitGrad;
+    lightCtx.beginPath();lightCtx.arc(ex,ey,exitR,0,Math.PI*2);lightCtx.fill();
   }
+  // Thread anchor glow
+  if(thread.active){
+    var ax=thread.anchorX-camera.x,ay=thread.anchorY-camera.y;
+    var anchorGrad=lightCtx.createRadialGradient(ax,ay,0,ax,ay,60);
+    anchorGrad.addColorStop(0,'rgba(255,255,255,0.4)');
+    anchorGrad.addColorStop(0.5,'rgba(255,255,255,0.15)');
+    anchorGrad.addColorStop(1,'rgba(255,255,255,0)');
+    lightCtx.fillStyle=anchorGrad;
+    lightCtx.beginPath();lightCtx.arc(ax,ay,60,0,Math.PI*2);lightCtx.fill();
+  }
+
+  // Step 4: Tint remaining darkness with subtle warm color (source-atop)
+  lightCtx.globalCompositeOperation='source-atop';
+  var tintGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*0.7);
+  tintGrad.addColorStop(0,'rgba(20,30,55,0.4)');
+  tintGrad.addColorStop(0.5,'rgba(10,15,30,0.2)');
+  tintGrad.addColorStop(1,'rgba(0,0,0,0)');
+  lightCtx.fillStyle=tintGrad;
+  lightCtx.fillRect(0,0,sw,sh);
+
+  // Step 5: Add a subtle warm glow to the LIGHT area (lighter = behind dark overlay)
+  lightCtx.globalCompositeOperation='destination-over';
+  var glowGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*0.6);
+  glowGrad.addColorStop(0,'rgba(15,20,40,0.3)');
+  glowGrad.addColorStop(0.5,'rgba(8,12,25,0.15)');
+  glowGrad.addColorStop(1,'rgba(0,0,0,0)');
+  lightCtx.fillStyle=glowGrad;
+  lightCtx.beginPath();lightCtx.arc(px,py,lightR*0.6,0,Math.PI*2);lightCtx.fill();
+
+  lightCtx.globalCompositeOperation='source-over';
+  lightTexture.source.update();
 
   // ═══ FOG: subtle depth mist at bottom ═══
   fogOverlay.clear();
