@@ -22,7 +22,7 @@
 
 ## ТЕКУЩИЙ СТАТУС
 
-- **Версия**: Beta 0.9.8 (leaderboard integration)
+- **Версия**: Beta 0.9.9 (profile + notifications)
 - **Стек**: PixiJS 8.9.2 + Matter.js 0.20.0 + Supabase JS 2.x
 - **Файл**: index.html (единый файл, ~4477 строк)
 - **Хостинг**: Vercel → https://void-game-ruddy.vercel.app
@@ -207,3 +207,4 @@ score = completed × 10000 + totalStars × 100 − round(totalTime)
 | alpha 2.3 | Фикс: персонаж не залезает на текст, существо на заставке = меню, меню на весь экран |
 | beta 0.9.7 | Pre-release полировка |
 | beta 0.9.8 | Лидерборд: Supabase + Vercel API, 3 вкладки, real-time, anti-cheat (HMAC initData) |
+| beta 0.9.9 | Профиль игрока (аватарка, ранг, статистика, достижения), уведомления при обгоне в лидерборде |
