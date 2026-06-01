@@ -154,7 +154,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="hud-thread" id="hud-thread">нить</div>
     <div class="hud-pause" id="hud-pause">❚❚</div>
     <div class="hud-sound" id="hud-sound" style="position:absolute;top:10px;right:52px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;transition:all .15s">♪</div>
-    <div class="hud-interact" id="hud-interact">E</div>
+    <div class="hud-interact" id="hud-interact">✋</div>
   </div>
   <div id="touch-controls">
     <div class="touch-row">
@@ -163,8 +163,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
         <div class="tb" id="btn-right">▶</div>
       </div>
       <div class="right-grp">
-        <div class="tb interact" id="btn-interact">E</div>
-        <div class="tb interact" id="btn-thread" style="background:rgba(60,60,100,.06);border-color:rgba(60,60,100,.1);color:rgba(100,100,160,.35)">T</div>
+        <div class="tb interact" id="btn-interact">✋</div>
+        <div class="tb interact" id="btn-thread" style="background:rgba(60,60,100,.06);border-color:rgba(60,60,100,.1);color:rgba(100,100,160,.35)">↗</div>
         <div class="tb dash" id="btn-dash">D</div>
         <div class="tb jump" id="btn-jump">▲</div>
       </div>
@@ -244,17 +244,17 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">управление</div>
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">
-          <b style="color:#8a8aaa">A/D</b> или <b style="color:#8a8aaa">стрелки</b> — движение<br>
-          <b style="color:#8a8aaa">Space/W</b> — прыжок<br>
-          <b style="color:#8a8aaa">Shift/D</b> — рывок (dash)<br>
-          <b style="color:#8a8aaa">E</b> — взаимодействие (рычаги, якоря)<br>
-          <b style="color:#8a8aaa">T</b> — нить (привязаться к якорю)<br>
-          На мобильном — экранные кнопки
+          <b style="color:#8a8aaa">◀ ▶</b> — движение влево/вправо<br>
+          <b style="color:#8a8aaa">▲</b> — прыжок<br>
+          <b style="color:#8a8aaa">D</b> — рывок (dash)<br>
+          <b style="color:#8a8aaa">✋</b> — взаимодействие (рычаги, якоря)<br>
+          <b style="color:#8a8aaa">↗</b> — нить (привязаться к якорю)<br>
+          Прижмись к стене в воздухе — скольжение; прыжок во время скольжения — отскок от стены
         </div>
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">как работает нить?</div>
-        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Нажми T рядом с якорем (синий кристалл), чтобы привязаться. Ты будешь раскачиваться как маятник. Нажми T снова или отпрыгни, чтобы отпустить. Нить помогает преодолеть пропасти и добраться до труднодоступных мест.</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Подойди к якорю (синий кристалл) и нажми кнопку нити (↗), чтобы привязаться. Ты будешь раскачиваться как маятник. Нажми кнопку нити снова или отпрыгни, чтобы отпустить. Нить помогает преодолеть пропасти и добраться до труднодоступных мест.</div>
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">что такое dash?</div>
@@ -270,7 +270,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">рычаги и двери</div>
-        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Нажми E рядом с рычагом, чтобы открыть привязанную дверь. Некоторые уровни требуют активировать несколько рычагов в правильном порядке.</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Подойди к рычагу и нажми кнопку взаимодействия (✋), чтобы открыть привязанную дверь. Некоторые уровни требуют активировать несколько рычагов в правильном порядке.</div>
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">звёзды</div>
@@ -2168,26 +2168,41 @@ var logoAnim={
   // Platforms: V(0), O(1), I(2), D(3), version(4), button(5)
   platforms:[],
   // Character state
-  char:{x:0,y:0,facing:1,eyeBlink:0,blinkTimer:3,emotion:'neutral',emotionTimer:0,squashX:1,squashY:1,sparkles:[],startX:0,startY:0},
+  char:{x:0,y:0,facing:1,eyeBlink:0,blinkTimer:3,emotion:'neutral',emotionTimer:0,squashX:1,squashY:1,sparkles:[],startX:0,startY:0,prepSquash:0},
   // Rope visualization
   rope:{active:false,x1:0,y1:0,x2:0,y2:0},
+  // Ambient particles
+  ambientParts:[],
   // Sequence
   seqStep:0,seqTimer:0,
+  // Transition blend (0-1) for smooth step changes
+  transBlend:1,
   sequence:[
-    {type:'idle',platform:0,duration:1.8},
-    {type:'jump',toPlatform:1,duration:0.55},
-    {type:'idle',platform:1,duration:0.3},
-    {type:'jump',toPlatform:2,duration:0.55},
-    {type:'idle',platform:2,duration:0.3},
-    {type:'jump',toPlatform:3,duration:0.55},
-    {type:'idle',platform:3,duration:0.6,emotion:'curious'},
-    {type:'swing',fromPlatform:3,toPlatform:4,duration:1.6},
-    {type:'idle',platform:4,duration:0.4},
-    {type:'jump',toPlatform:5,duration:0.6},
-    {type:'wave',platform:5,duration:2.0},
-    {type:'throw_rope',toPlatform:0,duration:0.6},
-    {type:'climb',toPlatform:0,duration:1.6},
-    {type:'idle',platform:0,duration:1.2},
+    {type:'idle',platform:0,duration:1.5,emotion:'neutral'},
+    {type:'prep_jump',toPlatform:1,duration:0.25},
+    {type:'jump',toPlatform:1,duration:0.5},
+    {type:'land',platform:1,duration:0.25,emotion:'happy'},
+    {type:'idle',platform:1,duration:0.4},
+    {type:'prep_jump',toPlatform:2,duration:0.2},
+    {type:'jump',toPlatform:2,duration:0.45},
+    {type:'land',platform:2,duration:0.25,emotion:'happy'},
+    {type:'idle',platform:2,duration:0.4},
+    {type:'prep_jump',toPlatform:3,duration:0.2},
+    {type:'jump',toPlatform:3,duration:0.5},
+    {type:'land',platform:3,duration:0.3,emotion:'curious'},
+    {type:'idle',platform:3,duration:0.8,emotion:'curious'},
+    {type:'swing',fromPlatform:3,toPlatform:4,duration:1.8},
+    {type:'land',platform:4,duration:0.3,emotion:'happy'},
+    {type:'idle',platform:4,duration:0.3},
+    {type:'prep_jump',toPlatform:5,duration:0.2},
+    {type:'jump',toPlatform:5,duration:0.55},
+    {type:'land',platform:5,duration:0.3,emotion:'happy'},
+    {type:'wave',platform:5,duration:2.2},
+    {type:'idle',platform:5,duration:0.3},
+    {type:'throw_rope',toPlatform:0,duration:0.7},
+    {type:'climb',toPlatform:0,duration:1.8},
+    {type:'land',platform:0,duration:0.4,emotion:'happy'},
+    {type:'idle',platform:0,duration:1.0},
   ],
   // Stars
   stars:[],
@@ -2199,8 +2214,12 @@ var logoAnim={
     var self=this;
     window.addEventListener('resize',function(){self.resize()});
     // Stars
-    for(var i=0;i<55;i++){
+    for(var i=0;i<60;i++){
       this.stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.2+0.3,speed:Math.random()*0.4+0.2,phase:Math.random()*Math.PI*2});
+    }
+    // Ambient particles
+    for(var i=0;i<20;i++){
+      this.ambientParts.push({x:Math.random()*this.W,y:Math.random()*this.H,vx:(Math.random()-0.5)*8,vy:-Math.random()*6-2,life:Math.random()*3,maxLife:3+Math.random()*2,r:0.6+Math.random()*0.8});
     }
     // Start on V
     var p=this.platforms[0];
@@ -2216,9 +2235,9 @@ var logoAnim={
   },
   calcPositions:function(){
     var W=this.W,H=this.H;
-    // VOID letters — centered, ~18% from top
+    // VOID letters — centered vertically in upper third
     var letterH=Math.max(40,H*0.13);
-    var topY=H*0.15;
+    var topY=H*0.18;
     var totalW=W*0.62;
     var startX=(W-totalW)/2;
     var slotW=totalW/4;
@@ -2227,7 +2246,7 @@ var logoAnim={
       {x:startX+slotW,y:topY-H*0.01,w:slotW*0.78,h:letterH*1.04,label:'O'},
       {x:startX+slotW*2,y:topY,w:slotW*0.45,h:letterH,label:'I'},
       {x:startX+slotW*3,y:topY-H*0.008,w:slotW*0.72,h:letterH*1.02,label:'D'},
-      // Version platform — find HTML element or use proportional
+      // Version platform
       {x:W*0.25,y:H*0.46,w:W*0.5,h:Math.max(16,H*0.03),label:'version'},
       // Button platform
       {x:W*0.15,y:H*0.62,w:W*0.7,h:Math.max(40,H*0.06),label:'button'},
@@ -2241,21 +2260,25 @@ var logoAnim={
   },
   easeInOut:function(t){return t<0.5?2*t*t:-1+(4-2*t)*t},
   easeOut:function(t){return 1-Math.pow(1-t,3)},
+  easeOutBack:function(t){var c=1.3;return 1+c*Math.pow(t-1,3)+c*Math.pow(t-1,2);},
   nextStep:function(){
     this.seqStep++;this.seqTimer=0;
     if(this.seqStep>=this.sequence.length)this.seqStep=0;
     this.char.startX=this.char.x;this.char.startY=this.char.y;
+    this.transBlend=0;
     var step=this.sequence[this.seqStep];
     if(step.emotion){this.char.emotion=step.emotion;this.char.emotionTimer=step.duration||1;}
   },
-  addSparkles:function(x,y,count){
+  addSparkles:function(x,y,count,color){
     for(var i=0;i<count;i++){
-      this.char.sparkles.push({x:x,y:y,vx:(Math.random()-0.5)*50,vy:-Math.random()*35-10,life:0.4+Math.random()*0.4,maxLife:0.8,r:1+Math.random()*1.5});
+      this.char.sparkles.push({x:x,y:y,vx:(Math.random()-0.5)*50,vy:-Math.random()*35-10,life:0.4+Math.random()*0.4,maxLife:0.8,r:1+Math.random()*1.5,color:color||'default'});
     }
   },
   update:function(dt){
     this.time+=dt;
     var c=this.char;
+    // Transition blend
+    if(this.transBlend<1)this.transBlend=Math.min(1,this.transBlend+dt*6);
     // Blink
     c.blinkTimer-=dt;
     if(c.blinkTimer<=0){c.eyeBlink=1;c.blinkTimer=2.5+Math.random()*3;var self=this;setTimeout(function(){self.char.eyeBlink=0},120);}
@@ -2263,8 +2286,16 @@ var logoAnim={
     if(c.emotionTimer>0){c.emotionTimer-=dt;if(c.emotionTimer<=0)c.emotion='neutral';}
     // Squash recovery
     c.squashX+=(1-c.squashX)*8*dt;c.squashY+=(1-c.squashY)*8*dt;
+    // Prep squash recovery
+    c.prepSquash*=Math.pow(0.01,dt);
     // Sparkles
     for(var i=c.sparkles.length-1;i>=0;i--){var sp=c.sparkles[i];sp.life-=dt;sp.x+=sp.vx*dt;sp.y+=sp.vy*dt;sp.vy+=30*dt;if(sp.life<=0)c.sparkles.splice(i,1);}
+    // Ambient particles
+    for(var i=0;i<this.ambientParts.length;i++){
+      var ap=this.ambientParts[i];
+      ap.life-=dt;ap.x+=ap.vx*dt;ap.y+=ap.vy*dt;
+      if(ap.life<=0){ap.x=Math.random()*this.W;ap.y=this.H+10;ap.vy=-Math.random()*6-2;ap.vx=(Math.random()-0.5)*8;ap.life=ap.maxLife;}
+    }
     // Sequence step
     var step=this.sequence[this.seqStep];
     this.seqTimer+=dt;
@@ -2273,7 +2304,30 @@ var logoAnim={
     switch(step.type){
       case 'idle':
         p=this.platforms[step.platform];
-        c.x=p.x+p.w/2;c.y=p.y-18+Math.sin(this.time*2.5)*1.5;
+        var idleBob=Math.sin(this.time*2.5)*1.5;
+        c.x=p.x+p.w/2;c.y=p.y-18+idleBob;
+        // Gentle breathing squash
+        c.squashX=1+Math.sin(this.time*1.8)*0.02;
+        c.squashY=1-Math.sin(this.time*1.8)*0.02;
+        if(t>=1)this.nextStep();
+        break;
+      case 'prep_jump':
+        // Crouch before jumping
+        p=this.platforms[step.toPlatform];
+        c.facing=p.x+p.w/2>c.x?1:-1;
+        c.prepSquash=t;
+        c.squashX=1+0.2*t;c.squashY=1-0.2*t;
+        c.emotion='focused';
+        if(t>=1){
+          this.nextStep();
+        }
+        break;
+      case 'land':
+        p=this.platforms[step.platform];
+        // Squash on landing, then spring back
+        var landSquash=1-t;
+        c.x=p.x+p.w/2;c.y=p.y-18+Math.sin(this.time*2.5)*1.5*(1-landSquash);
+        c.squashX=1+0.25*landSquash;c.squashY=1-0.25*landSquash;
         if(t>=1)this.nextStep();
         break;
       case 'jump':
@@ -2281,16 +2335,20 @@ var logoAnim={
         targetX=p.x+p.w/2;targetY=p.y-18;
         et=this.easeInOut(t);
         c.x=c.startX+(targetX-c.startX)*et;
-        var peakH=30+Math.abs(targetY-c.startY)*0.35;
+        var peakH=35+Math.abs(targetY-c.startY)*0.35;
         c.y=c.startY+(targetY-c.startY)*et-peakH*4*t*(1-t);
         c.facing=targetX>c.startX?1:-1;
-        if(t>0.1&&t<0.9)c.emotion='surprised';
-        else c.emotion='neutral';
+        // Spin slightly during jump
+        if(t>0.15&&t<0.85){
+          c.emotion='surprised';
+          c.squashX=1-0.05;c.squashY=1+0.08;
+        }else{
+          c.emotion='neutral';
+        }
+        if(Math.random()<0.08)this.addSparkles(c.x,c.y+5,1);
         if(t>=1){
           c.x=targetX;c.y=targetY;
-          c.squashX=1.25;c.squashY=0.75;
-          c.emotion='happy';c.emotionTimer=0.4;
-          this.addSparkles(c.x,c.y+15,4);
+          this.addSparkles(c.x,c.y+15,5);
           this.nextStep();
         }
         break;
@@ -2300,21 +2358,24 @@ var logoAnim={
         anchorX=p.x+p.w/2;anchorY=p.y+p.h;
         targetX=p2.x+p2.w/2;targetY=p2.y-18;
         ropeLen=Math.sqrt((targetX-anchorX)*(targetX-anchorX)+(targetY-anchorY)*(targetY-anchorY))*1.05;
-        // Swing from left of anchor to target angle
-        startAngle=-0.4;
+        startAngle=-0.5;
         endAngle=Math.atan2(targetX-anchorX,targetY-anchorY);
-        angle=startAngle+(endAngle-startAngle)*this.easeOut(t);
+        // Smooth pendulum swing with slight overshoot
+        var swingT=this.easeOut(t);
+        angle=startAngle+(endAngle-startAngle)*swingT;
+        // Add small secondary oscillation at end
+        if(t>0.7){var damp=Math.sin((t-0.7)/0.3*Math.PI)*0.05*(1-t);angle+=damp;}
         c.x=anchorX+Math.sin(angle)*ropeLen;
         c.y=anchorY+Math.cos(angle)*ropeLen;
         c.facing=Math.sin(angle)>0?1:-1;
         this.rope={active:true,x1:anchorX,y1:anchorY,x2:c.x,y2:c.y-10};
-        c.emotion='happy';
-        if(Math.random()<0.15)this.addSparkles(c.x,c.y,1);
+        c.emotion=t<0.3?'surprised':'happy';
+        if(Math.random()<0.2)this.addSparkles(c.x,c.y,1,'rope');
         if(t>=1){
           c.x=targetX;c.y=targetY;
           c.squashX=1.2;c.squashY=0.8;
           this.rope.active=false;
-          this.addSparkles(c.x,c.y+10,3);
+          this.addSparkles(c.x,c.y+10,4);
           this.nextStep();
         }
         break;
@@ -2328,27 +2389,33 @@ var logoAnim={
         p=this.platforms[step.toPlatform];
         targetX=p.x+p.w/2;targetY=p.y+p.h;
         var fromX=c.x,fromY=c.y-12;
-        this.rope={active:true,x1:fromX,y1:fromY,x2:fromX+(targetX-fromX)*this.easeOut(t),y2:fromY+(targetY-fromY)*this.easeOut(t)};
-        c.emotion='curious';
+        // Animated throw with slight arc
+        var ropeT=this.easeOutBack(Math.min(1,t*1.1));
+        this.rope={active:true,x1:fromX,y1:fromY,x2:fromX+(targetX-fromX)*ropeT,y2:fromY+(targetY-fromY)*ropeT};
+        c.emotion='focused';
+        // Character leans into throw
+        c.squashX=1-0.05*t;c.squashY=1+0.05*t;
         if(t>=1){this.rope={active:true,x1:fromX,y1:fromY,x2:targetX,y2:targetY};this.nextStep();}
         break;
       case 'climb':
         p=this.platforms[step.toPlatform];
         targetX=p.x+p.w/2;targetY=p.y-18;
+        // Climbing motion — not linear, has rhythmic pulls
         et=this.easeInOut(t);
+        // Add subtle up-down climbing rhythm
+        var climbRhythm=Math.sin(t*Math.PI*5)*3*(1-t);
         c.x=c.startX+(targetX-c.startX)*et;
-        c.y=c.startY+(targetY-c.startY)*et;
+        c.y=c.startY+(targetY-c.startY)*et+climbRhythm;
         c.facing=c.x<targetX?1:-1;
         // Rope from top anchor to character
         var topAnchor=this.platforms[step.toPlatform];
         this.rope.x2=c.x;this.rope.y2=c.y-10;
-        c.emotion='happy';
-        if(Math.random()<0.1)this.addSparkles(c.x,c.y,1);
+        c.emotion=t<0.5?'focused':'happy';
+        if(Math.random()<0.12)this.addSparkles(c.x,c.y,1,'rope');
         if(t>=1){
           c.x=targetX;c.y=targetY;
-          c.squashX=1.2;c.squashY=0.8;
+          this.addSparkles(c.x,c.y+10,5);
           this.rope.active=false;
-          this.addSparkles(c.x,c.y+10,4);
           this.nextStep();
         }
         break;
@@ -2369,13 +2436,19 @@ var logoAnim={
       ctx.fillStyle='rgba(160,170,210,'+alpha+')';
       ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);ctx.fill();
     }
+    // Ambient particles
+    for(var i=0;i<this.ambientParts.length;i++){
+      var ap=this.ambientParts[i];
+      var apAlpha=(ap.life/ap.maxLife)*0.15;
+      ctx.fillStyle='rgba(120,140,200,'+apAlpha+')';
+      ctx.beginPath();ctx.arc(ap.x,ap.y,ap.r,0,Math.PI*2);ctx.fill();
+    }
     // Rope
     if(this.rope.active){
       ctx.strokeStyle='rgba(100,80,140,0.7)';ctx.lineWidth=2.5;ctx.lineCap='round';
       ctx.beginPath();ctx.moveTo(this.rope.x1,this.rope.y1);
-      // Slight curve
-      var midX=(this.rope.x1+this.rope.x2)/2+5;
-      var midY=(this.rope.y1+this.rope.y2)/2+10;
+      var midX=(this.rope.x1+this.rope.x2)/2+5*Math.sin(this.time*2);
+      var midY=(this.rope.y1+this.rope.y2)/2+8+Math.sin(this.time*1.5)*3;
       ctx.quadraticCurveTo(midX,midY,this.rope.x2,this.rope.y2);
       ctx.stroke();
       // Glow
@@ -2384,32 +2457,45 @@ var logoAnim={
       ctx.quadraticCurveTo(midX,midY,this.rope.x2,this.rope.y2);
       ctx.stroke();
     }
-    // VOID Letters
+    // VOID Letters — alive and breathing
     for(var i=0;i<4;i++){
       var L=this.platforms[i];
       ctx.save();
       ctx.translate(L.x+L.w/2,L.y+L.h/2);
-      var wobble=Math.sin(this.time*0.8+i*1.5)*0.008;
+      // Gentle breathing wobble
+      var breathe=Math.sin(this.time*1.2+i*0.8)*0.006;
+      var wobble=Math.sin(this.time*0.6+i*1.5)*0.01;
       ctx.rotate(wobble);
-      // Letter block
-      ctx.shadowColor='rgba(100,130,200,0.25)';ctx.shadowBlur=15;
-      ctx.fillStyle='rgba(70,75,110,0.1)';
+      var scaleBreath=1+Math.sin(this.time*1.2+i*0.8)*0.012;
+      ctx.scale(scaleBreath,scaleBreath);
+      // Glow pulse — each letter pulses differently
+      var glowPulse=0.25+Math.sin(this.time*0.8+i*1.2)*0.12;
+      // Letter block with glow
+      ctx.shadowColor='rgba(100,130,200,'+glowPulse+')';ctx.shadowBlur=18+Math.sin(this.time*1.0+i)*5;
+      ctx.fillStyle='rgba(70,75,110,0.12)';
       ctx.fillRect(-L.w/2,-L.h/2,L.w,L.h);
-      ctx.strokeStyle='rgba(110,115,160,0.35)';ctx.lineWidth=1.2;
+      ctx.strokeStyle='rgba(110,115,160,'+(0.3+glowPulse*0.3)+')';ctx.lineWidth=1.2;
       ctx.strokeRect(-L.w/2,-L.h/2,L.w,L.h);
-      // Top edge highlight
-      ctx.fillStyle='rgba(130,135,180,0.25)';ctx.fillRect(-L.w/2,-L.h/2,L.w,2);
+      // Top edge highlight — pulsing
+      ctx.fillStyle='rgba(130,135,180,'+(0.2+glowPulse*0.2)+')';ctx.fillRect(-L.w/2,-L.h/2,L.w,2);
+      // Bottom edge subtle glow
+      ctx.fillStyle='rgba(80,90,160,'+(0.05+glowPulse*0.05)+')';ctx.fillRect(-L.w/2,L.h/2-2,L.w,2);
       // Letter text
       var fontSize=Math.max(24,Math.min(52,L.h*0.6));
-      ctx.shadowColor='rgba(140,160,230,0.5)';ctx.shadowBlur=20;
-      ctx.fillStyle='rgba(170,175,215,0.85)';
+      ctx.shadowColor='rgba(140,160,230,'+(0.4+glowPulse*0.2)+')';ctx.shadowBlur=22+Math.sin(this.time*0.9+i)*4;
+      ctx.fillStyle='rgba(170,175,215,'+(0.8+glowPulse*0.1)+')';
       ctx.font='bold '+fontSize+'px "Courier New",monospace';
       ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText(L.label,0,3);
-      ctx.shadowBlur=8;
-      ctx.fillStyle='rgba(195,200,230,0.4)';
+      // Second pass for glow
+      ctx.shadowBlur=10;
+      ctx.fillStyle='rgba(195,200,230,'+(0.3+glowPulse*0.15)+')';
       ctx.fillText(L.label,0,3);
       ctx.shadowBlur=0;
+      // Subtle particle spark near letter
+      if(Math.random()<0.008){
+        this.addSparkles(L.x+L.w/2+(Math.random()-0.5)*L.w*0.6,L.y+L.h*0.3,1,'letter');
+      }
       ctx.restore();
     }
     // Character
@@ -2418,7 +2504,13 @@ var logoAnim={
     for(var i=0;i<this.char.sparkles.length;i++){
       var sp=this.char.sparkles[i];
       var sa=sp.life/sp.maxLife;
-      ctx.fillStyle='rgba(160,180,230,'+sa*0.8+')';
+      if(sp.color==='rope'){
+        ctx.fillStyle='rgba(140,120,200,'+sa*0.7+')';
+      }else if(sp.color==='letter'){
+        ctx.fillStyle='rgba(160,180,240,'+sa*0.6+')';
+      }else{
+        ctx.fillStyle='rgba(160,180,230,'+sa*0.8+')';
+      }
       ctx.beginPath();ctx.arc(sp.x,sp.y,sp.r*sa,0,Math.PI*2);ctx.fill();
     }
   },
@@ -2433,12 +2525,15 @@ var logoAnim={
     var isSwinging=step.type==='swing';
     var isWaving=step.type==='wave';
     var isClimbing=step.type==='climb';
-    var isIdle=step.type==='idle';
+    var isIdle=step.type==='idle'||step.type==='land';
+    var isPrep=step.type==='prep_jump';
+    var isThrowing=step.type==='throw_rope';
     var bob=0;
     if(isIdle)bob=Math.sin(t*2.5)*1.5;
     // === SCARF ===
     ctx.strokeStyle='rgba(120,80,160,0.8)';ctx.lineWidth=2.5;ctx.lineCap='round';
     var scarfWave=isSwinging||isClimbing?Math.sin(t*6)*0.5:Math.sin(t*1.5)*0.15;
+    if(isPrep)scarfWave=Math.sin(t*3)*0.1;
     var sx=-5+Math.sin(scarfWave)*5,sy=bob-3+Math.sin(t*2)*1.5;
     ctx.beginPath();ctx.moveTo(0,bob-8);ctx.quadraticCurveTo(sx,sy+3,sx-3,sy+8);ctx.stroke();
     ctx.strokeStyle='rgba(100,65,140,0.5)';ctx.lineWidth=1.8;
@@ -2478,7 +2573,7 @@ var logoAnim={
         ctx.beginPath();ctx.ellipse(-3.5,eyeY+1.5,3.2,1.3,0,0,Math.PI);ctx.fill();
         ctx.beginPath();ctx.ellipse(3.5,eyeY+1.5,3.2,1.3,0,0,Math.PI);ctx.fill();
       }
-      if(c.emotion==='surprised'){
+      if(c.emotion==='surprised'||c.emotion==='focused'){
         ctx.fillStyle='rgba(25,30,55,0.9)';
         ctx.beginPath();ctx.arc(-3.5,eyeY,1.8,0,Math.PI*2);ctx.fill();
         ctx.beginPath();ctx.arc(3.5,eyeY,1.8,0,Math.PI*2);ctx.fill();
@@ -2491,7 +2586,7 @@ var logoAnim={
     }else if(c.emotion==='surprised'){
       ctx.fillStyle='rgba(45,50,85,0.5)';
       ctx.beginPath();ctx.ellipse(0,headY+3.5,1.5,2,0,0,Math.PI*2);ctx.fill();
-    }else if(c.emotion==='curious'){
+    }else if(c.emotion==='curious'||c.emotion==='focused'){
       ctx.strokeStyle='rgba(55,60,95,0.5)';ctx.lineWidth=1;ctx.lineCap='round';
       ctx.beginPath();ctx.moveTo(-2,headY+3.5);ctx.lineTo(1,headY+3);ctx.lineTo(2,headY+4);ctx.stroke();
     }else{
@@ -2511,6 +2606,13 @@ var logoAnim={
     }else if(isJumping){
       ctx.beginPath();ctx.moveTo(-5,armY);ctx.lineTo(-7,armY-4);ctx.stroke();
       ctx.beginPath();ctx.moveTo(5,armY);ctx.lineTo(7,armY-4);ctx.stroke();
+    }else if(isPrep){
+      ctx.beginPath();ctx.moveTo(-5,armY);ctx.lineTo(-6,armY+4);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(5,armY);ctx.lineTo(6,armY+4);ctx.stroke();
+    }else if(isThrowing){
+      ctx.beginPath();ctx.moveTo(-5,armY);ctx.lineTo(-7,armY+3);ctx.stroke();
+      var throwArm=Math.sin(t*4)*4;
+      ctx.beginPath();ctx.moveTo(5,armY);ctx.lineTo(10,armY-8+throwArm);ctx.stroke();
     }else{
       ctx.beginPath();ctx.moveTo(-5,armY);ctx.lineTo(-7,armY+6+Math.sin(t*1.5));ctx.stroke();
       ctx.beginPath();ctx.moveTo(5,armY);ctx.lineTo(7,armY+6-Math.sin(t*1.5));ctx.stroke();
@@ -2528,6 +2630,9 @@ var logoAnim={
     }else if(isJumping){
       ctx.beginPath();ctx.moveTo(-3,legY);ctx.lineTo(-4,legY+4);ctx.stroke();
       ctx.beginPath();ctx.moveTo(3,legY);ctx.lineTo(4,legY+4);ctx.stroke();
+    }else if(isPrep){
+      ctx.beginPath();ctx.moveTo(-3,legY);ctx.lineTo(-4,legY+5);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(3,legY);ctx.lineTo(4,legY+5);ctx.stroke();
     }else{
       ctx.beginPath();ctx.moveTo(-3,legY);ctx.lineTo(-3,legY+7+Math.sin(t*1.2)*0.5);ctx.stroke();
       ctx.beginPath();ctx.moveTo(3,legY);ctx.lineTo(3,legY+7-Math.sin(t*1.2)*0.5);ctx.stroke();
