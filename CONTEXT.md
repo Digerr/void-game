@@ -21,7 +21,7 @@
 
 ## ТЕКУЩИЙ СТАТУС
 
-- **Версия**: Alpha 2.0 (commit 7ab08ac)
+- **Версия**: Alpha 2.1 (commit 983f9dd)
 - **Стек**: PixiJS 8.9.2 + Matter.js 0.20.0
 - **Файл**: index.html (единый файл)
 - **Хостинг**: GitHub Pages → https://digerr.github.io/void-game/
