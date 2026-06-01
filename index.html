@@ -31,7 +31,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .hud-pause{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;transition:all .15s}
 .hud-pause:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.5)}
 .hud-interact{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:.65rem;color:#4a4a28;letter-spacing:.08em;z-index:20;display:none;animation:pulse 1.5s infinite;pointer-events:none}
-#touch-controls{position:absolute;bottom:0;left:0;right:0;display:none;padding:0 12px 14px;padding-bottom:max(14px,env(safe-area-inset-bottom))}
+#touch-controls{position:absolute;bottom:30px;left:0;right:0;display:none;padding:0 12px 14px;padding-bottom:max(14px,env(safe-area-inset-bottom))}
 #touch-controls.active{display:block}
 .touch-row{display:flex;justify-content:space-between;align-items:flex-end}
 .tb-group{display:flex;gap:10px;align-items:flex-end}
@@ -126,7 +126,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — Alpha 1.6
+// VOID — Alpha 1.7
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
@@ -297,7 +297,7 @@ function toggleSound(){
 }
 
 // ═══ GAME STATE ═══
-var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0};
+var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0,lastCheckpoint:null};
 
 // ═══ LEVEL DATA ═══
 var LEVELS=[
@@ -313,6 +313,7 @@ var LEVELS=[
       {x:2900,y:430,w:160,h:16},
     ],
     spikes:[{x:740,y:630,w:80},{x:1400,y:630,w:60}],
+    checkpoints:[{x:1500,y:510}],
   },
   {
     name:'Стены',story:'Тьма сжимается. Стены становятся ближе. Но стены — не только преграда. Они могут стать путём наверх.',
@@ -328,6 +329,7 @@ var LEVELS=[
       {x:3300,y:350,w:160,h:16},
     ],
     spikes:[{x:620,y:730,w:60},{x:1120,y:730,w:60},{x:2000,y:730,w:80},{x:2600,y:730,w:80}],
+    checkpoints:[{x:1700,y:590},{x:2700,y:450}],
   },
   {
     name:'Пилы',story:'Тишина нарушена. Вдали слышен скрежет — что-то вращается, что-то ждёт. Механизмы тьмы не знают пощады.',
@@ -343,6 +345,7 @@ var LEVELS=[
     ],
     spikes:[{x:640,y:730,w:60},{x:1230,y:730,w:60},{x:1820,y:730,w:60}],
     saws:[{x:1100,y:680,r:30},{x:1650,y:660,r:35},{x:2200,y:650,r:30},{x:2650,y:680,r:25}],
+    checkpoints:[{x:1200,y:460},{x:2500,y:470}],
   },
   {
     name:'Бездна',story:'Дно исчезло. Остались лишь платформы, парящие в пустоте. Один неверный шаг — и тьма примет тебя.',
@@ -360,6 +363,7 @@ var LEVELS=[
     ],
     spikes:[{x:430,y:780,w:50},{x:2000,y:630,w:40}],
     saws:[{x:1500,y:650,r:30},{x:1750,y:580,r:25},{x:3000,y:340,r:25},{x:3700,y:400,r:30}],
+    checkpoints:[{x:1600,y:530},{x:3100,y:370}],
   },
   {
     name:'Механизмы',story:'Древние механизмы ещё работают. Рычаги открывают двери, платформы движутся по рельсам. Но и тьма научилась пользоваться механизмами.',
@@ -384,6 +388,7 @@ var LEVELS=[
     ],
     spikes:[{x:640,y:730,w:80},{x:1230,y:730,w:60},{x:1830,y:730,w:60}],
     saws:[{x:2700,y:680,r:28},{x:3350,y:680,r:30}],
+    checkpoints:[{x:1600,y:540},{x:2800,y:470}],
     levers:[
       {x:600,y:504,doorX:760,doorY:630,doorW:20,doorH:100,id:'door1'},
       {x:1650,y:534,doorX:1860,doorY:630,doorW:20,doorH:100,id:'door2'},
@@ -426,6 +431,7 @@ var LEVELS=[
     fallingPlatforms:[
       {x:1550,y:620,w:80,h:16},{x:1750,y:550,w:80,h:16},
     ],
+    checkpoints:[{x:1500,y:560},{x:3200,y:370}],
   },
   {
     name:'Нить',story:'Из темноты появляется мерцающая нить — тонкая, почти невидимая. Но если потянуть за неё, она выдержит. Она станет мостом через пропасть, верёвкой для спуска, путём наверх. Тяни — и держись.',
@@ -458,6 +464,7 @@ var LEVELS=[
       {x:2850,y:180},{x:3400,y:150},
       {x:3950,y:200},
     ],
+    checkpoints:[{x:2000,y:410},{x:3500,y:430}],
   },
   {
     name:'Качели',story:'Тьма учит новому: если раскачаться посильнее, можно долететь туда, куда не добраться пешком. Нить — не только путь, но и разбег. Главное — вовремя отпустить.',
@@ -507,6 +514,7 @@ var LEVELS=[
       {x:3350,y:120},{x:3800,y:150},
       {x:4350,y:200},{x:4750,y:150},
     ],
+    checkpoints:[{x:2000,y:540},{x:3800,y:430}],
   }
 ];
 
@@ -591,8 +599,13 @@ if(player.dashing){g.circle(0,0,20);g.fill({color:0x6a6a9a,alpha:0.15})}
 function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,-1)}}
-function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
-function checkSpecialCollision(a,b){if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(player.alive)winLevel()}if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}}
+function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
+function checkSpecialCollision(a,b){if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(player.alive)winLevel()}if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
+  // Checkpoint activation
+  if((a.label==='checkpointZone'&&b.label==='player')||(b.label==='checkpointZone'&&a.label==='player')){
+    var cpBody=(a.label==='checkpointZone')?a:b;
+    for(var ci=0;ci<levelCheckpoints.length;ci++){if(levelCheckpoints[ci].body===cpBody){activateCheckpoint(levelCheckpoints[ci]);break}}
+  }}
 
 function updatePlayer(dt){
   if(!player.alive||!player.body)return;
@@ -692,7 +705,7 @@ function updatePlayer(dt){
 
 function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
 
-function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];createPlayer(lvl.spawn.x,lvl.spawn.y);state.levelStartTime=performance.now()}
+function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);state.levelStartTime=performance.now()}
 
 // ═══ SAW BLADES ═══
 var sawBodies=[],sawSprites=[],sawTime=0;
@@ -853,6 +866,55 @@ function updatePendulums(){
 // ═══ THREAD / ROPE SYSTEM (Unravel mechanic) ═══
 var thread={active:false,constraint:null,anchorX:0,anchorY:0,sprite:null,length:0,targetLength:0,minLength:40,maxLength:400,climbSpeed:120,range:380};
 var levelAnchors=[];
+var levelCheckpoints=[];
+var checkpointTime=0;
+function createCheckpoint(data){
+  var body=MBodies.circle(data.x,data.y-16,20,{isStatic:true,isSensor:true,label:'checkpointZone'});
+  MWorld.add(world,body);
+  var spr=new PIXI.Container();gameContainer.addChild(spr);
+  levelCheckpoints.push({body:body,sprite:spr,x:data.x,y:data.y,activated:false});
+}
+function updateCheckpoints(dt){
+  checkpointTime+=dt;
+  for(var i=0;i<levelCheckpoints.length;i++){
+    var cp=levelCheckpoints[i];cp.sprite.removeChildren();var g=new PIXI.Graphics();
+    if(cp.activated){
+      // Activated: warm steady glow
+      var pulse=Math.sin(checkpointTime*2+i)*0.15+0.85;
+      g.circle(0,-16,14);g.fill({color:0x3a5a3a,alpha:0.12*pulse});
+      g.circle(0,-16,8);g.fill({color:0x4a7a4a,alpha:0.2*pulse});
+      // Steady flame
+      var flameH=6+Math.sin(checkpointTime*4+i)*2;
+      g.moveTo(-3,-24);g.lineTo(0,-24-flameH);g.lineTo(3,-24);g.closePath();g.fill({color:0x6aaa6a,alpha:0.6*pulse});
+      g.moveTo(-2,-24);g.lineTo(0,-24-flameH*0.7);g.lineTo(2,-24);g.closePath();g.fill({color:0x8aca8a,alpha:0.4});
+      // Small particles floating up
+      for(var j=0;j<2;j++){
+        var py2=-24-Math.sin(checkpointTime*3+j*3)*12;
+        var px2=Math.sin(checkpointTime*2+j*2)*4;
+        g.circle(px2,py2,1.5);g.fill({color:0x5a9a5a,alpha:0.3+Math.sin(checkpointTime*4+j)*0.15});
+      }
+    }else{
+      // Inactive: dim cold glow, pulsating
+      var glow=Math.sin(checkpointTime*1.5+i*2)*0.1+0.2;
+      g.circle(0,-16,12);g.fill({color:0x2a2a4a,alpha:glow*0.5});
+      g.circle(0,-16,6);g.fill({color:0x3a3a5a,alpha:glow});
+      // Dim dot
+      g.circle(0,-24,2);g.fill({color:0x4a4a6a,alpha:glow*1.5});
+    }
+    // Vertical stick
+    g.rect(-1,0,2,16);g.fill({color:cp.activated?0x4a6a4a:0x3a3a5a,alpha:0.5});
+    cp.sprite.x=cp.x;cp.sprite.y=cp.y;cp.sprite.addChild(g);
+  }
+}
+function activateCheckpoint(cp){
+  if(cp.activated)return;
+  cp.activated=true;
+  state.lastCheckpoint={x:cp.x,y:cp.y};
+  spawnParticles(cp.x,cp.y-16,12,0x5a9a5a,{angle:-Math.PI/2,spread:1.5,speed:2,life:0.6,size:3,gravity:0});
+  tgHaptic('medium');
+  playTone(400,0.15,'sine',0.15,600);
+  playTone(600,0.2,'triangle',0.1,800);
+}
 function createAnchor(data){
   var body=MBodies.circle(data.x,data.y,10,{isStatic:true,isSensor:true,label:'anchor'});
   MWorld.add(world,body);
@@ -1020,11 +1082,13 @@ function loadLevel(n){
   pendulums=[];if(lvl.pendulums)for(var i=0;i<lvl.pendulums.length;i++)createPendulum(lvl.pendulums[i]);
   // Anchors
   levelAnchors=[];if(lvl.anchors)for(var i=0;i<lvl.anchors.length;i++)createAnchor(lvl.anchors[i]);
+  // Checkpoints
+  levelCheckpoints=[];state.lastCheckpoint=null;if(lvl.checkpoints)for(var i=0;i<lvl.checkpoints.length;i++)createCheckpoint(lvl.checkpoints[i]);
   // Exit
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();eg.rect(0,0,lvl.exit.w,lvl.exit.h);eg.fill({color:0x2a4a2a,alpha:0.7});eg.rect(0,0,lvl.exit.w,3);eg.fill({color:0x5a8a5a,alpha:0.9});eg.rect(0,0,2,lvl.exit.h);eg.fill({color:0x3a6a3a,alpha:0.7});eg.rect(lvl.exit.w-2,0,2,lvl.exit.h);eg.fill({color:0x3a6a3a,alpha:0.7});espr.addChild(eg);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];if(thread.active)detachThread();clearParticles();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelCheckpoints=[];state.lastCheckpoint=null;if(thread.active)detachThread();clearParticles();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
 
 // ═══ CAMERA ═══
 var camera={x:0,y:0};
@@ -1254,7 +1318,7 @@ function gameLoop(timestamp){
     else if(pvy>0)engine.gravity.y=player.gravityDown;
     if(!player.onGround&&Math.abs(pvy)<player.apexThreshold)engine.gravity.y*=player.apexGravityMult;
   }
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateThread(dt);updateExitGlow(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateCheckpoints(dt);updateThread(dt);updateExitGlow(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
   if(state.screen==='story'){updateCamera();updateBackground()}
   if(state.screen!=='playing')updateParticles(rawDt);
 }
