@@ -1340,13 +1340,17 @@ function loadProfile(){
   if(!c)return;
   if(!tg||!tg.initData){c.innerHTML='<div class="lb-empty">играй через Telegram<br><div class="lb-sub">для доступа к профилю</div></div>';return}
   c.innerHTML='<div class="lb-loading">загрузка...</div>';
-  console.log('[VOID] initData preview:', tg.initData.substring(0, 80) + '...');
+  // Debug: send initData to debug endpoint first, then profile
+  fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'debug_init',initData:tg.initData})}).then(function(r){return r.json()}).then(function(dbg){
+    console.log('[VOID] Debug initData:', JSON.stringify(dbg));
+  }).catch(function(){});
+  // Now actual profile request
   fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'profile',initData:tg.initData})}).then(function(r){return r.json()}).then(function(d){
     console.log('[VOID] Profile response:',JSON.stringify(d));
     if(!d.ok){
       var dbg=d.debug?JSON.stringify(d.debug):'';
       console.log('[VOID] Profile debug:',dbg);
-      c.innerHTML='<div class="lb-empty">ошибка: '+(d.detail||d.error||'неизвестно')+(dbg?'<br><div class="lb-sub" style="font-size:.5rem;word-break:break-all;margin-top:8px">'+escHtml(dbg)+'</div>':'')+'</div>';
+      c.innerHTML='<div class="lb-empty">ошибка: '+(d.detail||d.error||'неизвестно')+(dbg?'<br><div class="lb-sub" style="font-size:.45rem;word-break:break-all;margin-top:8px;max-height:200px;overflow-y:auto">'+escHtml(dbg)+'</div>':'')+'</div>';
       return;
     }
     profileData=d;
