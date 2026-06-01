@@ -533,6 +533,7 @@ this.dustParticles=[];this.scarfPoints=[];this.gameTime=0;
 this.wasGrounded=false;this.hintTimer=0;this.curHint='';this.hintAlpha=0;
 this.onRope=-1;this.grabbedBox=null;
 this.deathParticles=[];this.fadeAlpha=1;this.fadeDir=-1;this.lastCause='';
+this.squashTimer=0;this.squashDir=0;
 this.flood={active:false,level:800,speed:0,maxLevel:800,grace:0,isLava:false};
 this.chase={active:false,x:0,speed:0};
 this.weatherParticles=[];this.weatherTimer=0;
@@ -1465,7 +1466,7 @@ for(let i=1;i<this.scarfPoints.length;i++){const pr=this.scarfPoints[i-1];const 
 
 // === DUST + DEATH PARTICLES ===
 if(grounded&&Math.abs(this.player.body.velocity.x)>100&&Math.random()<0.3)this.spawnDust(this.player.x,this.player.y+CFG.PH/2,this.player.body.velocity.x*0.01);
-if(grounded&&!this.wasGrounded&&this.playerAlive){this.spawnLand(this.player.x,this.player.y+CFG.PH/2);if(Math.abs(this.player.body.velocity.y)>200)sfx('land')}
+if(grounded&&!this.wasGrounded&&this.playerAlive){this.spawnLand(this.player.x,this.player.y+CFG.PH/2);if(Math.abs(this.player.body.velocity.y)>200){sfx('land');this.squashTimer=8;this.squashDir=1}}
 this.wasGrounded=grounded;
 for(let i=this.dustParticles.length-1;i>=0;i--){const dp=this.dustParticles[i];dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=0.06;dp.vx*=0.97;dp.life--;if(dp.life<=0)this.dustParticles.splice(i,1)}
 for(let i=this.deathParticles.length-1;i>=0;i--){const dp=this.deathParticles[i];dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=dp.grav;dp.vx*=0.96;dp.life--;if(dp.life<=0)this.deathParticles.splice(i,1)}
@@ -1682,15 +1683,20 @@ const g=this.fgGraphics;g.clear();const cam=this.cameras.main;const cx=cam.scrol
 
 // Torch glow
 this.torchObjects.forEach(torch=>{
-const tx=torch.x;const ty=torch.y-4;const phase=torch.getData('glowPhase')||0;const fl=Math.sin(now*0.01+phase)*2;
+const tx=torch.x;const ty=torch.y-4;const phase=torch.getData('glowPhase')||0;const fl=Math.sin(now*0.01+phase)*2;const fl2=Math.sin(now*0.017+phase*1.5)*1.5;
 if(quality>=1){const r=quality===1?65:100;
-g.fillStyle(0xdc9632,0.18);g.fillCircle(tx,ty-4,r);
-g.fillStyle(0xb46e1e,0.1);g.fillCircle(tx,ty-4,r*0.6)}
+g.fillStyle(0xdc9632,0.06+fl*0.005);g.fillCircle(tx,ty-4,r*1.4);
+g.fillStyle(0xdc9632,0.12+fl*0.01);g.fillCircle(tx,ty-4,r);
+g.fillStyle(0xb46e1e,0.08+fl2*0.005);g.fillCircle(tx,ty-4,r*0.6);
+g.fillStyle(0xf0c050,0.04);g.fillCircle(tx+fl*0.5,ty-4-fl2,r*0.3)}
 });
 
 // Checkpoints
 this.checkpointObjects.forEach(cp=>{
-if(cp.getData('activated')){g.fillStyle(0x8c8c5a,0.1);g.fillCircle(cp.x+8,cp.y-34,14)}
+if(cp.getData('activated')){const cpPulse=Math.sin(now*0.006)*0.3+0.7;
+g.fillStyle(0x8c8c5a,0.06*cpPulse);g.fillCircle(cp.x+8,cp.y-34,20);
+g.fillStyle(0x8c8c5a,0.1*cpPulse);g.fillCircle(cp.x+8,cp.y-34,14);
+g.fillStyle(0xb4b48a,0.05*cpPulse);g.fillCircle(cp.x+8,cp.y-34,8)}
 });
 
 // Ropes
@@ -1703,15 +1709,17 @@ g.fillStyle(0x2a2a38,1);g.fillCircle(ex,ey,7);
 if(this.onRope===i){g.fillStyle(0xc8c896,0.06);g.fillCircle(ex,ey,14)}
 });
 
-// Portals
+// Portals — enhanced glow
 this.portals.forEach(p=>{
 const pulse=Math.sin(now*0.005)*0.3+0.7;
-g.fillStyle(p.color,0.15*pulse);g.fillCircle(p.x,p.y,p.r*2.5);
-g.fillStyle(p.color,0.25*pulse);g.fillCircle(p.x,p.y,p.r*1.5);
-g.fillStyle(p.color,0.5*pulse);g.fillCircle(p.x,p.y,p.r*0.8);
-// Particles
-for(let i=0;i<3;i++){const a=now*0.003+i*2.1;const pr=p.r*1.2;
-g.fillStyle(p.color,0.3);g.fillCircle(p.x+Math.cos(a)*pr,p.y+Math.sin(a)*pr,2)}
+const p2=Math.sin(now*0.008+1)*0.2+0.8;
+g.fillStyle(p.color,0.06*pulse);g.fillCircle(p.x,p.y,p.r*4);
+g.fillStyle(p.color,0.1*pulse);g.fillCircle(p.x,p.y,p.r*2.8);
+g.fillStyle(p.color,0.18*pulse);g.fillCircle(p.x,p.y,p.r*1.8);
+g.fillStyle(p.color,0.35*pulse);g.fillCircle(p.x,p.y,p.r*1.1);
+g.fillStyle(0xffffff,0.15*p2);g.fillCircle(p.x,p.y,p.r*0.5);
+for(let i=0;i<5;i++){const a=now*0.003+i*1.26;const pr=p.r*(1+Math.sin(now*0.004+i)*0.3);
+g.fillStyle(p.color,0.4*pulse);g.fillCircle(p.x+Math.cos(a)*pr,p.y+Math.sin(a)*pr,2.5)}
 });
 
 // Levers
@@ -1777,6 +1785,8 @@ g.strokePath();
 // Player aura
 if(this.playerAlive){
 const px=this.player.x;const py=this.player.y;
+// Squash & stretch animation
+if(this.squashTimer>0){this.squashTimer--;const t=this.squashTimer/8;const sx=1+t*0.25;const sy=1-t*0.2;this.player.setScale(sx,sy)}else{this.player.setScale(1,1)}
 const lR=quality===0?130:quality===1?200:280;
 g.fillStyle(0x464632,0.2);g.fillCircle(px,py-10,lR);
 g.fillStyle(0x3c3c28,0.14);g.fillCircle(px,py-10,lR*0.7);
@@ -1808,9 +1818,15 @@ else if(wp.type==='wind'){g.lineStyle(1,0x4a4a6a,alpha*0.2);g.beginPath();g.move
 // Fog
 if(lv.fog&&quality>=1){const fogAlpha=parseFloat(lv.fog.match(/[\d.]+(?=\))/)||0.06);g.fillStyle(Phaser.Display.Color.HexStringToColor(lv.sky[0]).color,Math.min(fogAlpha*2,0.12));g.fillRect(cx,cy,cam.width,cam.height)}
 
-// Vignette
-g.fillStyle(0x000000,0.15);g.fillRect(cx,cy,cam.width,cam.height*0.1);g.fillRect(cx,cy+cam.height*0.9,cam.width,cam.height*0.1);
-g.fillRect(cx,cy,cam.width*0.05,cam.height);g.fillRect(cx+cam.width*0.95,cy,cam.width*0.05,cam.height);
+// Vignette — radial darkening at edges
+if(quality>=1){
+const vSteps=6;const vMax=0.5;const vSize=cam.width*0.5;
+for(let vi=0;vi<vSteps;vi++){const va=vMax*(1-vi/vSteps)*0.08;const vs=1-(vi/vSteps)*0.15;
+g.fillStyle(0x000000,va);g.fillRect(cx+cam.width*(1-vs)/2,cy+cam.height*(1-vs)/2,cam.width*vs,cam.height*vs)}
+// Corner darkening
+g.fillStyle(0x000000,0.12);g.fillRect(cx,cy,cam.width*0.08,cam.height*0.12);g.fillRect(cx+cam.width*0.92,cy,cam.width*0.08,cam.height*0.12);
+g.fillRect(cx,cy+cam.height*0.88,cam.width*0.08,cam.height*0.12);g.fillRect(cx+cam.width*0.92,cy+cam.height*0.88,cam.width*0.08,cam.height*0.12)
+}
 
 // Fade overlay
 if(this.fadeAlpha>0){g.fillStyle(0x06060e,this.fadeAlpha);g.fillRect(cx,cy,cam.width,cam.height)}
