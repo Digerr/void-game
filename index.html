@@ -683,7 +683,7 @@ function toggleSound(){
 var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0,lastCheckpoint:null,flashColor:0,flashAlpha:0,flashTimer:0,hitStop:0,dashTrails:[],runDustTimer:0};
 
 // ═══ PROGRESS / SAVE ═══
-var progress={unlocked:1,levels:{},skin:0};
+var progress={unlocked:1,levels:{},skin:0,shards:[]};
 var SKINS=[
   {name:'пустота',scarf:0x7a5a9a,scarf2:0x6a4a8a,aura:0x6a6aaa,body:0x5a5a7e,head:0x5a5a80,req:'default'},
   {name:'рассвет',scarf:0xaa5a3a,scarf2:0x8a4a2a,aura:0xaa6a3a,body:0x6a5a5a,head:0x6a5a5a,req:'act1'},
@@ -752,7 +752,52 @@ function checkAchievements(){
   if(has3star)unlockAchievement('perfectionist');
 }
 
-function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={}}}catch(e){}}
+// ═══ MEMORY SHARDS ═══
+var MEMORY_SHARDS=[
+  {id:0,text:'Ты помнишь свет… но не помнишь, откуда он.'},
+  {id:1,text:'Кто-то звал тебя по имени. Голос уже давно умолк.'},
+  {id:2,text:'Здесь был город. Или тебе только кажется?'},
+  {id:3,text:'Ты бежал не от чего-то. Ты бежал к чему-то.'},
+  {id:4,text:'Пустота — не тьма. Это пространство без смысла.'},
+  {id:5,text:'Шаг за шагом. Так начинают возвращаться воспоминания.'},
+  {id:6,text:'Ты слышал музыку. Она звучала как прощание.'},
+  {id:7,text:'Каждый осколок — часть тебя. Собирай их.'},
+  {id:8,text:'Стены помнят прикосновения тех, кто был до тебя.'},
+  {id:9,text:'Даже во тьме остаётся тепло. Ты это чувствуешь.'},
+  {id:10,text:'Нить — не спасение. Нить — это память о том, что тебя держит.'},
+  {id:11,text:'Ты падал раньше. И каждый раз поднимался.'},
+  {id:12,text:'Здесь нет времени. Только глубина.'},
+  {id:13,text:'Нити тянутся из ниоткуда. Может, кто-то их оставил для тебя.'},
+  {id:14,text:'Последняя стена. За ней — или спасение, или конец.'},
+  {id:15,text:'Ты не первый здесь. Но можешь стать последним.'},
+  {id:16,text:'Пустота дышит. Ты чувствуешь это на своей коже.'},
+  {id:17,text:'Тени — это не враги. Они — такие же потерянные, как ты.'},
+  {id:18,text:'Почти всё вспомнил. Остался последний шаг.'},
+  {id:19,text:'Ты — это свет, который ищет выход из темноты.'}
+];
+var levelShards=[]; // {body, sprite, _gfx, x, y, shardId, collected}
+function isShardCollected(shardId){return progress.shards&&progress.shards.indexOf(shardId)>=0}
+function collectShard(shardId){
+  if(!progress.shards)progress.shards=[];
+  if(progress.shards.indexOf(shardId)>=0)return;
+  progress.shards.push(shardId);
+  saveProgress();
+  var shard=MEMORY_SHARDS[shardId%MEMORY_SHARDS.length];
+  // Show toast
+  showShardToast(shard.text);
+  tgHaptic('medium');
+}
+function showShardToast(text){
+  var toast=document.createElement('div');
+  toast.className='achievement-toast';
+  toast.style.borderColor='rgba(100,120,200,.3)';
+  toast.innerHTML='<span class="ach-icon">💎</span><span class="ach-text" style="color:#8a9aca;max-width:220px;white-space:normal;line-height:1.4">'+text+'</span>';
+  document.body.appendChild(toast);
+  setTimeout(function(){toast.style.opacity='0';toast.style.transition='opacity .4s'},3000);
+  setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast)},3500);
+}
+
+function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[]}}catch(e){}}
 function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(progress))}catch(e){}}
 function getLevelStars(n){var p=progress.levels[n];return p?p.stars:0}
 function getLevelBestTime(n){var p=progress.levels[n];return p?p.bestTime:Infinity}
@@ -1679,12 +1724,17 @@ g.circle(0,bodyBob,player.dashing?22:18);g.fill({color:skin.aura,alpha:auraAlpha
 function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,-1)}}
-function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
+function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
 function checkSpecialCollision(a,b){if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(player.alive)winLevel()}if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
   // Checkpoint activation
   if((a.label==='checkpointZone'&&b.label==='player')||(b.label==='checkpointZone'&&a.label==='player')){
     var cpBody=(a.label==='checkpointZone')?a:b;
     for(var ci=0;ci<levelCheckpoints.length;ci++){if(levelCheckpoints[ci].body===cpBody){activateCheckpoint(levelCheckpoints[ci]);break}}
+  }
+  // Shard collection
+  if((a.label==='shardZone'&&b.label==='player')||(b.label==='shardZone'&&a.label==='player')){
+    var shBody=(a.label==='shardZone')?a:b;
+    for(var si=0;si<levelShards.length;si++){if(levelShards[si].body===shBody&&!levelShards[si].collected){levelShards[si].collected=true;collectShard(levelShards[si].shardId);spawnParticles(levelShards[si].x,levelShards[si].y-10,10,0x7a8add,{speed:2,life:0.5,size:2.5,gravity:0});state.flashColor=0x3a4a8a;state.flashAlpha=0.1;state.flashTimer=0.15;break}}
   }}
 
 function updatePlayer(dt){
@@ -1957,6 +2007,36 @@ function createCheckpoint(data){
   var g=new PIXI.Graphics();spr.addChild(g);
   levelCheckpoints.push({body:body,sprite:spr,_gfx:g,x:data.x,y:data.y,activated:false});
 }
+function createShard(data){
+  var shardId=data.id!==undefined?data.id:0;
+  var alreadyCollected=isShardCollected(shardId);
+  var body=MBodies.circle(data.x,data.y-10,14,{isStatic:true,isSensor:true,label:'shardZone'});
+  MWorld.add(world,body);
+  var spr=new PIXI.Container();gameContainer.addChild(spr);
+  var g=new PIXI.Graphics();spr.addChild(g);
+  levelShards.push({body:body,sprite:spr,_gfx:g,x:data.x,y:data.y,shardId:shardId,collected:alreadyCollected});
+}
+var shardAnimTime=0;
+function updateShards(dt){
+  shardAnimTime+=dt;
+  for(var i=0;i<levelShards.length;i++){
+    var sh=levelShards[i];var g=sh._gfx;g.clear();
+    if(sh.collected){if(sh.sprite)sh.sprite.visible=false;continue}
+    var bob=Math.sin(shardAnimTime*2+i*1.5)*3;
+    var glow=Math.sin(shardAnimTime*3+i)*0.15+0.85;
+    // Outer glow
+    g.circle(0,bob-10,12);g.fill({color:0x4a5aaa,alpha:0.08*glow});
+    g.circle(0,bob-10,7);g.fill({color:0x5a6abb,alpha:0.15*glow});
+    // Crystal shape
+    g.moveTo(0,bob-18);g.lineTo(5,bob-10);g.lineTo(0,bob-2);g.lineTo(-5,bob-10);g.closePath();g.fill({color:0x7a8add,alpha:0.7*glow});
+    g.moveTo(0,bob-16);g.lineTo(3,bob-10);g.lineTo(0,bob-4);g.lineTo(-3,bob-10);g.closePath();g.fill({color:0x9aaaff,alpha:0.4});
+    // Sparkle
+    if(Math.random()<0.02){
+      spawnParticles(sh.x,sh.y-10,2,0x8a9add,{angle:-Math.PI/2,spread:2,speed:0.8,life:0.4,size:1.5,gravity:0});
+    }
+    sh.sprite.x=sh.x;sh.sprite.y=sh.y;
+  }
+}
 function updateCheckpoints(dt){
   checkpointTime+=dt;
   for(var i=0;i<levelCheckpoints.length;i++){
@@ -2146,6 +2226,20 @@ function updateThread(dt){
 
 // ═══ LEVEL LOADING ═══
 var levelBodies=[],levelSprites=[];
+function autoShardPosition(levelIdx){
+  var lvl=LEVELS[levelIdx];
+  if(!lvl||!lvl.platforms||lvl.platforms.length<3)return null;
+  // Place shard on a platform that's high up and in the middle-to-far area
+  var candidates=[];
+  for(var i=0;i<lvl.platforms.length;i++){
+    var p=lvl.platforms[i];
+    if(p.h<20&&p.y<lvl.height-200&&p.x>lvl.width*0.3){
+      candidates.push({x:p.x+p.w/2,y:p.y,id:levelIdx});
+    }
+  }
+  if(candidates.length===0)return null;
+  return candidates[Math.floor(candidates.length/2)];
+}
 function loadLevel(n){
   clearLevel();var lvl=LEVELS[n];if(!lvl)return;
   // Boundaries
@@ -2170,12 +2264,19 @@ function loadLevel(n){
   // Anchors
   levelAnchors=[];if(lvl.anchors)for(var i=0;i<lvl.anchors.length;i++)createAnchor(lvl.anchors[i]);
   // Checkpoints
-  levelCheckpoints=[];state.lastCheckpoint=null;if(lvl.checkpoints)for(var i=0;i<lvl.checkpoints.length;i++)createCheckpoint(lvl.checkpoints[i]);
+  levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;if(lvl.checkpoints)for(var i=0;i<lvl.checkpoints.length;i++)createCheckpoint(lvl.checkpoints[i]);
+  // Memory shards: 1 per level, placed at interesting spots
+  if(lvl.shards)for(var i=0;i<lvl.shards.length;i++)createShard(lvl.shards[i]);
+  // Auto-generate shard positions if not defined in level data
+  else if(!lvl.shards){
+    var shardPos=autoShardPosition(state.level);
+    if(shardPos)createShard({x:shardPos.x,y:shardPos.y,id:state.level});
+  }
   // Exit
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;espr._base=eg;espr._ew=lvl.exit.w;espr._eh=lvl.exit.h;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelCheckpoints=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -2698,12 +2799,13 @@ function shareResult(){
 function updateMenuStats(){
   var completed=0,totalStars=0;
   for(var i=0;i<LEVELS.length;i++){var s=getLevelStars(i);if(s>0){completed++;totalStars+=s}}
+  var shardCount=progress.shards?progress.shards.length:0;
   var cEl=document.getElementById('menu-completed');
   var sEl=document.getElementById('menu-stars-total');
   var dEl=document.getElementById('menu-deaths-total');
   var pEl=document.getElementById('menu-progress-fill');
   if(cEl)cEl.textContent=completed+'/'+LEVELS.length;
-  if(sEl)sEl.textContent=totalStars+' звёзд';
+  if(sEl)sEl.textContent=totalStars+' звёзд | '+shardCount+' осколков';
   if(dEl)dEl.textContent=state.totalDeaths+' смертей';
   if(pEl)pEl.style.width=(LEVELS.length>0?((completed/LEVELS.length)*100):0)+'%';
 }
@@ -2729,7 +2831,7 @@ function gameLoop(timestamp){
     else if(pvy>0)engine.gravity.y=player.gravityDown;
     if(!player.onGround&&Math.abs(pvy)<player.apexThreshold)engine.gravity.y*=player.apexGravityMult;
   }
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateCheckpoints(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
