@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>VOID — beta 0.9.4 (Phaser)</title>
+<title>VOID — beta 0.9.5 (Phaser)</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <script>if(typeof Phaser==='undefined'){document.write('<scr'+'ipt src="https://unpkg.com/phaser@3.80.1/dist/phaser.min.js"></scr'+'ipt>')}</script>
@@ -111,7 +111,7 @@ canvas{display:block}
 <div class="hang-wrap"><div class="swing-anchor"><div class="scarf-line"></div><div class="scarf-knot"></div><div class="char-body"><div class="char-head"><div class="char-eye l"></div><div class="char-eye r"></div></div><div class="char-torso"></div><div class="char-arms"><div class="char-arm left"></div><div class="char-arm right"></div></div><div class="char-legs"><div class="char-leg left"></div><div class="char-leg right"></div></div></div></div></div>
 <div class="logo">VOID</div>
 <div class="logo-sub" id="ui-sub">во тьму</div>
-<div class="ver">beta 0.9.4 phaser</div>
+<div class="ver">beta 0.9.5 phaser</div>
 <div class="made-by">made by SERGO</div>
 <div class="tabs">
 <button class="tab active" onclick="showTab('play',this)" id="tab-play">играть</button>
@@ -523,6 +523,7 @@ this.onRope=-1;this.grabbedBox=null;
 this.deathParticles=[];this.fadeAlpha=1;this.fadeDir=-1;this.lastCause='';
 this.flood={active:false,level:800,speed:0,maxLevel:800,grace:0,isLava:false};
 this.chase={active:false,x:0,speed:0};
+this.weatherParticles=[];this.weatherTimer=0;
 
 this.physics.world.setBounds(0,-500,12000,1500);
 
@@ -1438,6 +1439,29 @@ this.wasGrounded=grounded;
 for(let i=this.dustParticles.length-1;i>=0;i--){const dp=this.dustParticles[i];dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=0.06;dp.vx*=0.97;dp.life--;if(dp.life<=0)this.dustParticles.splice(i,1)}
 for(let i=this.deathParticles.length-1;i>=0;i--){const dp=this.deathParticles[i];dp.x+=dp.vx;dp.y+=dp.vy;dp.vy+=dp.grav;dp.vx*=0.96;dp.life--;if(dp.life<=0)this.deathParticles.splice(i,1)}
 
+// === WEATHER PARTICLES ===
+this.weatherTimer++;
+if(quality>=1){
+const lv=this.levelData;const cam=this.cameras.main;const px=this.player.x;const py=this.player.y;
+// Spawn weather particles near camera
+const spawnRate=quality===1?3:5;
+if(this.weatherTimer%2===0){
+if(lv.rain){for(let s=0;s<spawnRate;s++)this.weatherParticles.push({x:px-400+Math.random()*800,y:cam.scrollY-10,vx:-0.5-Math.random()*0.5,vy:6+Math.random()*4,life:60+Math.random()*30,type:'rain'})}
+if(lv.ash){for(let s=0;s<(spawnRate>>1);s++)this.weatherParticles.push({x:px-400+Math.random()*800,y:cam.scrollY-10,vx:Math.random()*0.8-0.2,vy:0.5+Math.random()*1.2,life:120+Math.random()*80,type:'ash',phase:Math.random()*6.28})}
+if(lv.leaves){if(this.weatherTimer%12===0)this.weatherParticles.push({x:px-350+Math.random()*700,y:cam.scrollY-10,vx:0.3+Math.random()*0.6,vy:0.4+Math.random()*0.8,life:200+Math.random()*100,type:'leaf',rot:Math.random()*6.28,rv:Math.random()*0.04-0.02,phase:Math.random()*6.28})}
+if(lv.crystals){if(this.weatherTimer%20===0)this.weatherParticles.push({x:px-300+Math.random()*600,y:cam.scrollY+Math.random()*cam.height,vx:0,vy:-0.15-Math.random()*0.2,life:100+Math.random()*60,type:'crystal',phase:Math.random()*6.28,hue:Math.random()})}
+}
+// Update weather particles
+for(let i=this.weatherParticles.length-1;i>=0;i--){const wp=this.weatherParticles[i];
+if(wp.type==='rain'){wp.x+=wp.vx;wp.y+=wp.vy}
+else if(wp.type==='ash'){wp.x+=wp.vx+Math.sin(this.gameTime*0.002+wp.phase)*0.3;wp.y+=wp.vy}
+else if(wp.type==='leaf'){wp.x+=wp.vx+Math.sin(this.gameTime*0.001+wp.phase)*0.5;wp.y+=wp.vy;wp.rot+=wp.rv}
+else if(wp.type==='crystal'){wp.x+=Math.sin(this.gameTime*0.003+wp.phase)*0.2;wp.y+=wp.vy;wp.phase+=0.01}
+wp.life--;if(wp.life<=0||wp.y>cam.scrollY+cam.height+20)this.weatherParticles.splice(i,1)}
+// Cap weather particles
+if(this.weatherParticles.length>400)this.weatherParticles.splice(0,this.weatherParticles.length-400);
+}
+
 // === HINTS ===
 this.hintTimer++;
 if(this.hintTimer>500&&!this.curHint){const h=t('hints');if(this.grabbedBox)this.curHint=h.push;else if(this.flood.active)this.curHint=this.flood.isLava?h.lava:h.flood;else if(this.chase.active)this.curHint=h.chase;else if(this.isWallSliding)this.curHint=h.walljump;else if(Math.abs(this.player.body.velocity.x)<5&&grounded)this.curHint=h.move;else this.curHint=h.jump;this.hintAlpha=0}
@@ -1722,6 +1746,18 @@ g.strokePath()}
 
 // Flash
 if(this.flash>0){g.fillStyle(0xc81e1e,this.flash*0.15);g.fillRect(cx,cy,cam.width,cam.height);this.flash-=0.035}
+
+// Weather particles
+this.weatherParticles.forEach(wp=>{
+const alpha=Math.min(1,wp.life/20);
+if(wp.type==='rain'){g.lineStyle(1,0x6a8aaa,alpha*0.4);g.beginPath();g.moveTo(wp.x,wp.y);g.lineTo(wp.x+wp.vx*2,wp.y+wp.vy*2);g.strokePath()}
+else if(wp.type==='ash'){const sz=1.5+Math.random();g.fillStyle(0xc8a078,alpha*0.35);g.fillCircle(wp.x,wp.y,sz)}
+else if(wp.type==='leaf'){g.fillStyle(0x8a6a3a,alpha*0.5);g.fillRect(wp.x-2,wp.y-1,4,2)}
+else if(wp.type==='crystal'){const hue=wp.hue;const col=hue<0.33?0x60a0d0:hue<0.66?0xa060d0:0x60d0a0;g.fillStyle(col,alpha*0.6);g.fillCircle(wp.x,wp.y,1.5+Math.sin(wp.phase)*0.5)}
+});
+
+// Fog
+if(lv.fog&&quality>=1){const fogAlpha=parseFloat(lv.fog.match(/[\d.]+(?=\))/)||0.06);g.fillStyle(Phaser.Display.Color.HexStringToColor(lv.sky[0]).color,Math.min(fogAlpha*2,0.12));g.fillRect(cx,cy,cam.width,cam.height)}
 
 // Vignette
 g.fillStyle(0x000000,0.15);g.fillRect(cx,cy,cam.width,cam.height*0.1);g.fillRect(cx,cy+cam.height*0.9,cam.width,cam.height*0.1);
