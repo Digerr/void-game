@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>VOID — beta 0.9.5 (Phaser)</title>
+<title>VOID — beta 0.9.6 (Phaser)</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <script>if(typeof Phaser==='undefined'){document.write('<scr'+'ipt src="https://unpkg.com/phaser@3.80.1/dist/phaser.min.js"></scr'+'ipt>')}</script>
@@ -206,9 +206,15 @@ tg.MainButton.setParams({color:'#1a1a2e',text_color:'#7a7a9a',is_visible:false})
 tg.MainButton.onClick(()=>{if(document.getElementById('death-screen').style.display==='flex')respawn();else if(document.getElementById('victory-screen').style.display==='flex'||document.getElementById('win-screen').style.display==='flex'){document.getElementById('win-screen').style.display='none';document.getElementById('victory-screen').style.display='none';startGame()}else if(document.getElementById('start-screen').style.display==='flex')startGame();tg.MainButton.hide()});
 // Apply TG theme colors
 try{if(tg.themeParams){const tp=tg.themeParams;if(tp.bg_color)document.body.style.background=tp.bg_color;if(tp.text_color){document.documentElement.style.setProperty('--tg-text',tp.text_color)}}}catch(e){}
+// BackButton — pause or quit instead of closing
+if(tg.BackButton){tg.BackButton.onClick(()=>{if(running&&!paused){togglePause()}else if(paused){quitToMenu();tg.BackButton.hide()}})}
 }
 function tgShowMainBtn(text){if(tg){tg.MainButton.setText(text);tg.MainButton.show()}}
 function tgHideMainBtn(){if(tg)tg.MainButton.hide()}
+// ═══ HAPTIC FEEDBACK ═══
+function tgHaptic(type){if(!tg||!tg.HapticFeedback)return;try{if(type==='light')tg.HapticFeedback.impactOccurred('light');else if(type==='medium')tg.HapticFeedback.impactOccurred('medium');else if(type==='heavy')tg.HapticFeedback.impactOccurred('heavy');else if(type==='rigid')tg.HapticFeedback.impactOccurred('rigid');else if(type==='soft')tg.HapticFeedback.impactOccurred('soft');else if(type==='success')tg.HapticFeedback.notificationOccurred('success');else if(type==='warning')tg.HapticFeedback.notificationOccurred('warning');else if(type==='error')tg.HapticFeedback.notificationOccurred('error');else if(type==='selection')tg.HapticFeedback.selectionChanged()}catch(e){}}
+// ═══ CLOSING CONFIRMATION ═══
+function setClosingConfirm(on){if(!tg)return;try{if(on)tg.enableClosingConfirmation();else tg.disableClosingConfirmation()}catch(e){}}
 function tgShare(){const completedCount=levelProgress.filter(p=>p.completed).length;const shareText=lang==='ru'?`Я добрался до ${completedCount}/30 уровней во тьме VOID. А ты?`:`I reached ${completedCount}/30 levels in the VOID. Can you beat me?`;if(tg){tg.openTelegramLink('https://t.me/share/url?url=https://t.me/voide_game_bot&text='+encodeURIComponent(shareText))}else{window.open('https://t.me/share/url?url=https://t.me/voide_game_bot&text='+encodeURIComponent(shareText),'_blank')}}
 function tgSaveCloud(){if(!tg||!tg.CloudStorage)return;try{const data={progress:levelProgress,deaths:totalDeaths,startTime:startTime};tg.CloudStorage.setItem('void_save',JSON.stringify(data),function(err){if(err)console.warn('Cloud save error:',err)})}catch(e){}}
 function tgLoadCloud(){if(!tg||!tg.CloudStorage)return new Promise(function(){});return new Promise(function(resolve){try{tg.CloudStorage.getItem('void_save',function(err,val){if(!err&&val){try{const d=JSON.parse(val);if(d&&d.progress&&d.progress.length>0){if(d.deaths>totalDeaths)totalDeaths=d.deaths;for(let i=0;i<Math.min(d.progress.length,30);i++){if(d.progress[i].completed&&!levelProgress[i].completed)levelProgress[i].completed=true;if(d.progress[i].bestTime&&(!levelProgress[i].bestTime||d.progress[i].bestTime<levelProgress[i].bestTime))levelProgress[i].bestTime=d.progress[i].bestTime}saveProgress();updateProgress()}}catch(e){}}resolve()})}catch(e){resolve()}})}
@@ -308,7 +314,7 @@ updateProgress();updateLevelList();updateFAQ();
 function hideAll(){['start-screen','death-screen','win-screen','pause-screen','touch-controls','victory-screen'].forEach(id=>document.getElementById(id).style.display='none')}
 function togglePause(){if(storyShown||transState||!gameScene||!gameScene.playerAlive)return;paused=!paused;document.getElementById('pause-screen').style.display=paused?'flex':'none';if(gameScene){paused?gameScene.physics.pause():gameScene.physics.resume()}}
 function resumeGame(){paused=false;document.getElementById('pause-screen').style.display='none';if(gameScene)gameScene.physics.resume()}
-function quitToMenu(){paused=false;running=false;hideAll();document.getElementById('start-screen').style.display='flex';document.getElementById('btn-pause').style.display='none';curLvl=0;initProgress();updateProgress();fadeMusicOut();tgHideMainBtn();if(phaserGame){phaserGame.destroy(true);phaserGame=null}gameScene=null}
+function quitToMenu(){paused=false;running=false;hideAll();document.getElementById('start-screen').style.display='flex';document.getElementById('btn-pause').style.display='none';curLvl=0;initProgress();updateProgress();fadeMusicOut();tgHideMainBtn();setClosingConfirm(false);if(tg&&tg.BackButton)tg.BackButton.hide();if(phaserGame){phaserGame.destroy(true);phaserGame=null}gameScene=null}
 let storyAutoTimer=null;
 function showStory(n){const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent=lang==='ru'?'нажмите чтобы продолжить':'click to continue';const ts=document.getElementById('transition-screen');ts.style.display='flex';ts.style.opacity='1';ts.onclick=dismissStory;ts.ontouchstart=function(e){e.preventDefault();e.stopPropagation();if(Date.now()-storyShownTime>400)dismissStory()};ts.onmousedown=function(){if(Date.now()-storyShownTime>400)dismissStory()};ts.style.cursor='pointer';storyShown=true;storyShownTime=Date.now();clearTimeout(storyAutoTimer);storyAutoTimer=setTimeout(function(){if(storyShown)dismissStory()},8000)}
 function doTransition(n){transState=2;transAlpha=1;const lv=LEVELS[n];document.getElementById('trans-level').textContent=(n+1)+'. '+lv.name[lang];document.getElementById('trans-text').textContent=lv.story[lang];document.getElementById('trans-hint').textContent='';document.getElementById('transition-screen').style.display='flex';document.getElementById('transition-screen').style.opacity='1';document.getElementById('transition-screen').onclick=null;setTimeout(()=>{transState=2},2500)}
@@ -1295,9 +1301,9 @@ if(input.j&&this.canWallJump&&!grounded&&this.wallDir!==0){
 this.player.body.velocity.x=this.wallDir>0?-CFG.WALL_JUMP_X:CFG.WALL_JUMP_X;
 this.player.body.velocity.y=CFG.WALL_JUMP_Y*dm[1];this.canWallJump=false;
 this.lastJumpPress=0;this.lastGrounded=0;this.facingRight=this.player.body.velocity.x>0;
-sfx('jump');this.spawnDust(this.player.x+(this.wallDir>0?CFG.PW/2:-CFG.PW/2),this.player.y,-this.wallDir*2);
+sfx('jump');tgHaptic('light');this.spawnDust(this.player.x+(this.wallDir>0?CFG.PW/2:-CFG.PW/2),this.player.y,-this.wallDir*2);
 }else if(jumpBuffer&&coyoteTime&&!this.isWallSliding){
-this.player.body.velocity.y=CFG.JUMP_FORCE*dm[1];this.lastGrounded=0;this.lastJumpPress=0;sfx('jump');
+this.player.body.velocity.y=CFG.JUMP_FORCE*dm[1];this.lastGrounded=0;this.lastJumpPress=0;sfx('jump');tgHaptic('light');
 }
 if(!input.j&&this.player.body.velocity.y<CFG.JUMP_FORCE*dm[1]*0.4)this.player.body.velocity.y=CFG.JUMP_FORCE*dm[1]*0.4;
 
@@ -1395,9 +1401,9 @@ if(input.e&&this.interactCooldown<=0){
 if(this.grabbedBox){this.grabbedBox.setData('grabbed',false);this.grabbedBox=null;this.interactCooldown=10;sfx('release')}
 else{
 let acted=false;
-for(const l of this.levers){if(Math.abs(this.player.x-l.getData('x'))<26&&Math.abs(this.player.y-l.getData('y'))<30){l.setData('active',!l.getData('active'));this.interactCooldown=15;this.flash=0.3;acted=true;sfx('lever');break}}
-if(!acted){for(const b of this.boxGroup.getChildren()){if(!b.getData('grabbed')&&Math.abs(this.player.x-b.x)<CFG.GRAB_DIST+12&&Math.abs(this.player.y-b.y)<30){b.setData('grabbed',true);this.grabbedBox=b;this.interactCooldown=10;acted=true;sfx('grab');break}}}
-if(!acted&&this.onRope<0){for(let i=0;i<this.ropes.length;i++){const r=this.ropes[i];const rx=r.px+Math.sin(r.angle)*r.len;const ry=r.py+Math.cos(r.angle)*r.len;if(Math.abs(this.player.x-rx)<22&&Math.abs(this.player.y-ry)<22){this.onRope=i;this.interactCooldown=10;acted=true;sfx('interact');this.player.body.setAllowGravity(false);break}}}
+for(const l of this.levers){if(Math.abs(this.player.x-l.getData('x'))<26&&Math.abs(this.player.y-l.getData('y'))<30){l.setData('active',!l.getData('active'));this.interactCooldown=15;this.flash=0.3;acted=true;sfx('lever');tgHaptic('medium');break}}
+if(!acted){for(const b of this.boxGroup.getChildren()){if(!b.getData('grabbed')&&Math.abs(this.player.x-b.x)<CFG.GRAB_DIST+12&&Math.abs(this.player.y-b.y)<30){b.setData('grabbed',true);this.grabbedBox=b;this.interactCooldown=10;acted=true;sfx('grab');tgHaptic('soft');break}}}
+if(!acted&&this.onRope<0){for(let i=0;i<this.ropes.length;i++){const r=this.ropes[i];const rx=r.px+Math.sin(r.angle)*r.len;const ry=r.py+Math.cos(r.angle)*r.len;if(Math.abs(this.player.x-rx)<22&&Math.abs(this.player.y-ry)<22){this.onRope=i;this.interactCooldown=10;acted=true;sfx('interact');tgHaptic('medium');this.player.body.setAllowGravity(false);break}}}
 }this.interactCooldown=Math.max(this.interactCooldown,10)}
 if(this.interactCooldown>0)this.interactCooldown--;
 
@@ -1442,6 +1448,13 @@ else this.winGame();
 
 // === SCORE ===
 const ns=Math.floor(this.player.x/10);if(ns>this.score)this.score=ns;
+
+// === CHECKPOINTS ===
+this.checkpointObjects.forEach(cp=>{
+if(!cp.getData('activated')&&Math.abs(this.player.x-cp.x)<30&&Math.abs(this.player.y-(cp.y+19))<40){
+cp.setData('activated',true);this.checkpointId=cp.getData('id');
+sfx('checkpoint');tgHaptic('success');this.flash=0.15}
+});
 
 // === SCARF ===
 if(this.scarfPoints.length>0){
@@ -1521,7 +1534,7 @@ const shakeInt=shakeMap[cause]||0.02;const shakeDur=cause==='saw'?500:400;
 this.cameras.main.shake(shakeDur,shakeInt);
 // Brief slow-mo (time scale dip)
 this.timeScale=0.3;this.slowMoTimer=12;
-sfx('death');
+sfx('death');tgHaptic('heavy');
 this.lastCause=cause;this.spawnDeathParticles(cause);
 levelProgress[curLvl].deaths=lvlDeaths;saveProgress();
 const causes=t('causes');document.getElementById('death-cause').textContent=causes[cause]||causes.fall;
@@ -1537,7 +1550,7 @@ let spawnX=80,spawnY=400;
 const cp=this.checkpointObjects.find(c=>c.getData('id')===this.checkpointId)||this.checkpointObjects[0];
 if(cp){spawnX=cp.x;spawnY=cp.y+19}
 this.player.setPosition(spawnX,spawnY-CFG.PH);this.player.body.velocity.set(0,0);
-this.playerAlive=true;this.player.setVisible(true);this.flash=0;this.onRope=-1;this.grabbedBox=null;this.deathParticles=[];this.fadeAlpha=0.6;this.fadeDir=-1;
+this.playerAlive=true;this.player.setVisible(true);this.flash=0;this.onRope=-1;this.grabbedBox=null;this.deathParticles=[];this.fadeAlpha=0.6;this.fadeDir=-1;tgHaptic('light');
 this.timeScale=1;this.slowMoTimer=0;this.deathScreenTimer=0;this.physics.world.timeScale=1;
 this.fallingPlatforms.forEach(p=>{p.y=p.getData('oy')+7;p.setData('falling',false);p.setData('fv',0);p.setData('st',0)});
 this.breakablePlatforms.forEach(p=>{if(p.getData('broken')||p.getData('breaking')){p.setData('broken',false);p.setData('breaking',false);p.setData('bt',0);p.setVisible(true);p.body.enable=true;p.y=p.getData('oy')+7}});
@@ -1555,6 +1568,7 @@ const prevShards=levelProgress[curLvl].shards||0;
 const newShards=lvlDeaths===0?3:lvlDeaths<=3?2:1;
 if(newShards>prevShards)levelProgress[curLvl].shards=newShards;
 saveProgress();updateProgress();
+tgHaptic('success');
 playTime=Date.now()-startTime;const tm=formatTime(playTime);
 const shardStr='★'.repeat(newShards)+'☆'.repeat(3-newShards);
 if(curLvl===29){document.getElementById('vs-deaths').textContent=totalDeaths+'';document.getElementById('vs-dist').textContent=this.score+'m';document.getElementById('vs-time').textContent=tm;document.getElementById('victory-screen').style.display='flex';tgShowMainBtn(lang==='ru'?'начать заново':'play again')}
@@ -1853,7 +1867,7 @@ const lvlIdx=Math.floor(Phaser.Math.Between.Seed(dailySeed)(0,29));curLvl=lvlIdx
 totalDeaths=0;lvlDeaths=0;initProgress();startTime=Date.now();playTime=0;
 document.getElementById('start-screen').style.display='none';document.getElementById('btn-pause').style.display='flex';
 if('ontouchstart'in window)document.getElementById('touch-controls').style.display='block';
-paused=false;transState=0;transAlpha=0;ensureAudio();initMusic();
+paused=false;transState=0;transAlpha=0;ensureAudio();initMusic();setClosingConfirm(true);
 if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume().then(()=>fadeMusicIn());else fadeMusicIn();
 launchLevel(lvlIdx,true);
 }
@@ -1874,8 +1888,9 @@ function startGame(){
 curLvl=0;totalDeaths=0;lvlDeaths=0;initProgress();startTime=Date.now();playTime=0;loadProgress();
 document.getElementById('start-screen').style.display='none';document.getElementById('btn-pause').style.display='flex';
 if('ontouchstart'in window)document.getElementById('touch-controls').style.display='block';
-paused=false;transState=0;transAlpha=0;ensureAudio();initMusic();
+paused=false;transState=0;transAlpha=0;ensureAudio();initMusic();setClosingConfirm(true);
 if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume().then(()=>fadeMusicIn());else fadeMusicIn();
+if(tg&&tg.BackButton)tg.BackButton.show();
 launchLevel(0,true);
 }
 
