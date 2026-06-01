@@ -157,6 +157,10 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .act-intro1 .act-intro-name{color:#8a5aba}
 .act-intro2 .act-intro-name{color:#ba8a2a}
 .act-intro3 .act-intro-name{color:#8a3a5a}
+.achievement-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(10,10,25,.9);border:1px solid rgba(180,160,60,.3);border-radius:8px;padding:8px 16px;z-index:200;animation:achieveIn .4s ease-out;display:flex;align-items:center;gap:8px;backdrop-filter:blur(4px)}
+.achievement-toast .ach-icon{font-size:1rem}
+.achievement-toast .ach-text{font-size:.5rem;color:#caba6a;letter-spacing:.08em;text-transform:uppercase}
+@keyframes achieveIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes actFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
@@ -281,6 +285,10 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
         <span style="font-size:.65rem;color:#8a8a9a;letter-spacing:.1em;text-transform:uppercase">нить — автозахват</span>
         <button class="btn" id="btn-autograb-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">вкл</button>
       </div>
+      <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:.65rem;color:#8a8a9a;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:6px">скин</span>
+        <div id="skin-selector" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"></div>
+      </div>
       <div style="padding:12px 0;margin-top:4px">
         <button class="btn" id="btn-reset-progress" style="width:100%;border-color:#3a1a1a;color:#6a3535;font-size:.6rem">сбросить прогресс</button>
       </div>
@@ -369,14 +377,34 @@ function updateSettingsUI(){
   if(sfxBtn)sfxBtn.textContent=soundMuted?'выкл':'вкл';
   if(musicBtn)musicBtn.textContent=musicMuted?'выкл':'вкл';
   if(hapticBtn)hapticBtn.textContent=settings.hapticEnabled?'вкл':'выкл';
-  if(autoBtn)autoBtn.textContent=settings.autoGrab?'вкл':'выкл';
-  // Style toggle buttons
+  if(autoBtn)autoBtn.textContent=settings.autoGrab?'вкл':'вкл';
   var toggles=[sfxBtn,musicBtn,hapticBtn,autoBtn];
   for(var i=0;i<toggles.length;i++){
     if(!toggles[i])continue;
     var isOn=toggles[i].textContent==='вкл';
     toggles[i].style.borderColor=isOn?'#2a4a2a':'#4a2a2a';
     toggles[i].style.color=isOn?'#5a8a5a':'#8a4a4a';
+  }
+  // Skin selector
+  var skinSel=document.getElementById('skin-selector');
+  if(skinSel){
+    skinSel.innerHTML='';
+    var unlocked=getUnlockedSkins();
+    for(var s=0;s<SKINS.length;s++){
+      var isUnlocked=unlocked.indexOf(s)>=0;
+      var isActive=(progress.skin||0)===s;
+      var btn=document.createElement('div');
+      btn.style.cssText='width:36px;height:36px;border-radius:50%;border:2px solid '+(isActive?'#6a8aba:rgba(255,255,255,.1)')+';display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;position:relative;overflow:hidden';
+      if(!isUnlocked)btn.style.opacity='0.25';
+      // Color preview: scarf color as circle fill
+      var preview=document.createElement('div');
+      preview.style.cssText='width:20px;height:20px;border-radius:50%;background:#'+SKINS[s].scarf.toString(16).padStart(6,'0');
+      btn.appendChild(preview);
+      if(isActive)btn.style.boxShadow='0 0 8px rgba(100,130,200,.3)';
+      if(isUnlocked)(function(idx){btn.addEventListener('click',function(){progress.skin=idx;saveProgress();updateSettingsUI();tgHaptic('light')})})(s);
+      btn.title=isUnlocked?SKINS[s].name:'🔒 '+SKINS[s].name;
+      skinSel.appendChild(btn);
+    }
   }
 }
 
@@ -636,7 +664,75 @@ function toggleSound(){
 var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0,lastCheckpoint:null};
 
 // ═══ PROGRESS / SAVE ═══
-var progress={unlocked:1,levels:{}};
+var progress={unlocked:1,levels:{},skin:0};
+var SKINS=[
+  {name:'пустота',scarf:0x7a5a9a,scarf2:0x6a4a8a,aura:0x6a6aaa,body:0x5a5a7e,head:0x5a5a80,req:'default'},
+  {name:'рассвет',scarf:0xaa5a3a,scarf2:0x8a4a2a,aura:0xaa6a3a,body:0x6a5a5a,head:0x6a5a5a,req:'act1'},
+  {name:'бездна',scarf:0x3a5aaa,scarf2:0x2a4a8a,aura:0x3a6aba,body:0x4a5a7a,head:0x4a5a7a,req:'act2'},
+  {name:'искра',scarf:0x9a9a2a,scarf2:0x8a8a1a,aura:0xaaaa3a,body:0x6a6a4a,head:0x6a6a4a,req:'act3'},
+  {name:'теневой',scarf:0xaa3a5a,scarf2:0x8a2a4a,aura:0xba4a6a,body:0x5a4a5a,head:0x5a4a5a,req:'act4'},
+  {name:'призрак',scarf:0xccccdd,scarf2:0xaaaacc,aura:0xddddff,body:0x9a9aaa,head:0x9a9aaa,req:'all3star'}
+];
+function getUnlockedSkins(){
+  var unlocked=[0]; // default always unlocked
+  // Check each act completed
+  var actComplete=[true,true,true,true];
+  for(var a=0;a<4;a++){for(var i=a*5;i<(a+1)*5;i++){if(getLevelStars(i)===0)actComplete[a]=false}}
+  if(actComplete[0])unlocked.push(1);
+  if(actComplete[1])unlocked.push(2);
+  if(actComplete[2])unlocked.push(3);
+  if(actComplete[3])unlocked.push(4);
+  // All 3 stars check
+  var all3=true;for(var i=0;i<LEVELS.length;i++){if(getLevelStars(i)<3){all3=false;break}}
+  if(all3)unlocked.push(5);
+  return unlocked;
+}
+function getCurrentSkin(){return SKINS[progress.skin||0]||SKINS[0]}
+
+// ═══ ACHIEVEMENTS ═══
+var ACHIEVEMENTS=[
+  {id:'first_step',name:'первый шаг',desc:'пройди первый уровень',icon:'👣'},
+  {id:'wall_crawler',name:'лазутчик',desc:'используй wall jump',icon:'🧗'},
+  {id:'thread_master',name:'ткач',desc:'привяжись к нити',icon:'🧵'},
+  {id:'dash_king',name:'рывок',desc:'используй дэш',icon:'💨'},
+  {id:'no_death',name:'бессмертие',desc:'пройди уровень без смертей',icon:'✨'},
+  {id:'speedrun',name:'скорость',desc:'пройди уровень за <20с',icon:'⚡'},
+  {id:'five_levels',name:'исследователь',desc:'пройди 5 уровней',icon:'🗺'},
+  {id:'halfway',name:'полпути',desc:'пройди 10 уровней',icon:'🌗'},
+  {id:'void_master',name:'властелин пустоты',desc:'пройди все уровни',icon:'👑'},
+  {id:'perfectionist',name:'перфекционист',desc:'получи ★★★ на любом уровне',icon:'💎'}
+];
+var achievementQueue=[];
+var achievementShowing=false;
+function unlockAchievement(id){
+  if(!progress.achievements)progress.achievements=[];
+  if(progress.achievements.indexOf(id)>=0)return;
+  progress.achievements.push(id);saveProgress();
+  var ach=ACHIEVEMENTS.find(function(a){return a.id===id});
+  if(ach)achievementQueue.push(ach);
+  showNextAchievement();
+}
+function showNextAchievement(){
+  if(achievementShowing||achievementQueue.length===0)return;
+  achievementShowing=true;
+  var ach=achievementQueue.shift();
+  var toast=document.createElement('div');toast.className='achievement-toast';
+  toast.innerHTML='<span class="ach-icon">'+ach.icon+'</span><span class="ach-text">'+ach.name+'</span>';
+  document.body.appendChild(toast);
+  tgHaptic('success');
+  setTimeout(function(){toast.style.opacity='0';toast.style.transition='opacity .5s';setTimeout(function(){toast.remove();achievementShowing=false;showNextAchievement()},500)},3000);
+}
+function checkAchievements(){
+  // Completed levels count
+  var completed=0,has3star=false;
+  for(var i=0;i<LEVELS.length;i++){var s=getLevelStars(i);if(s>0)completed++;if(s===3)has3star=true}
+  if(completed>=1)unlockAchievement('first_step');
+  if(completed>=5)unlockAchievement('five_levels');
+  if(completed>=10)unlockAchievement('halfway');
+  if(completed>=LEVELS.length)unlockAchievement('void_master');
+  if(has3star)unlockAchievement('perfectionist');
+}
+
 function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={}}}catch(e){}}
 function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(progress))}catch(e){}}
 function getLevelStars(n){var p=progress.levels[n];return p?p.stars:0}
@@ -1404,22 +1500,23 @@ function createPlayer(x,y){
 }
 
 function drawPlayerParts(){if(!player.sprite||!player._gfx)return;var g=player._gfx;g.clear();var vx=player.body.velocity.x,vy=player.body.velocity.y,t=player.animTime;var isRunning=player.onGround&&Math.abs(vx)>0.5;var isJumping=!player.onGround&&vy<-1;var isFalling=!player.onGround&&vy>1;var isIdle=player.onGround&&Math.abs(vx)<0.5;var isSwinging=thread.active;var isWallSlide=player.wallSliding;var bodyBob=0;if(isRunning)bodyBob=Math.sin(player.runCycle*12)*1.5;if(isIdle)bodyBob=Math.sin(t*2)*0.5;
+var skin=getCurrentSkin();
 // === SCARF (behind body, flowing) ===
 var scarfWave=isRunning?Math.sin(t*10-1)*0.4:isWallSlide?Math.sin(t*6)*0.3:Math.sin(t*1.5)*0.15;var scarfEndX=-player.facing*6+Math.sin(scarfWave)*6;var scarfEndY=-PLAYER_H/2-2+bodyBob*0.3+Math.sin(t*2)*2;
-g.moveTo(-1,-PLAYER_H/2+3+bodyBob*0.3);g.quadraticCurveTo(scarfEndX,scarfEndY+4,scarfEndX-player.facing*3,scarfEndY+10);g.stroke({width:2.5,color:0x7a5a9a});
-g.moveTo(0,-PLAYER_H/2+4+bodyBob*0.3);g.quadraticCurveTo(scarfEndX+2,scarfEndY+6,scarfEndX-player.facing*1,scarfEndY+12);g.stroke({width:2,color:0x6a4a8a});
+g.moveTo(-1,-PLAYER_H/2+3+bodyBob*0.3);g.quadraticCurveTo(scarfEndX,scarfEndY+4,scarfEndX-player.facing*3,scarfEndY+10);g.stroke({width:2.5,color:skin.scarf});
+g.moveTo(0,-PLAYER_H/2+4+bodyBob*0.3);g.quadraticCurveTo(scarfEndX+2,scarfEndY+6,scarfEndX-player.facing*1,scarfEndY+12);g.stroke({width:2,color:skin.scarf2});
 // === BODY (cute rounded) ===
-var torsoY=-PLAYER_H/2+6+bodyBob;g.ellipse(0,torsoY+3,7,9);g.fill(0x5a5a7e);
+var torsoY=-PLAYER_H/2+6+bodyBob;g.ellipse(0,torsoY+3,7,9);g.fill(skin.body);
 // Body highlight
 g.ellipse(-1,torsoY+1,4,5);g.fill({color:0x7a7aa0,alpha:0.3});
 // === HEAD (big, cute) ===
-var headY=-PLAYER_H/2-9+bodyBob*0.5;g.circle(0,headY,9);g.fill(0x5a5a80);
+var headY=-PLAYER_H/2-9+bodyBob*0.5;g.circle(0,headY,9);g.fill(skin.head);
 // Head highlight
 g.circle(-1.5,headY-3,4.5);g.fill({color:0x8a8ab0,alpha:0.2});
 // === EARS (cute pointy) ===
 var earWiggle=isWallSlide?Math.sin(t*8)*1.5:0;
-g.moveTo(-6,headY-5);g.lineTo(-10,headY-16+earWiggle);g.lineTo(-2,headY-8);g.closePath();g.fill(0x5a5a80);
-g.moveTo(6,headY-5);g.lineTo(10,headY-16-earWiggle);g.lineTo(2,headY-8);g.closePath();g.fill(0x5a5a80);
+g.moveTo(-6,headY-5);g.lineTo(-10,headY-16+earWiggle);g.lineTo(-2,headY-8);g.closePath();g.fill(skin.head);
+g.moveTo(6,headY-5);g.lineTo(10,headY-16-earWiggle);g.lineTo(2,headY-8);g.closePath();g.fill(skin.head);
 // Ear inner
 g.moveTo(-5,headY-6);g.lineTo(-8,headY-14+earWiggle);g.lineTo(-3,headY-8);g.closePath();g.fill({color:0x8a6aa0,alpha:0.5});
 g.moveTo(5,headY-6);g.lineTo(8,headY-14-earWiggle);g.lineTo(3,headY-8);g.closePath();g.fill({color:0x8a6aa0,alpha:0.5});
@@ -1557,7 +1654,7 @@ else{
 }
 // === GLOW aura ===
 var auraAlpha=0.06+Math.sin(t*1.5)*0.02;if(player.dashing)auraAlpha=0.2;
-g.circle(0,bodyBob,player.dashing?22:18);g.fill({color:0x6a6aaa,alpha:auraAlpha});
+g.circle(0,bodyBob,player.dashing?22:18);g.fill({color:skin.aura,alpha:auraAlpha});
 }
 
 function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
@@ -1619,7 +1716,7 @@ function updatePlayer(dt){
     MBody.setVelocity(player.body,{x:player.velocityX,y:player.body.velocity.y});
     if(player.onGround&&Math.abs(player.velocityX)>3&&Math.random()<0.3)spawnParticles(player.body.position.x-player.facing*4,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2+player.facing*0.3,spread:0.6,speed:0.8,life:0.25,size:1.8,gravity:0.5});
   }
-  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();spawnParticles(player.body.position.x,player.body.position.y,10,0x6a6aaa,{angle:Math.PI+player.dashDir,spread:1.2,speed:3,life:0.4,size:3.5,gravity:0});spawnParticles(player.body.position.x,player.body.position.y,5,0x8a8acc,{angle:Math.PI+player.dashDir,spread:0.5,speed:2,life:0.3,size:2,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1;state.slowMo=0.1;state.slowMoTimer=0.04;state.shakeAmount=2;state.shakeTime=0.08}
+  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();unlockAchievement('dash_king');spawnParticles(player.body.position.x,player.body.position.y,10,0x6a6aaa,{angle:Math.PI+player.dashDir,spread:1.2,speed:3,life:0.4,size:3.5,gravity:0});spawnParticles(player.body.position.x,player.body.position.y,5,0x8a8acc,{angle:Math.PI+player.dashDir,spread:0.5,speed:2,life:0.3,size:2,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1;state.slowMo=0.1;state.slowMoTimer=0.04;state.shakeAmount=2;state.shakeTime=0.08}
   player.inputDashPressed=false;
   if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
@@ -1639,7 +1736,7 @@ function updatePlayer(dt){
     }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.velocityX,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');sfxJump();spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1});
     // Jump stretch
     player.squashX=0.75;player.squashY=1.3;player.squashTimer=0.1;
-    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');sfxWallJump();var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,5,0x4a4a5a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2,life:0.3,size:2,gravity:0.5});
+    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');sfxWallJump();unlockAchievement('wall_crawler');var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,5,0x4a4a5a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2,life:0.3,size:2,gravity:0.5});
     // Wall jump squash
     player.squashX=0.7;player.squashY=1.2;player.squashTimer=0.1;
     }
@@ -1920,6 +2017,7 @@ function shootThread(){
   }
   if(!nearest)return;
   thread.active=true;
+  unlockAchievement('thread_master');
   thread.anchorX=nearest.x;thread.anchorY=nearest.y;
   thread.length=nearestDist;thread.targetLength=nearestDist;
   // Create constraint from anchor point to player
@@ -2407,7 +2505,7 @@ function showScreen(name){state.screen=name;document.getElementById('main-menu')
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
-function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x6a5aaa,{speed:2,life:0.8,size:3,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,8,0x8a7aca,{speed:3,life:1.0,size:2,gravity:0.1});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;recordLevelComplete(state.level,state.deaths,elapsed);state.slowMo=0.3;state.slowMoTimer=0.6;state.shakeAmount=3;state.shakeTime=0.2;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},800)}
+function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x6a5aaa,{speed:2,life:0.8,size:3,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,8,0x8a7aca,{speed:3,life:1.0,size:2,gravity:0.1});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');state.slowMo=0.3;state.slowMoTimer=0.6;state.shakeAmount=3;state.shakeTime=0.2;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},800)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
