@@ -354,7 +354,7 @@ var pixiApp=null,gameContainer=null,bgContainer=null,fxContainer=null,vignetteOv
 
 function initPixi(){
   pixiApp=new PIXI.Application();
-  return pixiApp.init({width:window.innerWidth,height:window.innerHeight,backgroundColor:0x06060e,antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),autoDensity:true}).then(function(){
+  return pixiApp.init({width:window.innerWidth,height:window.innerHeight,backgroundColor:0x12122a,antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),autoDensity:true}).then(function(){
     var ui=document.getElementById('ui-layer');
     ui.parentNode.insertBefore(pixiApp.canvas,ui);
     bgContainer=new PIXI.Container();gameContainer=new PIXI.Container();fxContainer=new PIXI.Container();
@@ -374,7 +374,7 @@ function initPixi(){
     window.addEventListener('resize',onResize);onResize();
   });
 }
-function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);for(var i=0;i<8;i++){g.circle(cx,cy,mr*(1-i*0.08));g.fill({color:0x06060e,alpha:i*0.04})}}
+function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);for(var i=0;i<6;i++){g.circle(cx,cy,mr*(1-i*0.1));g.fill({color:0x12122a,alpha:i*0.025})}}
 function onResize(){if(!pixiApp)return;pixiApp.renderer.resize(window.innerWidth,window.innerHeight);drawVignette();if(lightCanvas){var sw=Math.max(1,Math.floor(pixiApp.screen.width)),sh=Math.max(1,Math.floor(pixiApp.screen.height));if(lightCanvas.width!==sw||lightCanvas.height!==sh){lightCanvas.width=sw;lightCanvas.height=sh;lightTexture=PIXI.Texture.from(lightCanvas);lightSprite.texture=lightTexture}}}
 
 // ═══ MATTER.JS SETUP ═══
@@ -418,12 +418,12 @@ function createPlayer(x,y){
 }
 
 function drawPlayerParts(){if(!player.sprite||!player._gfx)return;var g=player._gfx;g.clear();var vx=player.body.velocity.x,vy=player.body.velocity.y,t=player.animTime;var isRunning=player.onGround&&Math.abs(vx)>0.5;var isJumping=!player.onGround&&vy<-1;var isFalling=!player.onGround&&vy>1;var isIdle=player.onGround&&Math.abs(vx)<0.5;var bodyBob=0;if(isRunning)bodyBob=Math.sin(player.runCycle*12)*1.5;if(isIdle)bodyBob=Math.sin(t*2)*0.5;
-var headY=-PLAYER_H/2-7+bodyBob*0.5;g.circle(0,headY,7);g.fill(0x282838);
+var headY=-PLAYER_H/2-7+bodyBob*0.5;g.circle(0,headY,7);g.fill(0x4a4a62);
 var ex=player.facing*3,eyeY=headY-0.5;var blinkPhase=t%4;var eyeH=(blinkPhase>3.8&&blinkPhase<3.95)?0.3:1.5;g.ellipse(ex,eyeY,1.5,eyeH);g.fill(0x99aacc);
-var scarfY=-PLAYER_H/2+1+bodyBob*0.3;g.rect(-2,scarfY,4,6);g.fill(0x3a3a5a);var tailAngle=isRunning?Math.sin(player.runCycle*10-1)*0.3:Math.sin(t*1.5)*0.1;var tailX=-player.facing*5+Math.sin(tailAngle)*4;var tailY=scarfY+4;g.moveTo(-1,scarfY+3);g.quadraticCurveTo(tailX,tailY+6,tailX-player.facing*2,tailY+10);g.stroke({width:2,color:0x3a3a5a});
-var torsoY=-PLAYER_H/2+6+bodyBob;g.rect(-5,torsoY,10,12);g.fill(0x282838);
-var armBaseY=torsoY+2;if(isRunning){g.moveTo(-5,armBaseY);g.lineTo(-8,armBaseY+10+Math.sin(player.runCycle*12+Math.PI)*3);g.stroke({width:3,color:0x282838});g.moveTo(5,armBaseY);g.lineTo(8,armBaseY+10+Math.sin(player.runCycle*12)*3);g.stroke({width:3,color:0x282838})}else if(player.wallSliding){var ws=player.onWallLeft?-1:1;g.moveTo(0,armBaseY);g.lineTo(ws*8,armBaseY-8);g.stroke({width:3,color:0x282838});g.moveTo(0,armBaseY+2);g.lineTo(ws*6,armBaseY-4);g.stroke({width:3,color:0x282838})}else{g.moveTo(-5,armBaseY);g.lineTo(-7,armBaseY+(isJumping?4:8));g.stroke({width:3,color:0x282838});g.moveTo(5,armBaseY);g.lineTo(7,armBaseY+(isJumping?4:8));g.stroke({width:3,color:0x282838})}
-var legBaseY=torsoY+11;if(isRunning){var ls=Math.sin(player.runCycle*12);g.moveTo(-3,legBaseY);g.lineTo(-3+ls*5,legBaseY+10);g.stroke({width:3,color:0x282838});g.moveTo(3,legBaseY);g.lineTo(3-ls*5,legBaseY+10);g.stroke({width:3,color:0x282838})}else if(player.wallSliding){var ws2=player.onWallLeft?-1:1;g.moveTo(-2,legBaseY);g.lineTo(ws2*4,legBaseY+8);g.stroke({width:3,color:0x282838});g.moveTo(2,legBaseY);g.lineTo(ws2*2,legBaseY+10);g.stroke({width:3,color:0x282838})}else if(isJumping){g.moveTo(-3,legBaseY);g.lineTo(-5,legBaseY+6);g.stroke({width:3,color:0x282838});g.moveTo(3,legBaseY);g.lineTo(5,legBaseY+6);g.stroke({width:3,color:0x282838})}else{g.moveTo(-3,legBaseY);g.lineTo(-3,legBaseY+(isFalling?12:10));g.stroke({width:3,color:0x282838});g.moveTo(3,legBaseY);g.lineTo(3,legBaseY+(isFalling?12:10));g.stroke({width:3,color:0x282838})}
+var scarfY=-PLAYER_H/2+1+bodyBob*0.3;g.rect(-2,scarfY,4,6);g.fill(0x6a6a82);var tailAngle=isRunning?Math.sin(player.runCycle*10-1)*0.3:Math.sin(t*1.5)*0.1;var tailX=-player.facing*5+Math.sin(tailAngle)*4;var tailY=scarfY+4;g.moveTo(-1,scarfY+3);g.quadraticCurveTo(tailX,tailY+6,tailX-player.facing*2,tailY+10);g.stroke({width:2,color:0x6a6a82});
+var torsoY=-PLAYER_H/2+6+bodyBob;g.rect(-5,torsoY,10,12);g.fill(0x4a4a62);
+var armBaseY=torsoY+2;if(isRunning){g.moveTo(-5,armBaseY);g.lineTo(-8,armBaseY+10+Math.sin(player.runCycle*12+Math.PI)*3);g.stroke({width:3,color:0x4a4a62});g.moveTo(5,armBaseY);g.lineTo(8,armBaseY+10+Math.sin(player.runCycle*12)*3);g.stroke({width:3,color:0x4a4a62})}else if(player.wallSliding){var ws=player.onWallLeft?-1:1;g.moveTo(0,armBaseY);g.lineTo(ws*8,armBaseY-8);g.stroke({width:3,color:0x4a4a62});g.moveTo(0,armBaseY+2);g.lineTo(ws*6,armBaseY-4);g.stroke({width:3,color:0x4a4a62})}else{g.moveTo(-5,armBaseY);g.lineTo(-7,armBaseY+(isJumping?4:8));g.stroke({width:3,color:0x4a4a62});g.moveTo(5,armBaseY);g.lineTo(7,armBaseY+(isJumping?4:8));g.stroke({width:3,color:0x4a4a62})}
+var legBaseY=torsoY+11;if(isRunning){var ls=Math.sin(player.runCycle*12);g.moveTo(-3,legBaseY);g.lineTo(-3+ls*5,legBaseY+10);g.stroke({width:3,color:0x4a4a62});g.moveTo(3,legBaseY);g.lineTo(3-ls*5,legBaseY+10);g.stroke({width:3,color:0x4a4a62})}else if(player.wallSliding){var ws2=player.onWallLeft?-1:1;g.moveTo(-2,legBaseY);g.lineTo(ws2*4,legBaseY+8);g.stroke({width:3,color:0x4a4a62});g.moveTo(2,legBaseY);g.lineTo(ws2*2,legBaseY+10);g.stroke({width:3,color:0x4a4a62})}else if(isJumping){g.moveTo(-3,legBaseY);g.lineTo(-5,legBaseY+6);g.stroke({width:3,color:0x4a4a62});g.moveTo(3,legBaseY);g.lineTo(5,legBaseY+6);g.stroke({width:3,color:0x4a4a62})}else{g.moveTo(-3,legBaseY);g.lineTo(-3,legBaseY+(isFalling?12:10));g.stroke({width:3,color:0x4a4a62});g.moveTo(3,legBaseY);g.lineTo(3,legBaseY+(isFalling?12:10));g.stroke({width:3,color:0x4a4a62})}
 if(player.dashing){g.circle(0,0,20);g.fill({color:0x6a6a9a,alpha:0.15})}
 }
 
@@ -513,7 +513,7 @@ function updatePlayer(dt){
   engine.gravity.y=1.5;
 }
 
-function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x2a2a3a;spawnParticles(px,py,20,dc,{speed:3,life:0.8,size:3,gravity:0.5});spawnParticles(px,py,5,0x6a6a9a,{speed:1.5,life:0.5,size:5,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
+function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,20,dc,{speed:3,life:0.8,size:3,gravity:0.5});spawnParticles(px,py,5,0x6a6a9a,{speed:1.5,life:0.5,size:5,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
 
 function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];createPlayer(lvl.spawn.x,lvl.spawn.y);state.levelStartTime=performance.now()}
 
@@ -590,14 +590,14 @@ function createLever(data){
   // Door
   var doorBody=MBodies.rectangle(data.doorX+data.doorW/2,data.doorY+data.doorH/2,data.doorW,data.doorH,{isStatic:true,label:'door'});
   MWorld.add(world,doorBody);
-  var doorSpr=new PIXI.Graphics();doorSpr.rect(0,0,data.doorW,data.doorH);doorSpr.fill(0x1a1a2a);doorSpr.rect(0,0,2,data.doorH);doorSpr.fill(0x2a2a3a);doorSpr.rect(data.doorW-2,0,2,data.doorH);doorSpr.fill(0x2a2a3a);doorSpr.x=data.doorX;doorSpr.y=data.doorY;gameContainer.addChild(doorSpr);
+  var doorSpr=new PIXI.Graphics();doorSpr.rect(0,0,data.doorW,data.doorH);doorSpr.fill(0x2a2a3e);doorSpr.rect(0,0,2,data.doorH);doorSpr.fill(0x3e3e52);doorSpr.rect(data.doorW-2,0,2,data.doorH);doorSpr.fill(0x3e3e52);doorSpr.x=data.doorX;doorSpr.y=data.doorY;gameContainer.addChild(doorSpr);
   levelLevers.push({body:body,sprite:spr,x:data.x,y:data.y,doorBody:doorBody,doorSprite:doorSpr,doorX:data.doorX,doorY:data.doorY,doorW:data.doorW,doorH:data.doorH,activated:false,id:data.id});
 }
 function updateLevers(){
   for(var i=0;i<levelLevers.length;i++){
     var lv=levelLevers[i];lv.sprite.removeChildren();var g=new PIXI.Graphics();
     // Base
-    g.rect(2,10,12,6);g.fill(0x2a2a3a);
+    g.rect(2,10,12,6);g.fill(0x3e3e52);
     // Handle
     if(lv.activated){g.moveTo(8,10);g.lineTo(4,0);g.stroke({width:3,color:0x3a5a3a})}
     else{g.moveTo(8,10);g.lineTo(12,0);g.stroke({width:3,color:0x5a3a2a})}
@@ -609,7 +609,7 @@ function updateLevers(){
 function activateLever(lv){
   if(lv.activated)return;lv.activated=true;tgHaptic('medium');
   // Open door - animate it rising
-  spawnParticles(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,8,0x3a3a5a,{speed:1.5,life:0.5,size:2,gravity:0.3});
+  spawnParticles(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,8,0x5a5a72,{speed:1.5,life:0.5,size:2,gravity:0.3});
   MWorld.remove(world,lv.doorBody);
   lv.doorSprite.visible=false;
 }
@@ -633,13 +633,13 @@ function updateEnemies(dt){
     en.sprite.removeChildren();var g=new PIXI.Graphics();
     // Shadow body
     var sway=Math.sin(en.time*3)*1.5;
-    g.circle(0+sway,-8,9);g.fill(0x141420);
-    g.rect(-6+sway,-1,12,16);g.fill(0x141420);
+    g.circle(0+sway,-8,9);g.fill(0x2a2a40);
+    g.rect(-6+sway,-1,12,16);g.fill(0x2a2a40);
     // Eyes
-    g.circle(-3+sway,-9,2);g.fill({color:0x4a1a1a,alpha:0.6+Math.sin(en.time*5)*0.2});
-    g.circle(3+sway,-9,2);g.fill({color:0x4a1a1a,alpha:0.6+Math.sin(en.time*5)*0.2});
+    g.circle(-3+sway,-9,2);g.fill({color:0x7a2a2a,alpha:0.7+Math.sin(en.time*5)*0.2});
+    g.circle(3+sway,-9,2);g.fill({color:0x7a2a2a,alpha:0.7+Math.sin(en.time*5)*0.2});
     // Wispy bottom
-    for(var j=0;j<4;j++){g.circle(-4+j*3+sway,14+Math.sin(en.time*4+j)*2,3);g.fill({color:0x141420,alpha:0.4})}
+    for(var j=0;j<4;j++){g.circle(-4+j*3+sway,14+Math.sin(en.time*4+j)*2,3);g.fill({color:0x2a2a40,alpha:0.4})}
     en.sprite.x=en.currentX;en.sprite.y=en.y;en.sprite.addChild(g);
   }
 }
@@ -663,7 +663,7 @@ function updatePendulums(){
     MBody.setPosition(pd.sensor,{x:pd.ball.position.x,y:pd.ball.position.y});
     pd.sprite.removeChildren();var g=new PIXI.Graphics();
     // Rod
-    g.moveTo(pd.pivotX,pd.pivotY);g.lineTo(pd.ball.position.x,pd.ball.position.y);g.stroke({width:3,color:0x1a1a2a});
+    g.moveTo(pd.pivotX,pd.pivotY);g.lineTo(pd.ball.position.x,pd.ball.position.y);g.stroke({width:3,color:0x2a2a3e});
     // Ball
     g.circle(pd.ball.position.x,pd.ball.position.y,pd.ballR);g.fill(0x1a1018);
     g.circle(pd.ball.position.x,pd.ball.position.y,pd.ballR);g.stroke({width:2,color:0x2a1a2a});
@@ -687,7 +687,7 @@ function updateAnchors(){
     var an=levelAnchors[i];an.sprite.removeChildren();var g=new PIXI.Graphics();
     // Ring visual
     g.circle(0,0,7);g.stroke({width:2,color:0x2a2a4a});
-    g.circle(0,0,3);g.fill(0x3a3a5a);
+    g.circle(0,0,3);g.fill(0x5a5a72);
     // Glow hint if player nearby and thread not active
     if(!thread.active&&player.alive&&player.body){
       var dx=player.body.position.x-an.x,dy=player.body.position.y-an.y;
@@ -803,9 +803,9 @@ function loadLevel(n){
   MWorld.add(world,MBodies.rectangle(lvl.width/2,-50,lvl.width,100,{isStatic:true,label:'boundary'}));
   MWorld.add(world,MBodies.rectangle(-50,lvl.height/2,100,lvl.height,{isStatic:true,label:'boundary'}));
   // Platforms
-  for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.8});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(0x12121c);spr.rect(0,0,p.w,2);spr.fill(0x1c1c2c);spr.rect(0,p.h-1,p.w,1);spr.fill(0x0a0a12);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
+  for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.8});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(0x2a2a40);spr.rect(0,0,p.w,2);spr.fill(0x3e3e58);spr.rect(0,p.h-1,p.w,1);spr.fill(0x1e1e36);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
   // Spikes
-  if(lvl.spikes)for(var i=0;i<lvl.spikes.length;i++){var s=lvl.spikes[i];MWorld.add(world,MBodies.rectangle(s.x+s.w/2,s.y-10,s.w,20,{isStatic:true,isSensor:true,label:'deathZone'}));var spr=new PIXI.Graphics();var cnt=Math.floor(s.w/10);for(var j=0;j<cnt;j++){var tx=j*10;spr.moveTo(tx+5,s.y-12);spr.lineTo(tx,s.y+2);spr.lineTo(tx+10,s.y+2);spr.closePath();spr.fill(0x2a1414)}spr.x=s.x;gameContainer.addChild(spr);levelSprites.push(spr)}
+  if(lvl.spikes)for(var i=0;i<lvl.spikes.length;i++){var s=lvl.spikes[i];MWorld.add(world,MBodies.rectangle(s.x+s.w/2,s.y-10,s.w,20,{isStatic:true,isSensor:true,label:'deathZone'}));var spr=new PIXI.Graphics();var cnt=Math.floor(s.w/10);for(var j=0;j<cnt;j++){var tx=j*10;spr.moveTo(tx+5,s.y-12);spr.lineTo(tx,s.y+2);spr.lineTo(tx+10,s.y+2);spr.closePath();spr.fill(0x5a2828)}spr.x=s.x;gameContainer.addChild(spr);levelSprites.push(spr)}
   // Saws
   sawBodies=[];sawSprites=[];if(lvl.saws)for(var i=0;i<lvl.saws.length;i++)createSaw(lvl.saws[i].x,lvl.saws[i].y,lvl.saws[i].r);
   // Moving platforms
@@ -872,12 +872,12 @@ function updateLightAndFog(dt){
 
   // Step 1: Fill everything with a soft darkness (ambient)
   lightCtx.globalCompositeOperation='source-over';
-  lightCtx.fillStyle='rgba(3,3,10,0.4)';
+  lightCtx.fillStyle='rgba(2,2,8,0.12)';
   lightCtx.fillRect(0,0,sw,sh);
 
   // Step 2: Cut smooth radial hole around player (destination-out erases darkness)
   lightCtx.globalCompositeOperation='destination-out';
-  var lightR=350+Math.sin(lightTime*1.2)*15;
+  var lightR=420+Math.sin(lightTime*1.2)*20;
   var mainGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR);
   mainGrad.addColorStop(0,'rgba(255,255,255,1)');
   mainGrad.addColorStop(0.15,'rgba(255,255,255,0.98)');
@@ -957,29 +957,29 @@ function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();
 // Layer 0: Stars + Moon (furthest)
 var l0=new PIXI.Graphics();
 // Moon
-l0.circle(2200,80,35);l0.fill({color:0x0e0e1a,alpha:0.6});
-l0.circle(2200,80,33);l0.fill({color:0x14142a,alpha:0.4});
+l0.circle(2200,80,35);l0.fill({color:0x1a1a30,alpha:0.7});
+l0.circle(2200,80,33);l0.fill({color:0x222240,alpha:0.5});
 // Moon glow
-l0.circle(2200,80,55);l0.fill({color:0x0a0a18,alpha:0.08});
-l0.circle(2200,80,80);l0.fill({color:0x08081a,alpha:0.03});
+l0.circle(2200,80,55);l0.fill({color:0x141428,alpha:0.12});
+l0.circle(2200,80,80);l0.fill({color:0x101024,alpha:0.06});
 // Stars
-for(var i=0;i<80;i++){var sx=Math.random()*6000;var sy=Math.random()*350;var ss=0.3+Math.random()*1.2;var sa=0.15+Math.random()*0.45;l0.circle(sx,sy,ss);l0.fill({color:0x3a3a5a,alpha:sa})}
+for(var i=0;i<80;i++){var sx=Math.random()*6000;var sy=Math.random()*350;var ss=0.3+Math.random()*1.2;var sa=0.2+Math.random()*0.5;l0.circle(sx,sy,ss);l0.fill({color:0x6a6a8a,alpha:sa})}
 bgContainer.addChild(l0);bgLayers.push({sprite:l0,speed:0.03});
 // Layer 1: Far mountains
 var l1=new PIXI.Graphics();
-for(var i=0;i<14;i++){var bx=i*200+Math.random()*80;var bh=60+Math.random()*180;l1.moveTo(bx,750);l1.lineTo(bx+40+Math.random()*40,750-bh);l1.lineTo(bx+80+Math.random()*50,750);l1.closePath();l1.fill(0x0a0a14)}
+for(var i=0;i<14;i++){var bx=i*200+Math.random()*80;var bh=60+Math.random()*180;l1.moveTo(bx,750);l1.lineTo(bx+40+Math.random()*40,750-bh);l1.lineTo(bx+80+Math.random()*50,750);l1.closePath();l1.fill(0x12121e)}
 bgContainer.addChild(l1);bgLayers.push({sprite:l1,speed:0.08});
 // Layer 2: Mid buildings/towers
 var l2=new PIXI.Graphics();
-for(var i=0;i<20;i++){var bx=i*120+Math.random()*50;var bh=40+Math.random()*120;l2.rect(bx,680-bh,20+Math.random()*20,bh);l2.fill(0x0c0c18)}
+for(var i=0;i<20;i++){var bx=i*120+Math.random()*50;var bh=40+Math.random()*120;l2.rect(bx,680-bh,20+Math.random()*20,bh);l2.fill(0x14142a)}
 // Occasional window lights
-for(var i=0;i<6;i++){var wx=i*350+Math.random()*150;var wy=580+Math.random()*60;l2.rect(wx,wy,3,4);l2.fill({color:0x1a1a2a,alpha:0.3+Math.random()*0.2})}
+for(var i=0;i<8;i++){var wx=i*350+Math.random()*150;var wy=580+Math.random()*60;l2.rect(wx,wy,3,4);l2.fill({color:0x3a3a52,alpha:0.4+Math.random()*0.3})}
 bgContainer.addChild(l2);bgLayers.push({sprite:l2,speed:0.25});
 // Layer 3: Near towers
 var l3=new PIXI.Graphics();
-for(var i=0;i<10;i++){var bx=i*250+Math.random()*100;var bh=80+Math.random()*200;l3.rect(bx,660-bh,12+Math.random()*10,bh);l3.fill(0x0e0e1a)}
+for(var i=0;i<10;i++){var bx=i*250+Math.random()*100;var bh=80+Math.random()*200;l3.rect(bx,660-bh,12+Math.random()*10,bh);l3.fill(0x18182e)}
 // Dripping particles from towers
-for(var i=0;i<4;i++){var dx=i*600+Math.random()*200;var dy=500+Math.random()*100;l3.circle(dx,dy,1.5);l3.fill({color:0x1a1a2a,alpha:0.3})}
+for(var i=0;i<4;i++){var dx=i*600+Math.random()*200;var dy=500+Math.random()*100;l3.circle(dx,dy,1.5);l3.fill({color:0x3a3a52,alpha:0.4})}
 bgContainer.addChild(l3);bgLayers.push({sprite:l3,speed:0.45})}
 function updateBackground(){for(var i=0;i<bgLayers.length;i++){bgLayers[i].sprite.x=-camera.x*bgLayers[i].speed;bgLayers[i].sprite.y=-camera.y*bgLayers[i].speed*0.3}}
 
