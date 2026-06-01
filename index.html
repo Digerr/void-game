@@ -27,8 +27,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .btn:active{transform:scale(.97)}
 .btn.primary{border-color:#3a5a7a;color:#7ab0d0}
 .btn.primary:hover{border-color:#4a7a9a;color:#9ac0e0;background:rgba(60,100,160,.04)}
-#level-select,#settings-screen,#faq-screen,#records-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,1);flex-direction:column;align-items:center;justify-content:center;z-index:50}
-#level-select.active,#settings-screen.active,#faq-screen.active,#records-screen.active{display:flex}
+#level-select,#settings-screen,#faq-screen,#records-screen,#profile-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,1);flex-direction:column;align-items:center;justify-content:center;z-index:50}
+#level-select.active,#settings-screen.active,#faq-screen.active,#records-screen.active,#profile-screen.active{display:flex}
 #level-select{background:linear-gradient(180deg,rgba(6,6,14,.98) 0%,rgba(10,10,20,.97) 100%)}
 .ls-title{font-size:1.1rem;font-weight:900;color:#8a8a9a;letter-spacing:.25em;margin-bottom:4px}
 .ls-subtitle{font-size:.42rem;color:#4a4a5a;letter-spacing:.12em;margin-bottom:10px;text-transform:uppercase}
@@ -218,6 +218,27 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .ch-level{font-size:.65rem;color:#6a6a7a;letter-spacing:.08em;margin-bottom:4px}
 .ch-result{font-size:.45rem;color:#4a5a6a;letter-spacing:.06em;margin-top:8px}
 .ch-best{font-size:.35rem;color:#3a4a5a;letter-spacing:.06em;margin-top:2px}
+/* Profile */
+#profile-screen{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:28px;padding-bottom:20px}
+.prof-avatar{width:64px;height:64px;border-radius:50%;border:2px solid #3a3a5a;overflow:hidden;margin-bottom:8px;background:#1a1a2a}
+.prof-avatar img{width:100%;height:100%;object-fit:cover}
+.prof-avatar-placeholder{width:64px;height:64px;border-radius:50%;border:2px solid #3a3a5a;background:#1a1a2a;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#4a4a6a;margin-bottom:8px}
+.prof-name{font-size:.9rem;font-weight:700;color:#8a8aaa;letter-spacing:.08em;margin-bottom:2px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prof-rank{font-size:2rem;font-weight:900;letter-spacing:.03em;line-height:1;margin-bottom:2px;text-shadow:0 0 20px currentColor}
+.prof-rank-label{font-size:.3rem;color:#4a4a5a;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
+.prof-best-rank{font-size:.4rem;color:#3a4a5a;letter-spacing:.08em;margin-bottom:12px}
+.prof-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:300px;margin-bottom:12px}
+.prof-stat{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:6px;padding:8px;text-align:center}
+.prof-stat-val{font-size:.85rem;font-weight:700;color:#7a8a9a;font-variant-numeric:tabular-nums}
+.prof-stat-label{font-size:.3rem;color:#4a4a5a;letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.prof-achievements{width:100%;max-width:300px;margin-bottom:12px}
+.prof-ach-title{font-size:.42rem;color:#5a5a6a;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;text-align:center}
+.prof-ach-grid{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.prof-ach{width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:.9rem;opacity:.3}
+.prof-ach.unlocked{opacity:1;border-color:rgba(180,160,60,.2);background:rgba(180,160,60,.04)}
+.prof-days{font-size:.42rem;color:#3a3a4a;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.prof-notif{width:100%;max-width:300px;display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:8px}
+.prof-notif-label{font-size:.55rem;color:#6a6a7a;letter-spacing:.08em;text-transform:uppercase}
 /* Leaderboard */
 #leaderboard-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,1);flex-direction:column;align-items:center;justify-content:flex-start;z-index:50;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-top:28px}
 #leaderboard-screen.active{display:flex}
@@ -348,6 +369,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
         <button class="btn" id="btn-records">рекорды</button>
       </div>
       <button class="btn" id="btn-leaderboard" style="border-color:#2a3a5a;color:#6a9aba;margin-top:4px">лидерборд</button>
+      <button class="btn" id="btn-profile" style="border-color:#3a3a5a;color:#8a7aaa;margin-top:2px">профиль</button>
       <button class="menu-challenge" id="btn-challenge">
         <span class="ch-label">испытание дня</span>
         <span class="ch-sub" id="ch-sub">ежедневный вызов</span>
@@ -458,6 +480,15 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       </div>
     </div>
     <button class="btn" id="btn-settings-back">назад</button>
+  </div>
+  <div id="profile-screen">
+    <div class="ls-title">профиль</div>
+    <div id="prof-content" style="display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px;padding:0 10px">
+      <div class="lb-loading">загрузка...</div>
+    </div>
+    <div style="padding:12px 0;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0">
+      <button class="btn" id="btn-profile-back">назад</button>
+    </div>
   </div>
   <div id="faq-screen">
     <div class="ls-title">faq</div>
@@ -1189,6 +1220,7 @@ function submitLB(){
   if(data.completed===0)return;
   var initData=tg?tg.initData:'';
   if(!initData){console.log('[VOID] No initData, skip LB submit');return}
+  var chatId=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user?tg.initDataUnsafe.user.id:0;
   var levelData={};
   for(var k in progress.levels){
     if(progress.levels.hasOwnProperty(k)){
@@ -1199,7 +1231,7 @@ function submitLB(){
   fetch(LB_API_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({initData:initData,levelData:levelData})
+    body:JSON.stringify({initData:initData,levelData:levelData,chatId:chatId})
   }).then(function(r){return r.json()}).then(function(d){
     if(d.ok)console.log('[VOID] LB submitted, rank:',d.rank);
     else console.log('[VOID] LB submit response:',d.error||d.message||d);
@@ -1295,6 +1327,79 @@ function renderLB(){
   var tabs=document.querySelectorAll('.lb-tab');
   for(var i=0;i<tabs.length;i++){tabs[i].classList.toggle('active',tabs[i].getAttribute('data-tab')===lbCurrentTab)}
 }
+
+// ═══ PROFILE ═══
+var profileData=null;
+function registerPlayer(){
+  if(!tg||!tg.initData)return;
+  var chatId=tg.initDataUnsafe&&tg.initDataUnsafe.user?tg.initDataUnsafe.user.id:0;
+  fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register',initData:tg.initData,chatId:chatId})}).then(function(r){return r.json()}).then(function(d){if(d.ok)console.log('[VOID] Player registered')}).catch(function(e){console.warn('[VOID] Register error:',e)});
+}
+function loadProfile(){
+  var c=document.getElementById('prof-content');
+  if(!c)return;
+  if(!tg||!tg.initData){c.innerHTML='<div class="lb-empty">играй через Telegram<br><div class="lb-sub">для доступа к профилю</div></div>';return}
+  c.innerHTML='<div class="lb-loading">загрузка...</div>';
+  fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'profile',initData:tg.initData})}).then(function(r){return r.json()}).then(function(d){
+    if(!d.ok){c.innerHTML='<div class="lb-empty">ошибка загрузки</div>';return}
+    profileData=d;
+    renderProfile(d);
+  }).catch(function(e){console.warn('[VOID] Profile error:',e);c.innerHTML='<div class="lb-empty">нет подключения</div>'});
+}
+function renderProfile(d){
+  var c=document.getElementById('prof-content');if(!c)return;
+  var tgUser=tg.initDataUnsafe&&tg.initDataUnsafe.user;
+  var avatarHtml='';
+  if(tgUser&&tgUser.photo_url){
+    avatarHtml='<div class="prof-avatar"><img src="'+tgUser.photo_url+'" alt="avatar"></div>';
+  }else{
+    avatarHtml='<div class="prof-avatar-placeholder">🌑</div>';
+  }
+  var rankCls=d.rank>0?(d.rank<=3?'rank-S':d.rank<=10?'rank-A':d.rank<=30?'rank-B':d.rank<=60?'rank-C':'rank-D'):'';
+  var rankStr=d.rank>0?'#'+d.rank:'--';
+  var bestRankStr=d.best_rank>0?'лучший ранг: #'+d.best_rank:'';
+  var daysStr='';
+  if(d.created){var diff=Math.floor((Date.now()-new Date(d.created).getTime())/86400000);daysStr=diff===0?'первый день':diff+' '+pluralDays(diff)+' в пустоте'}
+  var achCount=(progress.achievements||[]).length;
+  var achTotal=10;
+  var achHtml='';
+  var achIcons=['🌙','🏃','💀','⚡','🧗','🕷','🎯','🌟','🎵','👁'];
+  for(var i=0;i<achTotal;i++){
+    var unlocked=(progress.achievements||[]).indexOf(['no_death','speedrun','die_50','dash_100','wall_crawler','thread_master','perfect_level','all_3star','music_lover','first_blood'][i])>=0;
+    achHtml+='<div class="prof-ach'+(unlocked?' unlocked':'')+'">'+achIcons[i]+'</div>';
+  }
+  var notifEnabled=d.notifications_enabled!==false;
+  c.innerHTML=
+    avatarHtml+
+    '<div class="prof-name">'+escHtml(d.name||'???')+'</div>'+
+    '<div class="prof-rank '+rankCls+'">'+rankStr+'</div>'+
+    '<div class="prof-rank-label">ранг в лидерборде</div>'+
+    (bestRankStr?'<div class="prof-best-rank">'+bestRankStr+'</div>':'')+
+    (daysStr?'<div class="prof-days">'+daysStr+'</div>':'')+
+    '<div class="prof-stats">'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(d.completed||0)+'/'+LEVELS.length+'</div><div class="prof-stat-label">уровни</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_stars||0)+'/60</div><div class="prof-stat-label">звёзды</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(state.totalDeaths||0)+'</div><div class="prof-stat-label">смерти</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(d.score||0)+'</div><div class="prof-stat-label">score</div></div>'+
+    '</div>'+
+    '<div class="prof-achievements">'+
+      '<div class="prof-ach-title">достижения '+achCount+'/'+achTotal+'</div>'+
+      '<div class="prof-ach-grid">'+achHtml+'</div>'+
+    '</div>'+
+    '<div class="prof-notif">'+
+      '<span class="prof-notif-label">уведомления</span>'+
+      '<button class="btn" id="btn-notif-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">'+(notifEnabled?'вкл':'выкл')+'</button>'+
+    '</div>';
+  document.getElementById('btn-notif-toggle').addEventListener('click',function(){toggleNotifications()});
+}
+function toggleNotifications(){
+  if(!tg||!tg.initData||!profileData)return;
+  var newVal=!profileData.notifications_enabled;
+  fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'toggle_notifications',initData:tg.initData,enabled:newVal})}).then(function(r){return r.json()}).then(function(d){
+    if(d.ok){profileData.notifications_enabled=d.notifications_enabled;loadProfile()}
+  }).catch(function(e){console.warn('[VOID] Toggle notif error:',e)});
+}
+function pluralDays(n){var a=Math.abs(n)%100,b=a%10;if(a>10&&a<20)return'дней';if(b>1&&b<5)return'дня';if(b===1)return'день';return'дней'}
 
 // ═══ LEVEL DATA ═══
 var LEVELS=[
@@ -3238,7 +3343,7 @@ function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.lef
 function showScreen(name){
   state.screen=name;
   // Hide ALL overlay screens first to prevent any mixing
-  var overlays=['level-select','settings-screen','faq-screen','records-screen','challenge-screen','leaderboard-screen','story-screen','pause-screen','death-screen','win-screen'];
+  var overlays=['level-select','settings-screen','faq-screen','records-screen','challenge-screen','leaderboard-screen','profile-screen','story-screen','pause-screen','death-screen','win-screen'];
   for(var i=0;i<overlays.length;i++){document.getElementById(overlays[i]).classList.remove('active')}
   // Now show only the target
   document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');
@@ -3254,11 +3359,13 @@ function showScreen(name){
   if(name==='records')document.getElementById('records-screen').classList.add('active');
   if(name==='challenge')document.getElementById('challenge-screen').classList.add('active');
   if(name==='leaderboard')document.getElementById('leaderboard-screen').classList.add('active');
-  var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen',challenge:'challenge-screen',leaderboard:'leaderboard-screen'};
+  if(name==='profile')document.getElementById('profile-screen').classList.add('active');
+  var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen',challenge:'challenge-screen',leaderboard:'leaderboard-screen',profile:'profile-screen'};
   if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}
   if(name==='menu'){updateMenuStats();saveProgress();debouncedCloudSave()};
   if(name==='settings')updateSettingsUI();
   if(name==='records')showRecords();
+  if(name==='profile')loadProfile();
 }
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
@@ -3693,6 +3800,8 @@ function bindUI(){
   document.getElementById('btn-ch-play').addEventListener('click',function(){startChallenge()});
   document.getElementById('btn-leaderboard').addEventListener('click',function(){showLeaderboard('global')});
   document.getElementById('btn-lb-back').addEventListener('click',function(){showScreen('menu')});
+  document.getElementById('btn-profile').addEventListener('click',function(){showScreen('profile')});
+  document.getElementById('btn-profile-back').addEventListener('click',function(){showScreen('menu')});
   // LB tab clicks
   document.querySelectorAll('.lb-tab').forEach(function(tab){
     tab.addEventListener('click',function(){lbCurrentTab=this.getAttribute('data-tab');renderLB()});
@@ -4470,7 +4579,7 @@ function showAwakening(){
 }
 
 // ═══ INIT ═══
-async function init(){try{loadProgress();loadSettings();loadFromCloud();initSupabase();await initPixi();initInput();bindUI();initTelegramPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
+async function init(){try{loadProgress();loadSettings();loadFromCloud();initSupabase();await initPixi();initInput();bindUI();initTelegramPlayer();registerPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
 init();
 </script>
 </body>
