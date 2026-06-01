@@ -6,31 +6,22 @@
 <title>VOID</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-/* ═══ RESET & BASE ═══ */
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#06060e;font-family:'Courier New',monospace;touch-action:none;user-select:none;-webkit-user-select:none}
 canvas{display:block;position:fixed;inset:0;z-index:1}
-
-/* ═══ UI LAYER (above canvas) ═══ */
 #ui-layer{position:fixed;inset:0;z-index:10;pointer-events:none}
 #ui-layer *{pointer-events:auto}
-
-/* ═══ MAIN MENU ═══ */
 #main-menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,6,14,0.97)}
 #main-menu.hidden{display:none}
-
 .logo{font-size:3.5rem;font-weight:900;letter-spacing:.4em;color:#8a8a9a;margin-bottom:4px}
 .logo-sub{font-size:.65rem;color:#555;letter-spacing:.5em;text-transform:uppercase;margin-bottom:2px}
 .logo-ver{font-size:.5rem;color:#3a3a4a;letter-spacing:.15em;margin-bottom:20px}
 .made-by{font-size:.55rem;color:#4a4a5a;letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px}
-
 .btn{width:260px;padding:14px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.25em;background:transparent;border:1px solid #282838;color:#777;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:8px;border-radius:3px}
 .btn:hover{border-color:#444;color:#aaa;background:rgba(255,255,255,.02)}
 .btn:active{transform:scale(.97)}
 .btn.primary{border-color:#2a3a4a;color:#5580a0}
 .btn.primary:hover{border-color:#3a5a7a;color:#7aa0c0;background:rgba(60,100,160,.04)}
-
-/* ═══ GAME HUD ═══ */
 #game-hud{position:absolute;inset:0;display:none;pointer-events:none}
 #game-hud.active{display:block}
 .hud-timer{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-size:.7rem;color:#4a4a5a;letter-spacing:.1em}
@@ -39,8 +30,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .hud-dash{position:absolute;top:12px;right:60px;font-size:.5rem;color:#2a3a4a;letter-spacing:.08em;text-transform:uppercase}
 .hud-pause{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;transition:all .15s}
 .hud-pause:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.5)}
-
-/* ═══ TOUCH CONTROLS ═══ */
+.hud-interact{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:.65rem;color:#4a4a28;letter-spacing:.08em;z-index:20;display:none;animation:pulse 1.5s infinite;pointer-events:none}
 #touch-controls{position:absolute;bottom:0;left:0;right:0;display:none;padding:0 12px 14px;padding-bottom:max(14px,env(safe-area-inset-bottom))}
 #touch-controls.active{display:block}
 .touch-row{display:flex;justify-content:space-between;align-items:flex-end}
@@ -49,66 +39,48 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .tb:active,.tb.pressed{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.2)}
 .tb.jump{width:76px;height:76px;border-radius:50%}
 .tb.dash{width:52px;height:52px;border-radius:50%;font-size:12px;font-weight:700}
-.right-grp{display:flex;flex-direction:column;gap:8px;align-items:center}
-
-/* ═══ PAUSE SCREEN ═══ */
+.tb.interact{width:44px;height:44px;border-radius:50%;font-size:13px;font-weight:700}
+.right-grp{display:flex;flex-direction:column;gap:6px;align-items:center}
 #pause-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.94);flex-direction:column;align-items:center;justify-content:center}
 #pause-screen.active{display:flex}
 .pause-title{font-size:1.3rem;font-weight:900;color:#555;letter-spacing:.2em;margin-bottom:20px}
-
-/* ═══ STORY / TRANSITION SCREEN ═══ */
 #story-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.97);flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
 #story-screen.active{display:flex}
 .story-level{font-size:.6rem;color:#333;text-transform:uppercase;letter-spacing:.2em;margin-bottom:16px}
 .story-text{font-size:.85rem;color:#4a4a5a;letter-spacing:.05em;max-width:340px;line-height:1.9;text-align:center}
 .story-hint{font-size:.5rem;color:#2a2a3a;letter-spacing:.15em;margin-top:24px;text-transform:uppercase;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-
-/* ═══ DEATH SCREEN ═══ */
 #death-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.94);flex-direction:column;align-items:center;justify-content:center}
 #death-screen.active{display:flex}
 .death-title{font-size:1.6rem;font-weight:900;color:#4a1e1e;letter-spacing:.2em;margin-bottom:8px}
 .death-cause{color:#2e1212;font-size:.7rem;margin-bottom:16px}
-
-/* ═══ WIN SCREEN ═══ */
 #win-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.94);flex-direction:column;align-items:center;justify-content:center}
 #win-screen.active{display:flex}
 .win-title{font-size:1.8rem;font-weight:900;color:#3a5a3a;letter-spacing:.2em;margin-bottom:8px}
 .win-sub{color:#2a3a2a;font-size:.75rem;margin-bottom:16px}
-
-/* ═══ LOADING ═══ */
 #loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#06060e;z-index:100}
 #loading.hidden{display:none}
 .loading-text{font-size:.7rem;color:#333;letter-spacing:.2em;text-transform:uppercase;animation:pulse 1.5s infinite}
 </style>
 </head>
 <body>
-
-<!-- Loading -->
 <div id="loading"><div class="loading-text">загрузка</div></div>
-
-<!-- UI Layer (above canvas) -->
 <div id="ui-layer">
-
-  <!-- Main Menu -->
   <div id="main-menu">
     <div class="logo">VOID</div>
     <div class="logo-sub">во тьму</div>
-    <div class="logo-ver">alpha 1.1</div>
+    <div class="logo-ver">alpha 1.2</div>
     <div class="made-by">made by SERGO</div>
     <button class="btn primary" id="btn-play">спуститься</button>
   </div>
-
-  <!-- Game HUD -->
   <div id="game-hud">
     <div class="hud-level" id="hud-level"></div>
     <div class="hud-deaths" id="hud-deaths"></div>
     <div class="hud-timer" id="hud-timer">0:00</div>
     <div class="hud-dash" id="hud-dash">dash</div>
     <div class="hud-pause" id="hud-pause">❚❚</div>
+    <div class="hud-interact" id="hud-interact">E</div>
   </div>
-
-  <!-- Touch Controls -->
   <div id="touch-controls">
     <div class="touch-row">
       <div class="tb-group">
@@ -116,1485 +88,529 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
         <div class="tb" id="btn-right">▶</div>
       </div>
       <div class="right-grp">
+        <div class="tb interact" id="btn-interact">E</div>
         <div class="tb dash" id="btn-dash">D</div>
         <div class="tb jump" id="btn-jump">▲</div>
       </div>
     </div>
   </div>
-
-  <!-- Story Screen -->
   <div id="story-screen">
     <div class="story-level" id="story-level"></div>
     <div class="story-text" id="story-text"></div>
     <div class="story-hint">нажмите чтобы продолжить</div>
   </div>
-
-  <!-- Pause Screen -->
   <div id="pause-screen">
     <div class="pause-title">пауза</div>
     <button class="btn" id="btn-resume">продолжить</button>
     <button class="btn" id="btn-quit" style="border-color:#3a1a1a;color:#6a3535">выйти в меню</button>
   </div>
-
-  <!-- Death Screen -->
   <div id="death-screen">
     <div class="death-title">поглощён</div>
     <div class="death-cause" id="death-cause"></div>
     <button class="btn" id="btn-retry">снова</button>
   </div>
-
-  <!-- Win Screen -->
   <div id="win-screen">
     <div class="win-title">СПАСЁН</div>
     <div class="win-sub">ты выбрался из пустоты</div>
     <button class="btn primary" id="btn-next">далее</button>
   </div>
-
 </div>
-
-<!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.9.2/dist/pixi.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
-
 <script>
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — Alpha 1.1
-// PixiJS v8 + Matter.js
-// Telegram Mini App
+// VOID — Alpha 1.2
+// PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
-// ─── Error Display ───
-window.onerror = function(msg, url, line) {
-  console.error('ERR:', msg, 'L' + line);
-  var d = document.getElementById('loading');
-  if (d) { d.classList.remove('hidden'); d.querySelector('.loading-text').textContent = 'ERR L' + line + ': ' + msg; }
-};
-window.addEventListener('unhandledrejection', function(e) {
-  console.error('REJ:', e.reason);
-});
+window.onerror=function(msg,url,line){console.error('ERR:',msg,'L'+line);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERR L'+line+': '+msg}};
+window.addEventListener('unhandledrejection',function(e){console.error('REJ:',e.reason)});
 
-// ─── Telegram SDK ───
-var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-if (tg) {
-  tg.ready();
-  tg.expand();
-}
-function tgHaptic(type) {
-  if (!tg || !tg.HapticFeedback) return;
-  try {
-    if (type === 'light') tg.HapticFeedback.impactOccurred('light');
-    else if (type === 'medium') tg.HapticFeedback.impactOccurred('medium');
-    else if (type === 'heavy') tg.HapticFeedback.impactOccurred('heavy');
-    else if (type === 'selection') tg.HapticFeedback.selectionChanged();
-  } catch(e) {}
-}
+var tg=(window.Telegram&&window.Telegram.WebApp)?window.Telegram.WebApp:null;
+if(tg){tg.ready();tg.expand()}
+function tgHaptic(t){if(!tg||!tg.HapticFeedback)return;try{if(t==='light')tg.HapticFeedback.impactOccurred('light');else if(t==='medium')tg.HapticFeedback.impactOccurred('medium');else if(t==='heavy')tg.HapticFeedback.impactOccurred('heavy')}catch(e){}}
 
-// ═══════════════════════════════════════════════════════════════
-// GAME STATE
-// ═══════════════════════════════════════════════════════════════
+// ═══ GAME STATE ═══
+var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0};
 
-var state = {
-  screen: 'menu',
-  level: 0,
-  deaths: 0,
-  totalDeaths: 0,
-  levelStartTime: 0,
-  shakeAmount: 0,
-  shakeTime: 0,
-  slowMo: 1,
-  slowMoTimer: 0,
-  fadeAlpha: 0,
-  fadeDir: 0  // 0=none, 1=fading in, -1=fading out
-};
-
-// ═══════════════════════════════════════════════════════════════
-// LEVEL DATA
-// ═══════════════════════════════════════════════════════════════
-
-var LEVELS = [
+// ═══ LEVEL DATA ═══
+var LEVELS=[
   {
-    name: 'Пробуждение',
-    story: 'Ты очнулся во тьме. Не помнишь кто ты, не помнишь откуда. Только одно чувство — нужно двигаться. Вперёд. Туда, где мерцает далёкий свет.',
-    width: 3200, height: 800,
-    spawn: { x: 80, y: 500 },
-    exit: { x: 3000, y: 350, w: 40, h: 80 },
-    platforms: [
-      { x: 0, y: 650, w: 700, h: 40 },
-      { x: 850, y: 650, w: 500, h: 40 },
-      { x: 1550, y: 650, w: 400, h: 40 },
-      { x: 2100, y: 650, w: 500, h: 40 },
-      { x: 2750, y: 650, w: 450, h: 40 },
-      // Steps
-      { x: 300, y: 540, w: 120, h: 16 },
-      { x: 500, y: 440, w: 120, h: 16 },
-      { x: 700, y: 520, w: 100, h: 16 },
-      { x: 1000, y: 490, w: 130, h: 16 },
-      { x: 1250, y: 400, w: 120, h: 16 },
-      { x: 1450, y: 530, w: 100, h: 16 },
-      { x: 1700, y: 460, w: 120, h: 16 },
-      { x: 1950, y: 380, w: 100, h: 16 },
-      // Exit area
-      { x: 2900, y: 350, w: 160, h: 16 },
+    name:'Пробуждение',story:'Ты очнулся во тьме. Не помнишь кто ты, не помнишь откуда. Только одно чувство — нужно двигаться. Вперёд. Туда, где мерцает далёкий свет.',
+    width:3200,height:800,spawn:{x:80,y:500},exit:{x:3000,y:350,w:40,h:80},
+    platforms:[
+      {x:0,y:650,w:700,h:40},{x:850,y:650,w:500,h:40},{x:1550,y:650,w:400,h:40},{x:2100,y:650,w:500,h:40},{x:2750,y:650,w:450,h:40},
+      {x:300,y:540,w:120,h:16},{x:500,y:440,w:120,h:16},{x:700,y:520,w:100,h:16},
+      {x:1000,y:490,w:130,h:16},{x:1250,y:400,w:120,h:16},{x:1450,y:530,w:100,h:16},
+      {x:1700,y:460,w:120,h:16},{x:1950,y:380,w:100,h:16},
+      {x:2900,y:350,w:160,h:16},
     ],
-    spikes: [
-      { x: 740, y: 630, w: 80 },
-      { x: 1400, y: 630, w: 60 },
-    ],
+    spikes:[{x:740,y:630,w:80},{x:1400,y:630,w:60}],
   },
   {
-    name: 'Стены',
-    story: 'Тьма сжимается. Стены становятся ближе. Но стены — не только преграда. Они могут стать путём наверх.',
-    width: 3600, height: 900,
-    spawn: { x: 80, y: 650 },
-    exit: { x: 3400, y: 200, w: 40, h: 80 },
-    platforms: [
-      { x: 0, y: 750, w: 500, h: 40 },
-      { x: 700, y: 750, w: 300, h: 40 },
-      { x: 1200, y: 750, w: 300, h: 40 },
-      { x: 1700, y: 750, w: 400, h: 40 },
-      { x: 2300, y: 750, w: 300, h: 40 },
-      { x: 2800, y: 750, w: 300, h: 40 },
-      { x: 3200, y: 750, w: 400, h: 40 },
-      // Wall jump chimney
-      { x: 550, y: 400, w: 20, h: 350 },
-      { x: 680, y: 400, w: 20, h: 350 },
-      // Platforms after chimney
-      { x: 600, y: 550, w: 60, h: 16 },
-      // Higher platforms
-      { x: 1050, y: 600, w: 100, h: 16 },
-      { x: 1050, y: 350, w: 20, h: 250 },  // wall
-      { x: 1200, y: 350, w: 20, h: 250 },  // wall
-      { x: 1070, y: 450, w: 130, h: 16 },
-      // Dash section
-      { x: 1600, y: 600, w: 80, h: 16 },
-      { x: 1850, y: 550, w: 80, h: 16 },
-      // Second chimney
-      { x: 2150, y: 200, w: 20, h: 350 },
-      { x: 2280, y: 200, w: 20, h: 350 },
-      { x: 2170, y: 400, w: 60, h: 16 },
-      // Upper path
-      { x: 2500, y: 350, w: 120, h: 16 },
-      { x: 2700, y: 280, w: 100, h: 16 },
-      // Exit
-      { x: 3300, y: 200, w: 160, h: 16 },
+    name:'Стены',story:'Тьма сжимается. Стены становятся ближе. Но стены — не только преграда. Они могут стать путём наверх.',
+    width:3600,height:900,spawn:{x:80,y:650},exit:{x:3400,y:200,w:40,h:80},
+    platforms:[
+      {x:0,y:750,w:500,h:40},{x:700,y:750,w:300,h:40},{x:1200,y:750,w:300,h:40},{x:1700,y:750,w:400,h:40},{x:2300,y:750,w:300,h:40},{x:2800,y:750,w:300,h:40},{x:3200,y:750,w:400,h:40},
+      {x:550,y:400,w:20,h:350},{x:680,y:400,w:20,h:350},{x:600,y:550,w:60,h:16},
+      {x:1050,y:600,w:100,h:16},{x:1050,y:350,w:20,h:250},{x:1200,y:350,w:20,h:250},{x:1070,y:450,w:130,h:16},
+      {x:1600,y:600,w:80,h:16},{x:1850,y:550,w:80,h:16},
+      {x:2150,y:200,w:20,h:350},{x:2280,y:200,w:20,h:350},{x:2170,y:400,w:60,h:16},
+      {x:2500,y:350,w:120,h:16},{x:2700,y:280,w:100,h:16},{x:3300,y:200,w:160,h:16},
     ],
-    spikes: [
-      { x: 620, y: 730, w: 60 },
-      { x: 1120, y: 730, w: 60 },
-      { x: 2000, y: 730, w: 80 },
-      { x: 2600, y: 730, w: 80 },
-    ],
+    spikes:[{x:620,y:730,w:60},{x:1120,y:730,w:60},{x:2000,y:730,w:80},{x:2600,y:730,w:80}],
   },
   {
-    name: 'Пилы',
-    story: 'Тишина нарушена. Вдали слышен скрежет — что-то вращается, что-то ждёт. Механизмы тьмы не знают пощады.',
-    width: 4000, height: 900,
-    spawn: { x: 80, y: 650 },
-    exit: { x: 3800, y: 350, w: 40, h: 80 },
-    platforms: [
-      { x: 0, y: 750, w: 600, h: 40 },
-      { x: 800, y: 750, w: 400, h: 40 },
-      { x: 1400, y: 750, w: 300, h: 40 },
-      { x: 1900, y: 750, w: 400, h: 40 },
-      { x: 2500, y: 750, w: 300, h: 40 },
-      { x: 3000, y: 750, w: 400, h: 40 },
-      { x: 3550, y: 750, w: 450, h: 40 },
-      // Steps
-      { x: 350, y: 600, w: 100, h: 16 },
-      { x: 550, y: 500, w: 100, h: 16 },
-      { x: 700, y: 580, w: 80, h: 16 },
-      { x: 950, y: 550, w: 100, h: 16 },
-      // Elevated
-      { x: 1200, y: 480, w: 80, h: 16 },
-      { x: 1550, y: 520, w: 100, h: 16 },
-      { x: 1750, y: 430, w: 80, h: 16 },
-      // Gap with saw below
-      { x: 2100, y: 550, w: 80, h: 16 },
-      { x: 2300, y: 480, w: 80, h: 16 },
+    name:'Пилы',story:'Тишина нарушена. Вдали слышен скрежет — что-то вращается, что-то ждёт. Механизмы тьмы не знают пощады.',
+    width:4000,height:900,spawn:{x:80,y:650},exit:{x:3800,y:350,w:40,h:80},
+    platforms:[
+      {x:0,y:750,w:600,h:40},{x:800,y:750,w:400,h:40},{x:1400,y:750,w:300,h:40},{x:1900,y:750,w:400,h:40},{x:2500,y:750,w:300,h:40},{x:3000,y:750,w:400,h:40},{x:3550,y:750,w:450,h:40},
+      {x:350,y:600,w:100,h:16},{x:550,y:500,w:100,h:16},{x:700,y:580,w:80,h:16},{x:950,y:550,w:100,h:16},
+      {x:1200,y:480,w:80,h:16},{x:1550,y:520,w:100,h:16},{x:1750,y:430,w:80,h:16},
+      {x:2100,y:550,w:80,h:16},{x:2300,y:480,w:80,h:16},
+      {x:2700,y:500,w:120,h:16},{x:2900,y:420,w:100,h:16},{x:3100,y:350,w:100,h:16},{x:3700,y:350,w:160,h:16},
+    ],
+    spikes:[{x:640,y:730,w:60},{x:1230,y:730,w:60},{x:1820,y:730,w:60}],
+    saws:[{x:1100,y:680,r:30},{x:1650,y:660,r:35},{x:2200,y:650,r:30},{x:2650,y:680,r:25}],
+  },
+  {
+    name:'Бездна',story:'Дно исчезло. Остались лишь платформы, парящие в пустоте. Один неверный шаг — и тьма примет тебя.',
+    width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:250,w:40,h:80},
+    platforms:[
+      {x:0,y:800,w:400,h:40},
+      {x:500,y:720,w:100,h:16},{x:700,y:640,w:80,h:16},{x:900,y:700,w:100,h:16},
+      {x:1050,y:400,w:20,h:300},{x:1200,y:400,w:20,h:300},{x:1070,y:550,w:60,h:16},{x:1130,y:450,w:60,h:16},
+      {x:1350,y:600,w:80,h:16},{x:1600,y:550,w:80,h:16},{x:1850,y:500,w:80,h:16},
+      {x:2050,y:650,w:200,h:40},
+      {x:2350,y:500,w:20,h:300},{x:2500,y:400,w:20,h:400},{x:2370,y:550,w:60,h:16},{x:2430,y:420,w:60,h:16},
+      {x:2700,y:380,w:100,h:16},{x:2900,y:320,w:100,h:16},{x:3100,y:400,w:80,h:16},{x:3300,y:330,w:100,h:16},
+      {x:3500,y:380,w:80,h:16},{x:4200,y:250,w:160,h:16},
+    ],
+    spikes:[{x:430,y:780,w:50},{x:2000,y:630,w:40}],
+    saws:[{x:1500,y:650,r:30},{x:1750,y:580,r:25},{x:3000,y:340,r:25},{x:3700,y:400,r:30}],
+  },
+  {
+    name:'Механизмы',story:'Древние механизмы ещё работают. Рычаги открывают двери, платформы движутся по рельсам. Но и тьма научилась пользоваться механизмами.',
+    width:4200,height:900,spawn:{x:80,y:600},exit:{x:4000,y:300,w:40,h:80},
+    platforms:[
+      {x:0,y:750,w:600,h:40},{x:800,y:750,w:400,h:40},{x:1400,y:750,w:300,h:40},
+      {x:1900,y:750,w:400,h:40},{x:2500,y:750,w:400,h:40},{x:3100,y:750,w:300,h:40},
+      {x:3600,y:750,w:600,h:40},
+      // Steps to lever
+      {x:300,y:620,w:100,h:16},{x:500,y:520,w:100,h:16},
+      // After door 1
+      {x:1100,y:550,w:100,h:16},{x:1300,y:470,w:80,h:16},
+      // Lever 2 area
+      {x:1600,y:550,w:80,h:16},
+      // Moving platform target area
+      {x:2100,y:500,w:80,h:16},
       // Upper exit path
-      { x: 2700, y: 500, w: 120, h: 16 },
-      { x: 2900, y: 420, w: 100, h: 16 },
-      { x: 3100, y: 350, w: 100, h: 16 },
-      { x: 3700, y: 350, w: 160, h: 16 },
+      {x:2800,y:500,w:120,h:16},{x:3000,y:420,w:100,h:16},
+      {x:3200,y:350,w:80,h:16},
+      {x:3500,y:400,w:100,h:16},
+      {x:3900,y:300,w:160,h:16},
     ],
-    spikes: [
-      { x: 640, y: 730, w: 60 },
-      { x: 1230, y: 730, w: 60 },
-      { x: 1820, y: 730, w: 60 },
+    spikes:[{x:640,y:730,w:80},{x:1230,y:730,w:60},{x:1830,y:730,w:60}],
+    saws:[{x:2700,y:680,r:28},{x:3350,y:680,r:30}],
+    levers:[
+      {x:600,y:504,doorX:760,doorY:630,doorW:20,doorH:100,id:'door1'},
+      {x:1650,y:534,doorX:1860,doorY:630,doorW:20,doorH:100,id:'door2'},
     ],
-    saws: [
-      { x: 1100, y: 680, r: 30 },
-      { x: 1650, y: 660, r: 35 },
-      { x: 2200, y: 650, r: 30 },
-      { x: 2650, y: 680, r: 25 },
+    movingPlatforms:[
+      {x:2100,y:600,w:100,h:16,axis:'x',range:300,speed:1.2},
     ],
   },
   {
-    name: 'Бездна',
-    story: 'Дно исчезло. Остались лишь платформы, парящие в пустоте. Один неверный шаг — и тьма примет тебя. Но впереди свет. Почти.',
-    width: 4500, height: 1000,
-    spawn: { x: 80, y: 700 },
-    exit: { x: 4300, y: 250, w: 40, h: 80 },
-    platforms: [
-      { x: 0, y: 800, w: 400, h: 40 },
-      // Floating platforms (no ground)
-      { x: 500, y: 720, w: 100, h: 16 },
-      { x: 700, y: 640, w: 80, h: 16 },
-      { x: 900, y: 700, w: 100, h: 16 },
-      // Wall section
-      { x: 1050, y: 400, w: 20, h: 300 },
-      { x: 1200, y: 400, w: 20, h: 300 },
-      { x: 1070, y: 550, w: 60, h: 16 },
-      { x: 1130, y: 450, w: 60, h: 16 },
-      // Dash gaps
-      { x: 1350, y: 600, w: 80, h: 16 },
-      { x: 1600, y: 550, w: 80, h: 16 },
-      { x: 1850, y: 500, w: 80, h: 16 },
-      // Safe island
-      { x: 2050, y: 650, w: 200, h: 40 },
-      // Vertical climb
-      { x: 2350, y: 500, w: 20, h: 300 },
-      { x: 2500, y: 400, w: 20, h: 400 },
-      { x: 2370, y: 550, w: 60, h: 16 },
-      { x: 2430, y: 420, w: 60, h: 16 },
+    name:'Тени',story:'Ты не один во тьме. Что-то движется в глубине — тёмные силуэты, патрулирующие свои владения. Они не видят, но чувствуют.',
+    width:4800,height:900,spawn:{x:80,y:650},exit:{x:4600,y:250,w:40,h:80},
+    platforms:[
+      {x:0,y:750,w:500,h:40},{x:700,y:750,w:400,h:40},{x:1300,y:750,w:400,h:40},
+      {x:1900,y:750,w:400,h:40},{x:2500,y:750,w:300,h:40},{x:3000,y:750,w:400,h:40},
+      {x:3600,y:750,w:300,h:40},{x:4100,y:750,w:700,h:40},
+      // Navigation
+      {x:350,y:600,w:100,h:16},{x:550,y:500,w:100,h:16},
+      {x:900,y:580,w:80,h:16},{x:1100,y:500,w:100,h:16},
+      // Falling platforms area
+      {x:1500,y:580,w:80,h:16},{x:1700,y:500,w:80,h:16},
       // Upper path
-      { x: 2700, y: 380, w: 100, h: 16 },
-      { x: 2900, y: 320, w: 100, h: 16 },
-      { x: 3100, y: 400, w: 80, h: 16 },
-      { x: 3300, y: 330, w: 100, h: 16 },
-      // Final dash to exit
-      { x: 3500, y: 380, w: 80, h: 16 },
-      { x: 4200, y: 250, w: 160, h: 16 },
+      {x:2200,y:550,w:100,h:16},{x:2450,y:480,w:80,h:16},
+      {x:2650,y:400,w:100,h:16},
+      // Wall climb
+      {x:2850,y:250,w:20,h:300},{x:2980,y:250,w:20,h:300},{x:2870,y:400,w:60,h:16},{x:2940,y:320,w:60,h:16},
+      // Exit
+      {x:3200,y:350,w:100,h:16},{x:3400,y:280,w:80,h:16},{x:3600,y:350,w:100,h:16},
+      {x:3800,y:420,w:80,h:16},{x:4000,y:350,w:80,h:16},{x:4400,y:250,w:160,h:16},
     ],
-    spikes: [
-      { x: 430, y: 780, w: 50 },
-      { x: 2000, y: 630, w: 40 },
+    spikes:[{x:540,y:730,w:60},{x:1170,y:730,w:60},{x:1750,y:730,w:80},{x:2420,y:730,w:60}],
+    saws:[{x:2050,y:680,r:28},{x:3150,y:680,r:30}],
+    enemies:[
+      {x:800,y:710,range:250,speed:1.5},
+      {x:1400,y:710,range:200,speed:1.8},
+      {x:2000,y:710,range:220,speed:1.5},
+      {x:3100,y:710,range:180,speed:2},
     ],
-    saws: [
-      { x: 1500, y: 650, r: 30 },
-      { x: 1750, y: 580, r: 25 },
-      { x: 3000, y: 340, r: 25 },
-      { x: 3700, y: 400, r: 30 },
+    fallingPlatforms:[
+      {x:1550,y:620,w:80,h:16},{x:1750,y:550,w:80,h:16},
     ],
   }
 ];
 
-// ═══════════════════════════════════════════════════════════════
-// PIXIJS SETUP
-// ═══════════════════════════════════════════════════════════════
+// ═══ PIXIJS SETUP ═══
+var pixiApp=null,gameContainer=null,bgContainer=null,fxContainer=null,vignetteOverlay=null;
 
-var pixiApp = null;
-var gameContainer = null;
-var bgContainer = null;
-var fxContainer = null;   // particles, effects
-var vignetteOverlay = null;
-
-function initPixi() {
-  pixiApp = new PIXI.Application();
-  return pixiApp.init({
-    width: window.innerWidth,
-    height: window.innerHeight,
-    backgroundColor: 0x06060e,
-    antialias: true,
-    resolution: Math.min(window.devicePixelRatio || 1, 2),
-    autoDensity: true,
-  }).then(function() {
-    var uiLayer = document.getElementById('ui-layer');
-    uiLayer.parentNode.insertBefore(pixiApp.canvas, uiLayer);
-
-    bgContainer = new PIXI.Container();
-    gameContainer = new PIXI.Container();
-    fxContainer = new PIXI.Container();
-    pixiApp.stage.addChild(bgContainer);
-    pixiApp.stage.addChild(gameContainer);
-    pixiApp.stage.addChild(fxContainer);
-
-    // Vignette
-    vignetteOverlay = new PIXI.Graphics();
-    pixiApp.stage.addChild(vignetteOverlay);
-    drawVignette();
-
-    window.addEventListener('resize', onResize);
-    onResize();
-
-    console.log('[VOID] PixiJS initialized:', pixiApp.screen.width, 'x', pixiApp.screen.height);
+function initPixi(){
+  pixiApp=new PIXI.Application();
+  return pixiApp.init({width:window.innerWidth,height:window.innerHeight,backgroundColor:0x06060e,antialias:true,resolution:Math.min(window.devicePixelRatio||1,2),autoDensity:true}).then(function(){
+    var ui=document.getElementById('ui-layer');
+    ui.parentNode.insertBefore(pixiApp.canvas,ui);
+    bgContainer=new PIXI.Container();gameContainer=new PIXI.Container();fxContainer=new PIXI.Container();
+    pixiApp.stage.addChild(bgContainer);pixiApp.stage.addChild(gameContainer);pixiApp.stage.addChild(fxContainer);
+    vignetteOverlay=new PIXI.Graphics();pixiApp.stage.addChild(vignetteOverlay);drawVignette();
+    window.addEventListener('resize',onResize);onResize();
   });
 }
+function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);for(var i=0;i<8;i++){g.circle(cx,cy,mr*(1-i*0.08));g.fill({color:0x06060e,alpha:i*0.04})}}
+function onResize(){if(!pixiApp)return;pixiApp.renderer.resize(window.innerWidth,window.innerHeight);drawVignette()}
 
-function drawVignette() {
-  if (!vignetteOverlay) return;
-  var g = vignetteOverlay;
-  g.clear();
-  var w = pixiApp ? pixiApp.screen.width : window.innerWidth;
-  var h = pixiApp ? pixiApp.screen.height : window.innerHeight;
-  // Radial vignette approximation
-  var cx = w / 2, cy = h / 2;
-  var maxR = Math.sqrt(cx * cx + cy * cy);
-  for (var i = 0; i < 8; i++) {
-    var r = maxR * (1 - i * 0.08);
-    var alpha = i * 0.04;
-    g.circle(cx, cy, r);
-    g.fill({ color: 0x06060e, alpha: alpha });
-  }
-}
+// ═══ MATTER.JS SETUP ═══
+var engine=null,world=null;
+var MEngine=Matter.Engine,MWorld=Matter.World,MBodies=Matter.Bodies,MBody=Matter.Body,MComposite=Matter.Composite,MConstraint=Matter.Constraint,MEvents=Matter.Events;
 
-function onResize() {
-  if (!pixiApp) return;
-  pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
-  drawVignette();
-}
+function initMatter(){engine=MEngine.create({gravity:{x:0,y:1.5},positionIterations:8,velocityIterations:6});world=engine.world}
 
-// ═══════════════════════════════════════════════════════════════
-// MATTER.JS SETUP
-// ═══════════════════════════════════════════════════════════════
+// ═══ PARTICLES ═══
+var particles=[];
+function spawnParticles(x,y,count,color,opts){opts=opts||{};for(var i=0;i<count;i++){var angle=opts.angle!==undefined?opts.angle+(Math.random()-0.5)*(opts.spread||1):Math.random()*Math.PI*2;var speed=(opts.speed||2)*(0.5+Math.random());var life=(opts.life||0.5)*(0.5+Math.random());var size=(opts.size||3)*(0.5+Math.random()*0.5);var spr=new PIXI.Graphics();spr.circle(0,0,size);spr.fill({color:color,alpha:0.8});fxContainer.addChild(spr);particles.push({x:x,y:y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life:life,maxLife:life,size:size,color:color,gravity:opts.gravity||0.5,sprite:spr})}}
+function updateParticles(dt){for(var i=particles.length-1;i>=0;i--){var p=particles[i];p.life-=dt;if(p.life<=0){if(p.sprite)p.sprite.destroy();particles.splice(i,1);continue}p.vy+=p.gravity*dt*60;p.x+=p.vx*dt*60;p.y+=p.vy*dt*60;var alpha=Math.max(0,p.life/p.maxLife);if(p.sprite){p.sprite.x=p.x-camera.x;p.sprite.y=p.y-camera.y;p.sprite.alpha=alpha;p.sprite.scale.set(0.5+alpha*0.5)}}}
+function clearParticles(){for(var i=0;i<particles.length;i++){if(particles[i].sprite)particles[i].sprite.destroy()}particles=[]}
 
-var engine = null;
-var world = null;
+// ═══ PLAYER ═══
+var player={body:null,sprite:null,speed:6.5,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:18,dashDuration:0.12,dashCooldown:0.6,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null};
+var playerSensorGround=null,playerSensorLeft=null,playerSensorRight=null;
+var COYOTE_DURATION=0.08,JUMP_BUFFER_DURATION=0.1,WALL_SLIDE_SPEED=2.2,PLAYER_W=18,PLAYER_H=34;
 
-var MEngine = Matter.Engine;
-var MWorld = Matter.World;
-var MBodies = Matter.Bodies;
-var MBody = Matter.Body;
-var MComposite = Matter.Composite;
-var MConstraint = Matter.Constraint;
-var MEvents = Matter.Events;
-
-function initMatter() {
-  engine = MEngine.create({
-    gravity: { x: 0, y: 1.5 },
-    positionIterations: 8,
-    velocityIterations: 6
-  });
-  world = engine.world;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PARTICLES
-// ═══════════════════════════════════════════════════════════════
-
-var particles = [];
-
-function spawnParticles(x, y, count, color, opts) {
-  opts = opts || {};
-  for (var i = 0; i < count; i++) {
-    var angle = opts.angle !== undefined ? opts.angle + (Math.random() - 0.5) * (opts.spread || 1) : Math.random() * Math.PI * 2;
-    var speed = (opts.speed || 2) * (0.5 + Math.random());
-    var life = (opts.life || 0.5) * (0.5 + Math.random());
-    var size = (opts.size || 3) * (0.5 + Math.random() * 0.5);
-    particles.push({
-      x: x, y: y,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      life: life,
-      maxLife: life,
-      size: size,
-      color: color,
-      gravity: opts.gravity || 0.5,
-      sprite: null
-    });
-    // Create sprite
-    var spr = new PIXI.Graphics();
-    spr.circle(0, 0, size);
-    spr.fill({ color: color, alpha: 0.8 });
-    fxContainer.addChild(spr);
-    particles[particles.length - 1].sprite = spr;
-  }
-}
-
-function updateParticles(dt) {
-  for (var i = particles.length - 1; i >= 0; i--) {
-    var p = particles[i];
-    p.life -= dt;
-    if (p.life <= 0) {
-      if (p.sprite) p.sprite.destroy();
-      particles.splice(i, 1);
-      continue;
-    }
-    p.vy += p.gravity * dt * 60;
-    p.x += p.vx * dt * 60;
-    p.y += p.vy * dt * 60;
-    var alpha = Math.max(0, p.life / p.maxLife);
-    if (p.sprite) {
-      p.sprite.x = p.x - camera.x;
-      p.sprite.y = p.y - camera.y;
-      p.sprite.alpha = alpha;
-      p.sprite.scale.set(0.5 + alpha * 0.5);
-    }
-  }
-}
-
-function clearParticles() {
-  for (var i = 0; i < particles.length; i++) {
-    if (particles[i].sprite) particles[i].sprite.destroy();
-  }
-  particles = [];
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PLAYER
-// ═══════════════════════════════════════════════════════════════
-
-var player = {
-  body: null,
-  sprite: null,
-  speed: 6.5,
-  jumpForce: -15,
-  wallJumpForceX: 10,
-  wallJumpForceY: -13,
-  dashSpeed: 18,
-  dashDuration: 0.12,
-  dashCooldown: 0.6,
-  onGround: false,
-  wasOnGround: false,
-  onWallLeft: false,
-  onWallRight: false,
-  wallSliding: false,
-  facing: 1,
-  alive: true,
-  coyoteTime: 0,
-  jumpBuffer: 0,
-  inputX: 0,
-  inputJump: false,
-  inputJumpPressed: false,
-  inputDashPressed: false,
-  // Dash
-  dashing: false,
-  dashTimer: 0,
-  dashCooldownTimer: 0,
-  dashDir: 1,
-  // Animation
-  animTime: 0,
-  runCycle: 0,
-  lastGroundY: 0,
-  justLanded: false,
-};
-
-var playerSensorGround = null;
-var playerSensorLeft = null;
-var playerSensorRight = null;
-
-var COYOTE_DURATION = 0.08;
-var JUMP_BUFFER_DURATION = 0.1;
-var WALL_SLIDE_SPEED = 2.2;
-var PLAYER_W = 18;
-var PLAYER_H = 34;
-
-function createPlayer(x, y) {
-  player.body = MBodies.rectangle(x, y, PLAYER_W, PLAYER_H, {
-    label: 'player',
-    friction: 0.05,
-    frictionStatic: 0.3,
-    restitution: 0,
-    density: 0.002,
-    inertia: Infinity,
-    inverseInertia: 0
-  });
-
-  playerSensorGround = MBodies.rectangle(x, y + PLAYER_H / 2, PLAYER_W - 4, 4, {
-    label: 'sensorGround', isSensor: true, isStatic: false
-  });
-  playerSensorLeft = MBodies.rectangle(x - PLAYER_W / 2, y, 4, PLAYER_H - 8, {
-    label: 'sensorLeft', isSensor: true, isStatic: false
-  });
-  playerSensorRight = MBodies.rectangle(x + PLAYER_W / 2, y, 4, PLAYER_H - 8, {
-    label: 'sensorRight', isSensor: true, isStatic: false
-  });
-
-  var comp = MComposite.create({ label: 'playerComposite' });
-  MComposite.add(comp, [player.body, playerSensorGround, playerSensorLeft, playerSensorRight]);
-  MComposite.add(comp, MConstraint.create({
-    bodyA: player.body, pointA: { x: 0, y: PLAYER_H / 2 },
-    bodyB: playerSensorGround, pointB: { x: 0, y: 0 },
-    stiffness: 1, damping: 0, length: 0
-  }));
-  MComposite.add(comp, MConstraint.create({
-    bodyA: player.body, pointA: { x: -PLAYER_W / 2, y: 0 },
-    bodyB: playerSensorLeft, pointB: { x: 0, y: 0 },
-    stiffness: 1, damping: 0, length: 0
-  }));
-  MComposite.add(comp, MConstraint.create({
-    bodyA: player.body, pointA: { x: PLAYER_W / 2, y: 0 },
-    bodyB: playerSensorRight, pointB: { x: 0, y: 0 },
-    stiffness: 1, damping: 0, length: 0
-  }));
-  MWorld.add(world, comp);
-
-  // Container for body parts
-  player.sprite = new PIXI.Container();
-  gameContainer.addChild(player.sprite);
-
-  // Reset state
-  player.onGround = false;
-  player.wasOnGround = false;
-  player.onWallLeft = false;
-  player.onWallRight = false;
-  player.wallSliding = false;
-  player.alive = true;
-  player.coyoteTime = 0;
-  player.jumpBuffer = 0;
-  player.facing = 1;
-  player.dashing = false;
-  player.dashTimer = 0;
-  player.dashCooldownTimer = 0;
-  player.animTime = 0;
-  player.runCycle = 0;
-  player.lastGroundY = y;
-  player.justLanded = false;
-
+function createPlayer(x,y){
+  player.body=MBodies.rectangle(x,y,PLAYER_W,PLAYER_H,{label:'player',friction:0.05,frictionStatic:0.3,restitution:0,density:0.002,inertia:Infinity,inverseInertia:0});
+  playerSensorGround=MBodies.rectangle(x,y+PLAYER_H/2,PLAYER_W-4,4,{label:'sensorGround',isSensor:true,isStatic:false});
+  playerSensorLeft=MBodies.rectangle(x-PLAYER_W/2,y,4,PLAYER_H-8,{label:'sensorLeft',isSensor:true,isStatic:false});
+  playerSensorRight=MBodies.rectangle(x+PLAYER_W/2,y,4,PLAYER_H-8,{label:'sensorRight',isSensor:true,isStatic:false});
+  var comp=MComposite.create({label:'playerComposite'});
+  MComposite.add(comp,[player.body,playerSensorGround,playerSensorLeft,playerSensorRight]);
+  MComposite.add(comp,MConstraint.create({bodyA:player.body,pointA:{x:0,y:PLAYER_H/2},bodyB:playerSensorGround,pointB:{x:0,y:0},stiffness:1,damping:0,length:0}));
+  MComposite.add(comp,MConstraint.create({bodyA:player.body,pointA:{x:-PLAYER_W/2,y:0},bodyB:playerSensorLeft,pointB:{x:0,y:0},stiffness:1,damping:0,length:0}));
+  MComposite.add(comp,MConstraint.create({bodyA:player.body,pointA:{x:PLAYER_W/2,y:0},bodyB:playerSensorRight,pointB:{x:0,y:0},stiffness:1,damping:0,length:0}));
+  MWorld.add(world,comp);
+  player.sprite=new PIXI.Container();gameContainer.addChild(player.sprite);
+  player.onGround=false;player.wasOnGround=false;player.onWallLeft=false;player.onWallRight=false;
+  player.wallSliding=false;player.alive=true;player.coyoteTime=0;player.jumpBuffer=0;player.facing=1;
+  player.dashing=false;player.dashTimer=0;player.dashCooldownTimer=0;player.animTime=0;player.runCycle=0;
+  player.lastGroundY=y;player.justLanded=false;player.nearLever=null;
   setupPlayerSensors();
 }
 
-function drawPlayerParts() {
-  if (!player.sprite) return;
-  player.sprite.removeChildren();
+function drawPlayerParts(){if(!player.sprite)return;player.sprite.removeChildren();var g=new PIXI.Graphics();var vx=player.body.velocity.x,vy=player.body.velocity.y,t=player.animTime;var isRunning=player.onGround&&Math.abs(vx)>0.5;var isJumping=!player.onGround&&vy<-1;var isFalling=!player.onGround&&vy>1;var isIdle=player.onGround&&Math.abs(vx)<0.5;var bodyBob=0;if(isRunning)bodyBob=Math.sin(player.runCycle*12)*1.5;if(isIdle)bodyBob=Math.sin(t*2)*0.5;
+var headY=-PLAYER_H/2-7+bodyBob*0.5;g.circle(0,headY,7);g.fill(0x282838);
+var ex=player.facing*3,eyeY=headY-0.5;var blinkPhase=t%4;var eyeH=(blinkPhase>3.8&&blinkPhase<3.95)?0.3:1.5;g.ellipse(ex,eyeY,1.5,eyeH);g.fill(0x99aacc);
+var scarfY=-PLAYER_H/2+1+bodyBob*0.3;g.rect(-2,scarfY,4,6);g.fill(0x3a3a5a);var tailAngle=isRunning?Math.sin(player.runCycle*10-1)*0.3:Math.sin(t*1.5)*0.1;var tailX=-player.facing*5+Math.sin(tailAngle)*4;var tailY=scarfY+4;g.moveTo(-1,scarfY+3);g.quadraticCurveTo(tailX,tailY+6,tailX-player.facing*2,tailY+10);g.stroke({width:2,color:0x3a3a5a});
+var torsoY=-PLAYER_H/2+6+bodyBob;g.rect(-5,torsoY,10,12);g.fill(0x282838);
+var armBaseY=torsoY+2;if(isRunning){g.moveTo(-5,armBaseY);g.lineTo(-8,armBaseY+10+Math.sin(player.runCycle*12+Math.PI)*3);g.stroke({width:3,color:0x282838});g.moveTo(5,armBaseY);g.lineTo(8,armBaseY+10+Math.sin(player.runCycle*12)*3);g.stroke({width:3,color:0x282838})}else if(player.wallSliding){var ws=player.onWallLeft?-1:1;g.moveTo(0,armBaseY);g.lineTo(ws*8,armBaseY-8);g.stroke({width:3,color:0x282838});g.moveTo(0,armBaseY+2);g.lineTo(ws*6,armBaseY-4);g.stroke({width:3,color:0x282838})}else{g.moveTo(-5,armBaseY);g.lineTo(-7,armBaseY+(isJumping?4:8));g.stroke({width:3,color:0x282838});g.moveTo(5,armBaseY);g.lineTo(7,armBaseY+(isJumping?4:8));g.stroke({width:3,color:0x282838})}
+var legBaseY=torsoY+11;if(isRunning){var ls=Math.sin(player.runCycle*12);g.moveTo(-3,legBaseY);g.lineTo(-3+ls*5,legBaseY+10);g.stroke({width:3,color:0x282838});g.moveTo(3,legBaseY);g.lineTo(3-ls*5,legBaseY+10);g.stroke({width:3,color:0x282838})}else if(player.wallSliding){var ws2=player.onWallLeft?-1:1;g.moveTo(-2,legBaseY);g.lineTo(ws2*4,legBaseY+8);g.stroke({width:3,color:0x282838});g.moveTo(2,legBaseY);g.lineTo(ws2*2,legBaseY+10);g.stroke({width:3,color:0x282838})}else if(isJumping){g.moveTo(-3,legBaseY);g.lineTo(-5,legBaseY+6);g.stroke({width:3,color:0x282838});g.moveTo(3,legBaseY);g.lineTo(5,legBaseY+6);g.stroke({width:3,color:0x282838})}else{g.moveTo(-3,legBaseY);g.lineTo(-3,legBaseY+(isFalling?12:10));g.stroke({width:3,color:0x282838});g.moveTo(3,legBaseY);g.lineTo(3,legBaseY+(isFalling?12:10));g.stroke({width:3,color:0x282838})}
+if(player.alive){g.circle(0,0,24);g.fill({color:0x4a4a6a,alpha:0.04+Math.sin(t*3)*0.01})}
+if(player.dashing){g.circle(0,0,20);g.fill({color:0x6a6a9a,alpha:0.15})}
+player.sprite.addChild(g)}
 
-  var g = new PIXI.Graphics();
-  var vx = player.body.velocity.x;
-  var vy = player.body.velocity.y;
-  var t = player.animTime;
+function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
+function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
+function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,-1)}}
+function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
+function checkSpecialCollision(a,b){if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(player.alive)winLevel()}if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}}
 
-  // Determine animation state
-  var isRunning = player.onGround && Math.abs(vx) > 0.5;
-  var isJumping = !player.onGround && vy < -1;
-  var isFalling = !player.onGround && vy > 1;
-  var isIdle = player.onGround && Math.abs(vx) < 0.5;
+function updatePlayer(dt){
+  if(!player.alive||!player.body)return;
+  player.wasOnGround=player.onGround;player.onGround=playerSensorGround._colliding>0;player.onWallLeft=playerSensorLeft._colliding>0;player.onWallRight=playerSensorRight._colliding>0;
+  player.justLanded=false;
+  if(player.onGround&&!player.wasOnGround){player.justLanded=true;var fd=player.lastGroundY-player.body.position.y;if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.4,size:3,gravity:1});state.shakeAmount=Math.min(fd*0.02,4);state.shakeTime=0.15}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1})}player.lastGroundY=player.body.position.y;tgHaptic('light')}
+  if(player.onGround)player.lastGroundY=player.body.position.y;
+  if(player.onGround)player.coyoteTime=COYOTE_DURATION;else player.coyoteTime-=dt;
+  if(player.inputJumpPressed){player.jumpBuffer=JUMP_BUFFER_DURATION;player.inputJumpPressed=false}else player.jumpBuffer-=dt;
 
-  // Body bob
-  var bodyBob = 0;
-  if (isRunning) bodyBob = Math.sin(player.runCycle * 12) * 1.5;
-  if (isIdle) bodyBob = Math.sin(t * 2) * 0.5;
-
-  // Head
-  var headY = -PLAYER_H / 2 - 7 + bodyBob * 0.5;
-  g.circle(0, headY, 7);
-  g.fill(0x282838);
-
-  // Eye
-  var ex = player.facing * 3;
-  var eyeY = headY - 0.5;
-  // Blink
-  var blinkPhase = t % 4;
-  var eyeH = (blinkPhase > 3.8 && blinkPhase < 3.95) ? 0.3 : 1.5;
-  g.ellipse(ex, eyeY, 1.5, eyeH);
-  g.fill(0x99aacc);
-
-  // Scarf / neck
-  var scarfY = -PLAYER_H / 2 + 1 + bodyBob * 0.3;
-  g.rect(-2, scarfY, 4, 6);
-  g.fill(0x3a3a5a);
-  // Scarf tail
-  var tailAngle = isRunning ? Math.sin(player.runCycle * 10 - 1) * 0.3 : Math.sin(t * 1.5) * 0.1;
-  var tailX = -player.facing * 5 + Math.sin(tailAngle) * 4;
-  var tailY = scarfY + 4;
-  g.moveTo(-1, scarfY + 3);
-  g.quadraticCurveTo(tailX, tailY + 6, tailX - player.facing * 2, tailY + 10);
-  g.stroke({ width: 2, color: 0x3a3a5a });
-
-  // Torso
-  var torsoY = -PLAYER_H / 2 + 6 + bodyBob;
-  g.rect(-5, torsoY, 10, 12);
-  g.fill(0x282838);
-
-  // Arms
-  var armBaseY = torsoY + 2;
-  if (isRunning) {
-    // Running arms
-    var armSwing = Math.sin(player.runCycle * 12) * 25;
-    // Left arm
-    g.moveTo(-5, armBaseY);
-    g.lineTo(-8, armBaseY + 10 + Math.sin(player.runCycle * 12 + Math.PI) * 3);
-    g.stroke({ width: 3, color: 0x282838 });
-    // Right arm
-    g.moveTo(5, armBaseY);
-    g.lineTo(8, armBaseY + 10 + Math.sin(player.runCycle * 12) * 3);
-    g.stroke({ width: 3, color: 0x282838 });
-  } else if (player.wallSliding) {
-    // Wall slide pose - arms up
-    var wallSide = player.onWallLeft ? -1 : 1;
-    g.moveTo(0, armBaseY);
-    g.lineTo(wallSide * 8, armBaseY - 8);
-    g.stroke({ width: 3, color: 0x282838 });
-    g.moveTo(0, armBaseY + 2);
-    g.lineTo(wallSide * 6, armBaseY - 4);
-    g.stroke({ width: 3, color: 0x282838 });
-  } else {
-    // Idle / jump arms
-    g.moveTo(-5, armBaseY);
-    g.lineTo(-7, armBaseY + (isJumping ? 4 : 8));
-    g.stroke({ width: 3, color: 0x282838 });
-    g.moveTo(5, armBaseY);
-    g.lineTo(7, armBaseY + (isJumping ? 4 : 8));
-    g.stroke({ width: 3, color: 0x282838 });
-  }
-
-  // Legs
-  var legBaseY = torsoY + 11;
-  if (isRunning) {
-    // Running legs
-    var legSwing = Math.sin(player.runCycle * 12);
-    g.moveTo(-3, legBaseY);
-    g.lineTo(-3 + legSwing * 5, legBaseY + 10);
-    g.stroke({ width: 3, color: 0x282838 });
-    g.moveTo(3, legBaseY);
-    g.lineTo(3 - legSwing * 5, legBaseY + 10);
-    g.stroke({ width: 3, color: 0x282838 });
-  } else if (player.wallSliding) {
-    // Wall slide - legs braced
-    var ws = player.onWallLeft ? -1 : 1;
-    g.moveTo(-2, legBaseY);
-    g.lineTo(ws * 4, legBaseY + 8);
-    g.stroke({ width: 3, color: 0x282838 });
-    g.moveTo(2, legBaseY);
-    g.lineTo(ws * 2, legBaseY + 10);
-    g.stroke({ width: 3, color: 0x282838 });
-  } else if (isJumping) {
-    // Jump pose - legs tucked
-    g.moveTo(-3, legBaseY);
-    g.lineTo(-5, legBaseY + 6);
-    g.stroke({ width: 3, color: 0x282838 });
-    g.moveTo(3, legBaseY);
-    g.lineTo(5, legBaseY + 6);
-    g.stroke({ width: 3, color: 0x282838 });
-  } else {
-    // Idle / falling legs
-    g.moveTo(-3, legBaseY);
-    g.lineTo(-3, legBaseY + (isFalling ? 12 : 10));
-    g.stroke({ width: 3, color: 0x282838 });
-    g.moveTo(3, legBaseY);
-    g.lineTo(3, legBaseY + (isFalling ? 12 : 10));
-    g.stroke({ width: 3, color: 0x282838 });
-  }
-
-  // Aura glow (subtle)
-  if (player.alive) {
-    g.circle(0, 0, 24);
-    g.fill({ color: 0x4a4a6a, alpha: 0.04 + Math.sin(t * 3) * 0.01 });
-  }
-
-  // Dash afterimage
-  if (player.dashing) {
-    g.circle(0, 0, 20);
-    g.fill({ color: 0x6a6a9a, alpha: 0.15 });
-  }
-
-  player.sprite.addChild(g);
-}
-
-function setupPlayerSensors() {
-  playerSensorGround._colliding = 0;
-  playerSensorLeft._colliding = 0;
-  playerSensorRight._colliding = 0;
-
-  MEvents.on(engine, 'collisionStart', onCollisionStart);
-  MEvents.on(engine, 'collisionEnd', onCollisionEnd);
-}
-
-function onCollisionStart(e) {
-  for (var i = 0; i < e.pairs.length; i++) {
-    checkSensorCollision(e.pairs[i].bodyA, e.pairs[i].bodyB, 1);
-    checkSpecialCollision(e.pairs[i].bodyA, e.pairs[i].bodyB);
-  }
-}
-
-function onCollisionEnd(e) {
-  for (var i = 0; i < e.pairs.length; i++) {
-    checkSensorCollision(e.pairs[i].bodyA, e.pairs[i].bodyB, -1);
-  }
-}
-
-function checkSensorCollision(a, b, delta) {
-  if (!playerSensorGround) return;
-  var sensors = [playerSensorGround, playerSensorLeft, playerSensorRight];
-  for (var i = 0; i < sensors.length; i++) {
-    var s = sensors[i];
-    if (a === s || b === s) {
-      var other = (a === s) ? b : a;
-      if (other.label !== 'player' && other.label !== 'sensorGround' &&
-          other.label !== 'sensorLeft' && other.label !== 'sensorRight' &&
-          other.label !== 'deathZone' && other.label !== 'exitZone' &&
-          other.label !== 'sawZone') {
-        s._colliding = Math.max(0, (s._colliding || 0) + delta);
-      }
-    }
-  }
-}
-
-function checkSpecialCollision(a, b) {
-  // Exit zone
-  if ((a.label === 'exitZone' && b.label === 'player') ||
-      (b.label === 'exitZone' && a.label === 'player')) {
-    if (player.alive) winLevel();
-  }
-  // Death zone (spikes)
-  if ((a.label === 'deathZone' && b.label === 'player') ||
-      (b.label === 'deathZone' && a.label === 'player')) {
-    killPlayer('spikes');
-  }
-  // Saw zone
-  if ((a.label === 'sawZone' && b.label === 'player') ||
-      (b.label === 'sawZone' && a.label === 'player')) {
-    killPlayer('saw');
-  }
-}
-
-function updatePlayer(dt) {
-  if (!player.alive || !player.body) return;
-
-  // Sensors
-  player.wasOnGround = player.onGround;
-  player.onGround = playerSensorGround._colliding > 0;
-  player.onWallLeft = playerSensorLeft._colliding > 0;
-  player.onWallRight = playerSensorRight._colliding > 0;
-
-  // Landing detection
-  player.justLanded = false;
-  if (player.onGround && !player.wasOnGround) {
-    player.justLanded = true;
-    var fallDist = player.lastGroundY - player.body.position.y;
-    if (fallDist > 50) {
-      // Hard landing - dust + shake
-      spawnParticles(player.body.position.x, player.body.position.y + PLAYER_H / 2, 8, 0x4a4a5a,
-        { angle: -Math.PI / 2, spread: 2, speed: 1.5, life: 0.4, size: 3, gravity: 1 });
-      state.shakeAmount = Math.min(fallDist * 0.02, 4);
-      state.shakeTime = 0.15;
-    } else if (fallDist > 15) {
-      // Soft landing - small dust
-      spawnParticles(player.body.position.x, player.body.position.y + PLAYER_H / 2, 4, 0x3a3a4a,
-        { angle: -Math.PI / 2, spread: 1.5, speed: 1, life: 0.3, size: 2, gravity: 1 });
-    }
-    player.lastGroundY = player.body.position.y;
-    tgHaptic('light');
-  }
-  if (player.onGround) {
-    player.lastGroundY = player.body.position.y;
-  }
-
-  // Coyote time
-  if (player.onGround) {
-    player.coyoteTime = COYOTE_DURATION;
-  } else {
-    player.coyoteTime -= dt;
-  }
-
-  // Jump buffer
-  if (player.inputJumpPressed) {
-    player.jumpBuffer = JUMP_BUFFER_DURATION;
-    player.inputJumpPressed = false;
-  } else {
-    player.jumpBuffer -= dt;
-  }
+  // Interact (levers)
+  if(player.inputInteractPressed&&player.nearLever){activateLever(player.nearLever);player.inputInteractPressed=false}else player.inputInteractPressed=false;
+  // Check nearby levers
+  player.nearLever=null;
+  for(var i=0;i<levelLevers.length;i++){var lv=levelLevers[i];if(!lv.activated){var dx=player.body.position.x-(lv.x+8);var dy=player.body.position.y-(lv.y+8);if(Math.sqrt(dx*dx+dy*dy)<50){player.nearLever=lv;break}}}
+  document.getElementById('hud-interact').style.display=player.nearLever?'block':'none';
 
   // Dash
-  player.dashCooldownTimer -= dt;
-  if (player.dashing) {
-    player.dashTimer -= dt;
-    if (player.dashTimer <= 0) {
-      player.dashing = false;
-    } else {
-      // Dash movement
-      MBody.setVelocity(player.body, {
-        x: player.dashDir * player.dashSpeed,
-        y: 0
-      });
-      // Dash particles
-      if (Math.random() < 0.5) {
-        spawnParticles(player.body.position.x - player.dashDir * 10, player.body.position.y, 1, 0x5a5a8a,
-          { angle: Math.PI + player.dashDir * 0.5, spread: 0.5, speed: 1, life: 0.2, size: 2, gravity: 0 });
-      }
-    }
-  } else {
-    // Normal horizontal movement
-    var vx = player.inputX * player.speed;
-    MBody.setVelocity(player.body, { x: vx, y: player.body.velocity.y });
+  player.dashCooldownTimer-=dt;
+  if(player.dashing){player.dashTimer-=dt;if(player.dashTimer<=0)player.dashing=false;else{MBody.setVelocity(player.body,{x:player.dashDir*player.dashSpeed,y:0});if(Math.random()<0.5)spawnParticles(player.body.position.x-player.dashDir*10,player.body.position.y,1,0x5a5a8a,{angle:Math.PI+player.dashDir*0.5,spread:0.5,speed:1,life:0.2,size:2,gravity:0})}}
+  else{var pvx=player.inputX*player.speed;MBody.setVelocity(player.body,{x:pvx,y:player.body.velocity.y});if(player.onGround&&Math.abs(pvx)>3&&Math.random()<0.15)spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.5})}
+  if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');spawnParticles(player.body.position.x,player.body.position.y,6,0x5a5a8a,{angle:Math.PI+player.dashDir,spread:1,speed:2,life:0.3,size:2.5,gravity:0})}
+  player.inputDashPressed=false;
+  if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
-    // Running particles
-    if (player.onGround && Math.abs(vx) > 3 && Math.random() < 0.15) {
-      spawnParticles(player.body.position.x, player.body.position.y + PLAYER_H / 2, 1, 0x3a3a4a,
-        { angle: -Math.PI / 2, spread: 0.5, speed: 0.5, life: 0.2, size: 1.5, gravity: 0.5 });
-    }
-  }
-
-  // Dash input
-  if (player.inputDashPressed && !player.dashing && player.dashCooldownTimer <= 0) {
-    player.dashing = true;
-    player.dashTimer = player.dashDuration;
-    player.dashCooldownTimer = player.dashCooldown;
-    player.dashDir = player.inputX !== 0 ? (player.inputX > 0 ? 1 : -1) : player.facing;
-    player.inputDashPressed = false;
-    tgHaptic('medium');
-    // Dash burst particles
-    spawnParticles(player.body.position.x, player.body.position.y, 6, 0x5a5a8a,
-      { angle: Math.PI + player.dashDir, spread: 1, speed: 2, life: 0.3, size: 2.5, gravity: 0 });
-  }
-  player.inputDashPressed = false;
-
-  // Facing direction
-  if (player.inputX !== 0) {
-    player.facing = player.inputX > 0 ? 1 : -1;
-  }
-
-  // Wall sliding
-  player.wallSliding = false;
-  if (!player.onGround && (player.onWallLeft || player.onWallRight)) {
-    if ((player.onWallLeft && player.inputX < 0) || (player.onWallRight && player.inputX > 0)) {
-      player.wallSliding = true;
-      var vy = player.body.velocity.y;
-      if (vy > WALL_SLIDE_SPEED) {
-        MBody.setVelocity(player.body, { x: player.body.velocity.x, y: WALL_SLIDE_SPEED });
-      }
-      // Wall slide dust
-      if (Math.random() < 0.1) {
-        var wallX = player.onWallLeft ? player.body.position.x - PLAYER_W / 2 : player.body.position.x + PLAYER_W / 2;
-        spawnParticles(wallX, player.body.position.y, 1, 0x3a3a4a,
-          { angle: player.onWallLeft ? 0 : Math.PI, spread: 0.5, speed: 0.5, life: 0.2, size: 1.5, gravity: 0.3 });
-      }
-    }
-  }
+  // Wall slide
+  player.wallSliding=false;if(!player.onGround&&(player.onWallLeft||player.onWallRight)){if((player.onWallLeft&&player.inputX<0)||(player.onWallRight&&player.inputX>0)){player.wallSliding=true;var vy2=player.body.velocity.y;if(vy2>WALL_SLIDE_SPEED)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:WALL_SLIDE_SPEED});if(Math.random()<0.1){var wx=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:player.onWallLeft?0:Math.PI,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.3})}}}
 
   // Jump
-  if (player.jumpBuffer > 0) {
-    if (player.onGround || player.coyoteTime > 0) {
-      MBody.setVelocity(player.body, { x: player.body.velocity.x, y: player.jumpForce });
-      player.coyoteTime = 0;
-      player.jumpBuffer = 0;
-      tgHaptic('light');
-      // Jump dust
-      spawnParticles(player.body.position.x, player.body.position.y + PLAYER_H / 2, 4, 0x4a4a5a,
-        { angle: -Math.PI / 2, spread: 2, speed: 1.5, life: 0.3, size: 2, gravity: 1 });
-    } else if (player.wallSliding || player.onWallLeft || player.onWallRight) {
-      var wallDir = player.onWallLeft ? 1 : -1;
-      MBody.setVelocity(player.body, {
-        x: wallDir * player.wallJumpForceX,
-        y: player.wallJumpForceY
-      });
-      player.jumpBuffer = 0;
-      player.coyoteTime = 0;
-      tgHaptic('medium');
-      // Wall jump dust
-      var wx = player.onWallLeft ? player.body.position.x - PLAYER_W / 2 : player.body.position.x + PLAYER_W / 2;
-      spawnParticles(wx, player.body.position.y, 5, 0x4a4a5a,
-        { angle: wallDir === 1 ? 0 : Math.PI, spread: 1.5, speed: 2, life: 0.3, size: 2, gravity: 0.5 });
-    }
-  }
+  if(player.jumpBuffer>0){if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1})}else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;MBody.setVelocity(player.body,{x:wd*player.wallJumpForceX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,5,0x4a4a5a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2,life:0.3,size:2,gravity:0.5})}}
+  if(!player.inputJump&&player.body.velocity.y<-4)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.85});
 
-  // Variable jump height
-  if (!player.inputJump && player.body.velocity.y < -4) {
-    MBody.setVelocity(player.body, { x: player.body.velocity.x, y: player.body.velocity.y * 0.85 });
-  }
-
-  // Animation
-  player.animTime += dt;
-  if (isRunning()) {
-    player.runCycle += dt * Math.abs(player.body.velocity.x) * 0.15;
-  }
-
-  // Update visual
-  player.sprite.x = player.body.position.x;
-  player.sprite.y = player.body.position.y;
-  drawPlayerParts();
-
-  // Death zone
-  var lvl = LEVELS[state.level];
-  if (player.body.position.y > lvl.height + 100) {
-    killPlayer('fall');
-  }
-
-  // HUD dash indicator
-  var dashReady = player.dashCooldownTimer <= 0 && !player.dashing;
-  document.getElementById('hud-dash').style.color = dashReady ? '#3a5a6a' : '#1a2a3a';
+  player.animTime+=dt;if(player.onGround&&Math.abs(player.body.velocity.x)>0.5)player.runCycle+=dt*Math.abs(player.body.velocity.x)*0.15;
+  player.sprite.x=player.body.position.x;player.sprite.y=player.body.position.y;drawPlayerParts();
+  var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+100)killPlayer('fall');
+  var dashReady=player.dashCooldownTimer<=0&&!player.dashing;document.getElementById('hud-dash').style.color=dashReady?'#3a5a6a':'#1a2a3a';
 }
 
-function isRunning() {
-  return player.onGround && Math.abs(player.body.velocity.x) > 0.5;
-}
+function killPlayer(cause){if(!player.alive)return;player.alive=false;state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x2a2a3a;spawnParticles(px,py,20,dc,{speed:3,life:0.8,size:3,gravity:0.5});spawnParticles(px,py,5,0x6a6a9a,{speed:1.5,life:0.5,size:5,gravity:0});state.shakeAmount=6;state.shakeTime=0.25;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');if(player.sprite)player.sprite.visible=false;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},600)}
 
-function killPlayer(cause) {
-  if (!player.alive) return;
-  player.alive = false;
-  state.deaths++;
-  state.totalDeaths++;
+function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];createPlayer(lvl.spawn.x,lvl.spawn.y);state.levelStartTime=performance.now()}
 
-  // Death particles
-  var px = player.body.position.x;
-  var py = player.body.position.y;
-  var deathColor = cause === 'fall' ? 0x2a2a4a : cause === 'spikes' ? 0x4a1a1a : cause === 'saw' ? 0x3a1a2a : 0x2a2a3a;
-  spawnParticles(px, py, 20, deathColor,
-    { speed: 3, life: 0.8, size: 3, gravity: 0.5 });
-  // Glow burst
-  spawnParticles(px, py, 5, 0x6a6a9a,
-    { speed: 1.5, life: 0.5, size: 5, gravity: 0 });
+// ═══ SAW BLADES ═══
+var sawBodies=[],sawSprites=[],sawTime=0;
+function createSaw(x,y,r){var body=MBodies.circle(x,y,r,{isStatic:true,isSensor:true,label:'sawZone'});MWorld.add(world,body);sawBodies.push({body:body,x:x,y:y,r:r});var spr=new PIXI.Container();gameContainer.addChild(spr);sawSprites.push(spr)}
+function updateSaws(dt){sawTime+=dt;for(var i=0;i<sawSprites.length;i++){var saw=sawBodies[i],spr=sawSprites[i];spr.removeChildren();var g=new PIXI.Graphics();g.circle(0,0,saw.r);g.fill(0x1a1018);g.circle(0,0,saw.r);g.stroke({width:2,color:0x2a1a2a});for(var j=0;j<8;j++){var a=(j/8)*Math.PI*2+sawTime*5;g.circle(Math.cos(a)*(saw.r+4),Math.sin(a)*(saw.r+4),3);g.fill(0x2a1a2a)}g.circle(0,0,4);g.fill(0x1a0a14);spr.x=saw.x;spr.y=saw.y;spr.addChild(g)}}
 
-  // Screen shake
-  state.shakeAmount = 6;
-  state.shakeTime = 0.25;
-
-  // Slow-mo
-  state.slowMo = 0.3;
-  state.slowMoTimer = 0.4;
-
-  tgHaptic('heavy');
-
-  // Hide player sprite
-  if (player.sprite) player.sprite.visible = false;
-
-  setTimeout(function() {
-    state.slowMo = 1;
-    state.slowMoTimer = 0;
-    showDeathScreen(cause);
-  }, 600);
-}
-
-function respawnPlayer() {
-  // Remove old player composite
-  if (player.body) {
-    var allBodies = MComposite.allBodies(world);
-    var toRemove = [];
-    for (var i = 0; i < allBodies.length; i++) {
-      if (allBodies[i].label === 'player' || allBodies[i].label === 'sensorGround' ||
-          allBodies[i].label === 'sensorLeft' || allBodies[i].label === 'sensorRight') {
-        toRemove.push(allBodies[i]);
-      }
-    }
-    for (var i = 0; i < toRemove.length; i++) {
-      MWorld.remove(world, toRemove[i]);
-    }
-  }
-  var lvl = LEVELS[state.level];
-  createPlayer(lvl.spawn.x, lvl.spawn.y);
-  state.levelStartTime = performance.now();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SAW BLADES
-// ═══════════════════════════════════════════════════════════════
-
-var sawBodies = [];
-var sawSprites = [];
-var sawTime = 0;
-
-function createSaw(x, y, r) {
-  // Sensor body (death zone)
-  var body = MBodies.circle(x, y, r, {
-    isStatic: true, isSensor: true, label: 'sawZone'
-  });
-  MWorld.add(world, body);
-  sawBodies.push({ body: body, x: x, y: y, r: r });
-
-  // Visual
-  var spr = new PIXI.Container();
+// ═══ MOVING PLATFORMS ═══
+var movingPlatforms=[];
+function createMovingPlatform(data){
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'movingPlatform',friction:0.8});
+  MWorld.add(world,body);
+  var spr=new PIXI.Graphics();spr.rect(0,0,data.w,data.h);spr.fill(0x141e14);spr.rect(0,0,data.w,2);spr.fill(0x1c2c1c);spr.x=data.x;spr.y=data.y;
   gameContainer.addChild(spr);
-  sawSprites.push(spr);
+  movingPlatforms.push({body:body,sprite:spr,originX:data.x,originY:data.y,w:data.w,h:data.h,axis:data.axis||'x',range:data.range||200,speed:data.speed||1,time:0});
 }
-
-function updateSaws(dt) {
-  sawTime += dt;
-  for (var i = 0; i < sawSprites.length; i++) {
-    var saw = sawBodies[i];
-    var spr = sawSprites[i];
-    spr.removeChildren();
-    var g = new PIXI.Graphics();
-
-    // Outer circle
-    g.circle(0, 0, saw.r);
-    g.fill(0x1a1018);
-    g.circle(0, 0, saw.r);
-    g.stroke({ width: 2, color: 0x2a1a2a });
-
-    // Teeth
-    var teeth = 8;
-    for (var j = 0; j < teeth; j++) {
-      var angle = (j / teeth) * Math.PI * 2 + sawTime * 5;
-      var tx = Math.cos(angle) * (saw.r + 4);
-      var ty = Math.sin(angle) * (saw.r + 4);
-      g.circle(tx, ty, 3);
-      g.fill(0x2a1a2a);
-    }
-
-    // Center
-    g.circle(0, 0, 4);
-    g.fill(0x1a0a14);
-
-    spr.x = saw.x;
-    spr.y = saw.y;
-    spr.addChild(g);
+function updateMovingPlatforms(dt){
+  for(var i=0;i<movingPlatforms.length;i++){
+    var mp=movingPlatforms[i];mp.time+=dt*mp.speed;
+    var offset=Math.sin(mp.time)*mp.range;
+    if(mp.axis==='x'){MBody.setPosition(mp.body,{x:mp.originX+offset+mp.w/2,y:mp.originY+mp.h/2});mp.sprite.x=mp.originX+offset}
+    else{MBody.setPosition(mp.body,{x:mp.originX+mp.w/2,y:mp.originY+offset+mp.h/2});mp.sprite.y=mp.originY+offset}
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LEVEL LOADING
-// ═══════════════════════════════════════════════════════════════
-
-var levelBodies = [];
-var levelSprites = [];
-
-function loadLevel(n) {
-  clearLevel();
-  var lvl = LEVELS[n];
-  if (!lvl) return;
-
-  // Boundaries
-  var walls = [
-    MBodies.rectangle(lvl.width / 2, -50, lvl.width, 100, { isStatic: true, label: 'boundary' }),
-    MBodies.rectangle(-50, lvl.height / 2, 100, lvl.height, { isStatic: true, label: 'boundary' }),
-  ];
-  MWorld.add(world, walls);
-  levelBodies = levelBodies.concat(walls);
-
-  // Platforms
-  for (var i = 0; i < lvl.platforms.length; i++) {
-    var p = lvl.platforms[i];
-    var body = MBodies.rectangle(p.x + p.w / 2, p.y + p.h / 2, p.w, p.h, {
-      isStatic: true, label: 'platform', friction: 0.8
-    });
-    MWorld.add(world, body);
-    levelBodies.push(body);
-
-    var spr = new PIXI.Graphics();
-    spr.rect(0, 0, p.w, p.h);
-    spr.fill(0x12121c);
-    // Top edge
-    spr.rect(0, 0, p.w, 2);
-    spr.fill(0x1c1c2c);
-    // Subtle bottom edge
-    spr.rect(0, p.h - 1, p.w, 1);
-    spr.fill(0x0a0a12);
-    spr.x = p.x;
-    spr.y = p.y;
-    gameContainer.addChild(spr);
-    levelSprites.push(spr);
-  }
-
-  // Spikes
-  if (lvl.spikes) {
-    for (var i = 0; i < lvl.spikes.length; i++) {
-      var s = lvl.spikes[i];
-      var spikeBody = MBodies.rectangle(s.x + s.w / 2, s.y - 10, s.w, 20, {
-        isStatic: true, isSensor: true, label: 'deathZone'
-      });
-      MWorld.add(world, spikeBody);
-      levelBodies.push(spikeBody);
-
-      var spr = new PIXI.Graphics();
-      var count = Math.floor(s.w / 10);
-      for (var j = 0; j < count; j++) {
-        var tx = j * 10;
-        spr.moveTo(tx + 5, s.y - 12);
-        spr.lineTo(tx, s.y + 2);
-        spr.lineTo(tx + 10, s.y + 2);
-        spr.closePath();
-        spr.fill(0x2a1414);
+// ═══ FALLING PLATFORMS ═══
+var fallingPlatforms=[];
+function createFallingPlatform(data){
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'fallingPlatform',friction:0.8});
+  MWorld.add(world,body);
+  var spr=new PIXI.Graphics();spr.rect(0,0,data.w,data.h);spr.fill(0x1e1414);spr.rect(0,0,data.w,2);spr.fill(0x2c1c1c);spr.x=data.x;spr.y=data.y;
+  gameContainer.addChild(spr);
+  fallingPlatforms.push({body:body,sprite:spr,x:data.x,y:data.y,w:data.w,h:data.h,state:'idle',timer:0,shakeTime:0});
+}
+function updateFallingPlatforms(dt){
+  for(var i=fallingPlatforms.length-1;i>=0;i--){
+    var fp=fallingPlatforms[i];
+    if(fp.state==='idle'){
+      // Check if player is standing on it
+      if(player.onGround&&player.alive){
+        var px=player.body.position.x,py=player.body.position.y+PLAYER_H/2;
+        var bx=fp.x,by=fp.y;
+        if(px>bx-5&&px<bx+fp.w+5&&py>by-6&&py<by+6){
+          fp.state='shaking';fp.shakeTime=0;tgHaptic('light');
+        }
       }
-      spr.x = s.x;
-      gameContainer.addChild(spr);
-      levelSprites.push(spr);
+    }else if(fp.state==='shaking'){
+      fp.shakeTime+=dt;
+      fp.sprite.x=fp.x+Math.sin(fp.shakeTime*40)*2;
+      if(fp.shakeTime>0.8){
+        fp.state='falling';fp.timer=0;
+        MBody.setStatic(fp.body,false);MBody.setVelocity(fp.body,{x:0,y:0});
+        spawnParticles(fp.x+fp.w/2,fp.y+fp.h,6,0x3a1a1a,{angle:-Math.PI/2,spread:2,speed:1,life:0.4,size:2,gravity:1});
+      }
+    }else if(fp.state==='falling'){
+      fp.timer+=dt;
+      fp.sprite.x=fp.body.position.x-fp.w/2;fp.sprite.y=fp.body.position.y-fp.h/2;
+      fp.sprite.alpha=Math.max(0,1-fp.timer*0.5);
+      if(fp.timer>2){
+        MWorld.remove(world,fp.body);fp.sprite.destroy();fallingPlatforms.splice(i,1);
+      }
     }
   }
+}
 
+// ═══ LEVERS & DOORS ═══
+var levelLevers=[];
+var levelDoors=[];
+function createLever(data){
+  var body=MBodies.rectangle(data.x+8,data.y+8,20,20,{isStatic:true,isSensor:true,label:'leverZone'});
+  MWorld.add(world,body);
+  var spr=new PIXI.Container();gameContainer.addChild(spr);
+  // Door
+  var doorBody=MBodies.rectangle(data.doorX+data.doorW/2,data.doorY+data.doorH/2,data.doorW,data.doorH,{isStatic:true,label:'door'});
+  MWorld.add(world,doorBody);
+  var doorSpr=new PIXI.Graphics();doorSpr.rect(0,0,data.doorW,data.doorH);doorSpr.fill(0x1a1a2a);doorSpr.rect(0,0,2,data.doorH);doorSpr.fill(0x2a2a3a);doorSpr.rect(data.doorW-2,0,2,data.doorH);doorSpr.fill(0x2a2a3a);doorSpr.x=data.doorX;doorSpr.y=data.doorY;gameContainer.addChild(doorSpr);
+  levelLevers.push({body:body,sprite:spr,x:data.x,y:data.y,doorBody:doorBody,doorSprite:doorSpr,doorX:data.doorX,doorY:data.doorY,doorW:data.doorW,doorH:data.doorH,activated:false,id:data.id});
+}
+function updateLevers(){
+  for(var i=0;i<levelLevers.length;i++){
+    var lv=levelLevers[i];lv.sprite.removeChildren();var g=new PIXI.Graphics();
+    // Base
+    g.rect(2,10,12,6);g.fill(0x2a2a3a);
+    // Handle
+    if(lv.activated){g.moveTo(8,10);g.lineTo(4,0);g.stroke({width:3,color:0x3a5a3a})}
+    else{g.moveTo(8,10);g.lineTo(12,0);g.stroke({width:3,color:0x5a3a2a})}
+    // Glow hint if nearby
+    if(!lv.activated&&player.nearLever===lv){g.circle(8,-2,3);g.fill({color:0x6a5a3a,alpha:0.3+Math.sin(player.animTime*4)*0.15})}
+    lv.sprite.x=lv.x;lv.sprite.y=lv.y;lv.sprite.addChild(g);
+  }
+}
+function activateLever(lv){
+  if(lv.activated)return;lv.activated=true;tgHaptic('medium');
+  // Open door - animate it rising
+  spawnParticles(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,8,0x3a3a5a,{speed:1.5,life:0.5,size:2,gravity:0.3});
+  MWorld.remove(world,lv.doorBody);
+  lv.doorSprite.visible=false;
+}
+
+// ═══ ENEMIES (SHADOWS) ═══
+var levelEnemies=[];
+function createEnemy(data){
+  var body=MBodies.rectangle(data.x,data.y-16,20,32,{isStatic:true,isSensor:true,label:'enemyZone'});
+  MWorld.add(world,body);
+  var spr=new PIXI.Container();gameContainer.addChild(spr);
+  levelEnemies.push({body:body,sprite:spr,originX:data.x,y:data.y-16,range:data.range,speed:data.speed,dir:1,time:0,currentX:data.x});
+}
+function updateEnemies(dt){
+  for(var i=0;i<levelEnemies.length;i++){
+    var en=levelEnemies[i];en.time+=dt;
+    en.currentX+=en.dir*en.speed*60*dt;
+    if(en.currentX>en.originX+en.range){en.dir=-1;en.currentX=en.originX+en.range}
+    if(en.currentX<en.originX-en.range){en.dir=1;en.currentX=en.originX-en.range}
+    MBody.setPosition(en.body,{x:en.currentX,y:en.y});
+    // Visual
+    en.sprite.removeChildren();var g=new PIXI.Graphics();
+    // Shadow body
+    var sway=Math.sin(en.time*3)*1.5;
+    g.circle(0+sway,-8,9);g.fill(0x141420);
+    g.rect(-6+sway,-1,12,16);g.fill(0x141420);
+    // Eyes
+    g.circle(-3+sway,-9,2);g.fill({color:0x4a1a1a,alpha:0.6+Math.sin(en.time*5)*0.2});
+    g.circle(3+sway,-9,2);g.fill({color:0x4a1a1a,alpha:0.6+Math.sin(en.time*5)*0.2});
+    // Wispy bottom
+    for(var j=0;j<4;j++){g.circle(-4+j*3+sway,14+Math.sin(en.time*4+j)*2,3);g.fill({color:0x141420,alpha:0.4})}
+    en.sprite.x=en.currentX;en.sprite.y=en.y;en.sprite.addChild(g);
+  }
+}
+
+// ═══ PENDULUMS ═══
+var pendulums=[];
+function createPendulum(data){
+  var pivotX=data.px,pivotY=data.py,length=data.len||150,ballR=data.r||15;
+  var ball=MBodies.circle(pivotX,pivotY+length,ballR,{label:'pendulumBall',density:0.005});
+  var rod=MConstraint.create({pointA:{x:pivotX,y:pivotY},bodyB:ball,length:length,stiffness:1,damping:0});
+  MWorld.add(world,[ball,rod]);
+  // Death sensor on ball
+  var sensor=MBodies.circle(pivotX,pivotY+length,ballR+4,{isStatic:true,isSensor:true,label:'sawZone'});
+  MWorld.add(world,sensor);
+  var spr=new PIXI.Container();gameContainer.addChild(spr);
+  pendulums.push({ball:ball,rod:rod,sensor:sensor,sprite:spr,pivotX:pivotX,pivotY:pivotY,length:length,ballR:ballR});
+}
+function updatePendulums(){
+  for(var i=0;i<pendulums.length;i++){
+    var pd=pendulums[i];
+    MBody.setPosition(pd.sensor,{x:pd.ball.position.x,y:pd.ball.position.y});
+    pd.sprite.removeChildren();var g=new PIXI.Graphics();
+    // Rod
+    g.moveTo(pd.pivotX,pd.pivotY);g.lineTo(pd.ball.position.x,pd.ball.position.y);g.stroke({width:3,color:0x1a1a2a});
+    // Ball
+    g.circle(pd.ball.position.x,pd.ball.position.y,pd.ballR);g.fill(0x1a1018);
+    g.circle(pd.ball.position.x,pd.ball.position.y,pd.ballR);g.stroke({width:2,color:0x2a1a2a});
+    // Spikes on ball
+    for(var j=0;j<6;j++){var a=(j/6)*Math.PI*2;g.moveTo(pd.ball.position.x+Math.cos(a)*pd.ballR,pd.ball.position.y+Math.sin(a)*pd.ballR);g.lineTo(pd.ball.position.x+Math.cos(a)*(pd.ballR+6),pd.ball.position.y+Math.sin(a)*(pd.ballR+6));g.stroke({width:2,color:0x2a1a2a})}
+    pd.sprite.addChild(g);
+  }
+}
+
+// ═══ LEVEL LOADING ═══
+var levelBodies=[],levelSprites=[];
+function loadLevel(n){
+  clearLevel();var lvl=LEVELS[n];if(!lvl)return;
+  // Boundaries
+  MWorld.add(world,MBodies.rectangle(lvl.width/2,-50,lvl.width,100,{isStatic:true,label:'boundary'}));
+  MWorld.add(world,MBodies.rectangle(-50,lvl.height/2,100,lvl.height,{isStatic:true,label:'boundary'}));
+  // Platforms
+  for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.8});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(0x12121c);spr.rect(0,0,p.w,2);spr.fill(0x1c1c2c);spr.rect(0,p.h-1,p.w,1);spr.fill(0x0a0a12);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
+  // Spikes
+  if(lvl.spikes)for(var i=0;i<lvl.spikes.length;i++){var s=lvl.spikes[i];MWorld.add(world,MBodies.rectangle(s.x+s.w/2,s.y-10,s.w,20,{isStatic:true,isSensor:true,label:'deathZone'}));var spr=new PIXI.Graphics();var cnt=Math.floor(s.w/10);for(var j=0;j<cnt;j++){var tx=j*10;spr.moveTo(tx+5,s.y-12);spr.lineTo(tx,s.y+2);spr.lineTo(tx+10,s.y+2);spr.closePath();spr.fill(0x2a1414)}spr.x=s.x;gameContainer.addChild(spr);levelSprites.push(spr)}
   // Saws
-  sawBodies = [];
-  sawSprites = [];
-  if (lvl.saws) {
-    for (var i = 0; i < lvl.saws.length; i++) {
-      createSaw(lvl.saws[i].x, lvl.saws[i].y, lvl.saws[i].r);
-    }
-  }
-
-  // Exit zone
-  if (lvl.exit) {
-    var exitBody = MBodies.rectangle(
-      lvl.exit.x + lvl.exit.w / 2, lvl.exit.y + lvl.exit.h / 2,
-      lvl.exit.w, lvl.exit.h,
-      { isStatic: true, isSensor: true, label: 'exitZone' }
-    );
-    MWorld.add(world, exitBody);
-    levelBodies.push(exitBody);
-
-    var exitSpr = new PIXI.Graphics();
-    exitSpr.rect(0, 0, lvl.exit.w, lvl.exit.h);
-    exitSpr.fill({ color: 0x1a2a1a, alpha: 0.5 });
-    // Glow top
-    exitSpr.rect(0, 0, lvl.exit.w, 3);
-    exitSpr.fill({ color: 0x3a6a3a, alpha: 0.7 });
-    // Side lines
-    exitSpr.rect(0, 0, 2, lvl.exit.h);
-    exitSpr.fill({ color: 0x2a4a2a, alpha: 0.5 });
-    exitSpr.rect(lvl.exit.w - 2, 0, 2, lvl.exit.h);
-    exitSpr.fill({ color: 0x2a4a2a, alpha: 0.5 });
-    exitSpr.x = lvl.exit.x;
-    exitSpr.y = lvl.exit.y;
-    gameContainer.addChild(exitSpr);
-    levelSprites.push(exitSpr);
-  }
-
-  // Player
-  createPlayer(lvl.spawn.x, lvl.spawn.y);
+  sawBodies=[];sawSprites=[];if(lvl.saws)for(var i=0;i<lvl.saws.length;i++)createSaw(lvl.saws[i].x,lvl.saws[i].y,lvl.saws[i].r);
+  // Moving platforms
+  movingPlatforms=[];if(lvl.movingPlatforms)for(var i=0;i<lvl.movingPlatforms.length;i++)createMovingPlatform(lvl.movingPlatforms[i]);
+  // Falling platforms
+  fallingPlatforms=[];if(lvl.fallingPlatforms)for(var i=0;i<lvl.fallingPlatforms.length;i++)createFallingPlatform(lvl.fallingPlatforms[i]);
+  // Levers & doors
+  levelLevers=[];levelDoors=[];if(lvl.levers)for(var i=0;i<lvl.levers.length;i++)createLever(lvl.levers[i]);
+  // Enemies
+  levelEnemies=[];if(lvl.enemies)for(var i=0;i<lvl.enemies.length;i++)createEnemy(lvl.enemies[i]);
+  // Pendulums
+  pendulums=[];if(lvl.pendulums)for(var i=0;i<lvl.pendulums.length;i++)createPendulum(lvl.pendulums[i]);
+  // Exit
+  if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Graphics();espr.rect(0,0,lvl.exit.w,lvl.exit.h);espr.fill({color:0x1a2a1a,alpha:0.5});espr.rect(0,0,lvl.exit.w,3);espr.fill({color:0x3a6a3a,alpha:0.7});espr.rect(0,0,2,lvl.exit.h);espr.fill({color:0x2a4a2a,alpha:0.5});espr.rect(lvl.exit.w-2,0,2,lvl.exit.h);espr.fill({color:0x2a4a2a,alpha:0.5});espr.x=lvl.exit.x;espr.y=lvl.exit.y;gameContainer.addChild(espr)}
+  createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];clearParticles();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
 
-function clearLevel() {
-  MWorld.clear(world, false);
-  MEvents.off(engine, 'collisionStart', onCollisionStart);
-  MEvents.off(engine, 'collisionEnd', onCollisionEnd);
-  levelBodies = [];
-  levelSprites = [];
-  sawBodies = [];
-  sawSprites = [];
-  clearParticles();
-  if (gameContainer) gameContainer.removeChildren();
-  if (player.body) { player.body = null; player.sprite = null; }
-  camera.x = 0; camera.y = 0;
-}
+// ═══ CAMERA ═══
+var camera={x:0,y:0};
+function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var tx=player.body.position.x-sw*0.35;var ty=player.body.position.y-sh*0.5;var lvl=LEVELS[state.level];tx=Math.max(0,Math.min(tx,lvl.width-sw));ty=Math.max(-200,Math.min(ty,lvl.height-sh));camera.x+=(tx-camera.x)*0.08;camera.y+=(ty-camera.y)*0.06;var sx=0,sy=0;if(state.shakeTime>0){sx=(Math.random()-0.5)*state.shakeAmount*2;sy=(Math.random()-0.5)*state.shakeAmount*2}gameContainer.x=-camera.x+sx;gameContainer.y=-camera.y+sy}
 
-// ═══════════════════════════════════════════════════════════════
-// CAMERA
-// ═══════════════════════════════════════════════════════════════
+// ═══ PARALLAX BACKGROUND ═══
+var bgLayers=[];
+function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();bgLayers=[];var l0=new PIXI.Graphics();for(var i=0;i<12;i++){var bx=i*180+Math.random()*60;var bh=80+Math.random()*150;l0.moveTo(bx,700);l0.lineTo(bx+30+Math.random()*30,700-bh);l0.lineTo(bx+60+Math.random()*40,700);l0.closePath();l0.fill(0x0a0a14)}for(var i=0;i<30;i++){l0.circle(Math.random()*3000,50+Math.random()*200,0.5+Math.random());l0.fill({color:0x2a2a3a,alpha:0.3+Math.random()*0.3})}bgContainer.addChild(l0);bgLayers.push({sprite:l0,speed:0.08});var l1=new PIXI.Graphics();for(var i=0;i<16;i++){var bx=i*130+Math.random()*40;var bh=40+Math.random()*100;l1.rect(bx,600-bh,25+Math.random()*25,bh);l1.fill(0x0c0c18)}bgContainer.addChild(l1);bgLayers.push({sprite:l1,speed:0.25});var l2=new PIXI.Graphics();for(var i=0;i<8;i++){var bx=i*250+Math.random()*80;var bh=100+Math.random()*180;l2.rect(bx,580-bh,15+Math.random()*10,bh);l2.fill(0x0e0e1a)}bgContainer.addChild(l2);bgLayers.push({sprite:l2,speed:0.45})}
+function updateBackground(){for(var i=0;i<bgLayers.length;i++){bgLayers[i].sprite.x=-camera.x*bgLayers[i].speed;bgLayers[i].sprite.y=-camera.y*bgLayers[i].speed*0.3}}
 
-var camera = { x: 0, y: 0, targetX: 0, targetY: 0 };
-
-function updateCamera() {
-  if (!player.body || !pixiApp) return;
-
-  var sw = pixiApp.screen.width;
-  var sh = pixiApp.screen.height;
-
-  camera.targetX = player.body.position.x - sw * 0.35;
-  camera.targetY = player.body.position.y - sh * 0.5;
-
-  var lvl = LEVELS[state.level];
-  camera.targetX = Math.max(0, Math.min(camera.targetX, lvl.width - sw));
-  camera.targetY = Math.max(-200, Math.min(camera.targetY, lvl.height - sh));
-
-  camera.x += (camera.targetX - camera.x) * 0.08;
-  camera.y += (camera.targetY - camera.y) * 0.06;
-
-  // Screen shake
-  var shakeX = 0, shakeY = 0;
-  if (state.shakeTime > 0) {
-    shakeX = (Math.random() - 0.5) * state.shakeAmount * 2;
-    shakeY = (Math.random() - 0.5) * state.shakeAmount * 2;
-  }
-
-  gameContainer.x = -camera.x + shakeX;
-  gameContainer.y = -camera.y + shakeY;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// PARALLAX BACKGROUND
-// ═══════════════════════════════════════════════════════════════
-
-var bgLayers = [];
-
-function createBackground() {
-  if (!bgContainer) return;
-  bgContainer.removeChildren();
-  bgLayers = [];
-
-  // Layer 0: deep — mountains
-  var layer0 = new PIXI.Graphics();
-  for (var i = 0; i < 12; i++) {
-    var bx = i * 180 + Math.random() * 60;
-    var bh = 80 + Math.random() * 150;
-    layer0.moveTo(bx, 700);
-    layer0.lineTo(bx + 30 + Math.random() * 30, 700 - bh);
-    layer0.lineTo(bx + 60 + Math.random() * 40, 700);
-    layer0.closePath();
-    layer0.fill(0x0a0a14);
-  }
-  // Stars
-  for (var i = 0; i < 30; i++) {
-    layer0.circle(Math.random() * 3000, 50 + Math.random() * 200, 0.5 + Math.random());
-    layer0.fill({ color: 0x2a2a3a, alpha: 0.3 + Math.random() * 0.3 });
-  }
-  bgContainer.addChild(layer0);
-  bgLayers.push({ sprite: layer0, speed: 0.08 });
-
-  // Layer 1: mid — structures
-  var layer1 = new PIXI.Graphics();
-  for (var i = 0; i < 16; i++) {
-    var bx = i * 130 + Math.random() * 40;
-    var bh = 40 + Math.random() * 100;
-    layer1.rect(bx, 600 - bh, 25 + Math.random() * 25, bh);
-    layer1.fill(0x0c0c18);
-  }
-  bgContainer.addChild(layer1);
-  bgLayers.push({ sprite: layer1, speed: 0.25 });
-
-  // Layer 2: foreground — pillars
-  var layer2 = new PIXI.Graphics();
-  for (var i = 0; i < 8; i++) {
-    var bx = i * 250 + Math.random() * 80;
-    var bh = 100 + Math.random() * 180;
-    layer2.rect(bx, 580 - bh, 15 + Math.random() * 10, bh);
-    layer2.fill(0x0e0e1a);
-  }
-  bgContainer.addChild(layer2);
-  bgLayers.push({ sprite: layer2, speed: 0.45 });
-}
-
-function updateBackground() {
-  for (var i = 0; i < bgLayers.length; i++) {
-    var layer = bgLayers[i];
-    layer.sprite.x = -camera.x * layer.speed;
-    layer.sprite.y = -camera.y * layer.speed * 0.3;
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// INPUT
-// ═══════════════════════════════════════════════════════════════
-
-var keys = {};
-var touchState = { left: false, right: false, jump: false };
-
-function initInput() {
-  window.addEventListener('keydown', function(e) {
-    if (e.repeat) return;
-    keys[e.code] = true;
-    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
-      player.inputJumpPressed = true;
-      e.preventDefault();
-    }
-    if (e.code === 'KeyX' || e.code === 'KeyL' || e.code === 'ShiftLeft') {
-      player.inputDashPressed = true;
-      e.preventDefault();
-    }
-    if (e.code === 'Escape') togglePause();
-  });
-  window.addEventListener('keyup', function(e) {
-    keys[e.code] = false;
-  });
-
-  setupTouchButton('btn-left', 'left');
-  setupTouchButton('btn-right', 'right');
-  setupTouchButton('btn-jump', 'jump');
+// ═══ INPUT ═══
+var keys={},touchState={left:false,right:false,jump:false};
+function initInput(){
+  window.addEventListener('keydown',function(e){if(e.repeat)return;keys[e.code]=true;if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'){player.inputJumpPressed=true;e.preventDefault()}if(e.code==='KeyX'||e.code==='KeyL'||e.code==='ShiftLeft'){player.inputDashPressed=true;e.preventDefault()}if(e.code==='KeyE'||e.code==='ShiftRight'){player.inputInteractPressed=true;e.preventDefault()}if(e.code==='Escape')togglePause()});
+  window.addEventListener('keyup',function(e){keys[e.code]=false});
+  setupTouchButton('btn-left','left');setupTouchButton('btn-right','right');setupTouchButton('btn-jump','jump');
   // Dash button
-  var dashBtn = document.getElementById('btn-dash');
-  if (dashBtn) {
-    dashBtn.addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      player.inputDashPressed = true;
-      dashBtn.classList.add('pressed');
-    }, { passive: false });
-    dashBtn.addEventListener('touchend', function(e) {
-      e.preventDefault();
-      dashBtn.classList.remove('pressed');
-    }, { passive: false });
-    dashBtn.addEventListener('touchcancel', function() {
-      dashBtn.classList.remove('pressed');
-    });
-  }
+  var db=document.getElementById('btn-dash');if(db){db.addEventListener('touchstart',function(e){e.preventDefault();player.inputDashPressed=true;db.classList.add('pressed')},{passive:false});db.addEventListener('touchend',function(e){e.preventDefault();db.classList.remove('pressed')},{passive:false});db.addEventListener('touchcancel',function(){db.classList.remove('pressed')})}
+  // Interact button
+  var ib=document.getElementById('btn-interact');if(ib){ib.addEventListener('touchstart',function(e){e.preventDefault();player.inputInteractPressed=true;ib.classList.add('pressed')},{passive:false});ib.addEventListener('touchend',function(e){e.preventDefault();ib.classList.remove('pressed')},{passive:false});ib.addEventListener('touchcancel',function(){ib.classList.remove('pressed')})}
 }
+function setupTouchButton(id,action){var el=document.getElementById(id);if(!el)return;el.addEventListener('touchstart',function(e){e.preventDefault();touchState[action]=true;el.classList.add('pressed');if(action==='jump')player.inputJumpPressed=true},{passive:false});el.addEventListener('touchend',function(e){e.preventDefault();touchState[action]=false;el.classList.remove('pressed')},{passive:false});el.addEventListener('touchcancel',function(){touchState[action]=false;el.classList.remove('pressed')})}
+function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.left)ix-=1;if(keys['ArrowRight']||keys['KeyD']||touchState.right)ix+=1;player.inputX=ix;player.inputJump=keys['Space']||keys['ArrowUp']||keys['KeyW']||touchState.jump}
 
-function setupTouchButton(id, action) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    touchState[action] = true;
-    el.classList.add('pressed');
-    if (action === 'jump') player.inputJumpPressed = true;
-  }, { passive: false });
-  el.addEventListener('touchend', function(e) {
-    e.preventDefault();
-    touchState[action] = false;
-    el.classList.remove('pressed');
-  }, { passive: false });
-  el.addEventListener('touchcancel', function() {
-    touchState[action] = false;
-    el.classList.remove('pressed');
-  });
-}
+// ═══ SCREEN MANAGEMENT ═══
+function showScreen(name){state.screen=name;document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');document.getElementById('touch-controls').classList.toggle('active',name==='playing');document.getElementById('story-screen').classList.toggle('active',name==='story');document.getElementById('pause-screen').classList.toggle('active',name==='paused');document.getElementById('death-screen').classList.toggle('active',name==='dead');document.getElementById('win-screen').classList.toggle('active',name==='win')}
+function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
+function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
+function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;showScreen('dead')}
+function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,15,0x3a6a3a,{speed:2,life:0.8,size:3,gravity:0.3});tgHaptic('success');setTimeout(function(){showScreen('win')},300)}
+function togglePause(){if(state.screen==='playing')showScreen('paused');else if(state.screen==='paused')showScreen('playing')}
 
-function readInput() {
-  var ix = 0;
-  if (keys['ArrowLeft'] || keys['KeyA'] || touchState.left) ix -= 1;
-  if (keys['ArrowRight'] || keys['KeyD'] || touchState.right) ix += 1;
-  player.inputX = ix;
-  player.inputJump = keys['Space'] || keys['ArrowUp'] || keys['KeyW'] || touchState.jump;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SCREEN MANAGEMENT
-// ═══════════════════════════════════════════════════════════════
-
-function showScreen(name) {
-  state.screen = name;
-  document.getElementById('main-menu').classList.toggle('hidden', name !== 'menu');
-  document.getElementById('game-hud').classList.toggle('active', name === 'playing' || name === 'story');
-  document.getElementById('touch-controls').classList.toggle('active', name === 'playing');
-  document.getElementById('story-screen').classList.toggle('active', name === 'story');
-  document.getElementById('pause-screen').classList.toggle('active', name === 'paused');
-  document.getElementById('death-screen').classList.toggle('active', name === 'dead');
-  document.getElementById('win-screen').classList.toggle('active', name === 'win');
-}
-
-function showStoryScreen(n) {
-  var lvl = LEVELS[n];
-  document.getElementById('story-level').textContent = (n + 1) + '. ' + lvl.name;
-  document.getElementById('story-text').textContent = lvl.story;
-  showScreen('story');
-  setTimeout(function() {
-    if (state.screen === 'story') startPlaying();
-  }, 7000);
-}
-
-function startPlaying() {
-  showScreen('playing');
-  state.levelStartTime = performance.now();
-  state.deaths = state.deaths; // preserve across retries
-  document.getElementById('hud-level').textContent = (state.level + 1) + '. ' + LEVELS[state.level].name;
-}
-
-function showDeathScreen(cause) {
-  var causes = {
-    fall: 'пустота поглотила тебя',
-    spikes: 'пронзён шипами',
-    saw: 'разорван на части',
-    enemy: 'поглощён тенью'
-  };
-  document.getElementById('death-cause').textContent = causes[cause] || cause;
-  showScreen('dead');
-}
-
-function winLevel() {
-  player.alive = false;
-  // Win particles
-  spawnParticles(player.body.position.x, player.body.position.y, 15, 0x3a6a3a,
-    { speed: 2, life: 0.8, size: 3, gravity: 0.3 });
-  tgHaptic('success');
-  setTimeout(function() {
-    showScreen('win');
-  }, 300);
-}
-
-function togglePause() {
-  if (state.screen === 'playing') showScreen('paused');
-  else if (state.screen === 'paused') showScreen('playing');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// GAME LOOP
-// ═══════════════════════════════════════════════════════════════
-
-var lastTime = 0;
-
-function gameLoop(timestamp) {
+// ═══ GAME LOOP ═══
+var lastTime=0;
+function gameLoop(timestamp){
   requestAnimationFrame(gameLoop);
-
-  var rawDt = Math.min((timestamp - lastTime) / 1000, 0.05);
-  lastTime = timestamp;
-
-  // Slow-mo
-  if (state.slowMoTimer > 0) {
-    state.slowMoTimer -= rawDt;
-    if (state.slowMoTimer <= 0) state.slowMo = 1;
-  }
-  var dt = rawDt * state.slowMo;
-
-  // Screen shake decay
-  if (state.shakeTime > 0) {
-    state.shakeTime -= rawDt;
-    if (state.shakeTime <= 0) { state.shakeAmount = 0; state.shakeTime = 0; }
-  }
-
-  if (state.screen === 'playing') {
-    readInput();
-    updatePlayer(dt);
-    MEngine.update(engine, dt * 1000);
-    updateSaws(dt);
-    updateCamera();
-    updateBackground();
-    updateParticles(rawDt); // particles at full speed
-
-    // HUD
-    var elapsed = performance.now() - state.levelStartTime;
-    var secs = Math.floor(elapsed / 1000);
-    var mins = Math.floor(secs / 60);
-    document.getElementById('hud-timer').textContent = mins + ':' + (secs % 60 < 10 ? '0' : '') + (secs % 60);
-    document.getElementById('hud-deaths').textContent = 'смерти: ' + state.deaths;
-  }
-
-  if (state.screen === 'story') {
-    updateCamera();
-    updateBackground();
-  }
-
-  // Always update particles (for death/transition effects)
-  if (state.screen !== 'playing') {
-    updateParticles(rawDt);
-  }
+  var rawDt=Math.min((timestamp-lastTime)/1000,0.05);lastTime=timestamp;
+  if(state.slowMoTimer>0){state.slowMoTimer-=rawDt;if(state.slowMoTimer<=0)state.slowMo=1}
+  var dt=rawDt*state.slowMo;
+  if(state.shakeTime>0){state.shakeTime-=rawDt;if(state.shakeTime<=0){state.shakeAmount=0;state.shakeTime=0}}
+  if(state.screen==='playing'){readInput();updatePlayer(dt);MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateCamera();updateBackground();updateParticles(rawDt);var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);document.getElementById('hud-timer').textContent=mins+':'+(secs%60<10?'0':'')+(secs%60);document.getElementById('hud-deaths').textContent='смерти: '+state.deaths}
+  if(state.screen==='story'){updateCamera();updateBackground()}
+  if(state.screen!=='playing')updateParticles(rawDt);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// UI EVENT BINDINGS
-// ═══════════════════════════════════════════════════════════════
-
-function bindUI() {
-  document.getElementById('btn-play').addEventListener('click', function() {
-    document.getElementById('main-menu').classList.add('hidden');
-    state.level = 0;
-    state.deaths = 0;
-    initMatter();
-    createBackground();
-    loadLevel(state.level);
-    showStoryScreen(state.level);
-  });
-
-  document.getElementById('story-screen').addEventListener('click', function() {
-    if (state.screen === 'story') startPlaying();
-  });
-  document.getElementById('story-screen').addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    if (state.screen === 'story') startPlaying();
-  }, { passive: false });
-
-  document.getElementById('hud-pause').addEventListener('click', togglePause);
-  document.getElementById('btn-resume').addEventListener('click', function() { showScreen('playing'); });
-  document.getElementById('btn-quit').addEventListener('click', function() {
-    clearLevel();
-    showScreen('menu');
-  });
-
-  document.getElementById('btn-retry').addEventListener('click', function() {
-    respawnPlayer();
-    startPlaying();
-  });
-
-  document.getElementById('btn-next').addEventListener('click', function() {
-    state.level++;
-    state.deaths = 0;
-    if (state.level < LEVELS.length) {
-      clearLevel();
-      loadLevel(state.level);
-      showStoryScreen(state.level);
-    } else {
-      clearLevel();
-      showScreen('menu');
-    }
-  });
+// ═══ UI BINDINGS ═══
+function bindUI(){
+  document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');state.level=0;state.deaths=0;initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
+  document.getElementById('story-screen').addEventListener('click',function(){if(state.screen==='story')startPlaying()});
+  document.getElementById('story-screen').addEventListener('touchstart',function(e){e.preventDefault();if(state.screen==='story')startPlaying()},{passive:false});
+  document.getElementById('hud-pause').addEventListener('click',togglePause);
+  document.getElementById('btn-resume').addEventListener('click',function(){showScreen('playing')});
+  document.getElementById('btn-quit').addEventListener('click',function(){clearLevel();showScreen('menu')});
+  document.getElementById('btn-retry').addEventListener('click',function(){respawnPlayer();startPlaying()});
+  document.getElementById('btn-next').addEventListener('click',function(){state.level++;state.deaths=0;if(state.level<LEVELS.length){clearLevel();loadLevel(state.level);showStoryScreen(state.level)}else{clearLevel();showScreen('menu')}});
 }
 
-// ═══════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════
-
-async function init() {
-  try {
-    await initPixi();
-    initInput();
-    bindUI();
-    document.getElementById('loading').classList.add('hidden');
-    lastTime = performance.now();
-    requestAnimationFrame(gameLoop);
-    console.log('[VOID] Initialized successfully');
-  } catch (err) {
-    console.error('[VOID] Init failed:', err);
-    var d = document.getElementById('loading');
-    if (d) { d.classList.remove('hidden'); d.querySelector('.loading-text').textContent = 'ERROR: ' + err.message; }
-  }
-}
-
+// ═══ INIT ═══
+async function init(){try{await initPixi();initInput();bindUI();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized')}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
 init();
 </script>
 </body>
