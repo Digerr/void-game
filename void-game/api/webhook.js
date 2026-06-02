@@ -1,4 +1,63 @@
+import { createClient } from '@supabase/supabase-js';
+
 const GAME_URL = 'https://void-game-ruddy.vercel.app/';
+
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jibtmyuxbeckanmkhuik.supabase.co';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnRteXV4YmVja2FubWtodWlrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDMyMDQxMCwiZXhwIjoyMDk1ODk2NDEwfQ.BS61LXJPTKvE4KsZmKu0e7pPkR8VnMBXxRIJqUMX8VM';
+
+function getSupabase() {
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+}
+
+// Get current week key
+function getWeekKey() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  const diff = now - start;
+  const oneWeek = 604800000;
+  const weekNum = Math.ceil((diff / oneWeek) + start.getDay() / 7);
+  return now.getFullYear() + '-W' + String(weekNum).padStart(2, '0');
+}
+
+// Format time (seconds → m:ss or just seconds)
+function fmtTime(sec) {
+  if (!sec || sec <= 0) return '—';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  if (m > 0) return `${m}:${String(s).padStart(2, '0')}`;
+  return `${s}с`;
+}
+
+// Format days since date
+function daysSince(dateStr) {
+  if (!dateStr) return '?';
+  const d = new Date(dateStr);
+  const now = new Date();
+  return Math.floor((now - d) / 86400000);
+}
+
+// Medal emoji by rank
+function medal(r) {
+  if (r === 1) return '🥇';
+  if (r === 2) return '🥈';
+  if (r === 3) return '🥉';
+  return `${r}. `;
+}
+
+// HTML-escape user-provided text
+function esc(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// Send a Telegram message with HTML parse mode
+async function sendMsg(token, chatId, text, extra = {}) {
+  const body = { chat_id: chatId, text, parse_mode: 'HTML', ...extra };
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -6,56 +65,272 @@ export default async function handler(req, res) {
   }
 
   const update = req.body;
-  
+
   if (!update || !update.message) {
     return res.status(200).json({ ok: true });
   }
 
   const msg = update.message;
   const chatId = msg.chat.id;
+  const userId = msg.from?.id;
   const text = (msg.text || '').trim();
 
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8858889318:AAGramLmQGRhpJAyRWcJC8lPwkyrbDBiHcw';
 
-  // Handle /start and /play commands
+  // ── /start and /play ──
   if (text === '/start' || text === '/play' || text.startsWith('/start ') || text.startsWith('/play ')) {
-    const reply = {
-      chat_id: chatId,
-      text: '🌑 *VOID — Исследуй Пустоту*\n\nМрачный платформер во тьме. 30 уровней, 6 актов, нить-верёвка, испытания.\n\nНажми кнопку ниже чтобы начать →',
-      parse_mode: 'Markdown',
-      reply_markup: {
-        inline_keyboard: [[
-          {
-            text: '▶ ИГРАТЬ',
-            web_app: { url: GAME_URL }
-          }
-        ]]
+    await sendMsg(BOT_TOKEN, chatId,
+      '🌑 <b>VOID — Исследуй Пустоту</b>\n\nМрачный платформер во тьме. 30 уровней, 6 актов, нить-верёвка, испытания.\n\nНажми кнопку ниже чтобы начать →',
+      {
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+          ]]
+        }
       }
-    };
-
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(reply)
-    });
-
+    );
     return res.status(200).json({ ok: true });
   }
 
-  // Handle /help
+  // ── /help ──
   if (text === '/help') {
-    const helpText = {
-      chat_id: chatId,
-      text: '🎮 *Управление VOID*\n\n◀▶ — движение\n⬆ — прыжок\n⚡ — рывок (dash)\n✋ — взаимодействие\n↗ — нить (на уровнях с якорями)\n\n💡 Приседай на краю для coyote jump\n💡 Упор в стену = медленное скольжение',
-      parse_mode: 'Markdown'
-    };
+    await sendMsg(BOT_TOKEN, chatId,
+      '🎮 <b>Управление VOID</b>\n\n' +
+      '◀▶ — движение\n' +
+      '⬆ — прыжок\n' +
+      '⚡ — рывок (dash)\n' +
+      '✋ — взаимодействие\n' +
+      '↗ — нить (на уровнях с якорями)\n\n' +
+      '💡 Приседай на краю для coyote jump\n' +
+      '💡 Упор в стену = медленное скольжение\n\n' +
+      '📊 /stats — моя статистика\n' +
+      '🏆 /leaderboard — мировой рейтинг\n' +
+      '📅 /weekly — рейтинг недели\n' +
+      '📰 /news — обновления'
+    );
+    return res.status(200).json({ ok: true });
+  }
 
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(helpText)
+  // ── /stats — личная статистика ──
+  if (text === '/stats') {
+    if (!userId) {
+      await sendMsg(BOT_TOKEN, chatId, '❌ Не удалось определить твой аккаунт.');
+      return res.status(200).json({ ok: true });
+    }
+
+    const sb = getSupabase();
+    const playerId = 'tg_' + userId;
+
+    const { data: playerData } = await sb.from('players').select('*').eq('id', playerId).single();
+    const { data: lbData } = await sb.from('leaderboard').select('*').eq('id', playerId).single();
+
+    if (!lbData) {
+      await sendMsg(BOT_TOKEN, chatId,
+        '🌑 <b>Твоя статистика</b>\n\nТы ещё не играл в VOID или не прошёл ни одного уровня.\n\nНажми кнопку чтобы начать →',
+        {
+          reply_markup: {
+            inline_keyboard: [[
+              { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+            ]]
+          }
+        }
+      );
+      return res.status(200).json({ ok: true });
+    }
+
+    // Get global rank
+    const { count } = await sb.from('leaderboard').select('*', { count: 'exact', head: true }).gt('score', lbData.score);
+    const rank = (count || 0) + 1;
+
+    // Get weekly rank
+    const weekKey = getWeekKey();
+    let weeklyRank = -1;
+    try {
+      const { data: myWeekly } = await sb.from('weekly_scores').select('score').eq('id', playerId + '_' + weekKey).single();
+      if (myWeekly) {
+        const { count: weeklyAbove } = await sb.from('weekly_scores')
+          .select('*', { count: 'exact', head: true })
+          .eq('week_key', weekKey)
+          .gt('score', myWeekly.score);
+        weeklyRank = (weeklyAbove || 0) + 1;
+      }
+    } catch (e) {}
+
+    const days = daysSince(playerData?.created);
+    const bestRank = playerData?.best_rank || rank;
+    const name = esc(lbData.name);
+
+    const statsText =
+      `🌑 <b>Статистика ${name}</b>\n\n` +
+      `🏆 Ранг: <b>#${rank}</b> ${rank === bestRank ? '⭐ лучший' : '(лучший #'+bestRank+')'}\n` +
+      `📅 Недельный ранг: ${weeklyRank > 0 ? '#'+weeklyRank : 'нет'}\n` +
+      `⏱ Дней в пустоте: <b>${days}</b>\n\n` +
+      `📊 <b>Прогресс:</b>\n` +
+      `• Уровни: ${lbData.completed}/30\n` +
+      `• ⭐ Звёзды: ${lbData.total_stars}/90\n` +
+      `• 💎 Осколки: ${lbData.total_shards || 0}\n` +
+      `• ✨ Идеальные (3★): ${lbData.perfect_levels || 0}\n` +
+      `• 🏅 Достижения: ${lbData.achievements_count || 0}\n` +
+      `• ⚔️ Испытания: ${lbData.challenge_wins || 0}\n` +
+      `• ⏳ Общее время: ${fmtTime(lbData.total_time)}\n\n` +
+      `🔢 Очки: <b>${lbData.score}</b>`;
+
+    await sendMsg(BOT_TOKEN, chatId, statsText, {
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+        ]]
+      }
     });
+    return res.status(200).json({ ok: true });
+  }
 
+  // ── /leaderboard — глобальный топ-10 ──
+  if (text === '/leaderboard' || text === '/top') {
+    const sb = getSupabase();
+
+    const { data, error } = await sb
+      .from('leaderboard')
+      .select('name, score, completed, total_stars')
+      .order('score', { ascending: false })
+      .limit(10);
+
+    if (error || !data || data.length === 0) {
+      await sendMsg(BOT_TOKEN, chatId, '🏆 <b>Мировой рейтинг</b>\n\nПока нет ни одного игрока. Стань первым!');
+      return res.status(200).json({ ok: true });
+    }
+
+    let lbText = '🏆 <b>Мировой рейтинг VOID</b>\n\n';
+    for (let i = 0; i < data.length; i++) {
+      const p = data[i];
+      const name = esc(p.name || '???');
+      lbText += `${medal(i + 1)} ${name} — <b>${p.score}</b> (${p.completed} ур., ⭐${p.total_stars})\n`;
+    }
+
+    // If requesting user is outside top-10, show their rank
+    if (userId) {
+      const playerId = 'tg_' + userId;
+      const { data: myData } = await sb.from('leaderboard').select('score').eq('id', playerId).single();
+      if (myData) {
+        const { count: myAbove } = await sb.from('leaderboard').select('*', { count: 'exact', head: true }).gt('score', myData.score);
+        const myRank = (myAbove || 0) + 1;
+        if (myRank > 10) {
+          lbText += `\n. . .\n${medal(myRank)} <b>Ты</b> — <b>${myData.score}</b>`;
+        }
+      }
+    }
+
+    lbText += '\n\n📅 /weekly — рейтинг недели\n🎮 /stats — моя статистика';
+
+    await sendMsg(BOT_TOKEN, chatId, lbText);
+    return res.status(200).json({ ok: true });
+  }
+
+  // ── /weekly — недельный топ-10 ──
+  if (text === '/weekly') {
+    const sb = getSupabase();
+    const weekKey = getWeekKey();
+
+    const { data, error } = await sb
+      .from('weekly_scores')
+      .select('name, score, completed, total_stars')
+      .eq('week_key', weekKey)
+      .order('score', { ascending: false })
+      .limit(10);
+
+    if (error || !data || data.length === 0) {
+      await sendMsg(BOT_TOKEN, chatId,
+        '📅 <b>Рейтинг недели</b>\n\nНа этой неделе пока нет результатов. Играй и попадай в топ!',
+        {
+          reply_markup: {
+            inline_keyboard: [[
+              { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+            ]]
+          }
+        }
+      );
+      return res.status(200).json({ ok: true });
+    }
+
+    // Time until next Monday 00:00 UTC
+    const now = new Date();
+    const nextMonday = new Date(now);
+    nextMonday.setUTCDate(nextMonday.getUTCDate() + (8 - nextMonday.getUTCDay()) % 7);
+    nextMonday.setUTCHours(0, 0, 0, 0);
+    if (nextMonday <= now) nextMonday.setUTCDate(nextMonday.getUTCDate() + 7);
+    const diffMs = nextMonday - now;
+    const diffDays = Math.floor(diffMs / 86400000);
+    const diffHrs = Math.floor((diffMs % 86400000) / 3600000);
+
+    let wText = `📅 <b>Рейтинг недели ${esc(weekKey)}</b>\n\n`;
+    for (let i = 0; i < data.length; i++) {
+      const p = data[i];
+      const name = esc(p.name || '???');
+      const reward = i < 3 ? ' 🎨' : (i < 10 ? ' 🏷' : '');
+      wText += `${medal(i + 1)} ${name} — <b>${p.score}</b>${reward}\n`;
+    }
+
+    wText += `\n⏳ До сброса: ${diffDays}д ${diffHrs}ч\n`;
+    wText += '🎨 Топ-3: эксклюзивный скин\n';
+    wText += '🏷 Топ-10: уникальный бейдж';
+
+    await sendMsg(BOT_TOKEN, chatId, wText, {
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+        ]]
+      }
+    });
+    return res.status(200).json({ ok: true });
+  }
+
+  // ── /news — обновления игры ──
+  if (text === '/news') {
+    const newsText =
+      '📰 <b>Обновления VOID</b>\n\n' +
+      '🔶 <b>v0.14.0-beta</b> — текущая\n' +
+      '• Лидерборд: глобальный, недельный, по уровням\n' +
+      '• 3 вкладки: мир, неделя, уровни\n' +
+      '• Недельный рейтинг с таймером сброса\n' +
+      '• Кнопка 🏆 рекордов на уровне\n' +
+      '• Защита очков после сброса прогресса\n' +
+      '• Синхронизация ника во все таблицы\n' +
+      '• Изоляция аккаунтов на одном устройстве\n' +
+      '• Принудительное облачное сохранение ☁\n\n' +
+      '🔹 <b>v0.13.0-beta</b>\n' +
+      '• Фикс физики нити (маятник)\n' +
+      '• Настройка параметров swing/constraint\n\n' +
+      '🔸 <b>v0.12.0-beta</b>\n' +
+      '• Облачные сохранения (TG CloudStorage)\n' +
+      '• Система достижений\n' +
+      '• Испытания (Challenges)\n' +
+      '• Осколки (Shards)\n\n' +
+      '⬇️ <b>Более ранние версии</b>\n' +
+      '• 30 уровней, 6 актов\n' +
+      '• Скины, лор, катсцены\n' +
+      '• Фонарик, нить, dash, wall-jump';
+
+    await sendMsg(BOT_TOKEN, chatId, newsText, {
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+        ]]
+      }
+    });
+    return res.status(200).json({ ok: true });
+  }
+
+  // ── Unknown command ──
+  if (text.startsWith('/')) {
+    await sendMsg(BOT_TOKEN, chatId,
+      '❓ Неизвестная команда. Доступные:\n\n' +
+      '/start — начать игру\n' +
+      '/help — управление\n' +
+      '/stats — моя статистика\n' +
+      '/leaderboard — мировой рейтинг\n' +
+      '/weekly — рейтинг недели\n' +
+      '/news — обновления'
+    );
     return res.status(200).json({ ok: true });
   }
 
