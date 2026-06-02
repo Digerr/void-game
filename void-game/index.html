@@ -31,8 +31,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .btn:active{transform:scale(.97) translateY(0);box-shadow:none;transition:all .08s}
 .btn.primary{border-color:rgba(70,120,200,.5);color:#8ac0e8;background:rgba(60,110,190,.08);text-shadow:0 0 14px rgba(100,160,220,.25);box-shadow:0 0 20px rgba(60,110,190,.08),inset 0 1px 0 rgba(255,255,255,.05)}
 .btn.primary:hover{border-color:rgba(90,140,220,.7);color:#a8d4f0;background:rgba(60,110,190,.12);box-shadow:0 6px 24px rgba(60,110,190,.2),0 0 40px rgba(60,110,190,.08),inset 0 1px 0 rgba(255,255,255,.06)}
-#level-select,#settings-screen,#faq-screen,#records-screen,#profile-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,1);flex-direction:column;align-items:center;justify-content:center;z-index:50}
-#level-select.active,#settings-screen.active,#faq-screen.active,#records-screen.active,#profile-screen.active{display:flex}
+#level-select,#settings-screen,#faq-screen,#lore-screen,#records-screen,#profile-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,1);flex-direction:column;align-items:center;justify-content:center;z-index:50}
+#level-select.active,#settings-screen.active,#faq-screen.active,#lore-screen.active,#records-screen.active,#profile-screen.active{display:flex}
 #level-select{background:linear-gradient(180deg,rgba(6,6,14,.98) 0%,rgba(10,10,20,.97) 100%)}
 .ls-title{font-size:1.1rem;font-weight:900;color:#9a9aaa;letter-spacing:.25em;margin-bottom:2px}
 .ls-subtitle{font-size:.4rem;color:#5a5a6a;letter-spacing:.1em;margin-bottom:6px;text-transform:uppercase}
@@ -474,6 +474,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <div class="logo-ver" id="menu-version"></div>
         <div class="made-by">made by SKUFI4</div>
       </div>
+      <button class="menu-icon-btn" id="btn-lore" title="Лор">📜</button>
       <button class="menu-icon-btn" id="btn-faq" title="FAQ">?</button>
     </div>
     </div>
@@ -716,6 +717,80 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     </div>
     <button class="btn" id="btn-faq-back">назад</button>
   </div>
+  <div id="lore-screen">
+    <div class="ls-title">хроника пустоты</div>
+    <div style="max-width:320px;max-height:62vh;overflow-y:auto;padding:0 8px;margin-bottom:16px">
+      <!-- МИР -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#7a8ab8;font-weight:700;letter-spacing:.1em;margin-bottom:6px">мир</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Пустота — это не место. Это состояние. Когда что-то забыто окончательно — оно оказывается здесь. Не уничтожено, а вытеснено за пределы реальности. Платформы, шипы, стены — всё это обломки воспоминаний, которые ещё не растворились до конца. Они держатся на привычке: стена стоит потому что помнит что должна стоять. Пилы крутятся потому что помнят боль. Двери заперты потому что помнят страх. Пустота растёт. Чем больше мир забывает — тем больше она становится. Она не живая и не мёртвая. Она как шрам, который не затягивается.</div>
+      </div>
+      <!-- ПЕРСОНАЖ -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#7a8ab8;font-weight:700;letter-spacing:.1em;margin-bottom:6px">существо</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Он — не герой. Не избранник. Он — воспоминание, которое забыло себя. Как слово, которое вертится на языке но не вспоминается. У него нет имени, потому что имя — это первое что забывается. Он просто — тот кто ещё двигается. Пока он идёт — он существует. Остановится — растворится. Его тело маленькое и хрупкое не потому что он слабый, а потому что воспоминания теряют чёткость. Когда ты что-то забываешь — сначала размываются контуры. Потом пропадают детали. Осталась только суть — тёмное маленькое существо с глазами, которые ещё помнят свет.</div>
+      </div>
+      <!-- ШАРФ -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#7a8ab8;font-weight:700;letter-spacing:.1em;margin-bottom:6px">шарф</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Шарф — единственное что осталось от того кем он был. Он не знает чей это шарф. Но чувствует что должен его беречь. Это единственная вещь в Пустоте которая тёплая.</div>
+      </div>
+      <!-- ТЬМА -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#7a8ab8;font-weight:700;letter-spacing:.1em;margin-bottom:6px">тьма</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Тьма которая преследует — это не враг. Это забвение. Оно не хочет убить — оно хочет чтобы он перестал существовать. Тьма наступает ровно с той скоростью с которой воспоминание угасает. Если он стоит на месте — она догоняет. Если идёт вперёд — она отстаёт. Но она всегда рядом. Тьма — это естественный процесс. Как ржавчина. Как забвение.</div>
+      </div>
+      <!-- ОСКОЛКИ -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#7a8ab8;font-weight:700;letter-spacing:.1em;margin-bottom:6px">осколки памяти</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Осколки — это не подбираемые предметы. Это моменты когда воспоминание на секунду становится ясным. Как когда пытаешься вспомнить сон — на мгновение видишь его отчётливо, а потом снова расплывается. Каждый осколок — одна секунда из жизни которой больше нет.</div>
+      </div>
+      <!-- НИТЬ -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#7a8ab8;font-weight:700;letter-spacing:.1em;margin-bottom:6px">нить</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Якоря и нить — это чужие воспоминания. Не его. Когда в Пустоте что-то помнят другие — это создаёт точку опоры. Якорь — это чужое «я помню», и оно держит его как рука протянутая из темноты. Нить — не оружие и не инструмент. Это связь. Кто-то помнит — и этого достаточно чтобы не упасть.</div>
+      </div>
+      <!-- РАЗДЕЛИТЕЛЬ -->
+      <div style="border-top:1px solid rgba(255,255,255,.06);margin:16px 0"></div>
+      <!-- АКТ I -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.12em;margin-bottom:6px">акт i — пробуждение</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Он очнулся. Не проснулся — именно очнулся. Как очнулся от удара. Не помнит что было до, не понимает где находится. Под ногами — обломки чьей-то памяти. Они держат, но едва. Повсюду шипы — это боль, которая ещё не забылась. Пилы — это страх, который ещё крутится. Он не знает зачем идёт. Он идёт потому что стоять страшнее. Тьмы ещё нет — она не нужна, он и так едва помнит себя. Выходы — это не двери. Это места где обломки памяти ещё достаточно плотные чтобы протиснуться дальше.</div>
+        <div style="font-size:.5rem;color:#5a5a7a;line-height:1.6;margin-top:6px;font-style:italic">Осколки: обрывки без контекста. Голос. Чей-то силуэт. Тёплый свет. Ни одно воспоминание не складывается в картину. Просто ощущения — «здесь было что-то хорошее».</div>
+      </div>
+      <!-- АКТ II -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.12em;margin-bottom:6px">акт ii — глубины</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Он провалился глубже. Платформы неустойчивые, двигающиеся, падающие — воспоминания которые уже рушатся. Всё давит. Цвета темнее. Враги появились — это чужие воспоминания которые стали агрессивными оттого что их никто не помнит. Они не злые. Они отчаянные. Пружины — это моменты когда чужая память случайно помогла. Не из доброты — просто совпадение. Он начинает замечать: Пустота не случайна. Здесь есть структура. Кто-то или что-то создавало это.</div>
+        <div style="font-size:.5rem;color:#5a5a7a;line-height:1.6;margin-top:6px;font-style:italic">Осколки: первые связные образы. Комната. Окно. Чей-то смех. Но каждый осколок ощущается чужим. Как будто он вспоминает не свою жизнь.</div>
+      </div>
+      <!-- АКТ III -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.12em;margin-bottom:6px">акт iii — нити</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Всё изменилось. Якоря — повсюду. Нить — его единственная опора. Каждый якорь — чьё-то «я помню тебя», и оно держит его в мире. Он раскачивается на нитях как на чужих руках — кто-то не даёт ему упасть. Но он начинает понимать: нити тянутся не только к нему. Они везде. Сотни нитей, тысячи — Пустота пронизана чужой памятью. Он не один здесь. Другие воспоминания тоже пытаются не раствориться. Нить — это попытка. Рычаги и двери — чужие воспоминания заперты потому что слишком болезненные. Рычаг — это разрешение. «Можно открыть. Можно вспомнить.»</div>
+        <div style="font-size:.5rem;color:#5a5a7a;line-height:1.6;margin-top:6px;font-style:italic">Осколки: он видит себя. Но не так как сейчас. Выше. Сильнее. В глазах — решимость которой у него нет. Он понимает: он уже был здесь раньше. Или — кто-то как он.</div>
+      </div>
+      <!-- АКТ IV -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.12em;margin-bottom:6px">акт iv — пустота</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Он исчезает. Не умирает — именно исчезает. Тело теряет чёткость. Движения замедляются. Платформы едва держат — он проваливается сквозь них если стоит слишком долго. Пустота уже не вокруг него — она в нём. Порталы — это чужие воспоминания настолько сильные что пробили Пустоту насквозь. Шагнуть в портал — значит на секунду оказаться в чужом воспоминании полностью. Лёд — это воспоминания которые замёрзли от безразличия. Никто не помнит — и они застыли. Может быть — перестать существовать не так страшно?</div>
+        <div style="font-size:.5rem;color:#5a5a7a;line-height:1.6;margin-top:6px;font-style:italic">Осколки: тишина. Ни образов, ни голосов. Только ощущение: «меня не было. Меня нет. Меня не будет.» И где-то на самом дне — крошечный тёплый узелок. Шарф. Кто-то помнит.</div>
+      </div>
+      <!-- АКТ V -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.12em;margin-bottom:6px">акт v — возрождение</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Он другой. Не сильнее — целее. Контуры снова чёткие. Глаза горят. Не от надежды — от упрямства. Он не знает зачем идёт. Но знает что не остановится. Ветер — это Пустота которая замечает его. Впервые — он не просто обломок. Он что-то что сопротивляется. И Пустота реагирует: пытается сдуть, оттолкнуть, не пустить. Враги здесь — другие. Они не отчаянные. Они злые. Потому что он — угроза. Воспоминание которое отказывается быть забытым — это аномалия. Другие воспоминания пытаются его остановить — не из ненависти, из самосохранения. Если он выживет — значит можно выжить. А они уже сдались.</div>
+        <div style="font-size:.5rem;color:#5a5a7a;line-height:1.6;margin-top:6px;font-style:italic">Осколки: он видит других. Существа как он — маленькие, тёмные, с тёплыми шарфами. Одни идут. Другие остановились и растворяются. Третьи уже стали частью стен и шипов. Он понимает: шипы — это не боль. Это те кто не смог.</div>
+      </div>
+      <!-- АКТ VI -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.12em;margin-bottom:6px">акт vi — исход</div>
+        <div style="font-size:.58rem;color:#6a6a8a;line-height:1.7">Он вспомнил. Не всё — но достаточно. Пустота — не тюрьма. Не могила. Пустота — это черновик. Место где воспоминания ждут пока кто-нибудь вспомнит их достаточно чётко чтобы они стали реальностью. Каждый выход с уровня — это не побег. Это момент когда воспоминание становится достаточно ясным чтобы существовать. Тьма в акте VI — последняя. Она не преследует — она стоит стеной. Потому что по ту сторону — то что он почти вспомнил. Уровни — самые странные. Платформы складываются в знакомые формы. Коридоры, комнаты, лестницы — архитектура чьей-то жизни. Он помнит что кого-то любил. Помнит что потерял. Помнит что решил забыть — потому что помнить было невыносимо. Он сам выбрал Пустоту. Но сейчас — он выбирает вернуться.</div>
+        <div style="font-size:.5rem;color:#5a5a7a;line-height:1.6;margin-top:6px;font-style:italic">Осколки: он помнит. Не образы — чувства. Кто-то. Потеря. Решение забыть. Выбор вернуться.</div>
+      </div>
+    </div>
+    <button class="btn" id="btn-lore-back">назад</button>
+  </div>
   <div id="records-screen">
     <!-- Records overview (first screen) -->
     <div id="rec-overview" style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%">
@@ -780,7 +855,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.11.1-beta';
+var VOID_VERSION='0.12.0-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -811,7 +886,7 @@ document.addEventListener('visibilitychange',function(){
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — beta 0.11.1
+// VOID — beta 0.12.0
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
@@ -5244,7 +5319,7 @@ function showScreen(name){
   if(state.screen==='playing'||state.screen==='story'||state.screen==='paused'){keys={};touchState={left:false,right:false,jump:false,climbUp:false,climbDown:false}}
   state.screen=name;
   // Hide ALL overlay screens first to prevent any mixing
-  var overlays=['level-select','settings-screen','faq-screen','records-screen','challenge-screen','leaderboard-screen','profile-screen','story-screen','pause-screen','death-screen','win-screen','awakening','act-intro'];
+  var overlays=['level-select','settings-screen','faq-screen','lore-screen','records-screen','challenge-screen','leaderboard-screen','profile-screen','story-screen','pause-screen','death-screen','win-screen','awakening','act-intro'];
   for(var i=0;i<overlays.length;i++){var ov=document.getElementById(overlays[i]);if(ov)ov.classList.remove('active')}
   // Now show only the target
   document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');
@@ -5257,11 +5332,12 @@ function showScreen(name){
   if(name==='levels')document.getElementById('level-select').classList.add('active');
   if(name==='settings')document.getElementById('settings-screen').classList.add('active');
   if(name==='faq')document.getElementById('faq-screen').classList.add('active');
+  if(name==='lore')document.getElementById('lore-screen').classList.add('active');
   if(name==='records')document.getElementById('records-screen').classList.add('active');
   if(name==='challenge')document.getElementById('challenge-screen').classList.add('active');
   if(name==='leaderboard')document.getElementById('leaderboard-screen').classList.add('active');
   if(name==='profile')document.getElementById('profile-screen').classList.add('active');
-  var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen',challenge:'challenge-screen',leaderboard:'leaderboard-screen',profile:'profile-screen'};
+  var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',lore:'lore-screen',records:'records-screen',challenge:'challenge-screen',leaderboard:'leaderboard-screen',profile:'profile-screen'};
   if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}
   if(name==='menu'){stopMusic();updateMenuStats();saveProgress();debouncedCloudSave()};
   if(name==='settings')updateSettingsUI();
@@ -5805,8 +5881,10 @@ function bindUI(){
   // Settings & FAQ
   document.getElementById('btn-settings').addEventListener('click',function(){showScreen('settings')});
   document.getElementById('btn-faq').addEventListener('click',function(){showScreen('faq')});
+  document.getElementById('btn-lore').addEventListener('click',function(){showScreen('lore')});
   document.getElementById('btn-settings-back').addEventListener('click',function(){if(state.screen==='settings'&&state._prevScreen==='paused'){showScreen('paused')}else{showScreen('menu')}});
   document.getElementById('btn-faq-back').addEventListener('click',function(){showScreen('menu')});
+  document.getElementById('btn-lore-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-records').addEventListener('click',function(){showScreen('records')});
   document.getElementById('btn-records-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-rec-act-back').addEventListener('click',function(){document.getElementById('rec-overview').style.display='flex';document.getElementById('rec-act-detail').style.display='none'});
