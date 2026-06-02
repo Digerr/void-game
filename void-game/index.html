@@ -4350,12 +4350,11 @@ var logoAnim={
       ctx.font=''+Math.max(9,W*0.022)+'px "Courier New",monospace';
       ctx.letterSpacing='0.5em';
       ctx.fillText('ВО ТЬМУ',W/2,bottomY+10);
-      // "alpha 2.4"
       ctx.shadowBlur=0;
       ctx.fillStyle='rgba(90,90,106,'+(0.5+Math.sin(this.time*0.3)*0.08)+')';
       ctx.font=''+Math.max(8,W*0.017)+'px "Courier New",monospace';
       ctx.letterSpacing='0.15em';
-      ctx.fillText('ALPHA 2.5',W/2,bottomY+26);
+      ctx.fillText('ALPHA '+VOID_VERSION,W/2,bottomY+26);
       ctx.letterSpacing='0px';
     }
     // Character
