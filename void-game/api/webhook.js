@@ -134,17 +134,11 @@ export default async function handler(req, res) {
     const results = [];
 
     // Result 1: 🎮 Game — works in ALL chats (including private 1-on-1)
+    // NOTE: game type ONLY supports type, id, game_short_name — no extra fields!
     results.push({
       type: 'game',
       id: 'void_game',
-      game_short_name: 'void',
-      title: '▶ ИГРАТЬ в VOID',
-      description: 'Платформер о памяти, которое забыло себя. 30 уровней, 6 актов.',
-      reply_markup: {
-        inline_keyboard: [[
-          { text: '▶ ИГРАТЬ', url: GAME_URL }
-        ]]
-      }
+      game_short_name: 'void'
     });
 
     // Result 2: 📊 Моя статистика (personalized or generic)
