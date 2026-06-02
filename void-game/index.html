@@ -343,6 +343,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .achievement-toast .ach-text{font-size:.5rem;color:#caba6a;letter-spacing:.08em;text-transform:uppercase}
 @keyframes achieveIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes actFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes darkPulse{0%,100%{opacity:.3;transform:translateY(-50%) scale(1)}50%{opacity:1;transform:translateY(-50%) scale(1.15)}}
 </style>
 </head>
 <body>
@@ -415,6 +416,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="hud-pause" id="hud-pause">❚❚</div>
     <div class="hud-sound" id="hud-sound" style="position:absolute;top:10px;right:52px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;transition:all .15s">♪</div>
     <div class="hud-interact" id="hud-interact">✋</div>
+    <div id="hud-darkness-warn" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:1.4rem;color:#3a1a4a;animation:darkPulse 0.8s infinite;display:none;pointer-events:none;z-index:25;text-shadow:0 0 12px rgba(60,20,80,.6)">▶</div>
     <div class="tutorial-tip" id="tutorial-tip" style="display:none"></div>
   </div>
   <div id="touch-controls">
@@ -758,6 +760,7 @@ function sfxDeath(cause){
   else if(cause==='saw'){playTone(400,0.3,'square',0.12,50)}
   else if(cause==='enemy'){playTone(180,0.5,'square',0.15,40);playNoise(0.2,0.15,1200)}
   else if(cause==='pendulum'){playTone(120,0.6,'sawtooth',0.2,60);playTone(80,0.4,'square',0.15,30)}
+  else if(cause==='darkness'){playTone(80,0.8,'sawtooth',0.25,15);playTone(50,0.6,'sine',0.2,10);playNoise(0.6,0.3,400)}
 }
 function sfxWallSlide(){
   playNoise(0.06,0.06,600);
@@ -1002,7 +1005,8 @@ var ACHIEVEMENTS=[
   {id:'five_levels',name:'исследователь',desc:'пройди 5 уровней',icon:'🗺'},
   {id:'halfway',name:'полпути',desc:'пройди 10 уровней',icon:'🌗'},
   {id:'void_master',name:'властелин пустоты',desc:'пройди все уровни',icon:'👑'},
-  {id:'perfectionist',name:'перфекционист',desc:'получи ★★★ на любом уровне',icon:'💎'}
+  {id:'perfectionist',name:'перфекционист',desc:'получи ★★★ на любом уровне',icon:'💎'},
+  {id:'dark_escape',name:'бегство',desc:'убеги от настигающей тьмы',icon:'🌑'}
 ];
 var achievementQueue=[];
 var achievementShowing=false;
@@ -1863,6 +1867,7 @@ var LEVELS=[
     anchors:[{x:400,y:200},{x:1000,y:500},{x:1600,y:600},{x:2300,y:700}],
     checkpoints:[{x:500,y:830},{x:1500,y:930},{x:2800,y:1030}],
     wind:[{x:800,y:650,w:150,h:200,forceX:-2,forceY:0},{x:2000,y:900,w:200,h:150,forceX:0,forceY:-4}],
+    darkness:[{startX:-200,speed:0.8,height:1400}]
   },
   {
     name:'Эхо',story:'Шаги повторяются. Тени множатся. Каждое эхо — враг, каждое отражение — ловушка. Во тьме нет ничего страшнее собственных следов.',
@@ -1930,6 +1935,7 @@ var LEVELS=[
     saws:[{x:2000,y:680,r:28}],
     checkpoints:[{x:1900,y:480},{x:3500,y:460}],
     portals:[{x1:255,y1:560,x2:2400,y2:460,r:18}],
+    darkness:[{startX:-300,speed:0.7,height:1000}]
   },
   {
     name:'Маятник',story:'Время — твой враг. Маятники качаются без остановки, и между их взмахами — лишь мгновение. Просчитай ритм. Иначе — раздавлен.',
@@ -2032,6 +2038,7 @@ var LEVELS=[
     ],
     checkpoints:[{x:1700,y:500},{x:3400,y:460},{x:4600,y:380}],
     ice:[{x:750,y:596,w:80,h:16},{x:2800,y:476,w:80,h:16},{x:4300,y:416,w:80,h:16}],
+    darkness:[{startX:-100,speed:1.0,height:1000}]
   },
   {
     name:'Вихрь',story:'Всё кружится. Платформы движутся, пилы вращаются, враги патрулируют. В центре вихря — нить, ведущая сквозь хаос. Доверяйся ей, но проверяй.',
@@ -2119,7 +2126,8 @@ var LEVELS=[
       {x:2600,y:710,range:200,speed:2.0},
     ],
     checkpoints:[{x:750,y:530},{x:1900,y:460},{x:3300,y:430}],
-    wind:[{x:3000,y:300,w:200,h:250,forceX:0,forceY:-3}]
+    wind:[{x:3000,y:300,w:200,h:250,forceX:0,forceY:-3}],
+    darkness:[{startX:-100,speed:1.1,height:900}]
   }
 ];
 
@@ -2503,7 +2511,7 @@ function updatePlayer(dt){
   engine.gravity.y=1.5;
 }
 
-function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,30,dc,{speed:4,life:1.2,size:4,gravity:0.3});spawnParticles(px,py,12,0x6a6a9a,{speed:2.5,life:0.8,size:5,gravity:0});spawnParticles(px,py,5,0x99aacc,{speed:1.5,life:0.6,size:2.5,gravity:0});state.hitStop=0.03;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a1a1a;state.flashAlpha=0.25;state.flashTimer=0.3;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
+function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:cause==='darkness'?0x1a0a2a:0x3e3e52;spawnParticles(px,py,30,dc,{speed:4,life:1.2,size:4,gravity:0.3});spawnParticles(px,py,12,0x6a6a9a,{speed:2.5,life:0.8,size:5,gravity:0});spawnParticles(px,py,5,0x99aacc,{speed:1.5,life:0.6,size:2.5,gravity:0});state.hitStop=0.03;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a1a1a;state.flashAlpha=0.25;state.flashTimer=0.3;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
   // Challenge: check fail conditions
   if(challengeMode&&currentChallenge){
     var mid=currentChallenge.modifier.id;
@@ -2512,7 +2520,8 @@ function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.
   }
   setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},700)}
 
-function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);/* timer NOT reset here — keeps total level time accurate */}
+function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);/* timer NOT reset here — keeps total level time accurate */// Reset pursuing darkness position to behind the respawn point
+for(var di=0;di<levelDarkness.length;di++){var dk=levelDarkness[di];dk.x=Math.min(dk.x,sp.x-400);dk.warningShown=false}}
 
 // ═══ SAW BLADES ═══
 var sawBodies=[],sawSprites=[],sawTime=0;
@@ -2977,6 +2986,164 @@ function updateWind(dt){
   }
 }
 
+// ═══ PURSUING DARKNESS ═══
+var levelDarkness=[];
+function createDarkness(data){
+  levelDarkness.push({
+    x:data.startX||-200,
+    y:0,
+    speed:data.speed||1.2,
+    height:data.height||1200,
+    startX:data.startX||-200,
+    active:true,
+    sprite:null,
+    _gfx:null,
+    _gfxTendrils:null,
+    particleTimer:0,
+    tendrils:[],
+    pulseTime:0,
+    warningShown:false
+  });
+  // Create visual container (added after gameContainer is set)
+  var spr=new PIXI.Container();
+  gameContainer.addChild(spr);
+  var g=new PIXI.Graphics();spr.addChild(g);
+  var gt=new PIXI.Graphics();spr.addChild(gt);
+  levelDarkness[levelDarkness.length-1].sprite=spr;
+  levelDarkness[levelDarkness.length-1]._gfx=g;
+  levelDarkness[levelDarkness.length-1]._gfxTendrils=gt;
+  // Generate tendril shapes (procedural tentacle silhouettes)
+  var nd=data.tendrils||8;
+  for(var i=0;i<nd;i++){
+    var baseY=(i/nd)*data.height;
+    var len=40+Math.random()*80;
+    var segments=[];
+    for(var s=0;s<5;s++){
+      segments.push({x:len*(s/4),y:(Math.random()-0.5)*20});
+    }
+    levelDarkness[levelDarkness.length-1].tendrils.push({baseY:baseY,len:len,segments:segments,phase:Math.random()*Math.PI*2,speed:0.8+Math.random()*1.2});
+  }
+}
+function updateDarkness(dt){
+  for(var i=0;i<levelDarkness.length;i++){
+    var dk=levelDarkness[i];
+    if(!dk.active)continue;
+    dk.pulseTime+=dt;
+    // Move darkness wall forward
+    dk.x+=dk.speed*60*dt;
+    // Check if player is caught by darkness
+    if(player.alive&&player.body){
+      if(player.body.position.x<dk.x+15){
+        killPlayer('darkness');
+      }
+    }
+    // Draw darkness wall
+    var g=dk._gfx;g.clear();
+    var camX=camera.x;
+    var screenX=dk.x-camX;
+    var appW=pixiApp.screen.width;
+    // Only draw if visible
+    if(screenX>-200&&screenX<appW+200){
+      // Main darkness body — fills from left edge to darkness x
+      var fillX=Math.min(screenX,appW);
+      if(fillX>0){
+        // Gradient effect: darker closer to wall, fades into void
+        g.rect(0,0,fillX,dk.height);
+        g.fill({color:0x020208,alpha:0.92});
+        // Transition edge — slightly transparent gradient strips
+        for(var s=0;s<6;s++){
+          var stripX=fillX-s*4;
+          if(stripX>0){
+            g.rect(stripX,0,4,dk.height);
+            g.fill({color:0x0a0a1a,alpha:0.15*(1-s/6)});
+          }
+        }
+      }
+      // Pulsing aura at the wall edge
+      var pulse=Math.sin(dk.pulseTime*2)*0.3+0.7;
+      g.rect(fillX-30,0,30,dk.height);
+      g.fill({color:0x0a0a2a,alpha:0.25*pulse});
+      // Eyes in the darkness (creepy scattered dots)
+      for(var e=0;e<5;e++){
+        var eyeY=100+e*200+Math.sin(dk.pulseTime*0.5+e*1.3)*30;
+        var eyeX=screenX-50-Math.sin(dk.pulseTime*0.3+e*2.1)*30;
+        if(eyeX>0&&eyeX<appW){
+          g.circle(eyeX,eyeY,3+Math.sin(dk.pulseTime*3+e)*1);
+          g.fill({color:0x3a1a3a,alpha:0.3*pulse});
+          g.circle(eyeX+8,eyeY,3+Math.sin(dk.pulseTime*3+e+1)*1);
+          g.fill({color:0x3a1a3a,alpha:0.3*pulse});
+        }
+      }
+    }
+    // Draw tendrils (separate graphics layer)
+    var gt=dk._gfxTendrils;gt.clear();
+    if(screenX>-300&&screenX<appW+300){
+      for(var t=0;t<dk.tendrils.length;t++){
+        var td=dk.tendrils[t];
+        var baseScreenX=screenX;
+        var baseScreenY=td.baseY-camera.y;
+        gt.moveTo(baseScreenX,baseScreenY);
+        for(var s=0;s<td.segments.length;s++){
+          var seg=td.segments[s];
+          var waveX=seg.x+Math.sin(dk.pulseTime*td.speed+td.phase+s*0.8)*15;
+          var waveY=seg.y+Math.sin(dk.pulseTime*td.speed*0.7+td.phase+s*1.2)*8;
+          gt.lineTo(baseScreenX+waveX,baseScreenY+waveY);
+        }
+        gt.stroke({width:3+s*0.5,color:0x08081a,alpha:0.7});
+        // Thinner inner line
+        gt.moveTo(baseScreenX,baseScreenY);
+        for(var s=0;s<td.segments.length;s++){
+          var seg=td.segments[s];
+          var waveX=seg.x*0.7+Math.sin(dk.pulseTime*td.speed+td.phase+s*0.8)*10;
+          var waveY=seg.y*0.7+Math.sin(dk.pulseTime*td.speed*0.7+td.phase+s*1.2)*5;
+          gt.lineTo(baseScreenX+waveX,baseScreenY+waveY);
+        }
+        gt.stroke({width:1.5,color:0x2a1a3a,alpha:0.4});
+      }
+    }
+    dk.sprite.x=0;dk.sprite.y=0;
+    // Spawn darkness particles at the wall edge
+    dk.particleTimer+=dt;
+    if(dk.particleTimer>0.05&&player.alive){
+      dk.particleTimer=0;
+      var ppx=dk.x+Math.random()*40;
+      var ppy=player.body.position.y+(Math.random()-0.5)*300;
+      spawnParticles(ppx,ppy,1,0x1a1a3a,{angle:Math.PI*0.5,spread:2,speed:0.5,life:0.6,size:3,gravity:0});
+    }
+    // Warning indicator when darkness is close
+    if(player.alive&&player.body&&!dk.warningShown){
+      var distToPlayer=player.body.position.x-dk.x;
+      if(distToPlayer<300&&distToPlayer>0){
+        dk.warningShown=true;
+        showTutorialTip('darkness_warn','тьма приближается! Беги вперёд!');
+      }
+    }
+  }
+  // HUD darkness warning indicator
+  var darkWarnEl=document.getElementById('hud-darkness-warn');
+  if(darkWarnEl){
+    var closestDarkDist=Infinity;
+    for(var di=0;di<levelDarkness.length;di++){
+      if(player.alive&&player.body){
+        var dd=player.body.position.x-levelDarkness[di].x;
+        if(dd<closestDarkDist)closestDarkDist=dd;
+      }
+    }
+    if(closestDarkDist<400&&closestDarkDist>0){darkWarnEl.style.display='block';darkWarnEl.style.color=closestDarkDist<200?'#6a2a4a':'#3a1a4a'}
+    else{darkWarnEl.style.display='none'}
+  }
+}
+function showTutorialTip(id,text){
+  var tipEl=document.getElementById('tutorial-tip');
+  if(!tipEl||tutorial.shown[id])return;
+  tutorial.shown[id]=true;
+  tipEl.innerHTML=text;
+  tipEl.style.display='block';
+  tutorial.activeTip=id;
+  tgHaptic('medium');
+  setTimeout(function(){if(tutorial.activeTip===id){tipEl.style.display='none';tutorial.activeTip=null}},4000);
+}
+
 function shootThread(){
   if(thread.active||!player.alive||!player.body)return;
   // Find nearest anchor within range
@@ -3155,6 +3322,8 @@ function loadLevel(n){
   levelPortals=[];if(lvl.portals)for(var i=0;i<lvl.portals.length;i++)createPortalPair(lvl.portals[i]);
   // Wind
   levelWind=[];if(lvl.wind)for(var i=0;i<lvl.wind.length;i++)createWind(lvl.wind[i]);
+  // Pursuing Darkness
+  levelDarkness=[];if(lvl.darkness)for(var i=0;i<lvl.darkness.length;i++)createDarkness(lvl.darkness[i]);
   // Checkpoints
   levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;if(lvl.checkpoints)for(var i=0;i<lvl.checkpoints.length;i++)createCheckpoint(lvl.checkpoints[i]);
   // Memory shards: 1 per level, placed at interesting spots
@@ -3168,7 +3337,7 @@ function loadLevel(n){
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;espr._base=eg;espr._ew=lvl.exit.w;espr._eh=lvl.exit.h;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -3194,6 +3363,7 @@ var tutorial={
     {id:'spring',level:8,trigger:'time',delay:2,text:'пружины подбрасывают — используй для прыжка выше'},
     {id:'ice',level:9,trigger:'time',delay:2,text:'лёд скользкий — трудно остановиться. Планируй заранее'},
     {id:'wind',level:11,trigger:'time',delay:2,text:'ветер толкает — используй его или борись'},
+    {id:'darkness',level:15,trigger:'time',delay:2,text:'тьма наступает! Не останавливайся — беги!'},
   ],
   timer:0,activeTip:null
 };
@@ -3743,7 +3913,7 @@ function showScreen(name){
 }
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
-function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
+function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником',darkness:'тьма настигла тебя'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
 function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,20,0x6a5aaa,{speed:2.5,life:1,size:3.5,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,12,0x8a7aca,{speed:3.5,life:1.2,size:2.5,gravity:0.1});spawnParticles(player.body.position.x,player.body.position.y,6,0xaaaaff,{speed:1.5,life:0.8,size:1.5,gravity:0});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;var elapsedSec=elapsed/1000;
   // Challenge: check completion and speed conditions
   if(challengeMode&&currentChallenge){
@@ -3754,7 +3924,7 @@ function winLevel(){player.alive=false;spawnParticles(player.body.position.x,pla
     if(mid==='max3'&&state.deaths>=3)chComplete=false;
     endChallenge(chComplete);
   }
-  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
+  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');if(levelDarkness.length>0)unlockAchievement('dark_escape');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
@@ -4107,7 +4277,7 @@ function gameLoop(timestamp){
     var gDelta=(targetG-baseG)*player.body.mass*0.0012;
     Matter.Body.applyForce(player.body,player.body.position,{x:0,y:gDelta});
   }
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
