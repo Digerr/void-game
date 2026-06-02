@@ -6,6 +6,9 @@
 <title>VOID</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a1a2e">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
@@ -22,7 +25,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .logo-sub{font-size:.65rem;color:#7a7a8a;letter-spacing:.5em;text-transform:uppercase;margin-bottom:2px}
 .logo-ver{font-size:.5rem;color:#5a5a6a;letter-spacing:.15em;margin-bottom:8px}
 .made-by{font-size:.5rem;color:#4a4a5a;letter-spacing:.3em;text-transform:uppercase}
-.btn{width:260px;padding:14px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.25em;background:transparent;border:1px solid #3a3a4a;color:#9a9aaa;font-family:inherit;cursor:pointer;transition:all .2s;margin-top:8px;border-radius:3px}
+.btn{width:260px;padding:14px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.25em;background:transparent;border:1px solid #3a3a4a;color:#9a9aaa;font-family:inherit;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);margin-top:8px;border-radius:3px}
 .btn:hover{border-color:#5a5a6a;color:#ccccdd;background:rgba(255,255,255,.02)}
 .btn:active{transform:scale(.97)}
 .btn.primary{border-color:#3a5a7a;color:#7ab0d0}
@@ -363,7 +366,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
         <span class="stat-item"><span class="stat-val" id="menu-deaths-total">0 смертей</span></span>
       </div>
       <div class="menu-progress"><div class="menu-progress-fill" id="menu-progress-fill"></div></div>
-      <button class="btn primary" id="btn-play">спуститься</button>
+      <button class="btn primary" id="btn-play">▼ спуститься</button>
       <div class="menu-grid">
         <button class="btn" id="btn-levels">уровни</button>
         <button class="btn" id="btn-records">рекорды</button>
@@ -574,18 +577,23 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.9.2/dist/pixi.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
 <script>
-// Service Worker for offline caching
-if('serviceWorker' in navigator){
-  var swCode='var CACHE=\"void-v7\";var URLS=[\"/void-game/\",\"/void-game/index.html\",\"/void-game/manifest.json\",\"https://cdn.jsdelivr.net/npm/pixi.js@8.9.2/dist/pixi.min.js\",\"https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js\"];self.addEventListener(\"install\",function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(URLS)}));self.skipWaiting()});self.addEventListener(\"activate\",function(e){e.waitUntil(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k!==CACHE}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener(\"fetch\",function(e){e.respondWith(caches.match(e.request).then(function(r){if(r)return r;return fetch(e.request).then(function(resp){if(resp.status===200){var rc=resp.clone();caches.open(CACHE).then(function(c){c.put(e.request,rc)})}return resp}).catch(function(){return caches.match(\"/void-game/index.html\")})}))})';
-  var blob=new Blob([swCode],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(blob)).then(function(){console.log('[VOID] SW registered')}).catch(function(){console.warn('[VOID] SW failed')});
-}
+// Service Worker: force unregister all old SWs, clear all caches
+// Old Blob-URL SW with cache-first strategy caused stale versions
+(function forceCleanSW(){
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(function(regs){for(var i=0;i<regs.length;i++){regs[i].unregister();console.log('[VOID] Unregistered old SW')}});
+    if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
+  }
+})();
+var VOID_VERSION='1.0.0-pre';
+(function checkVersion(){fetch(location.href,{cache:'no-store'}).then(function(r){return r.text()}).then(function(html){var m=html.match(/VOID_VERSION='([^']+)'/);if(m&&m[1]!==VOID_VERSION){console.log('[VOID] New version:',m[1],'— reloading');if('caches' in window)caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}).then(function(){location.reload(true)});else location.reload(true)}}).catch(function(){})})();
+document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(function(){fetch(location.href,{cache:'no-store'}).then(function(r){return r.text()}).then(function(html){var m=html.match(/VOID_VERSION='([^']+)'/);if(m&&m[1]!==VOID_VERSION){if('caches' in window)caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}).then(function(){location.reload(true)});else location.reload(true)}}).catch(function(){})},1000)});
 </script>
 <script>
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — Beta 0.9.8 — Leaderboard
+// VOID — Pre-release 1.0.0
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
@@ -2090,9 +2098,9 @@ function updateParticles(dt){for(var i=particles.length-1;i>=0;i--){var p=partic
 function clearParticles(){for(var i=0;i<particles.length;i++){if(particles[i].sprite)particles[i].sprite.destroy()}particles=[]}
 
 // ═══ PLAYER ═══
-var player={body:null,sprite:null,speed:6.5,accelGround:80,accelAir:45,decelGround:70,decelAir:28,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:18,dashDuration:0.12,dashCooldown:0.6,gravityUp:1.2,gravityDown:2.0,apexThreshold:2.0,apexGravityMult:0.6,airControlBonus:0.5,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0};
+var player={body:null,sprite:null,speed:6.5,accelGround:80,accelAir:45,decelGround:70,decelAir:28,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:16,dashDuration:0.14,dashCooldown:0.6,gravityUp:1.2,gravityDown:2.0,apexThreshold:2.0,apexGravityMult:0.6,airControlBonus:0.5,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0};
 var playerSensorGround=null,playerSensorLeft=null,playerSensorRight=null;
-var COYOTE_DURATION=0.08,JUMP_BUFFER_DURATION=0.1,WALL_SLIDE_SPEED=2.2,PLAYER_W=18,PLAYER_H=34;
+var COYOTE_DURATION=0.1,JUMP_BUFFER_DURATION=0.12,WALL_SLIDE_SPEED=2.2,PLAYER_W=18,PLAYER_H=34;
 
 function createPlayer(x,y){
   player.body=MBodies.rectangle(x,y,PLAYER_W,PLAYER_H,{label:'player',friction:0.05,frictionStatic:0.3,restitution:0,density:0.002,inertia:Infinity,inverseInertia:0});
@@ -2297,8 +2305,8 @@ function updatePlayer(dt){
   player.justLanded=false;
   if(player.onGround&&!player.wasOnGround){player.justLanded=true;var fd=player.lastGroundY-player.body.position.y;
     // Squash & stretch on landing
-    if(fd>20){player.squashX=1.3;player.squashY=0.7;player.squashTimer=0.15}
-    if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.4,size:3,gravity:1});state.shakeAmount=Math.min(fd*0.02,4);state.shakeTime=0.15;sfxLand(true)}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1});sfxLand(false)}player.lastGroundY=player.body.position.y;tgHaptic('light')}
+    if(fd>20){player.squashX=1.25;player.squashY=0.75;player.squashTimer=0.2}
+    if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.4,size:3,gravity:1});state.shakeAmount=Math.min(fd*0.012,2.5);state.shakeTime=0.2;sfxLand(true)}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1});sfxLand(false)}player.lastGroundY=player.body.position.y;tgHaptic('light')}
   if(player.onGround)player.lastGroundY=player.body.position.y;
   if(player.onGround)player.coyoteTime=COYOTE_DURATION;else player.coyoteTime-=dt;
   if(player.inputJumpPressed){player.jumpBuffer=JUMP_BUFFER_DURATION;player.inputJumpPressed=false}else player.jumpBuffer-=dt;
@@ -2361,7 +2369,7 @@ function updatePlayer(dt){
       spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,5,0x4a4a8a,{angle:-Math.PI/2,spread:2,speed:2,life:0.3,size:2,gravity:1});
     }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.velocityX,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');sfxJump();spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1});progress.stats.jumps=(progress.stats.jumps||0)+1;
     // Jump stretch
-    player.squashX=0.75;player.squashY=1.3;player.squashTimer=0.1;
+    player.squashX=0.78;player.squashY=1.22;player.squashTimer=0.18;
     }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');sfxWallJump();unlockAchievement('wall_crawler');progress.stats.wallJumps=(progress.stats.wallJumps||0)+1;var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,8,0x5a5a6a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2.5,life:0.35,size:2.5,gravity:0.5});spawnParticles(wx2,player.body.position.y,4,0x7a7a9a,{angle:wd===1?0:Math.PI,spread:0.8,speed:1.5,life:0.25,size:1.5,gravity:0});player.squashX=0.7;player.squashY=1.3;player.squashTimer=0.08;
     // Wall jump squash
     player.squashX=0.7;player.squashY=1.2;player.squashTimer=0.1;
@@ -2370,12 +2378,12 @@ function updatePlayer(dt){
   if(!player.inputJump&&player.body.velocity.y<-4)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.85});
 
   player.animTime+=dt;if(player.onGround&&Math.abs(player.body.velocity.x)>0.5)player.runCycle+=dt*Math.abs(player.body.velocity.x)*0.15;
-  // Squash & stretch animation (spring back to 1.0)
-  if(player.squashTimer>0){player.squashTimer-=dt;if(player.squashTimer<=0){player.squashX=1;player.squashY=1}else{var sp=Math.min(1,player.squashTimer/0.1);player.squashX=1+(player.squashX-1)*sp;player.squashY=1+(player.squashY-1)*sp}}
+  // Squash & stretch animation (damped spring back to 1.0)
+  if(player.squashTimer>0){player.squashTimer-=dt;if(player.squashTimer<=0){player.squashX=1;player.squashY=1}else{var t=1-player.squashTimer/0.2;var spring=Math.cos(t*Math.PI*2.5)*Math.exp(-t*6);player.squashX=1+(player.squashX-1)*spring;player.squashY=1+(player.squashY-1)*spring;if(Math.abs(player.squashX-1)<0.02&&Math.abs(player.squashY-1)<0.02){player.squashX=1;player.squashY=1;player.squashTimer=0}}}
   // Smooth visual position (lerp towards physics position, snap if far)
   var dx=player.body.position.x-player._vx,dy=player.body.position.y-player._vy;
   var dist=Math.sqrt(dx*dx+dy*dy);
-  var lerpRate=dist>20?0.8:0.35; // snap if teleporting, smooth otherwise
+  var lerpRate=dist>20?0.8:0.22; // snap if teleporting, smooth otherwise
   player._vx+=dx*lerpRate;player._vy+=dy*lerpRate;
   player.sprite.x=player._vx;player.sprite.y=player._vy;
   // Apply squash & stretch scale
@@ -2390,7 +2398,7 @@ function updatePlayer(dt){
   engine.gravity.y=1.5;
 }
 
-function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.hitStop=0.06;state.shakeAmount=8;state.shakeTime=0.35;state.flashColor=0x2a1a1a;state.flashAlpha=0.4;state.flashTimer=0.3;state.slowMo=0.15;state.slowMoTimer=0.5;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
+function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.hitStop=0.04;state.shakeAmount=5;state.shakeTime=0.4;state.flashColor=0x2a1a1a;state.flashAlpha=0.3;state.flashTimer=0.4;state.slowMo=0.2;state.slowMoTimer=0.6;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
   // Challenge: check fail conditions
   if(challengeMode&&currentChallenge){
     var mid=currentChallenge.modifier.id;
@@ -3019,7 +3027,7 @@ function updateExitGlow(dt){
     }
   }
 }
-function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var tx=player.body.position.x-sw*0.35;var ty=player.body.position.y-sh*0.5;var lvl=LEVELS[state.level];tx=Math.max(0,Math.min(tx,lvl.width-sw));ty=Math.max(-200,Math.min(ty,lvl.height-sh));camera.x+=(tx-camera.x)*0.08;camera.y+=(ty-camera.y)*0.06;var sx=0,sy=0;if(state.shakeTime>0){sx=(Math.random()-0.5)*state.shakeAmount*2;sy=(Math.random()-0.5)*state.shakeAmount*2}gameContainer.x=-camera.x+sx;gameContainer.y=-camera.y+sy}
+function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var tx=player.body.position.x-sw*0.35;var ty=player.body.position.y-sh*0.5;var lvl=LEVELS[state.level];tx=Math.max(0,Math.min(tx,lvl.width-sw));ty=Math.max(-200,Math.min(ty,lvl.height-sh));camera.x+=(tx-camera.x)*0.055;camera.y+=(ty-camera.y)*0.04;var sx=0,sy=0;if(state.shakeTime>0){sx=(Math.random()-0.5)*state.shakeAmount*2;sy=(Math.random()-0.5)*state.shakeAmount*2}gameContainer.x=-camera.x+sx;gameContainer.y=-camera.y+sy}
 
 // ═══ PLAYER LIGHT & FOG ═══
 var lightTime=0;
@@ -3400,7 +3408,7 @@ function winLevel(){player.alive=false;spawnParticles(player.body.position.x,pla
     if(mid==='max3'&&state.deaths>3)chComplete=false;
     endChallenge(chComplete);
   }
-  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');submitLB();state.slowMo=0.2;state.slowMoTimer=0.8;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a2a5a;state.flashAlpha=0.2;state.flashTimer=0.4;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
+  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2.5;state.shakeTime=0.35;state.flashColor=0x2a2a5a;state.flashAlpha=0.12;state.flashTimer=0.5;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
@@ -3736,9 +3744,9 @@ function gameLoop(timestamp){
   if(state.hitStop>0){state.hitStop-=rawDt;if(state.hitStop>0)return;state.hitStop=0}
   if(state.slowMoTimer>0){state.slowMoTimer-=rawDt;if(state.slowMoTimer<=0)state.slowMo=1}
   var dt=rawDt*state.slowMo;
-  if(state.shakeTime>0){state.shakeTime-=rawDt;if(state.shakeTime<=0){state.shakeAmount=0;state.shakeTime=0}}
+  if(state.shakeTime>0){state.shakeTime-=rawDt;state.shakeAmount*=0.96;if(state.shakeTime<=0||state.shakeAmount<0.3){state.shakeAmount=0;state.shakeTime=0}}
   // Screen flash overlay
-  if(state.flashTimer>0){state.flashTimer-=rawDt;if(state.flashTimer<=0){state.flashAlpha=0;state.flashTimer=0}else{state.flashAlpha*=0.9}}
+  if(state.flashTimer>0){state.flashTimer-=rawDt;if(state.flashTimer<=0){state.flashAlpha=0;state.flashTimer=0}else{state.flashAlpha*=0.93}}
   if(state.screen==='playing'){readInput();updatePlayer(dt);progress.stats.playTime=(progress.stats.playTime||0)+rawDt;
   // Variable gravity: lighter going up, heavier down, reduced at apex
   if(player.alive&&player.body){
@@ -4230,7 +4238,7 @@ var logoAnim={
       ctx.fillStyle='rgba(90,90,106,'+(0.5+Math.sin(this.time*0.3)*0.08)+')';
       ctx.font=''+Math.max(8,W*0.017)+'px "Courier New",monospace';
       ctx.letterSpacing='0.15em';
-      ctx.fillText('ALPHA 2.2',W/2,bottomY+26);
+      ctx.fillText('PRE-RELEASE 1.0.0',W/2,bottomY+26);
       ctx.letterSpacing='0px';
     }
     // Character
