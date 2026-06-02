@@ -2062,8 +2062,13 @@ function renderProfile(d){
     '<div class="prof-notif">'+
       '<span class="prof-notif-label">уведомления</span>'+
       '<button class="btn" id="btn-notif-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">'+(notifEnabled?'вкл':'выкл')+'</button>'+
+    '</div>'+
+    '<div class="prof-notif" style="border-bottom:none">'+
+      '<span class="prof-notif-label">сохранить в облако</span>'+
+      '<button class="btn" id="btn-cloud-save" style="width:80px;padding:8px;font-size:.55rem;margin:0;border-color:#2a3a4a;color:#5a8a6a">☁</button>'+
     '</div>';
   document.getElementById('btn-notif-toggle').addEventListener('click',function(){toggleNotifications()});
+  document.getElementById('btn-cloud-save').addEventListener('click',function(){manualCloudSave()});
 }
 function toggleNotifications(){
   if(!tg||!tg.initData||!profileData)return;
@@ -2071,6 +2076,37 @@ function toggleNotifications(){
   fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'toggle_notifications',initData:tg.initData,enabled:newVal})}).then(function(r){return r.json()}).then(function(d){
     if(d.ok){profileData.notifications_enabled=d.notifications_enabled;loadProfile()}
   }).catch(function(e){console.warn('[VOID] Toggle notif error:',e)});
+}
+function manualCloudSave(){
+  var btn=document.getElementById('btn-cloud-save');
+  if(!btn)return;
+  btn.textContent='...';btn.style.opacity='0.5';
+  // Save locally first
+  saveProgress();
+  // Force cloud save (reset retry counter)
+  _cloudRetryCount=0;
+  if(!tg||!tg.CloudStorage){
+    btn.textContent='✗';btn.style.color='#6a4a4a';btn.style.opacity='1';
+    setTimeout(function(){btn.textContent='☁';btn.style.color='#5a8a6a'},2000);
+    return;
+  }
+  var data={v:2,unlocked:progress.unlocked||1,levels:progress.levels||{},skin:progress.skin||0,
+    shards:progress.shards||[],stats:progress.stats||{},achievements:progress.achievements||[],
+    challenges:progress.challenges||{},firstLaunch:progress.firstLaunch||false,
+    totalDeaths:progress.totalDeaths||state.totalDeaths||0};
+  tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){
+    if(err){
+      btn.textContent='✗';btn.style.color='#6a4a4a';
+      updateSyncIndicator(false);
+    }else{
+      btn.textContent='✓';btn.style.color='#4a8a5a';
+      updateSyncIndicator(true);
+      // Also submit score to leaderboard
+      submitLB();
+    }
+    btn.style.opacity='1';
+    setTimeout(function(){btn.textContent='☁';btn.style.color='#5a8a6a'},2000);
+  });
 }
 function pluralDays(n){var a=Math.abs(n)%100,b=a%10;if(a>10&&a<20)return'дней';if(b>1&&b<5)return'дня';if(b===1)return'день';return'дней'}
 
