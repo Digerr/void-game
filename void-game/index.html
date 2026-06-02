@@ -501,6 +501,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <button class="btn" id="btn-levels">уровни</button>
         <button class="btn" id="btn-profile" style="border-color:#3a3a5a;color:#8a7aaa">профиль</button>
       </div>
+      <button class="btn" id="btn-leaderboard" style="border-color:#2a3a5a;color:#6a9aba;margin-top:4px">лидерборд</button>
       <button class="menu-challenge" id="btn-challenge">
         <span class="ch-label">ежедневное испытание</span>
         <span class="ch-sub" id="ch-sub">ежедневный вызов</span>
@@ -834,7 +835,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.14.0-beta';
+var VOID_VERSION='0.15.0-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -883,8 +884,8 @@ var audioCtx=null,masterGain=null,musicGain=null,sfxGain=null,musicPlaying=false
 var audioInited=false,soundMuted=false,musicMuted=false;
 // Settings
 var settings={hapticEnabled:true,autoGrab:true,sfxVolume:0.6,musicVolume:0.15,targetFps:60,quality:'medium'};
-function loadSettings(){try{var s=localStorage.getItem('void_settings');if(s)settings=Object.assign(settings,JSON.parse(s))}catch(e){}}
-function saveSettings(){try{localStorage.setItem('void_settings',JSON.stringify(settings))}catch(e){}}
+function loadSettings(){try{var s=localStorage.getItem(_settingsKey());if(s)settings=Object.assign(settings,JSON.parse(s))}catch(e){}}
+function saveSettings(){try{localStorage.setItem(_settingsKey(),JSON.stringify(settings))}catch(e){}}
 function updateSettingsUI(){
   var sfxBtn=document.getElementById('btn-sfx-toggle');
   var musicBtn=document.getElementById('btn-music-toggle');
@@ -1455,33 +1456,50 @@ function showShardToast(text){
 }
 
 function getCurrentTgUserId(){if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)return'tg_'+tg.initDataUnsafe.user.id;return null}
+// User-specific localStorage keys to prevent cross-account cache mixing
+function _progressKey(){var uid=getCurrentTgUserId();return uid?'void_progress_'+uid:'void_progress'}
+function _settingsKey(){var uid=getCurrentTgUserId();return uid?'void_settings_'+uid:'void_settings'}
+function _deviceKey(){var uid=getCurrentTgUserId();return uid?'void_device_id_'+uid:'void_device_id'}
 function loadProgress(){
   try{
-    var s=localStorage.getItem('void_progress');
+    var pKey=_progressKey();
+    var s=localStorage.getItem(pKey);
+    // Migration: if user-specific key doesn't exist but old generic key does, migrate it
+    if(!s&&pKey!=='void_progress'){
+      var oldS=localStorage.getItem('void_progress');
+      if(oldS){
+        // Only migrate if the old data belongs to current user
+        var storedTgId=localStorage.getItem('void_tg_user');
+        var currentTgId=getCurrentTgUserId();
+        if(!storedTgId||storedTgId===currentTgId){
+          localStorage.setItem(pKey,oldS);
+          localStorage.removeItem('void_progress');
+          console.log('[VOID] Migrated progress to user-specific key:',pKey);
+          s=oldS;
+        }
+      }
+    }
+    // Also try migrating settings (only if old data belongs to current user)
+    var sKey=_settingsKey();
+    if(!localStorage.getItem(sKey)&&sKey!=='void_settings'){
+      var oldSettings=localStorage.getItem('void_settings');
+      var storedTgId=localStorage.getItem('void_tg_user');
+      var currentTgId=getCurrentTgUserId();
+      if(oldSettings&&(!storedTgId||storedTgId===currentTgId)){localStorage.setItem(sKey,oldSettings);localStorage.removeItem('void_settings');console.log('[VOID] Migrated settings to user-specific key')}
+    }
     if(s){
       progress=JSON.parse(s);
       if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};if(progress.totalDeaths===undefined)progress.totalDeaths=0;
       // Migration: convert bestTime from ms to seconds (pre-v2.9)
       if(!progress._v29_migrated){var migrated=false;for(var k in progress.levels){if(progress.levels.hasOwnProperty(k)){var lv=progress.levels[k];if(lv.bestTime&&lv.bestTime>100){lv.bestTime=lv.bestTime/1000;migrated=true}}}if(migrated){saveProgress();console.log('[VOID] Migrated bestTime ms→sec')}progress._v29_migrated=true;saveProgress()}
-      // Check if Telegram user changed — prevent cross-account data mixing
-      var currentTgId=getCurrentTgUserId();
-      var storedTgId=localStorage.getItem('void_tg_user');
-      if(currentTgId&&storedTgId&&currentTgId!==storedTgId){
-        console.log('[VOID] User changed:',storedTgId,'→',currentTgId,'— resetting local progress');
-        // Different user on same device — reset local, cloud will load fresh data
-        progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false};
-        saveProgress();
-      }
-      if(currentTgId)localStorage.setItem('void_tg_user',currentTgId);
+      // User-specific keys already isolate accounts — no need for void_tg_user check
       syncProgressUnlocked();
     }else{
-      // No local progress — store current user id
-      var currentTgId2=getCurrentTgUserId();
-      if(currentTgId2)localStorage.setItem('void_tg_user',currentTgId2);
+      // No local progress for this user
     }
   }catch(e){console.warn('[VOID] loadProgress error:',e)}
 }
-function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(progress))}catch(e){}}
+function saveProgress(){try{localStorage.setItem(_progressKey(),JSON.stringify(progress))}catch(e){}}
 function getLevelStars(n){var p=progress.levels[n];return p?p.stars:0}
 function getLevelBestTime(n){var p=progress.levels[n];return p?p.bestTime:Infinity}
 function calculateStars(deaths,time){
@@ -1701,7 +1719,7 @@ function initSupabase(){
 }
 function getMyLBId(){
   if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)return'tg_'+tg.initDataUnsafe.user.id;
-  return'local_'+(localStorage.getItem('void_device_id')||function(){var id='d_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);localStorage.setItem('void_device_id',id);return id}());
+  return'local_'+(localStorage.getItem(_deviceKey())||function(){var id='d_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);localStorage.setItem(_deviceKey(),id);return id}());
 }
 function computeLBScore(){
   var completed=0,totalStars=0,totalTime=0,perfectLevels=0;
@@ -7159,7 +7177,8 @@ function bindUI(){
   document.getElementById('btn-challenge').addEventListener('click',function(){showChallengeScreen()});
   document.getElementById('btn-ch-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-ch-play').addEventListener('click',function(){startChallenge()});
-  document.getElementById('btn-lb-back').addEventListener('click',function(){showScreen('profile')});
+  document.getElementById('btn-leaderboard').addEventListener('click',function(){showLeaderboard('global')});
+  document.getElementById('btn-lb-back').addEventListener('click',function(){showScreen(state._prevScreen==='profile'?'profile':'menu')});
   document.getElementById('btn-profile').addEventListener('click',function(){showScreen('profile')});
   document.getElementById('btn-profile-back').addEventListener('click',function(){showScreen('menu')});
   // LB tab clicks
@@ -7187,7 +7206,7 @@ function bindUI(){
   // Volume sliders
   document.getElementById('sfx-vol-slider').addEventListener('input',function(){settings.sfxVolume=this.value/100;if(sfxGain&&!soundMuted)sfxGain.gain.value=settings.sfxVolume*0.7;document.getElementById('sfx-vol-label').textContent=this.value+'%';saveSettings()});
   document.getElementById('music-vol-slider').addEventListener('input',function(){settings.musicVolume=this.value/100;if(musicGain&&!musicMuted)musicGain.gain.value=settings.musicVolume*0.7;document.getElementById('music-vol-label').textContent=this.value+'%';saveSettings()});
-  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem('void_progress');if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},achievements:[],challenges:{},firstLaunch:false};saveProgress();updateMenuStats();showScreen('menu')}});
+  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem(_progressKey());if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false};saveProgress();updateMenuStats();showScreen('menu')}});
   // Global menu click sound for all .btn and .menu-icon-btn elements
   var allBtns=document.querySelectorAll('.btn,.menu-icon-btn,.menu-challenge,.tb');
   for(var bi=0;bi<allBtns.length;bi++){(function(btn){btn.addEventListener('click',function(){sfxMenuClick()})})(allBtns[bi])}
