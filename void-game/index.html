@@ -468,6 +468,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="death-stats" id="death-stats"></div>
     <div class="death-checkpoint-hint" id="death-cp-hint"></div>
     <button class="btn" id="btn-retry">снова</button>
+    <button class="btn" id="btn-checkpoint" style="display:none;border-color:#2a3a5a;color:#6a9aba;margin-top:4px">чекпоинт</button>
   </div>
   <div id="win-screen">
     <div class="win-title">СПАСЁН</div>
@@ -639,7 +640,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.8.0';
+var VOID_VERSION='2.9.0';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -1051,20 +1052,24 @@ var SKINS=[
   {name:'бездна',scarf:0x3a5aaa,scarf2:0x2a4a8a,aura:0x3a6aba,body:0x4a5a7a,head:0x4a5a7a,req:'act2'},
   {name:'искра',scarf:0x9a9a2a,scarf2:0x8a8a1a,aura:0xaaaa3a,body:0x6a6a4a,head:0x6a6a4a,req:'act3'},
   {name:'теневой',scarf:0xaa3a5a,scarf2:0x8a2a4a,aura:0xba4a6a,body:0x5a4a5a,head:0x5a4a5a,req:'act4'},
+  {name:'возрождение',scarf:0x3a8a7a,scarf2:0x2a7a6a,aura:0x4a9a8a,body:0x4a6a6a,head:0x4a6a6a,req:'act5'},
+  {name:'исход',scarf:0x9a4a6a,scarf2:0x8a3a5a,aura:0xaa5a7a,body:0x5a4a5a,head:0x5a4a5a,req:'act6'},
   {name:'призрак',scarf:0xccccdd,scarf2:0xaaaacc,aura:0xddddff,body:0x9a9aaa,head:0x9a9aaa,req:'all3star'}
 ];
 function getUnlockedSkins(){
   var unlocked=[0]; // default always unlocked
   // Check each act completed
-  var actComplete=[true,true,true,true];
-  for(var a=0;a<4;a++){for(var i=a*5;i<(a+1)*5;i++){if(getLevelStars(i)===0)actComplete[a]=false}}
+  var actComplete=[true,true,true,true,true,true];
+  for(var a=0;a<6;a++){for(var i=a*5;i<(a+1)*5;i++){if(getLevelStars(i)===0)actComplete[a]=false}}
   if(actComplete[0])unlocked.push(1);
   if(actComplete[1])unlocked.push(2);
   if(actComplete[2])unlocked.push(3);
   if(actComplete[3])unlocked.push(4);
+  if(actComplete[4])unlocked.push(5);
+  if(actComplete[5])unlocked.push(6);
   // All 3 stars check
   var all3=true;for(var i=0;i<LEVELS.length;i++){if(getLevelStars(i)<3){all3=false;break}}
-  if(all3)unlocked.push(5);
+  if(all3)unlocked.push(7);
   return unlocked;
 }
 function getCurrentSkin(){return SKINS[progress.skin||0]||SKINS[0]}
@@ -1161,26 +1166,32 @@ function showShardToast(text){
   setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast)},3500);
 }
 
-function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};syncProgressUnlocked()}}catch(e){console.warn('[VOID] loadProgress error:',e)}}
+function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};// Migration: convert bestTime from ms to seconds (pre-v2.9)
+if(!progress._v29_migrated){var migrated=false;for(var k in progress.levels){if(progress.levels.hasOwnProperty(k)){var lv=progress.levels[k];if(lv.bestTime&&lv.bestTime>100){lv.bestTime=lv.bestTime/1000;migrated=true}}}if(migrated){saveProgress();console.log('[VOID] Migrated bestTime ms→sec')}progress._v29_migrated=true;saveProgress()}
+syncProgressUnlocked()}}catch(e){console.warn('[VOID] loadProgress error:',e)}}
 function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(progress))}catch(e){}}
 function getLevelStars(n){var p=progress.levels[n];return p?p.stars:0}
 function getLevelBestTime(n){var p=progress.levels[n];return p?p.bestTime:Infinity}
 function calculateStars(deaths,time){
-  if(deaths===0&&time<25)return 3;
-  if(deaths===0&&time<45)return 3;
-  if(deaths<=1&&time<40)return 3;
+  if(deaths===0&&time<20)return 3;
+  if(deaths<=1&&time<45)return 3;
   if(deaths<=2&&time<60)return 2;
   if(deaths<=4)return 2;
   return 1;
 }
 function recordLevelComplete(n,deaths,time){
-  var stars=calculateStars(deaths,time);
-  if(!progress.levels[n]||stars>progress.levels[n].stars){
-    progress.levels[n]={stars:stars,bestTime:Math.min(time,progress.levels[n]?progress.levels[n].bestTime:Infinity)};
+  var timeSec=time/1000;
+  var stars=calculateStars(deaths,timeSec);
+  var prevStars=progress.levels[n]?progress.levels[n].stars:0;
+  if(!progress.levels[n]){
+    progress.levels[n]={stars:stars,bestTime:timeSec};
+  }else{
+    if(stars>progress.levels[n].stars)progress.levels[n].stars=stars;
+    if(timeSec<progress.levels[n].bestTime)progress.levels[n].bestTime=timeSec;
   }
-  var prevStars=progress.levels[n]?progress.levels[n].stars:0;if(stars===3&&prevStars<3)progress.stats.perfectLevels=(progress.stats.perfectLevels||0)+1;
+  if(stars===3&&prevStars<3)progress.stats.perfectLevels=(progress.stats.perfectLevels||0)+1;
   if(n+1>=progress.unlocked&&n+1<LEVELS.length)progress.unlocked=n+2;
-  syncProgressUnlocked(); // ensure sync
+  syncProgressUnlocked();
   saveProgress();
   debouncedCloudSave();
 }
@@ -1521,9 +1532,9 @@ function renderProfile(d){
   var achCount=(progress.achievements||[]).length;
   var achTotal=10;
   var achHtml='';
-  var achIcons=['🌙','🏃','💀','⚡','🧗','🕷','🎯','🌟','🎵','👁'];
+  var achIcons=['👣','🧗','🧵','💨','✨','⚡','🗺','👑','💎','🌑'];
   for(var i=0;i<achTotal;i++){
-    var unlocked=(progress.achievements||[]).indexOf(['no_death','speedrun','die_50','dash_100','wall_crawler','thread_master','perfect_level','all_3star','music_lover','first_blood'][i])>=0;
+    var unlocked=(progress.achievements||[]).indexOf(['first_step','wall_crawler','thread_master','dash_king','no_death','speedrun','five_levels','void_master','perfectionist','dark_escape'][i])>=0;
     achHtml+='<div class="prof-ach'+(unlocked?' unlocked':'')+'">'+achIcons[i]+'</div>';
   }
   var notifEnabled=d.notifications_enabled!==false;
@@ -1536,7 +1547,7 @@ function renderProfile(d){
     (daysStr?'<div class="prof-days">'+daysStr+'</div>':'')+
     '<div class="prof-stats">'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.completed||0)+'/'+LEVELS.length+'</div><div class="prof-stat-label">уровни</div></div>'+
-      '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_stars||0)+'/60</div><div class="prof-stat-label">звёзды</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_stars||0)+'/'+(LEVELS.length*3)+'</div><div class="prof-stat-label">звёзды</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(state.totalDeaths||0)+'</div><div class="prof-stat-label">смерти</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.score||0)+'</div><div class="prof-stat-label">score</div></div>'+
     '</div>'+
@@ -4801,8 +4812,8 @@ function showScreen(name){
 }
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name;var flEl=document.getElementById('hud-flashlight');if(flEl)flEl.style.display=(LEVELS[state.level].flashlight)?'block':'none'}
-function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником',darkness:'тьма настигла тебя'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
-function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,20,0x6a5aaa,{speed:2.5,life:1,size:3.5,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,12,0x8a7aca,{speed:3.5,life:1.2,size:2.5,gravity:0.1});spawnParticles(player.body.position.x,player.body.position.y,6,0xaaaaff,{speed:1.5,life:0.8,size:1.5,gravity:0});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;var elapsedSec=elapsed/1000;
+function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником',darkness:'тьма настигла тебя'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'с начала уровня';var cpBtn=document.getElementById('btn-checkpoint');if(cpBtn)cpBtn.style.display=state.lastCheckpoint?'block':'none';showScreen('dead')}
+function winLevel(){player.alive=false;var lvl=LEVELS[state.level];spawnParticles(player.body.position.x,player.body.position.y,20,0x6a5aaa,{speed:2.5,life:1,size:3.5,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,12,0x8a7aca,{speed:3.5,life:1.2,size:2.5,gravity:0.1});spawnParticles(player.body.position.x,player.body.position.y,6,0xaaaaff,{speed:1.5,life:0.8,size:1.5,gravity:0});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;var elapsedSec=elapsed/1000;
   // Challenge: check completion and speed conditions
   if(challengeMode&&currentChallenge){
     var mid=currentChallenge.modifier.id;
@@ -4812,16 +4823,16 @@ function winLevel(){player.alive=false;spawnParticles(player.body.position.x,pla
     if(mid==='max3'&&state.deaths>=3)chComplete=false;
     endChallenge(chComplete);
   }
-  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');if(levelDarkness.length>0)unlockAchievement('dark_escape');if(lvl&&lvl.flashlight)unlockAchievement('light_bearer');if(levelGravityZones.length>0)unlockAchievement('gravity_master');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
+  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsedSec<20)unlockAchievement('speedrun');if(levelDarkness.length>0)unlockAchievement('dark_escape');if(lvl&&lvl.flashlight)unlockAchievement('light_bearer');if(levelGravityZones.length>0)unlockAchievement('gravity_master');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
   var bestTime=getLevelBestTime(state.level);
-  var isNewBest=elapsed<bestTime;
+  var isNewBest=elapsed/1000<bestTime;
   document.getElementById('win-level-name').textContent=(state.level+1)+'. '+lvl.name;
   document.getElementById('win-time').textContent=formatTime(elapsed);
   document.getElementById('win-deaths').textContent=state.deaths;
-  document.getElementById('win-best').textContent=isNewBest?'новый!':formatTime(bestTime);
+  document.getElementById('win-best').textContent=isNewBest?'новый!':formatTime(bestTime*1000);
   document.getElementById('win-best').style.color=isNewBest?'#6a9a5a':'#3a5a3a';
   document.getElementById('win-total-deaths').textContent=state.totalDeaths;
   var starsHtml='';
@@ -5088,7 +5099,9 @@ function showRecords(){
     {name:'Пробуждение',color:'#5a8aba',levels:[0,1,2,3,4]},
     {name:'Глубины',color:'#8a5aba',levels:[5,6,7,8,9]},
     {name:'Нити',color:'#ba8a2a',levels:[10,11,12,13,14]},
-    {name:'Пустота',color:'#8a3a5a',levels:[15,16,17,18,19]}
+    {name:'Пустота',color:'#8a3a5a',levels:[15,16,17,18,19]},
+    {name:'Возрождение',color:'#4a8a7a',levels:[20,21,22,23,24]},
+    {name:'Исход',color:'#9a3a6a',levels:[25,26,27,28,29]}
   ];
   for(var a=0;a<acts.length;a++){
     var act=acts[a];
@@ -5218,6 +5231,7 @@ function bindUI(){
   document.getElementById('btn-music').addEventListener('click',function(){toggleMusic();document.getElementById('btn-music').textContent='музыка: '+(musicMuted?'выкл':'вкл')});
   document.getElementById('btn-quit').addEventListener('click',function(){clearLevel();stopMusic();showScreen('menu')});
   document.getElementById('btn-retry').addEventListener('click',function(){state.deaths=0;clearLevel();loadLevel(state.level);startPlaying()});
+  document.getElementById('btn-checkpoint').addEventListener('click',function(){if(state.lastCheckpoint){respawnPlayer();startPlaying()}});
   document.getElementById('btn-next').addEventListener('click',function(){
     state.level++;state.deaths=0;
     if(state.level>=LEVELS.length){clearLevel();showScreen('menu');return}
@@ -5835,7 +5849,8 @@ function getDaySeed(){var d=new Date();return d.getFullYear()*10000+(d.getMonth(
 function seededRandom(seed){var x=Math.sin(seed)*10000;return x-Math.floor(x)}
 function generateDailyChallenge(){
   var seed=getDaySeed();
-  var levelIdx=Math.floor(seededRandom(seed)*LEVELS.length);
+  var maxLevel=Math.min(LEVELS.length,progress.unlocked||1);
+  var levelIdx=Math.floor(seededRandom(seed)*maxLevel);
   var modIdx=Math.floor(seededRandom(seed+1)*CHALLENGE_MODIFIERS.length);
   return{level:levelIdx,modifier:CHALLENGE_MODIFIERS[modIdx],seed:seed,date:new Date().toLocaleDateString('ru-RU')};
 }
