@@ -1,4 +1,4 @@
-const GAME_URL = 'https://void-game-ruddy.vercel.app/v0.11.1-beta';
+const GAME_URL = 'https://void-game-ruddy.vercel.app/';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

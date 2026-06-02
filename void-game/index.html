@@ -302,7 +302,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .prof-rank{font-size:2rem;font-weight:900;letter-spacing:.03em;line-height:1;margin-bottom:2px;text-shadow:0 0 20px currentColor}
 .prof-rank-label{font-size:.3rem;color:#4a4a5a;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
 .prof-best-rank{font-size:.4rem;color:#3a4a5a;letter-spacing:.08em;margin-bottom:12px}
-.prof-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:300px;margin-bottom:12px}
+.prof-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;max-width:320px;margin-bottom:12px}
 .prof-stat{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:6px;padding:8px;text-align:center}
 .prof-stat-val{font-size:.85rem;font-weight:700;color:#7a8a9a;font-variant-numeric:tabular-nums}
 .prof-stat-label{font-size:.3rem;color:#4a4a5a;letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
@@ -335,6 +335,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .lb-row.self .lb-name{color:#9ac0e0;font-weight:700}
 .lb-stars{font-size:.5rem;color:#6a6a3a;margin-right:8px;flex-shrink:0;min-width:32px;text-align:center}
 .lb-time{font-size:.5rem;color:#5a6a5a;flex-shrink:0;min-width:44px;text-align:right;letter-spacing:.04em}
+.lb-score{font-size:.5rem;color:#5a6a7a;flex-shrink:0;min-width:48px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.lb-level-sel{display:flex;justify-content:center;padding:8px 0;flex-shrink:0}
 .lb-empty{text-align:center;padding:40px 20px;color:#3a3a4a;font-size:.6rem;letter-spacing:.1em}
 .lb-loading{text-align:center;padding:40px 20px;color:#4a4a5a;font-size:.55rem;letter-spacing:.1em;animation:pulse 1.5s infinite}
 .lb-my-rank{width:100%;max-width:380px;padding:10px;text-align:center;font-size:.5rem;color:#5a6a8a;letter-spacing:.1em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.04);margin-top:4px;flex-shrink:0}
@@ -485,6 +487,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
       <div class="player-info" id="player-info" style="display:none">
         <div class="player-avatar" id="player-avatar"></div>
         <div class="player-name" id="player-name"></div>
+        <span id="sync-indicator" style="font-size:.4rem;margin-left:6px;color:#4a6a5a">☁</span>
       </div>
       <div class="menu-stats" id="menu-stats">
         <span class="stat-item" id="menu-rank-wrap"><span id="menu-rank" style="font-weight:900;color:#6a5a6a"></span></span>
@@ -804,8 +807,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     <div class="ls-title">лидерборд</div>
     <div class="lb-tabs" id="lb-tabs">
       <button class="lb-tab active" data-tab="global">мир</button>
-      <button class="lb-tab" data-tab="speed">скорость</button>
-      <button class="lb-tab" data-tab="stars">звёзды</button>
+      <button class="lb-tab" data-tab="weekly">неделя</button>
+      <button class="lb-tab" data-tab="level">уровни</button>
     </div>
     <div class="lb-list" id="lb-list">
       <div class="lb-loading">загрузка...</div>
@@ -1262,7 +1265,7 @@ function toggleSound(){
 var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0,lastCheckpoint:null,flashColor:0,flashAlpha:0,flashTimer:0,hitStop:0,dashTrails:[],runDustTimer:0,_flashGfx:null,_dashGfx:null,_lastHudTime:'',_lastHudDeaths:''};
 
 // ═══ PROGRESS / SAVE ═══
-var progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},firstLaunch:false};
+var progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,firstLaunch:false};
 // Derive unlocked from completed levels — ensures sync even if progress.unlocked gets corrupted
 function syncProgressUnlocked(){
   var maxCompleted=-1;
@@ -1442,7 +1445,7 @@ function showShardToast(text){
   setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast)},4600);
 }
 
-function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};// Migration: convert bestTime from ms to seconds (pre-v2.9)
+function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};if(progress.totalDeaths===undefined)progress.totalDeaths=0;// Migration: convert bestTime from ms to seconds (pre-v2.9)
 if(!progress._v29_migrated){var migrated=false;for(var k in progress.levels){if(progress.levels.hasOwnProperty(k)){var lv=progress.levels[k];if(lv.bestTime&&lv.bestTime>100){lv.bestTime=lv.bestTime/1000;migrated=true}}}if(migrated){saveProgress();console.log('[VOID] Migrated bestTime ms→sec')}progress._v29_migrated=true;saveProgress()}
 syncProgressUnlocked()}}catch(e){console.warn('[VOID] loadProgress error:',e)}}
 function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(progress))}catch(e){}}
@@ -1504,15 +1507,47 @@ function saveToCloud(){
       achievements:progress.achievements||[],
       challenges:progress.challenges||{},
       firstLaunch:progress.firstLaunch||false,
-      totalDeaths:state.totalDeaths
+      totalDeaths:progress.totalDeaths||state.totalDeaths||0
     };
     tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){if(err)console.warn('[VOID] Cloud save error:',err);else console.log('[VOID] Cloud saved')});
   }catch(e){console.warn('[VOID] CloudStorage error:',e)}
 }
+// Cloud save with retry (3 attempts)
+var _cloudRetryCount=0;
+function saveToCloudWithRetry(){
+  if(!tg||!tg.CloudStorage)return;
+  clearTimeout(_cloudSaveTimer);
+  _cloudSaveTimer=setTimeout(function(){
+    _cloudRetryCount=0;
+    _doCloudSaveAttempt();
+  },2000);
+}
+function _doCloudSaveAttempt(){
+  if(!tg||!tg.CloudStorage)return;
+  var origSave=saveToCloud;
+  // Override callback to add retry
+  try{
+    var data={
+      v:2,unlocked:progress.unlocked||1,levels:progress.levels||{},skin:progress.skin||0,
+      shards:progress.shards||[],stats:progress.stats||{},achievements:progress.achievements||[],
+      challenges:progress.challenges||{},firstLaunch:progress.firstLaunch||false,
+      totalDeaths:progress.totalDeaths||state.totalDeaths||0
+    };
+    tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){
+      if(err){
+        _cloudRetryCount++;
+        if(_cloudRetryCount<3){console.warn('[VOID] Cloud save failed, retry '+_cloudRetryCount);setTimeout(_doCloudSaveAttempt,2000)}
+        else{console.warn('[VOID] Cloud save failed after 3 attempts');_cloudRetryCount=0}
+      }else{console.log('[VOID] Cloud saved');_cloudRetryCount=0;updateSyncIndicator(true)}
+    });
+  }catch(e){console.warn('[VOID] CloudStorage error:',e);_cloudRetryCount=0}
+}
+var _syncOk=false;
+function updateSyncIndicator(ok){_syncOk=ok;var el=document.getElementById('sync-indicator');if(el)el.textContent=ok?'☁ ✓':'☁ ✗';if(el)el.style.color=ok?'#4a6a5a':'#6a4a4a'}
 function debouncedCloudSave(){
   if(!tg||!tg.CloudStorage)return;
   clearTimeout(_cloudSaveTimer);
-  _cloudSaveTimer=setTimeout(saveToCloud,2000); // debounce 2s
+  _cloudSaveTimer=setTimeout(function(){_cloudRetryCount=0;_doCloudSaveAttempt()},2000); // debounce 2s
 }
 function loadFromCloud(){
   if(!tg||!tg.CloudStorage)return;
@@ -1574,8 +1609,12 @@ function mergeCloudData(cloud){
   }
   // Take higher unlocked value
   if(cloud.unlocked&&cloud.unlocked>(progress.unlocked||1)){progress.unlocked=cloud.unlocked;changed=true}
-  // Take higher totalDeaths
-  if(cloud.totalDeaths&&cloud.totalDeaths>state.totalDeaths){state.totalDeaths=cloud.totalDeaths;changed=true}
+  // Take higher totalDeaths (now stored in progress)
+  if(cloud.totalDeaths&&cloud.totalDeaths>(progress.totalDeaths||0)){progress.totalDeaths=cloud.totalDeaths;state.totalDeaths=progress.totalDeaths;changed=true}
+  // Also sync from state to progress if state is higher (backward compat)
+  if(state.totalDeaths>(progress.totalDeaths||0)){progress.totalDeaths=state.totalDeaths;changed=true}
+  // Merge skin preference (take cloud skin if local is default)
+  if(cloud.skin!==undefined&&progress.skin===0&&cloud.skin>0){progress.skin=cloud.skin;changed=true}
   // Merge stats — take max of each
   if(cloud.stats){
     var stKeys=['jumps','dashes','wallJumps','threadsUsed','playTime','perfectLevels'];
@@ -1618,7 +1657,7 @@ var lbMyRank=-1;
 var lbData=[];
 var LB_SUPABASE_URL='https://jibtmyuxbeckanmkhuik.supabase.co';
 var LB_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnRteXV4YmVja2FubWtodWlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjA0MTAsImV4cCI6MjA5NTg5NjQxMH0.x1oT9Lym80rZNj9dJA39nA-pBSWzKhAOJGHZisOoFok';
-var LB_API_URL='https://void-api-deploy.vercel.app/api/leaderboard';
+var LB_API_URL='https://void-game-api.vercel.app/api/leaderboard';
 
 function initSupabase(){
   try{
@@ -1632,13 +1671,25 @@ function getMyLBId(){
   return'local_'+(localStorage.getItem('void_device_id')||function(){var id='d_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);localStorage.setItem('void_device_id',id);return id}());
 }
 function computeLBScore(){
-  var completed=0,totalStars=0,totalTime=0;
+  var completed=0,totalStars=0,totalTime=0,perfectLevels=0;
   for(var i=0;i<LEVELS.length;i++){
     var s=getLevelStars(i);if(s>0){completed++;totalStars+=s}
     var bt=getLevelBestTime(i);if(bt<Infinity)totalTime+=bt;
+    if(s===3)perfectLevels++;
   }
-  var score=completed*10000+totalStars*100-Math.round(totalTime);
-  return{score:score,completed:completed,totalStars:totalStars,totalTime:totalTime};
+  var totalShards=(progress.shards||[]).length;
+  var achievementsCount=(progress.achievements||[]).length;
+  var challengeWins=0;for(var k in progress.challenges){if(progress.challenges[k]&&progress.challenges[k].completed)challengeWins++}
+  var score=Math.max(0,
+    completed*5000+
+    totalStars*200+
+    totalShards*150+
+    achievementsCount*300+
+    perfectLevels*500+
+    challengeWins*250-
+    Math.round(totalTime*0.5)
+  );
+  return{score:score,completed:completed,totalStars:totalStars,totalTime:totalTime,totalShards:totalShards,achievementsCount:achievementsCount,perfectLevels:perfectLevels,challengeWins:challengeWins};
 }
 function submitLB(){
   var data=computeLBScore();
@@ -1656,7 +1707,11 @@ function submitLB(){
   fetch(LB_API_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({initData:initData,levelData:levelData,chatId:chatId})
+    body:JSON.stringify({
+      initData:initData,levelData:levelData,chatId:chatId,
+      totalShards:data.totalShards,achievementsCount:data.achievementsCount,
+      perfectLevels:data.perfectLevels,challengeWins:data.challengeWins
+    })
   }).then(function(r){return r.json()}).then(function(d){
     if(d.ok)console.log('[VOID] LB submitted, rank:',d.rank);
     else console.log('[VOID] LB submit response:',d.error||d.message||d);
@@ -1672,6 +1727,26 @@ function loadLB(){
   if(!sbClient){renderLBOffline();return}
   var listEl=document.getElementById('lb-list');
   if(listEl)listEl.innerHTML='<div class="lb-loading">загрузка...</div>';
+  if(lbCurrentTab==='weekly'){
+    // Weekly: fetch from weekly_scores table
+    var weekKey=getWeekKey();
+    sbClient.from('weekly_scores').select('*').eq('week_key',weekKey).order('score',{ascending:false}).limit(100).then(function(res){
+      if(res.error){console.warn('[VOID] Weekly LB error:',res.error);renderLBOffline();return}
+      lbData=res.data||[];
+      renderLB();
+    }).catch(function(e){console.warn('[VOID] Weekly LB catch:',e);renderLBOffline()});
+    return;
+  }
+  if(lbCurrentTab==='level'){
+    // Level records: fetch from level_records table for selected level
+    var lvlIdx=lbSelectedLevel||0;
+    sbClient.from('level_records').select('*').eq('level_index',lvlIdx).order('best_time',{ascending:true}).limit(20).then(function(res){
+      if(res.error){console.warn('[VOID] Level records error:',res.error);lbLevelData=[];renderLBLevel()}
+      else{lbLevelData=res.data||[];renderLBLevel()}
+    }).catch(function(e){lbLevelData=[];renderLBLevel()});
+    return;
+  }
+  // Global tab
   sbClient.from('leaderboard').select('*').order('score',{ascending:false}).limit(120).then(function(res){
     if(res.error){console.warn('[VOID] LB load error:',res.error);renderLBOffline();return}
     lbData=res.data||[];
@@ -1680,12 +1755,18 @@ function loadLB(){
   // Subscribe to real-time
   if(!lbSubscription&&sbClient){
     lbSubscription=sbClient.channel('lb-changes').on('postgres_changes',{event:'*',schema:'public',table:'leaderboard'},function(){
-      // Reload on any change
       sbClient.from('leaderboard').select('*').order('score',{ascending:false}).limit(120).then(function(res){
         if(!res.error){lbData=res.data||[];renderLB()}
       });
     }).subscribe();
   }
+}
+var lbSelectedLevel=0;
+var lbLevelData=[];
+function getWeekKey(){
+  var now=new Date();var start=new Date(now.getFullYear(),0,1);var diff=now-start;
+  var oneWeek=604800000;var weekNum=Math.ceil((diff/oneWeek)+start.getDay()/7);
+  return now.getFullYear()+'-W'+String(weekNum).padStart(2,'0');
 }
 function renderLBOffline(){
   var listEl=document.getElementById('lb-list');
@@ -1698,6 +1779,8 @@ function renderLB(){
   var listEl=document.getElementById('lb-list');
   var rankEl=document.getElementById('lb-my-rank');
   if(!listEl)return;
+  // Level tab has its own renderer
+  if(lbCurrentTab==='level'){renderLBLevel();return}
   if(!lbData||lbData.length===0){
     listEl.innerHTML='<div class="lb-empty">пока никого нет<br><div class="lb-sub">стань первым во тьме</div></div>';
     if(rankEl)rankEl.textContent='';
@@ -1705,15 +1788,7 @@ function renderLB(){
   }
   var myId=getMyLBId();
   var sorted=lbData.slice();
-  // Sort by tab
-  if(lbCurrentTab==='speed'){
-    sorted=sorted.filter(function(d){return d.completed>0&&d.total_time>0});
-    sorted.sort(function(a,b){return a.total_time-b.total_time||b.total_stars-a.total_stars});
-  }else if(lbCurrentTab==='stars'){
-    sorted.sort(function(a,b){return b.total_stars-a.total_stars||b.completed-a.completed||a.total_time-b.total_time});
-  }else{
-    sorted.sort(function(a,b){return b.score-a.score});
-  }
+  sorted.sort(function(a,b){return b.score-a.score});
   var top100=sorted.slice(0,100);
   var myIdx=-1;
   for(var i=0;i<sorted.length;i++){if(sorted[i].id===myId){myIdx=i;break}}
@@ -1730,23 +1805,86 @@ function renderLB(){
     else if(rank===3)rowCls+=' top3';
     var rankStr=rank<=3?['I','II','III'][rank-1]:rank;
     var timeStr=entry.total_time&&entry.total_time<99999?formatTime(entry.total_time*1000):'--:--';
+    var scoreStr=entry.score?entry.score.toLocaleString():'0';
     html+='<div class="'+rowCls+'">'+
       '<div class="lb-rank">'+rankStr+'</div>'+
       '<div class="lb-name">'+escHtml(entry.name||'???')+'</div>'+
+      '<div class="lb-score">'+scoreStr+'</div>'+
       '<div class="lb-stars">'+(entry.total_stars||0)+'★</div>'+
-      '<div class="lb-time">'+timeStr+'</div>'+
       '</div>';
   }
   listEl.innerHTML=html;
   if(rankEl){
     if(lbMyRank>0){
       var myD=computeLBScore();
-      rankEl.innerHTML='твой ранг: <b style="color:#9ac0e0">#'+lbMyRank+'</b> — '+myD.completed+'/'+LEVELS.length+' | '+myD.totalStars+'★ | '+formatTime(myD.totalTime*1000);
+      rankEl.innerHTML='твой ранг: <b style="color:#9ac0e0">#'+lbMyRank+'</b> — '+myD.score.toLocaleString()+' очков | '+myD.completed+'/'+LEVELS.length+' | '+myD.totalStars+'★';
     }else if(computeLBScore().completed>0){
       rankEl.innerHTML='твой ранг: ещё не в таблице';
     }else{
       rankEl.textContent='пройди уровень чтобы попасть в лидерборд';
     }
+  }
+  // Update tabs
+  var tabs=document.querySelectorAll('.lb-tab');
+  for(var i=0;i<tabs.length;i++){tabs[i].classList.toggle('active',tabs[i].getAttribute('data-tab')===lbCurrentTab)}
+}
+function renderLBLevel(){
+  var listEl=document.getElementById('lb-list');
+  var rankEl=document.getElementById('lb-my-rank');
+  if(!listEl)return;
+  // Level selector
+  var selHtml='<div class="lb-level-sel"><select id="lb-level-select" style="background:#1a1a2a;color:#8a8aaa;border:1px solid #3a3a5a;border-radius:4px;padding:6px 10px;font-size:.55rem;font-family:inherit;width:100%;max-width:200px">';
+  var acts=[
+    {name:'Пробуждение',levels:[0,1,2,3,4]},{name:'Глубины',levels:[5,6,7,8,9]},
+    {name:'Нити',levels:[10,11,12,13,14]},{name:'Пустота',levels:[15,16,17,18,19]},
+    {name:'Возрождение',levels:[20,21,22,23,24]},{name:'Исход',levels:[25,26,27,28,29]}
+  ];
+  for(var a=0;a<acts.length;a++){
+    for(var li=0;li<acts[a].levels.length;li++){
+      var idx=acts[a].levels[li];
+      var lvl=LEVELS[idx];
+      var sel=idx===lbSelectedLevel?' selected':'';
+      selHtml+='<option value="'+idx+'"'+sel+'>'+lvl.name+'</option>';
+    }
+  }
+  selHtml+='</select></div>';
+  var myBestTime=getLevelBestTime(lbSelectedLevel);
+  var myBestStr=myBestTime<Infinity?formatTime(myBestTime*1000):'--:--';
+  var myStars=getLevelStars(lbSelectedLevel);
+  if(!lbLevelData||lbLevelData.length===0){
+    listEl.innerHTML=selHtml+'<div class="lb-empty">пока нет рекордов<br><div class="lb-sub">стань первым на этом уровне</div></div>';
+  }else{
+    var html=selHtml;
+    var myId=getMyLBId();
+    for(var i=0;i<lbLevelData.length;i++){
+      var entry=lbLevelData[i];
+      var rank=i+1;
+      var isSelf=entry.user_id===myId;
+      var rowCls='lb-row';
+      if(isSelf)rowCls+=' self';
+      if(rank===1)rowCls+=' top1';
+      else if(rank===2)rowCls+=' top2';
+      else if(rank===3)rowCls+=' top3';
+      var rankStr=rank<=3?['I','II','III'][rank-1]:rank;
+      var timeStr=entry.best_time?formatTime(entry.best_time*1000):'--:--';
+      html+='<div class="'+rowCls+'">'+
+        '<div class="lb-rank">'+rankStr+'</div>'+
+        '<div class="lb-name">'+escHtml(entry.name||'???')+'</div>'+
+        '<div class="lb-time" style="min-width:56px">'+timeStr+'</div>'+
+        '<div class="lb-stars">'+(entry.stars||0)+'★</div>'+
+        '</div>';
+    }
+    listEl.innerHTML=html;
+  }
+  if(rankEl){
+    rankEl.innerHTML='твоё лучшее: <b style="color:#9ac0e0">'+myBestStr+'</b> — '+myStars+'★';
+  }
+  // Bind level selector
+  var selEl=document.getElementById('lb-level-select');
+  if(selEl){
+    selEl.addEventListener('change',function(){
+      lbSelectedLevel=parseInt(this.value)||0;loadLB();
+    });
   }
   // Update tabs
   var tabs=document.querySelectorAll('.lb-tab');
@@ -1813,6 +1951,17 @@ function renderProfile(d){
     achHtml+='<div class="prof-ach'+(unlocked?' unlocked':'')+'">'+ACHIEVEMENTS[i].icon+'</div>';
   }
   var notifEnabled=d.notifications_enabled!==false;
+  // Weekly rank display
+  var weeklyHtml='';
+  if(d.weekly_rank>0){
+    var wk=d.week_key||'';
+    weeklyHtml='<div class="prof-stat"><div class="prof-stat-val">#'+d.weekly_rank+'</div><div class="prof-stat-label">неделя '+(wk?wk.replace(/.*-W/,''):'')+'</div></div>';
+  }
+  // Calculate total play time
+  var playSecs=progress.stats.playTime||0;
+  var playMins=Math.floor(playSecs/60);
+  var playHrs=Math.floor(playMins/60);
+  var playStr=playHrs>0?playHrs+'ч '+(playMins%60)+'м':playMins+'м';
   c.innerHTML=
     avatarHtml+
     '<div class="prof-name">'+escHtml(d.name||'???')+'</div>'+
@@ -1823,8 +1972,13 @@ function renderProfile(d){
     '<div class="prof-stats">'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.completed||0)+'/'+LEVELS.length+'</div><div class="prof-stat-label">уровни</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_stars||0)+'/'+(LEVELS.length*3)+'</div><div class="prof-stat-label">звёзды</div></div>'+
-      '<div class="prof-stat"><div class="prof-stat-val">'+(state.totalDeaths||0)+'</div><div class="prof-stat-label">смерти</div></div>'+
-      '<div class="prof-stat"><div class="prof-stat-val">'+(d.score||0)+'</div><div class="prof-stat-label">score</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_shards||0)+'</div><div class="prof-stat-label">осколки</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(d.perfect_levels||0)+'</div><div class="prof-stat-label">идеальные</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(d.achievements_count||0)+'/'+achTotal+'</div><div class="prof-stat-label">ачивки</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(progress.totalDeaths||0)+'</div><div class="prof-stat-label">смерти</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+playStr+'</div><div class="prof-stat-label">время</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+(d.score||0).toLocaleString()+'</div><div class="prof-stat-label">score</div></div>'+
+      weeklyHtml+
     '</div>'+
     '<div class="prof-achievements">'+
       '<div class="prof-ach-title">достижения '+achCount+'/'+achTotal+'</div>'+
@@ -3543,7 +3697,7 @@ function updatePlayer(dt){
   document.getElementById('hud-thread').style.color=(thread.active||nearAnchor)?'#4a4a7a':'#1a2a2a';
 }
 
-function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:cause==='darkness'?0x1a0a2a:0x3e3e52;spawnParticles(px,py,30,dc,{speed:4,life:1.2,size:4,gravity:0.3});spawnParticles(px,py,12,0x6a6a9a,{speed:2.5,life:0.8,size:5,gravity:0});spawnParticles(px,py,5,0x99aacc,{speed:1.5,life:0.6,size:2.5,gravity:0});state.hitStop=0.03;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a1a1a;state.flashAlpha=0.25;state.flashTimer=0.3;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
+function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;progress.totalDeaths=state.totalDeaths;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:cause==='darkness'?0x1a0a2a:0x3e3e52;spawnParticles(px,py,30,dc,{speed:4,life:1.2,size:4,gravity:0.3});spawnParticles(px,py,12,0x6a6a9a,{speed:2.5,life:0.8,size:5,gravity:0});spawnParticles(px,py,5,0x99aacc,{speed:1.5,life:0.6,size:2.5,gravity:0});state.hitStop=0.03;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a1a1a;state.flashAlpha=0.25;state.flashTimer=0.3;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
   // Challenge: check fail conditions
   if(challengeMode&&currentChallenge){
     var mid=currentChallenge.modifier.id;
