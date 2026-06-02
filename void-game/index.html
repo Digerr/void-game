@@ -3400,12 +3400,30 @@ function updatePlayer(dt){
     }
   }
   else if(thread.active){
-    // While on thread: swing with left/right
-    var swingForce=player.inputX*0.08;
+    // While on thread: pendulum-style swing with left/right
+    var dx=player.body.position.x-thread.anchorX;
+    var dy=player.body.position.y-thread.anchorY;
+    var pendAngle=Math.atan2(dx,Math.max(dy,1)); // angle from vertical
+    // Reduce force at extreme angles (prevents getting stuck at max swing)
+    var angleDamping=Math.max(0,1-Math.abs(pendAngle)/(Math.PI*0.35));
+    // Gentle swing force — acts like pumping a swing
+    var swingForce=player.inputX*0.035*angleDamping;
     MBody.applyForce(player.body,player.body.position,{x:swingForce,y:0});
+    // Cap horizontal velocity to prevent insane speed
+    var vx=player.body.velocity.x;
+    var maxSwingSpeed=5.5;
+    if(Math.abs(vx)>maxSwingSpeed){
+      MBody.setVelocity(player.body,{x:Math.sign(vx)*maxSwingSpeed,y:player.body.velocity.y});
+    }
+    // Also dampen vertical velocity if too fast (prevents bouncing)
+    var vy=player.body.velocity.y;
+    if(Math.abs(vy)>8){
+      MBody.setVelocity(player.body,{x:player.body.velocity.x,y:Math.sign(vy)*8});
+    }
+    // Angular velocity control
     var angVel=player.body.angularVelocity||0;
-    if(Math.abs(angVel)>2)MBody.setAngularVelocity(player.body,Math.sign(angVel)*2);
-    MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.92);
+    if(Math.abs(angVel)>1.2)MBody.setAngularVelocity(player.body,Math.sign(angVel)*1.2);
+    MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.88);
     player.velocityX=player.body.velocity.x;
   }
   else{
@@ -4181,7 +4199,7 @@ function shootThread(){
   thread.constraint=MConstraint.create({
     pointA:{x:nearest.x,y:nearest.y},
     bodyB:player.body,pointB:{x:0,y:-PLAYER_H/4},
-    length:nearestDist,stiffness:0.6,damping:0.02
+    length:nearestDist,stiffness:0.85,damping:0.05
   });
   MWorld.add(world,thread.constraint);
   // Visual container
