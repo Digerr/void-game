@@ -39,12 +39,10 @@ export default async function handler(req, res) {
   const body = req.body || {};
   const action = body.action || 'submit';
 
-  // ── SETUP: Create tables ──
+  // ── SETUP: Check table status (admin only, no SQL exposed) ──
   if (action === 'setup') {
     const sb = getSupabase();
     try {
-      // Add new columns to leaderboard if they don't exist
-      // We'll try to select them first, and if they don't exist, we note it
       const { data: testRow, error: testErr } = await sb
         .from('leaderboard')
         .select('id,total_shards,achievements_count,perfect_levels,challenge_wins')
@@ -55,16 +53,8 @@ export default async function handler(req, res) {
         missingCols.push('total_shards', 'achievements_count', 'perfect_levels', 'challenge_wins');
       }
 
-      // Try to insert into weekly_scores to see if it exists
-      const { error: wsErr } = await sb
-        .from('weekly_scores')
-        .select('id')
-        .limit(1);
-
-      const { error: lrErr } = await sb
-        .from('level_records')
-        .select('id')
-        .limit(1);
+      const { error: wsErr } = await sb.from('weekly_scores').select('id').limit(1);
+      const { error: lrErr } = await sb.from('level_records').select('id').limit(1);
 
       return res.status(200).json({
         ok: true,
@@ -72,59 +62,9 @@ export default async function handler(req, res) {
         missing_columns: missingCols,
         weekly_scores_exists: !wsErr || (wsErr.message && !wsErr.message.includes('Could not find')),
         level_records_exists: !lrErr || (lrErr.message && !lrErr.message.includes('Could not find')),
-        note: 'New tables need to be created via Supabase SQL editor. See SQL below.',
-        sql: `
--- Run in Supabase SQL Editor:
-
--- Add new columns to leaderboard
-ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS total_sharts INTEGER DEFAULT 0;
-ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS achievements_count INTEGER DEFAULT 0;
-ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS perfect_levels INTEGER DEFAULT 0;
-ALTER TABLE leaderboard ADD COLUMN IF NOT EXISTS challenge_wins INTEGER DEFAULT 0;
-
--- Create weekly_scores table
-CREATE TABLE IF NOT EXISTS weekly_scores (
-  id TEXT PRIMARY KEY,
-  name TEXT,
-  score INTEGER DEFAULT 0,
-  completed INTEGER DEFAULT 0,
-  total_stars INTEGER DEFAULT 0,
-  total_shards INTEGER DEFAULT 0,
-  achievements INTEGER DEFAULT 0,
-  week_key TEXT NOT NULL,
-  updated TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Create level_records table
-CREATE TABLE IF NOT EXISTS level_records (
-  id SERIAL PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  name TEXT,
-  level_index INTEGER NOT NULL,
-  best_time REAL DEFAULT 0,
-  stars INTEGER DEFAULT 0,
-  updated TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, level_index)
-);
-
--- Enable RLS
-ALTER TABLE weekly_scores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE level_records ENABLE ROW LEVEL SECURITY;
-
--- RLS policies (read all, write own)
-CREATE POLICY "weekly_scores_read" ON weekly_scores FOR SELECT USING (true);
-CREATE POLICY "weekly_scores_write" ON weekly_scores FOR ALL USING (true);
-CREATE POLICY "level_records_read" ON level_records FOR SELECT USING (true);
-CREATE POLICY "level_records_write" ON level_records FOR ALL USING (true);
-
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_weekly_scores_week_key ON weekly_scores(week_key, score DESC);
-CREATE INDEX IF NOT EXISTS idx_level_records_level ON level_records(level_index, best_time ASC);
-CREATE INDEX IF NOT EXISTS idx_level_records_user ON level_records(user_id);
-        `
       });
     } catch (e) {
-      return res.status(500).json({ ok: false, error: e.message });
+      return res.status(500).json({ ok: false, error: 'setup check failed' });
     }
   }
 

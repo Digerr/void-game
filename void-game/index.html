@@ -1451,9 +1451,33 @@ function showShardToast(text){
   setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast)},4600);
 }
 
-function loadProgress(){try{var s=localStorage.getItem('void_progress');if(s){progress=JSON.parse(s);if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};if(progress.totalDeaths===undefined)progress.totalDeaths=0;// Migration: convert bestTime from ms to seconds (pre-v2.9)
-if(!progress._v29_migrated){var migrated=false;for(var k in progress.levels){if(progress.levels.hasOwnProperty(k)){var lv=progress.levels[k];if(lv.bestTime&&lv.bestTime>100){lv.bestTime=lv.bestTime/1000;migrated=true}}}if(migrated){saveProgress();console.log('[VOID] Migrated bestTime ms→sec')}progress._v29_migrated=true;saveProgress()}
-syncProgressUnlocked()}}catch(e){console.warn('[VOID] loadProgress error:',e)}}
+function getCurrentTgUserId(){if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)return'tg_'+tg.initDataUnsafe.user.id;return null}
+function loadProgress(){
+  try{
+    var s=localStorage.getItem('void_progress');
+    if(s){
+      progress=JSON.parse(s);
+      if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};if(progress.totalDeaths===undefined)progress.totalDeaths=0;
+      // Migration: convert bestTime from ms to seconds (pre-v2.9)
+      if(!progress._v29_migrated){var migrated=false;for(var k in progress.levels){if(progress.levels.hasOwnProperty(k)){var lv=progress.levels[k];if(lv.bestTime&&lv.bestTime>100){lv.bestTime=lv.bestTime/1000;migrated=true}}}if(migrated){saveProgress();console.log('[VOID] Migrated bestTime ms→sec')}progress._v29_migrated=true;saveProgress()}
+      // Check if Telegram user changed — prevent cross-account data mixing
+      var currentTgId=getCurrentTgUserId();
+      var storedTgId=localStorage.getItem('void_tg_user');
+      if(currentTgId&&storedTgId&&currentTgId!==storedTgId){
+        console.log('[VOID] User changed:',storedTgId,'→',currentTgId,'— resetting local progress');
+        // Different user on same device — reset local, cloud will load fresh data
+        progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false};
+        saveProgress();
+      }
+      if(currentTgId)localStorage.setItem('void_tg_user',currentTgId);
+      syncProgressUnlocked();
+    }else{
+      // No local progress — store current user id
+      var currentTgId2=getCurrentTgUserId();
+      if(currentTgId2)localStorage.setItem('void_tg_user',currentTgId2);
+    }
+  }catch(e){console.warn('[VOID] loadProgress error:',e)}
+}
 function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(progress))}catch(e){}}
 function getLevelStars(n){var p=progress.levels[n];return p?p.stars:0}
 function getLevelBestTime(n){var p=progress.levels[n];return p?p.bestTime:Infinity}
@@ -1952,6 +1976,11 @@ function loadProfile(){
   fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'profile',initData:tg.initData})}).then(function(r){return r.json()}).then(function(d){
     console.log('[VOID] Profile response:',JSON.stringify(d));
     if(!d.ok){
+      // No leaderboard entry yet — show friendly message
+      if(d.error==='no leaderboard entry'){
+        c.innerHTML='<div class="lb-empty">профиль появится после<br>прохождения первого уровня</div>';
+        return;
+      }
       // On error, fetch full debug info
       fetch(LB_API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'debug_init',initData:tg.initData})}).then(function(r2){return r2.json()}).then(function(dbg){
         console.log('[VOID] Debug:',JSON.stringify(dbg));
