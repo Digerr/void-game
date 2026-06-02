@@ -422,6 +422,9 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .lore-chapter-title{font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.12em;margin-bottom:6px}
 .lore-chapter-text{font-size:.58rem;color:#6a6a8a;line-height:1.7}
 .lore-hint{font-size:.48rem;color:#5a5a7a;line-height:1.5;margin-top:4px;letter-spacing:.05em}
+.lore-cutscene-btn{margin-top:10px;padding:6px 14px;font-size:.48rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(100,120,200,.08);border:1px solid rgba(100,120,200,.2);color:#7a8ab8;border-radius:6px;cursor:pointer;transition:all .25s;font-family:inherit}
+.lore-cutscene-btn:hover{background:rgba(100,120,200,.15);border-color:rgba(100,120,200,.35);color:#9aaada}
+.lore-cutscene-btn:active{transform:scale(.95);transition:all .08s}
 .lore-section-title{font-size:.7rem;color:#7a8ab8;font-weight:700;letter-spacing:.1em;margin-bottom:6px}
 .lore-section-text{font-size:.58rem;color:#6a6a8a;line-height:1.7}
 #lore-content::-webkit-scrollbar{width:3px}
@@ -5589,6 +5592,10 @@ function renderLoreScreen(){
           if(sh&&sh.lore)html+='<div class="lore-shard-entry">💎 '+sh.lore+'</div>';
         }
       }
+      // Add cutscene replay button (acts 1-5 have a preceding cutscene)
+      if(a>0&&(a-1)<CUTSCENES.length){
+        html+='<button class="lore-cutscene-btn" data-cs="'+(a-1)+'">▶ катсцена</button>';
+      }
       ch.innerHTML=html;
     }else{
       ch.className='lore-locked';
@@ -5608,6 +5615,19 @@ function renderLoreScreen(){
     }
     c.appendChild(ch);
   }
+  // Delegate click for cutscene replay buttons
+  c.onclick=function(e){
+    var btn=e.target.closest&&e.target.closest('.lore-cutscene-btn');
+    if(!btn)return;
+    var csIdx=parseInt(btn.getAttribute('data-cs'));
+    if(isNaN(csIdx)||csIdx<0||csIdx>=CUTSCENES.length)return;
+    showScreen('lore'); // keep lore as current screen
+    playCutscene(csIdx,function(){
+      // Return to lore screen after cutscene
+      renderLoreScreen();
+      showScreen('lore');
+    });
+  };
 }
 
 // ═══ SCREEN MANAGEMENT ═══
