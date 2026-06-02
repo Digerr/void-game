@@ -14,7 +14,7 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#0e0e1e;font-family:'Courier New','SF Mono','Fira Code',monospace;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-canvas{display:block;position:fixed;inset:0;z-index:1}
+canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 #ui-layer{position:fixed;inset:0;z-index:10;pointer-events:none}
 #ui-layer *{pointer-events:auto}
 #main-menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,rgba(20,20,45,0.97) 0%,rgba(6,6,14,0.99) 70%);overflow:hidden}
@@ -455,15 +455,15 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
         <span class="stat-item"><span class="stat-val" id="menu-deaths-total">0 смертей</span></span>
       </div>
       <div class="menu-progress"><div class="menu-progress-fill" id="menu-progress-fill"></div></div>
-      <button class="btn primary" id="btn-play">▼ спуститься</button>
+      <button class="btn primary" id="btn-play">играть</button>
       <div class="menu-grid">
-        <button class="btn" id="btn-levels">прогресс</button>
-        <button class="btn" id="btn-records">рекорды</button>
+        <button class="btn" id="btn-levels">уровни</button>
+        <button class="btn" id="btn-records">рейтинг</button>
       </div>
-      <button class="btn" id="btn-leaderboard" style="border-color:#2a3a5a;color:#6a9aba;margin-top:4px">лидерборд</button>
+      <button class="btn" id="btn-leaderboard" style="border-color:#2a3a5a;color:#6a9aba;margin-top:4px">таблица лидеров</button>
       <button class="btn" id="btn-profile" style="border-color:#3a3a5a;color:#8a7aaa;margin-top:2px">профиль</button>
       <button class="menu-challenge" id="btn-challenge">
-        <span class="ch-label">испытание дня</span>
+        <span class="ch-label">ежедневное испытание</span>
         <span class="ch-sub" id="ch-sub">ежедневный вызов</span>
       </button>
     </div>
@@ -516,7 +516,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   <div id="pause-screen">
     <div class="pause-title">пауза</div>
     <button class="btn" id="btn-resume">продолжить</button>
-    <button class="btn" id="btn-music" style="font-size:.6rem;letter-spacing:.15em">музыка: вкл</button>
+    <button class="btn" id="btn-music" style="font-size:.6rem;letter-spacing:.15em">звук: вкл</button>
+    <button class="btn" id="btn-pause-settings" style="font-size:.6rem;letter-spacing:.15em">⚙ настройки</button>
     <button class="btn" id="btn-quit" style="border-color:#3a1a1a;color:#6a3535">выйти в меню</button>
   </div>
   <div id="death-screen">
@@ -526,6 +527,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="death-checkpoint-hint" id="death-cp-hint"></div>
     <button class="btn" id="btn-retry">снова</button>
     <button class="btn" id="btn-checkpoint" style="display:none;border-color:#2a3a5a;color:#6a9aba;margin-top:4px">чекпоинт</button>
+    <button class="btn" id="btn-death-menu" style="display:none;border-color:#3a1a1a;color:#6a3535;margin-top:4px;font-size:.6rem">выйти в меню</button>
   </div>
   <div id="win-screen">
     <div class="win-title">СПАСЁН</div>
@@ -539,6 +541,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="win-total-stats"><div class="win-total-stat">всего смертей: <span id="win-total-deaths">0</span></div></div>
     <div class="win-sub" id="win-sub">ты выбрался из пустоты</div>
     <button class="btn primary" id="btn-next">далее</button>
+    <button class="btn" id="btn-win-menu" style="border-color:#3a1a1a;color:#6a3535;margin-top:4px;font-size:.6rem">выйти в меню</button>
     <div class="win-share" id="btn-share">поделиться</div>
   </div>
   <div id="level-select">
@@ -633,11 +636,11 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     </div>
   </div>
   <div id="faq-screen">
-    <div class="ls-title">faq</div>
+    <div class="ls-title">помощь</div>
     <div style="max-width:320px;max-height:60vh;overflow-y:auto;padding:0 8px;margin-bottom:16px">
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">что это за игра?</div>
-        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">VOID — это платформер во тьме. Ты играешь за маленькое существо, которое очнулось в пустоте. Твоя задача — добраться до выхода через шипы, пилы, врагов и ловушки. 20 уровней, от простых до адских.</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">VOID — это платформер во тьме. Ты играешь за маленькое существо, которое очнулось в пустоте. Твоя задача — добраться до выхода через шипы, пилы, врагов и ловушки. 30 уровней, 6 актов, от простых до адских. Игра в бета-версии — возможны баги, прогресс может быть сброшен.</div>
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">управление</div>
@@ -673,6 +676,34 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">звёзды</div>
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">3 звезды = 0 смертей, 2 звезды = 1-3 смерти, 1 звезда = 4+ смертей. Собирай звёзды, чтобы доказать своё мастерство!</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">маятники</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Раскачивающиеся шары с шипами — они качаются ритмично. Изучи тайминг и пробегай в момент, когда маятник в стороне.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">пружины</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Пружинные платформы подбрасывают тебя высоко вверх. Используй их для прыжков на недосягаемые площадки.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">порталы</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Парные порталы телепортируют тебя между двумя точками. Шагни в один — выйдешь из другого.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">лёд</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Ледяные платформы скользкие — трудно остановиться и трудно начать движение. Планируй заранее!</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">тьма</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">На некоторых уровнях тьма наступает за тобой — не оглядывайся, просто беги вперёд!</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">осколки памяти</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Светящиеся кристаллы на уровнях — осколки памяти. Собирай их, чтобы узнать историю этого мира.</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">бета-версия</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Игра находится в бета-версии. Это значит, что возможны баги, баланс уровней может меняться, а прогресс может быть сброшен при крупных обновлениях. Спасибо за тестирование!</div>
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">прогресс не сохраняется?</div>
@@ -745,7 +776,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.17.2';
+var VOID_VERSION='0.10.0-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -776,9 +807,11 @@ document.addEventListener('visibilitychange',function(){
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — Pre-release 1.0.0
+// VOID — beta 0.10.0
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
+
+var isTelegram=!!(window.Telegram&&window.Telegram.WebApp);
 
 window.onerror=function(msg,url,line){console.error('ERR:',msg,'L'+line);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERR L'+line+': '+msg}};
 window.addEventListener('unhandledrejection',function(e){console.error('REJ:',e.reason)});
@@ -1130,8 +1163,8 @@ function startMusic(){
 function stopMusic(){
   if(melodyTimer){clearTimeout(melodyTimer);melodyTimer=null}
   if(musicNodes._chordInterval){clearInterval(musicNodes._chordInterval)}
-  if(musicNodes._padOscs){for(var p=0;p<musicNodes._padOscs.length;p++){try{musicNodes._padOscs[p].osc.stop()}catch(e){}}}
-  for(var i=0;i<musicNodes.length;i++){try{musicNodes[i].stop()}catch(e){}}
+  if(musicNodes._padOscs){for(var p=0;p<musicNodes._padOscs.length;p++){try{musicNodes._padOscs[p].osc.stop();musicNodes._padOscs[p].osc.disconnect()}catch(e){}}}
+  for(var i=0;i<musicNodes.length;i++){try{musicNodes[i].stop();musicNodes[i].disconnect()}catch(e){}}
   musicNodes=[];musicPlaying=false;
 }
 
@@ -3358,7 +3391,7 @@ function updatePlayer(dt){
   player.sprite.scale.set(player.squashX,player.squashY);
   drawPlayerParts();
   // Death: fall off bottom
-  var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+100)killPlayer('fall');
+  var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+50)killPlayer('fall');
   var dashReady=player.dashCooldownTimer<=0&&!player.dashing;document.getElementById('hud-dash').style.color=dashReady?'#3a5a6a':'#1a2a3a';
   var threadReady=!thread.active&&levelAnchors.length>0;var nearAnchor=false;
   if(threadReady&&player.body){for(var ai=0;ai<levelAnchors.length;ai++){var adx=player.body.position.x-levelAnchors[ai].x,ady=player.body.position.y-levelAnchors[ai].y;if(Math.sqrt(adx*adx+ady*ady)<thread.range){nearAnchor=true;break}}}
@@ -4196,6 +4229,8 @@ function loadLevel(n){
   }
   // Exit
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;espr._base=eg;espr._ew=lvl.exit.w;espr._eh=lvl.exit.h;gameContainer.addChild(espr)}
+  // Death floor — invisible kill zone below the level
+  MWorld.add(world,MBodies.rectangle(lvl.width/2,lvl.height+50,lvl.width+400,20,{isStatic:true,isSensor:true,label:'deathZone'}));
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
 function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
@@ -4270,6 +4305,8 @@ function updateWeather(dt){
   var weatherType=theme.weather||'ash';
   // Spawn rate varies by act — deeper acts have more intense weather
   var spawnRate=weatherType==='rain'?0.4:weatherType==='voidDust'?0.18:weatherType==='ember'?0.2:weatherType==='sparks'?0.15:weatherType==='crystal'?0.1:0.12;
+  // Quality: reduce weather particles on low/medium
+  if(settings.quality==='low')spawnRate*=0.2;else if(settings.quality==='medium')spawnRate*=0.5;
   if(Math.random()<spawnRate){
     var px=player.body.position.x+(Math.random()-0.5)*600;
     var py=player.body.position.y-300;
@@ -4411,7 +4448,7 @@ var ty=player.body.position.y-sh*0.42+lookAheadY;
 tx=Math.max(0,Math.min(tx,lvl.width-sw));
 ty=Math.max(-200,Math.min(ty,lvl.height-sh));
 // Adaptive lerp: dt-independent, faster during dash, slower when still
-var baseSpeedX=0.14;var baseSpeedY=0.12;
+var baseSpeedX=isTelegram?0.20:0.14;var baseSpeedY=isTelegram?0.17:0.12;
 if(player.dashing){baseSpeedX=0.28;baseSpeedY=0.22}
 else if(Math.abs(player.body.velocity.x)<1&&player.onGround){baseSpeedX=0.08;baseSpeedY=0.07}
 var lf=Math.min(1,1-Math.pow(1-baseSpeedX,dt*60));
@@ -4695,7 +4732,7 @@ bgSkySprite.circle(sw/2,sh*0.72,180);bgSkySprite.fill({color:theme.horizonGlow,a
 bgSkySprite.circle(sw/2,sh*0.72,90);bgSkySprite.fill({color:theme.horizonGlow,alpha:0.05});
 bgContainer.addChild(bgSkySprite);bgLayers.push({sprite:bgSkySprite,speed:0.01});
 // === AURORA / NEBULA — atmospheric glow unique to each act ===
-if(theme.auroraAlpha&&theme.auroraAlpha>0){
+if(theme.auroraAlpha&&theme.auroraAlpha>0&&settings.quality!=='low'){
   bgAuroraSprite=new PIXI.Graphics();
   // Draw 3 undulating aurora bands
   for(var ab=0;ab<3;ab++){
@@ -5156,6 +5193,8 @@ function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.lef
 
 // ═══ SCREEN MANAGEMENT ═══
 function showScreen(name){
+  // Track previous screen for back navigation
+  state._prevScreen=state.screen;
   // Reset input when leaving gameplay to prevent stuck keys
   if(state.screen==='playing'||state.screen==='story'||state.screen==='paused'){keys={};touchState={left:false,right:false,jump:false,climbUp:false,climbDown:false}}
   state.screen=name;
@@ -5179,14 +5218,14 @@ function showScreen(name){
   if(name==='profile')document.getElementById('profile-screen').classList.add('active');
   var screenMap={story:'story-screen',paused:'pause-screen',dead:'death-screen',win:'win-screen',levels:'level-select',settings:'settings-screen',faq:'faq-screen',records:'records-screen',challenge:'challenge-screen',leaderboard:'leaderboard-screen',profile:'profile-screen'};
   if(screenMap[name]){var el=document.getElementById(screenMap[name]);if(el){el.classList.remove('screen-fadein');void el.offsetWidth;el.classList.add('screen-fadein')}}
-  if(name==='menu'){updateMenuStats();saveProgress();debouncedCloudSave()};
+  if(name==='menu'){stopMusic();updateMenuStats();saveProgress();debouncedCloudSave()};
   if(name==='settings')updateSettingsUI();
   if(name==='records')showRecords();
   if(name==='profile')loadProfile();
 }
 function showStoryScreen(n){if(n<0||n>=LEVELS.length)return;var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
 function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';if(state.level<0||state.level>=LEVELS.length)return;document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name;var flEl=document.getElementById('hud-flashlight');if(flEl)flEl.style.display=(LEVELS[state.level].flashlight)?'block':'none'}
-function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником',darkness:'тьма настигла тебя'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'с начала уровня';var cpBtn=document.getElementById('btn-checkpoint');if(cpBtn)cpBtn.style.display=state.lastCheckpoint?'block':'none';showScreen('dead')}
+function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником',darkness:'тьма настигла тебя'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'с начала уровня';var cpBtn=document.getElementById('btn-checkpoint');if(cpBtn)cpBtn.style.display=state.lastCheckpoint?'block':'none';var dmBtn=document.getElementById('btn-death-menu');if(dmBtn)dmBtn.style.display='block';showScreen('dead')}
 function winLevel(){player.alive=false;var lvl=LEVELS[state.level];spawnParticles(player.body.position.x,player.body.position.y,20,0x6a5aaa,{speed:2.5,life:1,size:3.5,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,12,0x8a7aca,{speed:3.5,life:1.2,size:2.5,gravity:0.1});spawnParticles(player.body.position.x,player.body.position.y,6,0xaaaaff,{speed:1.5,life:0.8,size:1.5,gravity:0});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;var elapsedSec=elapsed/1000;
   // Challenge: check completion and speed conditions
   if(challengeMode&&currentChallenge){
@@ -5604,9 +5643,9 @@ function updateMenuStats(){
   if(chSub){var ch=generateDailyChallenge();chSub.textContent=ch.modifier.name}
   // Version display in menu
   var vEl=document.getElementById('menu-version');
-  if(vEl)vEl.textContent='ALPHA '+VOID_VERSION;
+  if(vEl)vEl.textContent='BETA '+VOID_VERSION;
 }
-function togglePause(){if(state.screen==='playing')showScreen('paused');else if(state.screen==='paused')showScreen('playing')}
+function togglePause(){if(state.screen==='playing'){var mb=document.getElementById('btn-music');if(mb)mb.textContent='звук: '+(soundMuted?'выкл':'вкл');showScreen('paused')}else if(state.screen==='paused')showScreen('playing')}
 
 // ═══ GAME LOOP ═══
 var lastTime=0,lastRenderTime=0;
@@ -5638,7 +5677,7 @@ function gameLoop(timestamp){
   }
   MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
-  if(player.alive&&player.dashing&&player.sprite){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
+  if(player.alive&&player.dashing&&player.sprite&&settings.quality!=='low'){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
   if(player.alive&&player.onGround&&Math.abs(player.body.velocity.x)>3){state.runDustTimer-=rawDt;if(state.runDustTimer<=0){state.runDustTimer=0.08;spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2-2,1,0x3a3a4a,{angle:-Math.PI/2+player.facing*0.4,spread:0.5,speed:0.6,life:0.2,size:1.5,gravity:0.5})}}
   // Update dash trails
@@ -5686,8 +5725,14 @@ function bindUI(){
   document.getElementById('hud-sound').addEventListener('click',function(){toggleSound();updateSoundButton()});
   document.getElementById('hud-sound').addEventListener('touchstart',function(e){e.preventDefault();toggleSound();updateSoundButton()},{passive:false});
   document.getElementById('btn-resume').addEventListener('click',function(){showScreen('playing')});
-  document.getElementById('btn-music').addEventListener('click',function(){toggleMusic();document.getElementById('btn-music').textContent='музыка: '+(musicMuted?'выкл':'вкл')});
-  document.getElementById('btn-quit').addEventListener('click',function(){clearLevel();stopMusic();showScreen('menu')});
+  document.getElementById('btn-music').addEventListener('click',function(){var wasAllMuted=soundMuted&&musicMuted;if(wasAllMuted){soundMuted=false;musicMuted=false;if(sfxGain)sfxGain.gain.value=settings.sfxVolume;if(musicGain)musicGain.gain.value=settings.musicVolume}else{soundMuted=true;musicMuted=true;if(sfxGain)sfxGain.gain.value=0;if(musicGain)musicGain.gain.value=0}document.getElementById('btn-music').textContent='звук: '+(soundMuted?'выкл':'вкл')});
+  document.getElementById('btn-quit').addEventListener('click',function(){if(confirm('Прогресс текущего уровня будет потерян. Выйти?')){clearLevel();stopMusic();showScreen('menu')}});
+  // Pause settings button
+  document.getElementById('btn-pause-settings').addEventListener('click',function(){showScreen('settings')});
+  // Death screen menu button
+  document.getElementById('btn-death-menu').addEventListener('click',function(){clearLevel();stopMusic();showScreen('menu')});
+  // Win screen menu button
+  document.getElementById('btn-win-menu').addEventListener('click',function(){clearLevel();stopMusic();showScreen('menu')});
   document.getElementById('btn-retry').addEventListener('click',function(){state.deaths=0;clearLevel();loadLevel(state.level);startPlaying()});
   document.getElementById('btn-checkpoint').addEventListener('click',function(){if(state.lastCheckpoint){respawnPlayer();startPlaying()}});
   document.getElementById('btn-next').addEventListener('click',function(){
@@ -5707,7 +5752,7 @@ function bindUI(){
   // Settings & FAQ
   document.getElementById('btn-settings').addEventListener('click',function(){showScreen('settings')});
   document.getElementById('btn-faq').addEventListener('click',function(){showScreen('faq')});
-  document.getElementById('btn-settings-back').addEventListener('click',function(){showScreen('menu')});
+  document.getElementById('btn-settings-back').addEventListener('click',function(){if(state.screen==='settings'&&state._prevScreen==='paused'){showScreen('paused')}else{showScreen('menu')}});
   document.getElementById('btn-faq-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-records').addEventListener('click',function(){showScreen('records')});
   document.getElementById('btn-records-back').addEventListener('click',function(){showScreen('menu')});
@@ -5732,6 +5777,7 @@ function bindUI(){
   document.getElementById('btn-autograb-toggle').addEventListener('click',function(){settings.autoGrab=!settings.autoGrab;saveSettings();updateSettingsUI()});
   // FPS toggle (60/120)
   document.getElementById('btn-fps-toggle').addEventListener('click',function(){
+    if(isTelegram){settings.targetFps=60;targetFrameInterval=1000/60;saveSettings();updateSettingsUI();return}
     settings.targetFps=settings.targetFps===60?120:60;
     targetFrameInterval=1000/settings.targetFps;
     saveSettings();updateSettingsUI();
@@ -6512,7 +6558,7 @@ function showAwakening(){
 }
 
 // ═══ INIT ═══
-async function init(){try{loadProgress();loadSettings();loadFromCloud();initSupabase();await initPixi();initInput();bindUI();initTelegramPlayer();registerPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');targetFrameInterval=1000/(settings.targetFps||60);lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
+async function init(){try{loadProgress();loadSettings();loadFromCloud();initSupabase();await initPixi();initInput();bindUI();initTelegramPlayer();registerPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');if(isTelegram&&settings.targetFps>60){settings.targetFps=60;saveSettings();console.log('[VOID] Telegram detected — auto 60fps')}targetFrameInterval=1000/(settings.targetFps||60);lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized',isTelegram?'(Telegram)':'(Browser)');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
 init();
 </script>
 </body>
