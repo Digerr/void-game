@@ -132,11 +132,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  if (!update || !update.message) {
+  if (!update || (!update.message && !update.channel_post)) {
     return res.status(200).json({ ok: true });
   }
 
-  const msg = update.message;
+  // In channels, messages come as channel_post instead of message
+  const msg = update.message || update.channel_post;
   const chatId = msg.chat.id;
   const userId = msg.from?.id;
   const rawText = (msg.text || '').trim();
