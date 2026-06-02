@@ -269,16 +269,16 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .rec-row-time{font-size:.42rem;color:#5a7a6a;font-variant-numeric:tabular-nums;min-width:32px;text-align:right}
 .rec-row-time.na{color:#2a2a3a}
 /* Awakening cutscene */
-#awakening{position:absolute;inset:0;display:none;background:#020208;z-index:150;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+#awakening{position:absolute;inset:0;display:none;background:#020208;z-index:150;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;padding-top:5%}
 #awakening.active{display:flex}
 .aw-dark{position:absolute;inset:0;background:#020208;opacity:1;transition:opacity 2s ease-out;pointer-events:none}
 .aw-dark.fade{opacity:0}
 .aw-creature{position:relative;z-index:2;opacity:0;transform:scale(0.5);transition:all 2s cubic-bezier(.2,0,.2,1)}
 .aw-creature.visible{opacity:1;transform:scale(1)}
 .aw-creature.awake{transform:scale(1.05)}
-.aw-glow{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(90,90,170,.15) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0;transition:opacity 2.5s ease-out;z-index:1}
+.aw-glow{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(90,90,170,.15) 0%,transparent 70%);top:42%;left:50%;transform:translate(-50%,-50%);opacity:0;transition:opacity 2.5s ease-out;z-index:1}
 .aw-glow.visible{opacity:1}
-.aw-text{position:relative;z-index:2;font-size:.75rem;color:#5a5a7a;letter-spacing:.1em;text-align:center;opacity:0;transform:translateY(12px);transition:all 1.5s ease-out;line-height:2;max-width:300px;margin-top:20px}
+.aw-text{position:relative;z-index:2;font-size:.75rem;color:#5a5a7a;letter-spacing:.1em;text-align:center;opacity:0;transform:translateY(12px);transition:all 1.5s ease-out;line-height:2;max-width:300px;margin-top:28px}
 .aw-text.visible{opacity:1;transform:translateY(0)}
 .aw-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;font-size:.4rem;color:#2a2a3a;letter-spacing:.15em;text-transform:uppercase;z-index:2;opacity:0;transition:opacity 1s ease-out}
 .aw-hint.visible{opacity:1;animation:pulse 2s infinite}
@@ -416,7 +416,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 #cutscene-letterbox-top,#cutscene-letterbox-bot{position:absolute;left:0;right:0;height:12%;background:#000;z-index:2;pointer-events:none}
 #cutscene-letterbox-top{top:0}
 #cutscene-letterbox-bot{bottom:0}
-#cutscene-text{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);color:rgba(180,190,220,.95);font-size:.62rem;letter-spacing:.18em;text-align:center;opacity:0;transition:opacity 1s;pointer-events:none;max-width:300px;line-height:1.7;z-index:3;text-shadow:0 0 12px rgba(0,0,0,0.8),0 2px 6px rgba(0,0,0,0.6)}
+#cutscene-text{position:absolute;bottom:15%;left:50%;transform:translateX(-50%);color:rgba(180,190,220,.95);font-size:.62rem;letter-spacing:.18em;text-align:center;opacity:0;transition:opacity 1s;pointer-events:none;max-width:300px;line-height:1.7;z-index:5;text-shadow:0 0 12px rgba(0,0,0,0.8),0 2px 6px rgba(0,0,0,0.6),0 0 20px rgba(0,0,0,0.9),0 0 40px rgba(0,0,0,0.7)}
 #cutscene-text.visible{opacity:1}
 #cutscene-act-label{position:absolute;top:13%;left:50%;transform:translateX(-50%);color:rgba(120,130,160,.5);font-size:.38rem;letter-spacing:.25em;text-transform:uppercase;opacity:0;transition:opacity 1s;pointer-events:none;z-index:3}
 #cutscene-act-label.visible{opacity:1}
@@ -470,7 +470,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     <canvas id="aw-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0"></canvas>
     <div class="aw-glow" id="aw-glow"></div>
     <div class="aw-creature" id="aw-creature">
-      <canvas id="aw-creature-canvas" width="100" height="90" style="width:100px;height:90px"></canvas>
+      <canvas id="aw-creature-canvas" width="100" height="80" style="width:100px;height:80px"></canvas>
     </div>
     <div class="aw-text" id="aw-text">ты очнулся во тьме<br>не помнишь кто ты<br>но нужно двигаться</div>
     <div class="aw-hint" id="aw-hint">нажми чтобы продолжить</div>
@@ -5610,9 +5610,9 @@ var CUTSCENES=[
       {type:'fade',from:1,to:0,duration:1.5},
       {type:'ambient',count:20,color:'rgba(60,80,140,0.15)',duration:9},
       {type:'ground',y:0.72,color:'rgba(42,58,88,0.5)',duration:9},
-      {type:'silhouette',x:0.2,y:0.66,w:18,h:28,color:'rgba(138,154,202,0.9)',action:'run',duration:2.5},
+      {type:'silhouette',x:0.2,y:0.56,sc:1.5,action:'run',duration:2.5},
       {type:'ground',y:0.72,color:'rgba(42,58,88,0.5)',action:'crack',duration:3,startAt:2},
-      {type:'silhouette',x:0.5,y:0.66,w:18,h:28,color:'rgba(138,154,202,0.9)',action:'fall',duration:3.5,startAt:3},
+      {type:'silhouette',x:0.5,y:0.56,sc:1.5,action:'fall',duration:3.5,startAt:3},
       {type:'text',content:'И земля ушла из-под ног',startAt:4.5,duration:3}
     ]
   },
@@ -5621,9 +5621,9 @@ var CUTSCENES=[
     steps:[
       {type:'fade',from:1,to:0,duration:1.5},
       {type:'ambient',count:15,color:'rgba(80,60,140,0.12)',duration:9},
-      {type:'silhouette',x:0.5,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.4)',action:'hang',duration:2.5},
-      {type:'line',x1:0.5,y1:0.08,x2:0.5,y2:0.45,color:'rgba(120,140,220,0.7)',action:'extend',duration:2,startAt:1.5},
-      {type:'silhouette',x:0.5,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.9)',action:'reach',duration:2.5,startAt:3},
+      {type:'silhouette',x:0.5,y:0.42,sc:1.5,action:'hang',duration:2.5},
+      {type:'line',x1:0.5,y1:0.08,x2:0.5,y2:0.38,color:'rgba(120,140,220,0.7)',action:'extend',duration:2,startAt:1.5},
+      {type:'silhouette',x:0.5,y:0.42,sc:1.5,action:'reach',duration:2.5,startAt:3},
       {type:'text',content:'Из темноты протянулась нить',startAt:4.5,duration:3}
     ]
   },
@@ -5632,9 +5632,9 @@ var CUTSCENES=[
     steps:[
       {type:'fade',from:1,to:0,duration:1.5},
       {type:'ambient',count:10,color:'rgba(50,30,60,0.1)',duration:9},
-      {type:'silhouette',x:0.5,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.9)',action:'stand',duration:2},
-      {type:'silhouette',x:0.5,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.7)',action:'dissolve',duration:3.5,startAt:2},
-      {type:'glow',x:0.5,y:0.55,r:5,color:'rgba(200,140,100,0.8)',action:'grow',duration:2.5,startAt:4},
+      {type:'silhouette',x:0.5,y:0.42,sc:1.5,action:'stand',duration:1.9},
+      {type:'silhouette',x:0.5,y:0.42,sc:1.5,action:'dissolve',duration:3.5,startAt:2.1},
+      {type:'glow',x:0.5,y:0.48,r:5,color:'rgba(200,140,100,0.8)',action:'grow',duration:2.5,startAt:4},
       {type:'text',content:'Ты почти исчез. Но что-то держит.',startAt:5,duration:3}
     ]
   },
@@ -5643,10 +5643,10 @@ var CUTSCENES=[
     steps:[
       {type:'fade',from:1,to:0,duration:1.5},
       {type:'ambient',count:30,color:'rgba(40,80,80,0.12)',duration:9},
-      {type:'particles',x:0.5,y:0.5,color:'rgba(138,154,202,0.35)',action:'drift',duration:2.5},
-      {type:'particles',x:0.5,y:0.5,color:'rgba(138,154,202,0.6)',action:'converge',duration:2.5,startAt:2},
-      {type:'silhouette',x:0.5,y:0.55,w:18,h:28,color:'rgba(138,154,202,0.95)',action:'rise',duration:2,startAt:4},
-      {type:'glow',x:0.5,y:0.46,r:4,color:'rgba(200,180,100,0.8)',action:'grow',duration:2,startAt:4.5},
+      {type:'particles',x:0.5,y:0.45,color:'rgba(138,154,202,0.35)',action:'drift',duration:2.5},
+      {type:'particles',x:0.5,y:0.45,color:'rgba(138,154,202,0.6)',action:'converge',duration:2.5,startAt:2},
+      {type:'silhouette',x:0.5,y:0.5,sc:1.5,action:'rise',duration:2,startAt:4},
+      {type:'glow',x:0.5,y:0.4,r:4,color:'rgba(200,180,100,0.8)',action:'grow',duration:2,startAt:4.5},
       {type:'text',content:'Воспоминание отказывается быть забытым',startAt:5,duration:3}
     ]
   },
@@ -5655,10 +5655,10 @@ var CUTSCENES=[
     steps:[
       {type:'fade',from:1,to:0,duration:1.5},
       {type:'ambient',count:12,color:'rgba(100,40,70,0.12)',duration:9},
-      {type:'silhouette',x:0.4,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.8)',action:'stand',duration:2},
+      {type:'silhouette',x:0.35,y:0.42,sc:1.5,action:'stand',duration:1.9},
       {type:'divide',y:0.5,color1:'rgba(15,8,25,0.9)',color2:'rgba(140,160,220,0.12)',duration:2.5,startAt:2},
-      {type:'silhouette',x:0.4,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.95)',action:'walk_right',duration:2.5,startAt:3.5},
-      {type:'glow',x:0.72,y:0.5,r:25,color:'rgba(180,200,240,0.2)',action:'grow',duration:2.5,startAt:4},
+      {type:'silhouette',x:0.35,y:0.42,sc:1.5,action:'walk_right',duration:2.5,startAt:3.5},
+      {type:'glow',x:0.72,y:0.42,r:25,color:'rgba(180,200,240,0.2)',action:'grow',duration:2.5,startAt:4},
       {type:'text',content:'Он выбрал вернуться',startAt:5,duration:3}
     ]
   }
@@ -5714,93 +5714,112 @@ function playCutscene(idx,callback){
       particles.push({x:cx+(Math.random()-0.5)*100,y:cy+(Math.random()-0.5)*100,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,r:1.2+Math.random()*2,phase:Math.random()*Math.PI*2});
     }
   }
-  // Silhouette drawing — cinematic style with glow
-  function drawSilhouette(ctx2,sx,sy,w,h,color,alpha,legPhase,armPhase,emotion){
+  // Silhouette drawing — matching logo cat character style
+  function drawSilhouette(ctx2,sx,sy,sc,alpha,legPhase,armPhase,emotion,facing){
     ctx2.save();
+    ctx2.translate(sx,sy);
+    var f=facing||1;
+    ctx2.scale(f*sc,sc);
     ctx2.globalAlpha=alpha;
-    var headY=sy-h*0.35;
-    var bob=sy*0;
-    // Aura glow
-    if(alpha>0.2){
-      ctx2.globalAlpha=alpha*0.08;
-      var auraG=ctx2.createRadialGradient(sx,sy,4,sx,sy,w*2.2);
-      auraG.addColorStop(0,'rgba(120,140,210,1)');auraG.addColorStop(1,'rgba(120,140,210,0)');
-      ctx2.fillStyle=auraG;ctx2.beginPath();ctx2.arc(sx,sy,w*2.2,0,Math.PI*2);ctx2.fill();
+    var bob=0;
+    // === AURA ===
+    if(alpha>0.15){
+      ctx2.globalAlpha=alpha*0.06;
+      var aura=ctx2.createRadialGradient(0,bob,4,0,bob,22);
+      aura.addColorStop(0,'rgba(120,140,210,1)');aura.addColorStop(1,'rgba(120,140,210,0)');
+      ctx2.fillStyle=aura;ctx2.beginPath();ctx2.arc(0,bob,22,0,Math.PI*2);ctx2.fill();
       ctx2.globalAlpha=alpha;
     }
-    // Scarf — two-layer, flowing
-    var scarfWave=Math.sin((legPhase||0)*0.5)*4;
-    ctx2.strokeStyle=color;ctx2.lineWidth=2.5;ctx2.lineCap='round';
-    ctx2.beginPath();ctx2.moveTo(sx-2,headY+8);ctx2.quadraticCurveTo(sx-6+scarfWave,headY+12,sx-8+scarfWave*1.5,headY+18);ctx2.stroke();
-    ctx2.globalAlpha=alpha*0.5;ctx2.lineWidth=1.8;
-    ctx2.beginPath();ctx2.moveTo(sx-1,headY+9);ctx2.quadraticCurveTo(sx-4+scarfWave,headY+14,sx-6+scarfWave*1.2,headY+20);ctx2.stroke();
+    // === SCARF ===
+    var scarfWave=Math.sin((legPhase||0)*0.5)*0.15;
+    ctx2.strokeStyle='rgba(120,80,160,0.8)';ctx2.lineWidth=2.5;ctx2.lineCap='round';
+    var scarfX=-5+Math.sin(scarfWave)*5,scarfY=bob-3+Math.sin((legPhase||0)*2)*1.5;
+    ctx2.beginPath();ctx2.moveTo(0,bob-8);ctx2.quadraticCurveTo(scarfX,scarfY+3,scarfX-3,scarfY+8);ctx2.stroke();
+    ctx2.strokeStyle='rgba(100,65,140,0.5)';ctx2.lineWidth=1.8;
+    ctx2.beginPath();ctx2.moveTo(1,bob-7);ctx2.quadraticCurveTo(scarfX+2,scarfY+5,scarfX-1,scarfY+10);ctx2.stroke();
     ctx2.globalAlpha=alpha;
-    // Body — ellipse (like logo character)
-    ctx2.fillStyle=color;
-    ctx2.beginPath();ctx2.ellipse(sx,sy+2,w*0.36,h*0.3,0,0,Math.PI*2);ctx2.fill();
-    // Body highlight
-    ctx2.fillStyle='rgba(180,180,210,0.15)';
-    ctx2.beginPath();ctx2.ellipse(sx-1,sy,w*0.2,h*0.16,0,0,Math.PI*2);ctx2.fill();
-    // Head — circle
-    ctx2.fillStyle=color;
-    ctx2.beginPath();ctx2.arc(sx,headY,w*0.47,0,Math.PI*2);ctx2.fill();
-    // Head highlight
-    ctx2.fillStyle='rgba(180,180,210,0.12)';
-    ctx2.beginPath();ctx2.arc(sx-2,headY-2,w*0.22,0,Math.PI*2);ctx2.fill();
-    // Ears — cat ears like logo character
-    ctx2.fillStyle=color;
-    ctx2.beginPath();ctx2.moveTo(sx-w*0.28,headY-w*0.28);ctx2.lineTo(sx-w*0.5,headY-w*0.78);ctx2.lineTo(sx-w*0.12,headY-w*0.38);ctx2.closePath();ctx2.fill();
-    ctx2.beginPath();ctx2.moveTo(sx+w*0.28,headY-w*0.28);ctx2.lineTo(sx+w*0.5,headY-w*0.78);ctx2.lineTo(sx+w*0.12,headY-w*0.38);ctx2.closePath();ctx2.fill();
-    // Inner ears
-    ctx2.fillStyle='rgba(160,130,190,0.35)';
-    ctx2.beginPath();ctx2.moveTo(sx-w*0.24,headY-w*0.3);ctx2.lineTo(sx-w*0.42,headY-w*0.65);ctx2.lineTo(sx-w*0.16,headY-w*0.37);ctx2.closePath();ctx2.fill();
-    ctx2.beginPath();ctx2.moveTo(sx+w*0.24,headY-w*0.3);ctx2.lineTo(sx+w*0.42,headY-w*0.65);ctx2.lineTo(sx+w*0.16,headY-w*0.37);ctx2.closePath();ctx2.fill();
-    // Eyes
-    if(alpha>0.3){
-      var isHappy=emotion==='happy';
-      var isSurprised=emotion==='surprised'||emotion==='focused';
+    // === BODY ===
+    ctx2.fillStyle='rgba(85,85,125,0.9)';
+    ctx2.beginPath();ctx2.ellipse(0,bob+2,6.5,8.5,0,0,Math.PI*2);ctx2.fill();
+    ctx2.fillStyle='rgba(115,115,155,0.25)';
+    ctx2.beginPath();ctx2.ellipse(-1,bob,3.5,4.5,0,0,Math.PI*2);ctx2.fill();
+    // === HEAD ===
+    var headY=bob-11;
+    ctx2.fillStyle='rgba(90,90,135,0.95)';
+    ctx2.beginPath();ctx2.arc(0,headY,8.5,0,Math.PI*2);ctx2.fill();
+    ctx2.fillStyle='rgba(140,140,185,0.2)';
+    ctx2.beginPath();ctx2.arc(-1.5,headY-2.5,4,0,Math.PI*2);ctx2.fill();
+    // === EARS ===
+    ctx2.fillStyle='rgba(90,90,135,0.9)';
+    ctx2.beginPath();ctx2.moveTo(-5,headY-5);ctx2.lineTo(-9,headY-14);ctx2.lineTo(-2,headY-7);ctx2.closePath();ctx2.fill();
+    ctx2.beginPath();ctx2.moveTo(5,headY-5);ctx2.lineTo(9,headY-14);ctx2.lineTo(2,headY-7);ctx2.closePath();ctx2.fill();
+    ctx2.fillStyle='rgba(130,100,160,0.45)';
+    ctx2.beginPath();ctx2.moveTo(-4,headY-6);ctx2.lineTo(-7,headY-12);ctx2.lineTo(-3,headY-7);ctx2.closePath();ctx2.fill();
+    ctx2.beginPath();ctx2.moveTo(4,headY-6);ctx2.lineTo(7,headY-12);ctx2.lineTo(3,headY-7);ctx2.closePath();ctx2.fill();
+    // === EYES ===
+    if(alpha>0.25){
+      var eyeY=headY;
       ctx2.fillStyle='rgba(25,30,55,0.9)';
-      if(isHappy){
-        ctx2.beginPath();ctx2.ellipse(sx-w*0.14,headY+1,w*0.18,h*0.07,0,0,Math.PI);ctx2.fill();
-        ctx2.beginPath();ctx2.ellipse(sx+w*0.14,headY+1,w*0.18,h*0.07,0,0,Math.PI);ctx2.fill();
-      }else if(isSurprised){
-        ctx2.beginPath();ctx2.arc(sx-w*0.14,headY,w*0.1,0,Math.PI*2);ctx2.fill();
-        ctx2.beginPath();ctx2.arc(sx+w*0.14,headY,w*0.1,0,Math.PI*2);ctx2.fill();
-      }else{
-        ctx2.beginPath();ctx2.ellipse(sx-w*0.14,headY,w*0.17,h*0.17,0,0,Math.PI*2);ctx2.fill();
-        ctx2.beginPath();ctx2.ellipse(sx+w*0.14,headY,w*0.17,h*0.17,0,0,Math.PI*2);ctx2.fill();
-      }
-      // Eye highlights (only if not happy closed eyes)
-      if(!isHappy){
-        ctx2.fillStyle='rgba(200,215,245,0.85)';
-        ctx2.beginPath();ctx2.arc(sx-w*0.09,headY-1,1.2,0,Math.PI*2);ctx2.fill();
-        ctx2.beginPath();ctx2.arc(sx+w*0.19,headY-1,1.2,0,Math.PI*2);ctx2.fill();
-      }
-    }
-    // Mouth
-    if(alpha>0.4){
-      var isCurious=emotion==='curious'||emotion==='focused';
       if(emotion==='happy'){
-        ctx2.strokeStyle='rgba(80,85,115,0.5)';ctx2.lineWidth=1;ctx2.lineCap='round';
-        ctx2.beginPath();ctx2.arc(sx,headY+w*0.17,w*0.14,0.2,Math.PI-0.2);ctx2.stroke();
-      }else if(isCurious){
-        ctx2.strokeStyle='rgba(80,85,115,0.4)';ctx2.lineWidth=0.8;ctx2.lineCap='round';
-        ctx2.beginPath();ctx2.moveTo(sx-w*0.1,headY+w*0.2);ctx2.lineTo(sx+w*0.05,headY+w*0.17);ctx2.lineTo(sx+w*0.1,headY+w*0.22);ctx2.stroke();
+        // Happy — closed crescent eyes
+        ctx2.beginPath();ctx2.ellipse(-3.5,eyeY+1.5,3.2,1.3,0,0,Math.PI);ctx2.fill();
+        ctx2.beginPath();ctx2.ellipse(3.5,eyeY+1.5,3.2,1.3,0,0,Math.PI);ctx2.fill();
+      }else if(emotion==='surprised'||emotion==='focused'){
+        // Surprised/focused — small pupils
+        ctx2.beginPath();ctx2.ellipse(-3.5,eyeY,3,3,0,0,Math.PI*2);ctx2.fill();
+        ctx2.beginPath();ctx2.ellipse(3.5,eyeY,3,3,0,0,Math.PI*2);ctx2.fill();
+        ctx2.fillStyle='rgba(195,205,240,0.9)';
+        ctx2.beginPath();ctx2.arc(-2.5,eyeY-1.2,1.2,0,Math.PI*2);ctx2.fill();
+        ctx2.beginPath();ctx2.arc(4.5,eyeY-1.2,1.2,0,Math.PI*2);ctx2.fill();
+        ctx2.fillStyle='rgba(220,225,255,0.5)';
+        ctx2.beginPath();ctx2.arc(-4.5,eyeY+0.3,0.6,0,Math.PI*2);ctx2.fill();
+        ctx2.beginPath();ctx2.arc(2.5,eyeY+0.3,0.6,0,Math.PI*2);ctx2.fill();
+        // Surprised — even smaller pupils
+        if(emotion==='surprised'){
+          ctx2.fillStyle='rgba(25,30,55,0.9)';
+          ctx2.beginPath();ctx2.arc(-3.5,eyeY,1.8,0,Math.PI*2);ctx2.fill();
+          ctx2.beginPath();ctx2.arc(3.5,eyeY,1.8,0,Math.PI*2);ctx2.fill();
+        }
       }else{
-        ctx2.strokeStyle='rgba(80,85,115,0.3)';ctx2.lineWidth=0.8;ctx2.lineCap='round';
-        ctx2.beginPath();ctx2.moveTo(sx-w*0.08,headY+w*0.19);ctx2.lineTo(sx+w*0.08,headY+w*0.19);ctx2.stroke();
+        // Neutral/curious — normal eyes with highlights
+        ctx2.beginPath();ctx2.ellipse(-3.5,eyeY,3,3,0,0,Math.PI*2);ctx2.fill();
+        ctx2.beginPath();ctx2.ellipse(3.5,eyeY,3,3,0,0,Math.PI*2);ctx2.fill();
+        ctx2.fillStyle='rgba(195,205,240,0.9)';
+        ctx2.beginPath();ctx2.arc(-2.5,eyeY-1.2,1.2,0,Math.PI*2);ctx2.fill();
+        ctx2.beginPath();ctx2.arc(4.5,eyeY-1.2,1.2,0,Math.PI*2);ctx2.fill();
+        ctx2.fillStyle='rgba(220,225,255,0.5)';
+        ctx2.beginPath();ctx2.arc(-4.5,eyeY+0.3,0.6,0,Math.PI*2);ctx2.fill();
+        ctx2.beginPath();ctx2.arc(2.5,eyeY+0.3,0.6,0,Math.PI*2);ctx2.fill();
       }
     }
-    // Arms
+    // === MOUTH ===
+    if(alpha>0.35){
+      if(emotion==='happy'){
+        ctx2.strokeStyle='rgba(55,60,95,0.65)';ctx2.lineWidth=1.3;ctx2.lineCap='round';
+        ctx2.beginPath();ctx2.arc(0,headY+3,2.5,0.2,Math.PI-0.2);ctx2.stroke();
+      }else if(emotion==='surprised'){
+        ctx2.fillStyle='rgba(45,50,85,0.5)';
+        ctx2.beginPath();ctx2.ellipse(0,headY+3.5,1.5,2,0,0,Math.PI*2);ctx2.fill();
+      }else if(emotion==='curious'||emotion==='focused'){
+        ctx2.strokeStyle='rgba(55,60,95,0.5)';ctx2.lineWidth=1;ctx2.lineCap='round';
+        ctx2.beginPath();ctx2.moveTo(-2,headY+3.5);ctx2.lineTo(1,headY+3);ctx2.lineTo(2,headY+4);ctx2.stroke();
+      }else{
+        ctx2.strokeStyle='rgba(55,60,95,0.4)';ctx2.lineWidth=1;ctx2.lineCap='round';
+        ctx2.beginPath();ctx2.moveTo(-1.5,headY+3.5);ctx2.lineTo(1.5,headY+3.5);ctx2.stroke();
+      }
+    }
+    // === ARMS ===
     var ap=armPhase||0;
-    ctx2.strokeStyle=color;ctx2.lineWidth=2.2;ctx2.lineCap='round';
-    ctx2.beginPath();ctx2.moveTo(sx-w*0.28,sy-2);ctx2.lineTo(sx-w*0.45+Math.sin(ap)*w*0.15,sy+h*0.1+Math.cos(ap)*h*0.08);ctx2.stroke();
-    ctx2.beginPath();ctx2.moveTo(sx+w*0.28,sy-2);ctx2.lineTo(sx+w*0.45+Math.sin(ap+Math.PI)*w*0.15,sy+h*0.1+Math.cos(ap+Math.PI)*h*0.08);ctx2.stroke();
-    // Legs
+    var armY=bob;
+    ctx2.strokeStyle='rgba(85,85,125,0.8)';ctx2.lineWidth=2.2;ctx2.lineCap='round';
+    ctx2.beginPath();ctx2.moveTo(-5,armY);ctx2.lineTo(-7+Math.sin(ap)*2,armY+6+Math.cos(ap)*1.5);ctx2.stroke();
+    ctx2.beginPath();ctx2.moveTo(5,armY);ctx2.lineTo(7+Math.sin(ap+Math.PI)*2,armY+6+Math.cos(ap+Math.PI)*1.5);ctx2.stroke();
+    // === LEGS ===
     var lp=legPhase||0;
-    ctx2.lineWidth=2.2;
-    ctx2.beginPath();ctx2.moveTo(sx-w*0.1,sy+h*0.2);ctx2.lineTo(sx-w*0.15+Math.sin(lp)*w*0.2,sy+h*0.45);ctx2.stroke();
-    ctx2.beginPath();ctx2.moveTo(sx+w*0.1,sy+h*0.2);ctx2.lineTo(sx+w*0.15+Math.sin(lp+Math.PI)*w*0.2,sy+h*0.45);ctx2.stroke();
+    var legY=bob+8;
+    ctx2.strokeStyle='rgba(75,75,115,0.8)';ctx2.lineWidth=2.2;ctx2.lineCap='round';
+    ctx2.beginPath();ctx2.moveTo(-3,legY);ctx2.lineTo(-3,legY+7+Math.sin(lp)*0.5);ctx2.stroke();
+    ctx2.beginPath();ctx2.moveTo(3,legY);ctx2.lineTo(3,legY+7-Math.sin(lp)*0.5);ctx2.stroke();
     ctx2.restore();
   }
   // Track if ambient was initialized
@@ -5835,7 +5854,8 @@ function playCutscene(idx,callback){
       var stepElapsed=elapsed-stepStart;
       var stepProgress=Math.min(stepElapsed/step.duration,1);
       // Stop drawing steps that have completed (prevents doubling)
-      if(stepElapsed>step.duration&&step.type==='silhouette'&&step.action!=='dissolve')continue;
+      // Use >= to prevent 1-frame overlap between ending step and starting step
+      if(stepElapsed>=step.duration&&step.type==='silhouette'&&step.action!=='dissolve')continue;
       if(step.type==='fade'){
         // Fade from black at start
         if(step.from!==undefined){
@@ -5844,36 +5864,37 @@ function playCutscene(idx,callback){
         }
       }else if(step.type==='silhouette'){
         var sx2=step.x*W,sy2=step.y*H;
+        var sc2=step.sc||1.5;
         if(step.action==='run'){
           sx2=(step.x+stepProgress*0.35)*W;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.5+0.5*stepProgress,stepElapsed*7,0,'focused');
+          drawSilhouette(ctx,sx2,sy2,sc2,0.5+0.5*stepProgress,stepElapsed*7,0,'focused',1);
         }else if(step.action==='fall'){
           sy2=(step.y+stepProgress*stepProgress*0.45)*H;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,1-stepProgress*0.4,stepElapsed*0.5,-stepProgress*2.5,'surprised');
+          drawSilhouette(ctx,sx2,sy2,sc2,1-stepProgress*0.4,stepElapsed*0.5,-stepProgress*2.5,'surprised',1);
         }else if(step.action==='hang'){
           var sway=Math.sin(stepElapsed*1.5)*8;
-          drawSilhouette(ctx,sx2+sway,sy2,step.w,step.h,step.color,0.25+0.15*Math.sin(stepElapsed*2),0,0,'curious');
+          drawSilhouette(ctx,sx2+sway,sy2,sc2,0.25+0.15*Math.sin(stepElapsed*2),0,0,'curious',1);
         }else if(step.action==='reach'){
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.4+0.6*stepProgress,stepElapsed*0.3,-1.2+stepProgress*0.7,'focused');
+          drawSilhouette(ctx,sx2,sy2,sc2,0.4+0.6*stepProgress,stepElapsed*0.3,-1.2+stepProgress*0.7,'focused',1);
         }else if(step.action==='stand'){
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.7+0.3*Math.sin(stepElapsed*0.8),stepElapsed*0.1,0,stepElapsed>1?'curious':'neutral');
+          drawSilhouette(ctx,sx2,sy2,sc2,0.7+0.3*Math.sin(stepElapsed*0.8),stepElapsed*0.1,0,stepElapsed>1?'curious':'neutral',1);
         }else if(step.action==='dissolve'){
           var alpha=1-stepProgress;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,alpha*0.8,stepElapsed*0.1,0,'surprised');
+          drawSilhouette(ctx,sx2,sy2,sc2,alpha*0.8,stepElapsed*0.1,0,'surprised',1);
           // Dissolve particles rising
           var pCount=Math.floor(stepProgress*40);
           for(var p=0;p<pCount;p++){
-            var px=sx2+(Math.random()-0.5)*step.w*3;
-            var py=sy2+(Math.random()-0.5)*step.h*2-stepProgress*30;
+            var px=sx2+(Math.random()-0.5)*30;
+            var py=sy2+(Math.random()-0.5)*40-stepProgress*30;
             ctx.beginPath();ctx.arc(px,py,0.8+Math.random()*1.5,0,Math.PI*2);
-            ctx.fillStyle=step.color;ctx.globalAlpha=alpha*0.3*Math.random();ctx.fill();ctx.globalAlpha=1;
+            ctx.fillStyle='rgba(85,85,125,1)';ctx.globalAlpha=alpha*0.3*Math.random();ctx.fill();ctx.globalAlpha=1;
           }
         }else if(step.action==='rise'){
           sy2=(0.65-stepProgress*0.18)*H;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.2+0.8*stepProgress,stepElapsed*0.5,0,stepProgress>0.5?'happy':'focused');
+          drawSilhouette(ctx,sx2,sy2,sc2,0.2+0.8*stepProgress,stepElapsed*0.5,0,stepProgress>0.5?'happy':'focused',1);
         }else if(step.action==='walk_right'){
           sx2=(step.x+stepProgress*0.22)*W;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.6+0.4*stepProgress,stepElapsed*5,0,'happy');
+          drawSilhouette(ctx,sx2,sy2,sc2,0.6+0.4*stepProgress,stepElapsed*5,0,'happy',1);
         }
       }else if(step.type==='ground'){
         var gy=step.y*H;
@@ -7414,58 +7435,56 @@ function showAwakening(){
   var el=document.getElementById('awakening');
   if(!el)return;
   el.classList.add('active');
-  // Draw creature on mini canvas — matching the menu logo character style
+  // Draw creature on mini canvas — matching the logo cat character exactly
   var cc=document.getElementById('aw-creature-canvas');
   if(cc){
     var ctx=cc.getContext('2d');
-    ctx.clearRect(0,0,100,90);
-    var skin=getCurrentSkin();
-    var bodyCol='#'+skin.body.toString(16).padStart(6,'0');
-    var headCol='#'+skin.head.toString(16).padStart(6,'0');
-    var scarfCol='#'+skin.scarf.toString(16).padStart(6,'0');
-    var cx=50,cy=48;
-    // Aura
+    ctx.clearRect(0,0,100,80);
+    var cx=50,cy=40,bob=0;
+    // === AURA ===
     ctx.globalAlpha=0.06;
-    var aura=ctx.createRadialGradient(cx,cy,4,cx,cy,30);
+    var aura=ctx.createRadialGradient(cx,cy+bob,4,cx,cy+bob,30);
     aura.addColorStop(0,'rgba(120,140,210,1)');aura.addColorStop(1,'rgba(120,140,210,0)');
-    ctx.fillStyle=aura;ctx.beginPath();ctx.arc(cx,cy,30,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=aura;ctx.beginPath();ctx.arc(cx,cy+bob,30,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=1;
-    // Scarf
-    ctx.strokeStyle=scarfCol;ctx.lineWidth=2.5;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(cx-2,cy-8);ctx.quadraticCurveTo(cx-8,cy-4,cx-10,cy+2);ctx.stroke();
-    ctx.strokeStyle=scarfCol;ctx.lineWidth=1.8;ctx.globalAlpha=0.5;
-    ctx.beginPath();ctx.moveTo(cx-1,cy-7);ctx.quadraticCurveTo(cx-6,cy-2,cx-8,cy+4);ctx.stroke();
-    ctx.globalAlpha=1;
-    // Body
-    ctx.fillStyle=bodyCol;
-    ctx.beginPath();ctx.ellipse(cx,cy+2,9,11,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='rgba(140,140,180,0.2)';
-    ctx.beginPath();ctx.ellipse(cx-2,cy,5,6,0,0,Math.PI*2);ctx.fill();
-    // Head
-    var headY=cy-14;
-    ctx.fillStyle=headCol;
-    ctx.beginPath();ctx.arc(cx,headY,11,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='rgba(150,150,195,0.18)';
-    ctx.beginPath();ctx.arc(cx-2,headY-3,5,0,Math.PI*2);ctx.fill();
-    // Ears
-    ctx.fillStyle=headCol;
-    ctx.beginPath();ctx.moveTo(cx-7,headY-6);ctx.lineTo(cx-12,headY-18);ctx.lineTo(cx-3,headY-9);ctx.closePath();ctx.fill();
-    ctx.beginPath();ctx.moveTo(cx+7,headY-6);ctx.lineTo(cx+12,headY-18);ctx.lineTo(cx+3,headY-9);ctx.closePath();ctx.fill();
-    ctx.fillStyle='rgba(130,100,160,0.4)';
-    ctx.beginPath();ctx.moveTo(cx-6,headY-7);ctx.lineTo(cx-10,headY-15);ctx.lineTo(cx-4,headY-9);ctx.closePath();ctx.fill();
-    ctx.beginPath();ctx.moveTo(cx+6,headY-7);ctx.lineTo(cx+10,headY-15);ctx.lineTo(cx+4,headY-9);ctx.closePath();ctx.fill();
-    // Eyes (closed)
-    ctx.fillStyle='#1a1a3a';
-    ctx.beginPath();ctx.ellipse(cx-4,headY,3.5,0.6,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(cx+4,headY,3.5,0.6,0,0,Math.PI*2);ctx.fill();
-    // Arms
-    ctx.strokeStyle=bodyCol;ctx.lineWidth=2.2;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(cx-7,cy);ctx.lineTo(cx-10,cy+8);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx+7,cy);ctx.lineTo(cx+10,cy+8);ctx.stroke();
-    // Legs
-    ctx.strokeStyle=bodyCol;ctx.lineWidth=2.2;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(cx-4,cy+10);ctx.lineTo(cx-4,cy+18);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx+4,cy+10);ctx.lineTo(cx+4,cy+18);ctx.stroke();
+    // === SCARF ===
+    ctx.strokeStyle='rgba(120,80,160,0.8)';ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(cx,cy+bob-8);ctx.quadraticCurveTo(cx-7,cy+bob-3,cx-10,cy+bob+2);ctx.stroke();
+    ctx.strokeStyle='rgba(100,65,140,0.5)';ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(cx+1,cy+bob-7);ctx.quadraticCurveTo(cx-5,cy+bob-2,cx-8,cy+bob+4);ctx.stroke();
+    // === BODY ===
+    ctx.fillStyle='rgba(85,85,125,0.9)';
+    ctx.beginPath();ctx.ellipse(cx,cy+bob+2,6.5,8.5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(115,115,155,0.25)';
+    ctx.beginPath();ctx.ellipse(cx-1,cy+bob,3.5,4.5,0,0,Math.PI*2);ctx.fill();
+    // === HEAD ===
+    var headY=cy+bob-11;
+    ctx.fillStyle='rgba(90,90,135,0.95)';
+    ctx.beginPath();ctx.arc(cx,headY,8.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(140,140,185,0.2)';
+    ctx.beginPath();ctx.arc(cx-1.5,headY-2.5,4,0,Math.PI*2);ctx.fill();
+    // === EARS ===
+    ctx.fillStyle='rgba(90,90,135,0.9)';
+    ctx.beginPath();ctx.moveTo(cx-5,headY-5);ctx.lineTo(cx-9,headY-14);ctx.lineTo(cx-2,headY-7);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(cx+5,headY-5);ctx.lineTo(cx+9,headY-14);ctx.lineTo(cx+2,headY-7);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(130,100,160,0.45)';
+    ctx.beginPath();ctx.moveTo(cx-4,headY-6);ctx.lineTo(cx-7,headY-12);ctx.lineTo(cx-3,headY-7);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.moveTo(cx+4,headY-6);ctx.lineTo(cx+7,headY-12);ctx.lineTo(cx+3,headY-7);ctx.closePath();ctx.fill();
+    // === EYES (closed — sleeping) ===
+    ctx.fillStyle='rgba(25,30,55,0.9)';
+    ctx.beginPath();ctx.ellipse(cx-3.5,headY,3,0.6,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(cx+3.5,headY,3,0.6,0,0,Math.PI*2);ctx.fill();
+    // === MOUTH (neutral) ===
+    ctx.strokeStyle='rgba(55,60,95,0.4)';ctx.lineWidth=1;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(cx-1.5,headY+3.5);ctx.lineTo(cx+1.5,headY+3.5);ctx.stroke();
+    // === ARMS ===
+    ctx.strokeStyle='rgba(85,85,125,0.8)';ctx.lineWidth=2.2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(cx-5,cy+bob);ctx.lineTo(cx-7,cy+bob+6);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+5,cy+bob);ctx.lineTo(cx+7,cy+bob+6);ctx.stroke();
+    // === LEGS ===
+    ctx.strokeStyle='rgba(75,75,115,0.8)';ctx.lineWidth=2.2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(cx-3,cy+bob+8);ctx.lineTo(cx-3,cy+bob+15);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx+3,cy+bob+8);ctx.lineTo(cx+3,cy+bob+15);ctx.stroke();
   }
   // Draw floating particles on background canvas
   var bc=document.getElementById('aw-canvas');
@@ -7491,68 +7510,63 @@ function showAwakening(){
   setTimeout(function(){document.getElementById('aw-glow').classList.add('visible')},500);
   setTimeout(function(){
     document.getElementById('aw-creature').classList.add('visible');
-    // Open eyes on creature canvas — full detail matching menu character
+    // Open eyes on creature canvas — matching logo cat character exactly
     var cc2=document.getElementById('aw-creature-canvas');
     if(cc2){
       var ctx2=cc2.getContext('2d');
-      ctx2.clearRect(0,0,100,90);
-      var skin2=getCurrentSkin();
-      var b2='#'+skin2.body.toString(16).padStart(6,'0');
-      var h2='#'+skin2.head.toString(16).padStart(6,'0');
-      var s2='#'+skin2.scarf.toString(16).padStart(6,'0');
-      var cx2=50,cy2=48;
-      // Aura
+      ctx2.clearRect(0,0,100,80);
+      var cx2=50,cy2=40,bob2=0;
+      // === AURA ===
       ctx2.globalAlpha=0.08;
-      var aura2=ctx2.createRadialGradient(cx2,cy2,4,cx2,cy2,30);
+      var aura2=ctx2.createRadialGradient(cx2,cy2+bob2,4,cx2,cy2+bob2,30);
       aura2.addColorStop(0,'rgba(120,140,210,1)');aura2.addColorStop(1,'rgba(120,140,210,0)');
-      ctx2.fillStyle=aura2;ctx2.beginPath();ctx2.arc(cx2,cy2,30,0,Math.PI*2);ctx2.fill();
+      ctx2.fillStyle=aura2;ctx2.beginPath();ctx2.arc(cx2,cy2+bob2,30,0,Math.PI*2);ctx2.fill();
       ctx2.globalAlpha=1;
-      // Scarf
-      ctx2.strokeStyle=s2;ctx2.lineWidth=2.5;ctx2.lineCap='round';
-      ctx2.beginPath();ctx2.moveTo(cx2-2,cy2-8);ctx2.quadraticCurveTo(cx2-8,cy2-4,cx2-10,cy2+2);ctx2.stroke();
-      ctx2.strokeStyle=s2;ctx2.lineWidth=1.8;ctx2.globalAlpha=0.5;
-      ctx2.beginPath();ctx2.moveTo(cx2-1,cy2-7);ctx2.quadraticCurveTo(cx2-6,cy2-2,cx2-8,cy2+4);ctx2.stroke();
-      ctx2.globalAlpha=1;
-      // Body
-      ctx2.fillStyle=b2;
-      ctx2.beginPath();ctx2.ellipse(cx2,cy2+2,9,11,0,0,Math.PI*2);ctx2.fill();
-      ctx2.fillStyle='rgba(140,140,180,0.2)';
-      ctx2.beginPath();ctx2.ellipse(cx2-2,cy2,5,6,0,0,Math.PI*2);ctx2.fill();
-      // Head
-      var headY2=cy2-14;
-      ctx2.fillStyle=h2;
-      ctx2.beginPath();ctx2.arc(cx2,headY2,11,0,Math.PI*2);ctx2.fill();
-      ctx2.fillStyle='rgba(150,150,195,0.18)';
-      ctx2.beginPath();ctx2.arc(cx2-2,headY2-3,5,0,Math.PI*2);ctx2.fill();
-      // Ears
-      ctx2.fillStyle=h2;
-      ctx2.beginPath();ctx2.moveTo(cx2-7,headY2-6);ctx2.lineTo(cx2-12,headY2-18);ctx2.lineTo(cx2-3,headY2-9);ctx2.closePath();ctx2.fill();
-      ctx2.beginPath();ctx2.moveTo(cx2+7,headY2-6);ctx2.lineTo(cx2+12,headY2-18);ctx2.lineTo(cx2+3,headY2-9);ctx2.closePath();ctx2.fill();
-      ctx2.fillStyle='rgba(130,100,160,0.4)';
-      ctx2.beginPath();ctx2.moveTo(cx2-6,headY2-7);ctx2.lineTo(cx2-10,headY2-15);ctx2.lineTo(cx2-4,headY2-9);ctx2.closePath();ctx2.fill();
-      ctx2.beginPath();ctx2.moveTo(cx2+6,headY2-7);ctx2.lineTo(cx2+10,headY2-15);ctx2.lineTo(cx2+4,headY2-9);ctx2.closePath();ctx2.fill();
-      // Eyes OPEN
-      ctx2.fillStyle='#1a1a3a';
-      ctx2.beginPath();ctx2.ellipse(cx2-4,headY2,3.5,3.5,0,0,Math.PI*2);ctx2.fill();
-      ctx2.beginPath();ctx2.ellipse(cx2+4,headY2,3.5,3.5,0,0,Math.PI*2);ctx2.fill();
+      // === SCARF ===
+      ctx2.strokeStyle='rgba(120,80,160,0.8)';ctx2.lineWidth=2.5;ctx2.lineCap='round';
+      ctx2.beginPath();ctx2.moveTo(cx2,cy2+bob2-8);ctx2.quadraticCurveTo(cx2-7,cy2+bob2-3,cx2-10,cy2+bob2+2);ctx2.stroke();
+      ctx2.strokeStyle='rgba(100,65,140,0.5)';ctx2.lineWidth=1.8;
+      ctx2.beginPath();ctx2.moveTo(cx2+1,cy2+bob2-7);ctx2.quadraticCurveTo(cx2-5,cy2+bob2-2,cx2-8,cy2+bob2+4);ctx2.stroke();
+      // === BODY ===
+      ctx2.fillStyle='rgba(85,85,125,0.9)';
+      ctx2.beginPath();ctx2.ellipse(cx2,cy2+bob2+2,6.5,8.5,0,0,Math.PI*2);ctx2.fill();
+      ctx2.fillStyle='rgba(115,115,155,0.25)';
+      ctx2.beginPath();ctx2.ellipse(cx2-1,cy2+bob2,3.5,4.5,0,0,Math.PI*2);ctx2.fill();
+      // === HEAD ===
+      var headY2=cy2+bob2-11;
+      ctx2.fillStyle='rgba(90,90,135,0.95)';
+      ctx2.beginPath();ctx2.arc(cx2,headY2,8.5,0,Math.PI*2);ctx2.fill();
+      ctx2.fillStyle='rgba(140,140,185,0.2)';
+      ctx2.beginPath();ctx2.arc(cx2-1.5,headY2-2.5,4,0,Math.PI*2);ctx2.fill();
+      // === EARS ===
+      ctx2.fillStyle='rgba(90,90,135,0.9)';
+      ctx2.beginPath();ctx2.moveTo(cx2-5,headY2-5);ctx2.lineTo(cx2-9,headY2-14);ctx2.lineTo(cx2-2,headY2-7);ctx2.closePath();ctx2.fill();
+      ctx2.beginPath();ctx2.moveTo(cx2+5,headY2-5);ctx2.lineTo(cx2+9,headY2-14);ctx2.lineTo(cx2+2,headY2-7);ctx2.closePath();ctx2.fill();
+      ctx2.fillStyle='rgba(130,100,160,0.45)';
+      ctx2.beginPath();ctx2.moveTo(cx2-4,headY2-6);ctx2.lineTo(cx2-7,headY2-12);ctx2.lineTo(cx2-3,headY2-7);ctx2.closePath();ctx2.fill();
+      ctx2.beginPath();ctx2.moveTo(cx2+4,headY2-6);ctx2.lineTo(cx2+7,headY2-12);ctx2.lineTo(cx2+3,headY2-7);ctx2.closePath();ctx2.fill();
+      // === EYES OPEN ===
+      ctx2.fillStyle='rgba(25,30,55,0.9)';
+      ctx2.beginPath();ctx2.ellipse(cx2-3.5,headY2,3,3,0,0,Math.PI*2);ctx2.fill();
+      ctx2.beginPath();ctx2.ellipse(cx2+3.5,headY2,3,3,0,0,Math.PI*2);ctx2.fill();
       // Eye highlights
-      ctx2.fillStyle='#ccddef';
-      ctx2.beginPath();ctx2.arc(cx2-3,headY2-1.5,1.4,0,Math.PI*2);ctx2.fill();
-      ctx2.beginPath();ctx2.arc(cx2+5,headY2-1.5,1.4,0,Math.PI*2);ctx2.fill();
+      ctx2.fillStyle='rgba(195,205,240,0.9)';
+      ctx2.beginPath();ctx2.arc(cx2-2.5,headY2-1.2,1.2,0,Math.PI*2);ctx2.fill();
+      ctx2.beginPath();ctx2.arc(cx2+4.5,headY2-1.2,1.2,0,Math.PI*2);ctx2.fill();
       ctx2.fillStyle='rgba(220,225,255,0.5)';
-      ctx2.beginPath();ctx2.arc(cx2-5.5,headY2+0.5,0.7,0,Math.PI*2);ctx2.fill();
-      ctx2.beginPath();ctx2.arc(cx2+2.5,headY2+0.5,0.7,0,Math.PI*2);ctx2.fill();
-      // Smile
+      ctx2.beginPath();ctx2.arc(cx2-4.5,headY2+0.3,0.6,0,Math.PI*2);ctx2.fill();
+      ctx2.beginPath();ctx2.arc(cx2+2.5,headY2+0.3,0.6,0,Math.PI*2);ctx2.fill();
+      // === SMILE ===
       ctx2.strokeStyle='rgba(55,60,95,0.65)';ctx2.lineWidth=1.3;ctx2.lineCap='round';
-      ctx2.beginPath();ctx2.arc(cx2,headY2+3,2.8,0.2,Math.PI-0.2);ctx2.stroke();
-      // Arms
-      ctx2.strokeStyle=b2;ctx2.lineWidth=2.2;ctx2.lineCap='round';
-      ctx2.beginPath();ctx2.moveTo(cx2-7,cy2);ctx2.lineTo(cx2-10,cy2+8);ctx2.stroke();
-      ctx2.beginPath();ctx2.moveTo(cx2+7,cy2);ctx2.lineTo(cx2+10,cy2+8);ctx2.stroke();
-      // Legs
-      ctx2.strokeStyle=b2;ctx2.lineWidth=2.2;ctx2.lineCap='round';
-      ctx2.beginPath();ctx2.moveTo(cx2-4,cy2+10);ctx2.lineTo(cx2-4,cy2+18);ctx2.stroke();
-      ctx2.beginPath();ctx2.moveTo(cx2+4,cy2+10);ctx2.lineTo(cx2+4,cy2+18);ctx2.stroke();
+      ctx2.beginPath();ctx2.arc(cx2,headY2+3,2.5,0.2,Math.PI-0.2);ctx2.stroke();
+      // === ARMS ===
+      ctx2.strokeStyle='rgba(85,85,125,0.8)';ctx2.lineWidth=2.2;ctx2.lineCap='round';
+      ctx2.beginPath();ctx2.moveTo(cx2-5,cy2+bob2);ctx2.lineTo(cx2-7,cy2+bob2+6);ctx2.stroke();
+      ctx2.beginPath();ctx2.moveTo(cx2+5,cy2+bob2);ctx2.lineTo(cx2+7,cy2+bob2+6);ctx2.stroke();
+      // === LEGS ===
+      ctx2.strokeStyle='rgba(75,75,115,0.8)';ctx2.lineWidth=2.2;ctx2.lineCap='round';
+      ctx2.beginPath();ctx2.moveTo(cx2-3,cy2+bob2+8);ctx2.lineTo(cx2-3,cy2+bob2+15);ctx2.stroke();
+      ctx2.beginPath();ctx2.moveTo(cx2+3,cy2+bob2+8);ctx2.lineTo(cx2+3,cy2+bob2+15);ctx2.stroke();
     }
   },2500);
   setTimeout(function(){document.getElementById('aw-text').classList.add('visible')},4000);
