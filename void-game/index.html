@@ -2943,159 +2943,170 @@ function createPlayer(x,y){
   setupPlayerSensors();
 }
 
-function drawPlayerParts(){if(!player.sprite||!player._gfx)return;var g=player._gfx;g.clear();var vx=player.body.velocity.x,vy=player.body.velocity.y,t=player.animTime;var isRunning=player.onGround&&Math.abs(vx)>0.5;var isJumping=!player.onGround&&vy<-1;var isFalling=!player.onGround&&vy>1;var isIdle=player.onGround&&Math.abs(vx)<0.5;var isSwinging=thread.active;var isWallSlide=player.wallSliding;var bodyBob=0;if(isRunning)bodyBob=Math.sin(player.runCycle*12)*1.5;if(isIdle)bodyBob=Math.sin(t*2)*0.5;
+function drawPlayerParts(){if(!player.sprite||!player._gfx)return;var g=player._gfx;g.clear();var vx=player.body.velocity.x,vy=player.body.velocity.y,t=player.animTime;
+// Smooth animation state blending
+var runAmt=player.onGround?Math.min(1,Math.abs(vx)/2):0;
+var jumpAmt=!player.onGround&&vy<-0.5?Math.min(1,Math.abs(vy)/8):0;
+var fallAmt=!player.onGround&&vy>0.5?Math.min(1,Math.abs(vy)/10):0;
+var idleAmt=Math.max(0,1-runAmt-jumpAmt-fallAmt);
+var isWallSlide=player.wallSliding;
+var isSwinging=thread.active;
+// Body bob — smooth blend between run bob and idle bob
+var bodyBob=0;
+if(runAmt>0.3)bodyBob=Math.sin(player.runCycle*10)*1.2*runAmt;
+else if(idleAmt>0.5)bodyBob=Math.sin(t*2)*0.5;
 var skin=getCurrentSkin();
 var vf=player.visualFacing;
 // === SCARF (behind body, flowing) ===
-var scarfWave=isRunning?Math.sin(t*10-1)*0.4:isWallSlide?Math.sin(t*6)*0.3:Math.sin(t*1.5)*0.15;var scarfEndX=-vf*6+Math.sin(scarfWave)*6;var scarfEndY=-PLAYER_H/2-2+bodyBob*0.3+Math.sin(t*2)*2;
-g.moveTo(-1,-PLAYER_H/2+3+bodyBob*0.3);g.quadraticCurveTo(scarfEndX,scarfEndY+4,scarfEndX-vf*3,scarfEndY+10);g.stroke({width:2.5,color:skin.scarf});
-g.moveTo(0,-PLAYER_H/2+4+bodyBob*0.3);g.quadraticCurveTo(scarfEndX+2,scarfEndY+6,scarfEndX-vf*1,scarfEndY+12);g.stroke({width:2,color:skin.scarf2});
+var scarfSpeed=isWallSlide?6:runAmt>0.3?8:1.5;
+var scarfAmp=isWallSlide?0.3:runAmt>0.3?0.35:0.15;
+var scarfWave=Math.sin(t*scarfSpeed-0.5)*scarfAmp;
+var scarfEndX=-vf*5+Math.sin(scarfWave)*5;
+var scarfEndY=-PLAYER_H/2-2+bodyBob*0.3+Math.sin(t*1.8)*1.5;
+g.moveTo(-1,-PLAYER_H/2+3+bodyBob*0.3);g.quadraticCurveTo(scarfEndX,scarfEndY+3,scarfEndX-vf*2.5,scarfEndY+9);g.stroke({width:2.5,color:skin.scarf});
+g.moveTo(0,-PLAYER_H/2+4+bodyBob*0.3);g.quadraticCurveTo(scarfEndX+1.5,scarfEndY+5,scarfEndX-vf*1,scarfEndY+11);g.stroke({width:2,color:skin.scarf2});
 // === BODY (cute rounded) ===
 var torsoY=-PLAYER_H/2+6+bodyBob;g.ellipse(0,torsoY+3,7,9);g.fill(skin.body);
-// Body highlight
 g.ellipse(-1,torsoY+1,4,5);g.fill({color:0x7a7aa0,alpha:0.3});
 // === HEAD (big, cute) ===
-var headY=-PLAYER_H/2-9+bodyBob*0.5;g.circle(0,headY,9);g.fill(skin.head);
-// Head highlight
+// Slight tilt based on velocity
+var headTilt=vx*0.015;
+var headY=-PLAYER_H/2-9+bodyBob*0.5;
+g.circle(0,headY,9);g.fill(skin.head);
 g.circle(-1.5,headY-3,4.5);g.fill({color:0x8a8ab0,alpha:0.2});
 // === EARS (cute pointy) ===
-var earWiggle=isWallSlide?Math.sin(t*8)*1.5:0;
+var earWiggle=isWallSlide?Math.sin(t*8)*1.5:runAmt>0.3?Math.sin(player.runCycle*10)*0.5:0;
 g.moveTo(-6,headY-5);g.lineTo(-10,headY-16+earWiggle);g.lineTo(-2,headY-8);g.closePath();g.fill(skin.head);
 g.moveTo(6,headY-5);g.lineTo(10,headY-16-earWiggle);g.lineTo(2,headY-8);g.closePath();g.fill(skin.head);
-// Ear inner
 g.moveTo(-5,headY-6);g.lineTo(-8,headY-14+earWiggle);g.lineTo(-3,headY-8);g.closePath();g.fill({color:0x8a6aa0,alpha:0.5});
 g.moveTo(5,headY-6);g.lineTo(8,headY-14-earWiggle);g.lineTo(3,headY-8);g.closePath();g.fill({color:0x8a6aa0,alpha:0.5});
 // === EYES (big, expressive, cute) ===
 var ex=vf*2;var eyeY=headY+0;
 var blinkPhase=t%4;var isBlinking=(blinkPhase>3.8&&blinkPhase<3.95);
 var blinkScale=isBlinking?0.1:1;
-// Left eye
-g.ellipse(ex-4,eyeY,3,3*blinkScale);g.fill(0x1a1a3a);
-// Right eye
-g.ellipse(ex+4,eyeY,3,3*blinkScale);g.fill(0x1a1a3a);
+// Squint during landing
+var landSquint=player.landSquashTimer>0?Math.min(1,player.landSquashTimer/0.06):0;
+var eyeScaleY=blinkScale*(1-landSquint*0.6);
+g.ellipse(ex-4,eyeY,3,3*eyeScaleY);g.fill(0x1a1a3a);
+g.ellipse(ex+4,eyeY,3,3*eyeScaleY);g.fill(0x1a1a3a);
 if(!isBlinking){
-  // Eye shine (big cute highlight)
+  // Eye shine
   g.circle(ex-3,eyeY-1.5,1.3);g.fill(0xccddef);
   g.circle(ex+5,eyeY-1.5,1.3);g.fill(0xccddef);
-  // Smaller bottom shine
   g.circle(ex-5,eyeY+0.5,0.6);g.fill({color:0x99aacc,alpha:0.6});
   g.circle(ex+3,eyeY+0.5,0.6);g.fill({color:0x99aacc,alpha:0.6});
-  // Happy squint on landing
-  if(player.justLanded){
-    g.ellipse(ex-4,eyeY+1.5,3.5,1.5);g.fill(0x5a5a80);
-    g.ellipse(ex+4,eyeY+1.5,3.5,1.5);g.fill(0x5a5a80);
-  }
-  // Focused/surprised eyes during wall slide
+  // Focused eyes during wall slide
   if(isWallSlide){
     g.circle(ex-4,eyeY,2);g.fill(0x1a1a3a);
     g.circle(ex+4,eyeY,2);g.fill(0x1a1a3a);
   }
+  // Wide eyes when falling fast
+  if(fallAmt>0.5){
+    var wideScale=1+fallAmt*0.3;
+    g.ellipse(ex-4,eyeY,3*wideScale,3*wideScale);g.fill(0x1a1a3a);
+    g.ellipse(ex+4,eyeY,3*wideScale,3*wideScale);g.fill(0x1a1a3a);
+    g.circle(ex-3,eyeY-1.5,1.5);g.fill(0xccddef);
+    g.circle(ex+5,eyeY-1.5,1.5);g.fill(0xccddef);
+  }
 }
-// === MOUTH (clean paths — no stray lines) ===
-if(player.justLanded||isIdle&&Math.sin(t*3)>0.8){
-  // Happy smile — quadratic curve (no arc path issues)
-  g.moveTo(ex-3,headY+3);g.quadraticCurveTo(ex,headY+7.5,ex+3,headY+3);g.stroke({width:1.2,color:0x3a3a60});
-}else if(isJumping||isWallSlide){
-  // Surprised/determined O mouth
+// === MOUTH ===
+if(player.landSquashTimer>0.04){
+  // Happy smile on landing
+  g.moveTo(ex-3,headY+3);g.quadraticCurveTo(ex,headY+7,ex+3,headY+3);g.stroke({width:1.2,color:0x3a3a60});
+}else if(isWallSlide){
   g.ellipse(ex,headY+4,1.5,2);g.fill({color:0x2a2a50,alpha:0.6});
-}else if(isFalling){
+}else if(jumpAmt>0.3){
+  g.ellipse(ex,headY+4,1.5,2);g.fill({color:0x2a2a50,alpha:0.6});
+}else if(fallAmt>0.5){
   // Scared open mouth
-  g.ellipse(ex,headY+4,2,2.5);g.fill({color:0x2a2a50,alpha:0.7});
-}else if(isRunning){
-  // Determined slight smile
+  g.ellipse(ex,headY+4,2,2.5*fallAmt);g.fill({color:0x2a2a50,alpha:0.7});
+}else if(runAmt>0.3){
   g.moveTo(ex-2,headY+4);g.quadraticCurveTo(ex,headY+6,ex+2,headY+4);g.stroke({width:1,color:0x3a3a60});
+}else if(idleAmt>0.5&&Math.sin(t*3)>0.8){
+  g.moveTo(ex-3,headY+3);g.quadraticCurveTo(ex,headY+7,ex+3,headY+3);g.stroke({width:1.2,color:0x3a3a60});
 }else{
-  // Neutral — small line
   g.moveTo(ex-1.5,headY+4);g.lineTo(ex+1.5,headY+4);g.stroke({width:1,color:0x3a3a60});
 }
 // === ARMS ===
 var armBaseY=torsoY+2;
-if(isRunning){
-  var runArmSwing=Math.sin(player.runCycle*12);
-  g.moveTo(-5,armBaseY);g.lineTo(-8,armBaseY+8+runArmSwing*3);g.stroke({width:2.5,color:0x5a5a7e});
-  g.moveTo(5,armBaseY);g.lineTo(8,armBaseY+8-runArmSwing*3);g.stroke({width:2.5,color:0x5a5a7e});
-}
-else if(isWallSlide){
-  // Wall climb — arms alternately reaching and pulling
+if(isWallSlide){
   var ws=player.onWallLeft?-1:1;
-  var climbPhase=Math.sin(t*6);
-  var grab1=Math.max(0,climbPhase)*3;
-  var grab2=Math.max(0,-climbPhase)*3;
-  // Arm 1 — reaches high, pulls body up
-  g.moveTo(-ws*2,armBaseY-2);g.lineTo(ws*7+ws*2*climbPhase,armBaseY-12+grab1);g.stroke({width:2.5,color:0x5a5a7e});
-  // Arm 2 — lower, just grabbed, pulling
-  g.moveTo(ws*1,armBaseY+2);g.lineTo(ws*8-ws*2*climbPhase,armBaseY-5+grab2);g.stroke({width:2.5,color:0x5a5a7e});
-  // Gripping hands
-  g.circle(ws*7+ws*2*climbPhase,armBaseY-12+grab1,1.8);g.fill(0x6a6a9e);
-  g.circle(ws*8-ws*2*climbPhase,armBaseY-5+grab2,1.8);g.fill(0x6a6a9e);
-  // Fingers on wall side
-  g.moveTo(ws*7+ws*2*climbPhase+ws*1.5,armBaseY-13+grab1);g.lineTo(ws*7+ws*2*climbPhase+ws*3,armBaseY-14+grab1);g.stroke({width:1.2,color:0x5a5a7e});
-  g.moveTo(ws*8-ws*2*climbPhase+ws*1.5,armBaseY-6+grab2);g.lineTo(ws*8-ws*2*climbPhase+ws*3,armBaseY-7+grab2);g.stroke({width:1.2,color:0x5a5a7e});
-}
-else if(isSwinging){
+  var climbPhase=Math.sin(t*5);
+  var grab1=Math.max(0,climbPhase)*2.5;
+  var grab2=Math.max(0,-climbPhase)*2.5;
+  g.moveTo(-ws*2,armBaseY-2);g.lineTo(ws*6+ws*1.5*climbPhase,armBaseY-10+grab1);g.stroke({width:2.5,color:0x5a5a7e});
+  g.moveTo(ws*1,armBaseY+2);g.lineTo(ws*7-ws*1.5*climbPhase,armBaseY-4+grab2);g.stroke({width:2.5,color:0x5a5a7e});
+  g.circle(ws*6+ws*1.5*climbPhase,armBaseY-10+grab1,1.8);g.fill(0x6a6a9e);
+  g.circle(ws*7-ws*1.5*climbPhase,armBaseY-4+grab2,1.8);g.fill(0x6a6a9e);
+}else if(isSwinging){
   g.moveTo(-4,armBaseY);g.lineTo(-2,armBaseY-10);g.stroke({width:2.5,color:0x5a5a7e});
   g.moveTo(4,armBaseY);g.lineTo(2,armBaseY-10);g.stroke({width:2.5,color:0x5a5a7e});
-}
-else if(isJumping){
-  g.moveTo(-5,armBaseY);g.lineTo(-7,armBaseY-4);g.stroke({width:2.5,color:0x5a5a7e});
-  g.moveTo(5,armBaseY);g.lineTo(7,armBaseY-4);g.stroke({width:2.5,color:0x5a5a7e});
-}
-else if(isFalling){
-  // Flailing arms
-  var flap=Math.sin(t*6)*3;
-  g.moveTo(-5,armBaseY);g.lineTo(-9,armBaseY+2+flap);g.stroke({width:2.5,color:0x5a5a7e});
-  g.moveTo(5,armBaseY);g.lineTo(9,armBaseY+2-flap);g.stroke({width:2.5,color:0x5a5a7e});
-}
-else{
+}else{
+  // Smooth blend between run/jump/fall/idle arms
+  var runSwing=Math.sin(player.runCycle*10);
+  // Run arms — swing with elbows
+  var runArmLX=-6+runSwing*4;
+  var runArmLY=armBaseY+6+runSwing*2;
+  var runArmRX=6-runSwing*4;
+  var runArmRY=armBaseY+6-runSwing*2;
+  // Jump arms — raised up
+  var jmpArmLX=-6;var jmpArmLY=armBaseY-5;
+  var jmpArmRX=6;var jmpArmRY=armBaseY-5;
+  // Fall arms — flailing
+  var flap=Math.sin(t*5)*2.5;
+  var fallArmLX=-8;var fallArmLY=armBaseY+2+flap;
+  var fallArmRX=8;var fallArmRY=armBaseY+2-flap;
   // Idle arms — gentle sway
-  var idleSway=Math.sin(t*1.5);
-  g.moveTo(-5,armBaseY);g.lineTo(-7,armBaseY+7+idleSway);g.stroke({width:2.5,color:0x5a5a7e});
-  g.moveTo(5,armBaseY);g.lineTo(7,armBaseY+7-idleSway);g.stroke({width:2.5,color:0x5a5a7e});
+  var idleSway=Math.sin(t*1.5)*1;
+  var idleArmLX=-6;var idleArmLY=armBaseY+7+idleSway;
+  var idleArmRX=6;var idleArmRY=armBaseY+7-idleSway;
+  // Blend
+  var armLX=runArmLX*runAmt+jmpArmLX*jumpAmt+fallArmLX*fallAmt+idleArmLX*idleAmt;
+  var armLY=runArmLY*runAmt+jmpArmLY*jumpAmt+fallArmLY*fallAmt+idleArmLY*idleAmt;
+  var armRX=runArmRX*runAmt+jmpArmRX*jumpAmt+fallArmRX*fallAmt+idleArmRX*idleAmt;
+  var armRY=runArmRY*runAmt+jmpArmRY*jumpAmt+fallArmRY*fallAmt+idleArmRY*idleAmt;
+  g.moveTo(-5,armBaseY);g.lineTo(armLX,armLY);g.stroke({width:2.5,color:0x5a5a7e});
+  g.moveTo(5,armBaseY);g.lineTo(armRX,armRY);g.stroke({width:2.5,color:0x5a5a7e});
 }
 // === LEGS ===
 var legBaseY=torsoY+10;
-if(isRunning){
-  var ls=Math.sin(player.runCycle*12);
-  g.moveTo(-3,legBaseY);g.lineTo(-3+ls*5,legBaseY+9);g.stroke({width:2.5,color:0x5a5a7e});
-  g.moveTo(3,legBaseY);g.lineTo(3-ls*5,legBaseY+9);g.stroke({width:2.5,color:0x5a5a7e});
-}
-else if(isWallSlide){
-  // Wall climb legs — alternating push off wall
+if(isWallSlide){
   var ws2=player.onWallLeft?-1:1;
-  var climbLeg=Math.sin(t*6);
-  // Upper leg — pushing off wall (bent knee then extend)
-  var kneeX1=ws2*(4+climbLeg*2);
-  var kneeY1=legBaseY-2+Math.max(0,-climbLeg)*4;
-  g.moveTo(-ws2*1,legBaseY);g.lineTo(kneeX1,kneeY1);g.lineTo(ws2*(7+climbLeg),legBaseY+5);g.stroke({width:2.5,color:0x5a5a7e});
-  // Lower leg — hanging then tucking up
-  var tuck=Math.max(0,climbLeg)*3;
-  g.moveTo(ws2*1,legBaseY+2);g.lineTo(ws2*(2-climbLeg),legBaseY+8-tuck);g.stroke({width:2.5,color:0x5a5a7e});
-  // Feet
-  g.circle(ws2*(7+climbLeg),legBaseY+5,1.5);g.fill(0x6a6a9e);
-  g.circle(ws2*(2-climbLeg),legBaseY+8-tuck,1.5);g.fill(0x6a6a9e);
-  // Toe grip on wall
-  g.moveTo(ws2*(7+climbLeg)+ws2*1,legBaseY+5);g.lineTo(ws2*(7+climbLeg)+ws2*2.5,legBaseY+4);g.stroke({width:1.2,color:0x5a5a7e});
-}
-else if(isSwinging){
-  // Swinging legs — dangling with momentum
-  var swingLeg=Math.sin(t*3)*4;
+  var climbLeg=Math.sin(t*5);
+  var kneeX1=ws2*(3+climbLeg*1.5);
+  var kneeY1=legBaseY-1+Math.max(0,-climbLeg)*3;
+  g.moveTo(-ws2*1,legBaseY);g.lineTo(kneeX1,kneeY1);g.lineTo(ws2*(6+climbLeg),legBaseY+4);g.stroke({width:2.5,color:0x5a5a7e});
+  var tuck=Math.max(0,climbLeg)*2.5;
+  g.moveTo(ws2*1,legBaseY+2);g.lineTo(ws2*(2-climbLeg*0.5),legBaseY+7-tuck);g.stroke({width:2.5,color:0x5a5a7e});
+  g.circle(ws2*(6+climbLeg),legBaseY+4,1.5);g.fill(0x6a6a9e);
+  g.circle(ws2*(2-climbLeg*0.5),legBaseY+7-tuck,1.5);g.fill(0x6a6a9e);
+}else if(isSwinging){
+  var swingLeg=Math.sin(t*2.5)*3.5;
   g.moveTo(-3,legBaseY);g.lineTo(-4+swingLeg,legBaseY+9);g.stroke({width:2.5,color:0x5a5a7e});
   g.moveTo(3,legBaseY);g.lineTo(4-swingLeg,legBaseY+9);g.stroke({width:2.5,color:0x5a5a7e});
-}
-else if(isJumping){
-  g.moveTo(-3,legBaseY);g.lineTo(-5,legBaseY+5);g.stroke({width:2.5,color:0x5a5a7e});
-  g.moveTo(3,legBaseY);g.lineTo(5,legBaseY+5);g.stroke({width:2.5,color:0x5a5a7e});
-}
-else if(isFalling){
-  // Falling legs — spread
-  g.moveTo(-3,legBaseY);g.lineTo(-6,legBaseY+10);g.stroke({width:2.5,color:0x5a5a7e});
-  g.moveTo(3,legBaseY);g.lineTo(6,legBaseY+10);g.stroke({width:2.5,color:0x5a5a7e});
-}
-else{
-  // Idle legs — subtle weight shift
+}else{
+  // Smooth blend between run/jump/fall/idle legs
+  var legSin=Math.sin(player.runCycle*10);
+  // Run legs — stride with knees
+  var runLegLX=-3+legSin*4.5;var runLegLY=legBaseY+9;
+  var runLegRX=3-legSin*4.5;var runLegRY=legBaseY+9;
+  // Jump legs — tucked up
+  var jmpLegLX=-4;var jmpLegLY=legBaseY+5;
+  var jmpLegRX=4;var jmpLegRY=legBaseY+5;
+  // Fall legs — spread slightly
+  var fallLegLX=-5;var fallLegLY=legBaseY+10;
+  var fallLegRX=5;var fallLegRY=legBaseY+10;
+  // Idle legs — weight shift
   var legShift=Math.sin(t*1.2)*0.5;
-  g.moveTo(-3,legBaseY);g.lineTo(-3+legShift,legBaseY+9);g.stroke({width:2.5,color:0x5a5a7e});
-  g.moveTo(3,legBaseY);g.lineTo(3-legShift,legBaseY+9);g.stroke({width:2.5,color:0x5a5a7e});
+  var idleLegLX=-3+legShift;var idleLegLY=legBaseY+9;
+  var idleLegRX=3-legShift;var idleLegRY=legBaseY+9;
+  // Blend
+  var legLX=runLegLX*runAmt+jmpLegLX*jumpAmt+fallLegLX*fallAmt+idleLegLX*idleAmt;
+  var legLY=runLegLY*runAmt+jmpLegLY*jumpAmt+fallLegLY*fallAmt+idleLegLY*idleAmt;
+  var legRX=runLegRX*runAmt+jmpLegRX*jumpAmt+fallLegRX*fallAmt+idleLegRX*idleAmt;
+  var legRY=runLegRY*runAmt+jmpLegRY*jumpAmt+fallLegRY*fallAmt+idleLegRY*idleAmt;
+  g.moveTo(-3,legBaseY);g.lineTo(legLX,legLY);g.stroke({width:2.5,color:0x5a5a7e});
+  g.moveTo(3,legBaseY);g.lineTo(legRX,legRY);g.stroke({width:2.5,color:0x5a5a7e});
 }
 // === GLOW aura ===
 var auraAlpha=0.06+Math.sin(t*1.5)*0.02;if(player.dashing)auraAlpha=0.2;
