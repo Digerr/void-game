@@ -607,7 +607,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.4.1';
+var VOID_VERSION='2.5.0';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -1085,9 +1085,11 @@ function saveProgress(){try{localStorage.setItem('void_progress',JSON.stringify(
 function getLevelStars(n){var p=progress.levels[n];return p?p.stars:0}
 function getLevelBestTime(n){var p=progress.levels[n];return p?p.bestTime:Infinity}
 function calculateStars(deaths,time){
-  if(deaths===0&&time<30)return 3;
-  if(deaths<=2&&time<60)return 3;
-  if(deaths<=5)return 2;
+  if(deaths===0&&time<25)return 3;
+  if(deaths===0&&time<45)return 3;
+  if(deaths<=1&&time<40)return 3;
+  if(deaths<=2&&time<60)return 2;
+  if(deaths<=4)return 2;
   return 1;
 }
 function recordLevelComplete(n,deaths,time){
@@ -2145,9 +2147,9 @@ function updateParticles(dt){for(var i=particles.length-1;i>=0;i--){var p=partic
 function clearParticles(){for(var i=0;i<particles.length;i++){if(particles[i].sprite)particles[i].sprite.destroy()}particles=[]}
 
 // ═══ PLAYER ═══
-var player={body:null,sprite:null,speed:6.5,accelGround:80,accelAir:45,decelGround:70,decelAir:28,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:18,dashDuration:0.12,dashCooldown:0.55,gravityUp:1.2,gravityDown:2.0,apexThreshold:2.0,apexGravityMult:0.6,airControlBonus:0.5,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0,squashDur:0.15,squashFromX:1,squashFromY:1};
+var player={body:null,sprite:null,speed:7,accelGround:90,accelAir:55,decelGround:75,decelAir:30,jumpForce:-14.5,wallJumpForceX:10,wallJumpForceY:-13.5,dashSpeed:19,dashDuration:0.13,dashCooldown:0.5,gravityUp:1.1,gravityDown:2.1,apexThreshold:2.5,apexGravityMult:0.5,airControlBonus:0.6,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0,squashDur:0.15,squashFromX:1,squashFromY:1};
 var playerSensorGround=null,playerSensorLeft=null,playerSensorRight=null;
-var COYOTE_DURATION=0.08,JUMP_BUFFER_DURATION=0.1,WALL_SLIDE_SPEED=2.2,PLAYER_W=18,PLAYER_H=34;
+var COYOTE_DURATION=0.12,JUMP_BUFFER_DURATION=0.12,WALL_SLIDE_SPEED=2.0,PLAYER_W=18,PLAYER_H=34;
 
 function createPlayer(x,y){
   player.body=MBodies.rectangle(x,y,PLAYER_W,PLAYER_H,{label:'player',friction:0.05,frictionStatic:0.3,restitution:0,density:0.002,inertia:Infinity,inverseInertia:0});
@@ -2426,10 +2428,11 @@ function updatePlayer(dt){
     }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.velocityX,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');sfxJump();spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1});progress.stats.jumps=(progress.stats.jumps||0)+1;
     // Jump stretch
     player.squashFromX=0.78;player.squashFromY=1.22;player.squashDur=0.15;player.squashTimer=0.15;
-    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');sfxWallJump();unlockAchievement('wall_crawler');progress.stats.wallJumps=(progress.stats.wallJumps||0)+1;var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,8,0x5a5a6a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2.5,life:0.35,size:2.5,gravity:0.5});spawnParticles(wx2,player.body.position.y,4,0x7a7a9a,{angle:wd===1?0:Math.PI,spread:0.8,speed:1.5,life:0.25,size:1.5,gravity:0});player.squashFromX=0.7;player.squashFromY=1.25;player.squashDur=0.1;player.squashTimer=0.1;
+    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=COYOTE_DURATION*0.5;tgHaptic('medium');sfxWallJump();unlockAchievement('wall_crawler');progress.stats.wallJumps=(progress.stats.wallJumps||0)+1;var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,8,0x5a5a6a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2.5,life:0.35,size:2.5,gravity:0.5});spawnParticles(wx2,player.body.position.y,4,0x7a7a9a,{angle:wd===1?0:Math.PI,spread:0.8,speed:1.5,life:0.25,size:1.5,gravity:0});player.squashFromX=0.7;player.squashFromY=1.25;player.squashDur=0.1;player.squashTimer=0.1;
     }
   }
-  if(!player.inputJump&&player.body.velocity.y<-4)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.85});
+  // Variable jump height: releasing jump early cuts upward velocity for short hops
+  if(!player.inputJump&&player.body.velocity.y<-2)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.8});
 
   player.animTime+=dt;if(player.onGround&&Math.abs(player.body.velocity.x)>0.5)player.runCycle+=dt*Math.abs(player.body.velocity.x)*0.15;
   // Squash & stretch animation (damped spring from stored initial values → 1.0)
@@ -3112,7 +3115,7 @@ function updateExitGlow(dt){
     }
   }
 }
-function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var tx=player.body.position.x-sw*0.35;var ty=player.body.position.y-sh*0.5;var lvl=LEVELS[state.level];tx=Math.max(0,Math.min(tx,lvl.width-sw));ty=Math.max(-200,Math.min(ty,lvl.height-sh));camera.x+=(tx-camera.x)*0.09;camera.y+=(ty-camera.y)*0.07;var sx=0,sy=0;if(state.shakeTime>0){sx=(Math.random()-0.5)*state.shakeAmount*2;sy=(Math.random()-0.5)*state.shakeAmount*2}gameContainer.x=-camera.x+sx;gameContainer.y=-camera.y+sy}
+function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var lvl=LEVELS[state.level];var lookAheadX=player.facing*sw*0.06;var lookAheadY=(player.body.velocity.y*0.8)*0.02;var tx=player.body.position.x-sw*0.35+lookAheadX;var ty=player.body.position.y-sh*0.45+lookAheadY;tx=Math.max(0,Math.min(tx,lvl.width-sw));ty=Math.max(-200,Math.min(ty,lvl.height-sh));var speedX=0.12;var speedY=0.09;if(player.dashing){speedX=0.22;speedY=0.15}camera.x+=(tx-camera.x)*speedX;camera.y+=(ty-camera.y)*speedY;var sx=0,sy=0;if(state.shakeTime>0){sx=(Math.random()-0.5)*state.shakeAmount*2;sy=(Math.random()-0.5)*state.shakeAmount*2}gameContainer.x=-camera.x+sx;gameContainer.y=-camera.y+sy}
 
 // ═══ PLAYER LIGHT & FOG ═══
 var lightTime=0;
