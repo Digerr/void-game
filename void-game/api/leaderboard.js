@@ -68,7 +68,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // ── REGISTER: Register player ──
+  // ── REGISTER: Register player & sync name ──
   if (action === 'register') {
     const user = validateInitData(body.initData);
     if (!user) return res.status(200).json({ ok: false, error: 'invalid initData' });
@@ -82,6 +82,11 @@ export default async function handler(req, res) {
       name: user.name,
       chat_id: body.chatId || null,
     }, { onConflict: 'id' });
+
+    // Sync name across all tables (user may have changed Telegram name)
+    try { await sb.from('leaderboard').update({ name: user.name }).eq('id', playerId); } catch (e) {}
+    try { await sb.from('weekly_scores').update({ name: user.name }).like('id', playerId + '_%'); } catch (e) {}
+    try { await sb.from('level_records').update({ name: user.name }).eq('user_id', playerId); } catch (e) {}
 
     return res.status(200).json({ ok: true, id: playerId });
   }
