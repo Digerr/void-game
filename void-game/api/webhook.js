@@ -133,16 +133,13 @@ export default async function handler(req, res) {
 
     const results = [];
 
-    // Result 1: ▶ ИГРАТЬ
+    // Result 1: 🎮 Game — works in ALL chats (including private 1-on-1)
     results.push({
-      type: 'article',
-      id: 'void_play',
+      type: 'game',
+      id: 'void_game',
+      game_short_name: 'void',
       title: '▶ ИГРАТЬ в VOID',
       description: 'Платформер о памяти, которое забыло себя. 30 уровней, 6 актов.',
-      input_message_content: {
-        message_text: '🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя.\n30 уровней · 6 актов · магнитный шарф · паркур\n\nНажми ▶ ИГРАТЬ чтобы начать →',
-        parse_mode: 'HTML'
-      },
       reply_markup: {
         inline_keyboard: [[
           { text: '▶ ИГРАТЬ', url: GAME_URL }
@@ -245,6 +242,34 @@ export default async function handler(req, res) {
         cache_time: 15
       })
     });
+    return res.status(200).json({ ok: true });
+  }
+
+  // ── Callback query: game "Play" button pressed ──
+  if (update.callback_query) {
+    const cb = update.callback_query;
+    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8858889318:AAGramLmQGRhpJAyRWcJC8lPwkyrbDBiHcw';
+
+    if (cb.game_short_name === 'void') {
+      // Answer with game URL — Telegram opens it as a game
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          callback_query_id: cb.id,
+          url: GAME_URL
+        })
+      });
+    } else {
+      // Generic callback acknowledgment
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          callback_query_id: cb.id
+        })
+      });
+    }
     return res.status(200).json({ ok: true });
   }
 
