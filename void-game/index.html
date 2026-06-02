@@ -706,6 +706,10 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Игра находится в бета-версии. Это значит, что возможны баги, баланс уровней может меняться, а прогресс может быть сброшен при крупных обновлениях. Спасибо за тестирование!</div>
       </div>
       <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">проблемы в telegram?</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Telegram WebView может работать менее плавно, чем браузер. Мы оптимизируем движение — попробуй снизить качество графики или FPS в настройках если ощущаешь подтормаживания.</div>
+      </div>
+      <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">прогресс не сохраняется?</div>
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Прогресс автоматически сохраняется в Telegram CloudStorage — полный прогресс включая пройденные уровни, звёзды, осколки и достижения. Убедись, что играешь через Telegram-бота @voide_game_bot. Если играешь в браузере — прогресс хранится в localStorage.</div>
       </div>
@@ -776,7 +780,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.10.0-beta';
+var VOID_VERSION='0.11.0-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -807,7 +811,7 @@ document.addEventListener('visibilitychange',function(){
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — beta 0.10.0
+// VOID — beta 0.11.0
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
@@ -3169,8 +3173,8 @@ if(isWallSlide){
 function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,-1)}}
-function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
-function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}else if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}else if((a.label==='pendulumZone'&&b.label==='player')||(b.label==='pendulumZone'&&a.label==='player')){killPlayer('pendulum')}else if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
+function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
+function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;if((a.label==='fallZone'&&b.label==='player')||(b.label==='fallZone'&&a.label==='player')){killPlayer('fall')}else if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}else if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}else if((a.label==='pendulumZone'&&b.label==='player')||(b.label==='pendulumZone'&&a.label==='player')){killPlayer('pendulum')}else if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
   // Checkpoint activation
   if((a.label==='checkpointZone'&&b.label==='player')||(b.label==='checkpointZone'&&a.label==='player')){
     var cpBody=(a.label==='checkpointZone')?a:b;
@@ -3391,7 +3395,7 @@ function updatePlayer(dt){
   player.sprite.scale.set(player.squashX,player.squashY);
   drawPlayerParts();
   // Death: fall off bottom
-  var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+50)killPlayer('fall');
+  var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+30)killPlayer('fall');
   var dashReady=player.dashCooldownTimer<=0&&!player.dashing;document.getElementById('hud-dash').style.color=dashReady?'#3a5a6a':'#1a2a3a';
   var threadReady=!thread.active&&levelAnchors.length>0;var nearAnchor=false;
   if(threadReady&&player.body){for(var ai=0;ai<levelAnchors.length;ai++){var adx=player.body.position.x-levelAnchors[ai].x,ady=player.body.position.y-levelAnchors[ai].y;if(Math.sqrt(adx*adx+ady*ady)<thread.range){nearAnchor=true;break}}}
@@ -4186,7 +4190,7 @@ function loadLevel(n){
   MWorld.add(world,MBodies.rectangle(lvl.width/2,-50,lvl.width,100,{isStatic:true,label:'boundary'}));
   MWorld.add(world,MBodies.rectangle(-50,lvl.height/2,100,lvl.height,{isStatic:true,label:'boundary'}));
   MWorld.add(world,MBodies.rectangle(lvl.width+50,lvl.height/2,100,lvl.height,{isStatic:true,label:'boundary'}));
-  MWorld.add(world,MBodies.rectangle(lvl.width/2,lvl.height+50,lvl.width,100,{isStatic:true,label:'boundary'}));
+  // Bottom boundary removed — player falls through and dies via fallZone sensor + position check
   // Platforms (act-themed colors)
   var actTheme=getLevelTheme();
   for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.8});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(actTheme.platColor);spr.rect(0,0,p.w,2);spr.fill(actTheme.platTop);spr.rect(0,p.h-1,p.w,1);spr.fill(actTheme.platBot);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
@@ -4229,8 +4233,8 @@ function loadLevel(n){
   }
   // Exit
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;espr._base=eg;espr._ew=lvl.exit.w;espr._eh=lvl.exit.h;gameContainer.addChild(espr)}
-  // Death floor — invisible kill zone below the level
-  MWorld.add(world,MBodies.rectangle(lvl.width/2,lvl.height+50,lvl.width+400,20,{isStatic:true,isSensor:true,label:'deathZone'}));
+  // Death floor — invisible kill zone below the level (fallZone → killPlayer('fall'))
+  MWorld.add(world,MBodies.rectangle(lvl.width/2,lvl.height+20,lvl.width+400,30,{isStatic:true,isSensor:true,label:'fallZone'}));
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
 function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
@@ -5192,6 +5196,17 @@ function setupTouchButton(id,action){var el=document.getElementById(id);if(!el)r
 function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.left)ix-=1;if(keys['ArrowRight']||keys['KeyD']||touchState.right)ix+=1;player.inputX=ix;player.inputJump=keys['Space']||keys['ArrowUp']||keys['KeyW']||touchState.jump}
 
 // ═══ SCREEN MANAGEMENT ═══
+function showOverlayMsg(title,sub){
+  var toast=document.createElement('div');
+  toast.className='achievement-toast';
+  toast.style.borderColor='rgba(100,120,200,.3)';
+  toast.style.flexDirection='column';
+  toast.style.textAlign='center';
+  toast.innerHTML='<span class="ach-text" style="color:#8a9aca;font-size:.6rem;letter-spacing:.1em">'+title+'</span>'+(sub?'<span class="ach-text" style="color:#6a6a8a;font-size:.45rem;margin-top:3px">'+sub+'</span>':'');
+  document.body.appendChild(toast);
+  setTimeout(function(){toast.style.opacity='0';toast.style.transition='opacity .5s'},2500);
+  setTimeout(function(){if(toast.parentNode)toast.parentNode.removeChild(toast)},3100);
+}
 function showScreen(name){
   // Track previous screen for back navigation
   state._prevScreen=state.screen;
@@ -5650,12 +5665,20 @@ function togglePause(){if(state.screen==='playing'){var mb=document.getElementBy
 // ═══ GAME LOOP ═══
 var lastTime=0,lastRenderTime=0;
 var targetFrameInterval=1000/60;
+var _smoothDt=0.016; // dt smoothing for Telegram WebView stability
 function gameLoop(timestamp){
   requestAnimationFrame(gameLoop);
   // FPS limiting: skip frame if too soon
   if(timestamp-lastRenderTime<targetFrameInterval*0.92)return;
   lastRenderTime=timestamp;
-  var rawDt=Math.min((timestamp-lastTime)/1000,0.05);lastTime=timestamp;
+  var rawDt=(timestamp-lastTime)/1000;lastTime=timestamp;
+  // Clamp max dt (tighter in Telegram to prevent jerky spikes)
+  rawDt=Math.min(rawDt,isTelegram?0.033:0.05);
+  // Smooth dt with EMA filter in Telegram to eliminate frame-time jitter
+  if(isTelegram){
+    _smoothDt=_smoothDt*0.75+rawDt*0.25;
+    rawDt=_smoothDt;
+  }
   // Hit-stop: freeze all updates briefly for impact feel
   if(state.hitStop>0){state.hitStop-=rawDt;if(state.hitStop>0)return;state.hitStop=0}
   if(state.slowMoTimer>0){state.slowMoTimer-=rawDt;if(state.slowMoTimer<=0)state.slowMo=1}
@@ -5762,7 +5785,7 @@ function bindUI(){
   document.getElementById('btn-challenge').addEventListener('click',function(){showChallengeScreen()});
   document.getElementById('btn-ch-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-ch-play').addEventListener('click',function(){startChallenge()});
-  document.getElementById('btn-leaderboard').addEventListener('click',function(){showLeaderboard('global')});
+  document.getElementById('btn-leaderboard').addEventListener('click',function(){showOverlayMsg('таблица лидеров скоро откроется!','следи за обновлениями')});
   document.getElementById('btn-lb-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-profile').addEventListener('click',function(){showScreen('profile')});
   document.getElementById('btn-profile-back').addEventListener('click',function(){showScreen('menu')});
@@ -5777,7 +5800,6 @@ function bindUI(){
   document.getElementById('btn-autograb-toggle').addEventListener('click',function(){settings.autoGrab=!settings.autoGrab;saveSettings();updateSettingsUI()});
   // FPS toggle (60/120)
   document.getElementById('btn-fps-toggle').addEventListener('click',function(){
-    if(isTelegram){settings.targetFps=60;targetFrameInterval=1000/60;saveSettings();updateSettingsUI();return}
     settings.targetFps=settings.targetFps===60?120:60;
     targetFrameInterval=1000/settings.targetFps;
     saveSettings();updateSettingsUI();
@@ -6558,7 +6580,7 @@ function showAwakening(){
 }
 
 // ═══ INIT ═══
-async function init(){try{loadProgress();loadSettings();loadFromCloud();initSupabase();await initPixi();initInput();bindUI();initTelegramPlayer();registerPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');if(isTelegram&&settings.targetFps>60){settings.targetFps=60;saveSettings();console.log('[VOID] Telegram detected — auto 60fps')}targetFrameInterval=1000/(settings.targetFps||60);lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized',isTelegram?'(Telegram)':'(Browser)');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
+async function init(){try{loadProgress();loadSettings();loadFromCloud();initSupabase();await initPixi();initInput();bindUI();initTelegramPlayer();registerPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');if(isTelegram){_smoothDt=0.016;console.log('[VOID] Telegram detected — dt smoothing enabled')}targetFrameInterval=1000/(settings.targetFps||60);lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized',isTelegram?'(Telegram)':'(Browser)');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
 init();
 </script>
 </body>
