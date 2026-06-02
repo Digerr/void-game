@@ -44,15 +44,15 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .ls-act-card:hover{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08);transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
 .ls-act-card:active{transform:scale(.97);transition:transform .08s}
 .ls-act-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;opacity:.8}
-.ls-act-card0::before{background:#5a8aba}.ls-act-card1::before{background:#8a5aba}.ls-act-card2::before{background:#ba8a2a}.ls-act-card3::before{background:#8a3a5a}.ls-act-card4::before{background:#4a8a7a}.ls-act-card5::before{background:#9a3a6a}
-.ls-act-card0 .ls-act-card-name{color:#5a8aba}.ls-act-card1 .ls-act-card-name{color:#8a5aba}.ls-act-card2 .ls-act-card-name{color:#ba8a2a}.ls-act-card3 .ls-act-card-name{color:#8a3a5a}.ls-act-card4 .ls-act-card-name{color:#4a8a7a}.ls-act-card5 .ls-act-card-name{color:#9a3a6a}
+.ls-act-card0::before{background:#5a8aba}.ls-act-card1::before{background:#8a5aba}.ls-act-card2::before{background:#ba8a2a}.ls-act-card3::before{background:#ba3a6a}.ls-act-card4::before{background:#4ababa}.ls-act-card5::before{background:#da3a7a}
+.ls-act-card0 .ls-act-card-name{color:#5a8aba}.ls-act-card1 .ls-act-card-name{color:#8a5aba}.ls-act-card2 .ls-act-card-name{color:#ba8a2a}.ls-act-card3 .ls-act-card-name{color:#ba3a6a}.ls-act-card4 .ls-act-card-name{color:#4ababa}.ls-act-card5 .ls-act-card-name{color:#da3a7a}
 .ls-act-card-icon{font-size:1.4rem;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.03);flex-shrink:0}
 .ls-act-card-body{flex:1;min-width:0}
 .ls-act-card-name{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
 .ls-act-card-meta{display:flex;align-items:center;gap:8px;font-size:.42rem;color:#5a5a6a;letter-spacing:.06em}
 .ls-act-card-bar{height:2px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden;margin-top:6px;width:100%}
 .ls-act-card-bar-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1)}
-.ls-act-card0 .ls-act-card-bar-fill{background:#5a8aba}.ls-act-card1 .ls-act-card-bar-fill{background:#8a5aba}.ls-act-card2 .ls-act-card-bar-fill{background:#ba8a2a}.ls-act-card3 .ls-act-card-bar-fill{background:#8a3a5a}.ls-act-card4 .ls-act-card-bar-fill{background:#4a8a7a}.ls-act-card5 .ls-act-card-bar-fill{background:#9a3a6a}
+.ls-act-card0 .ls-act-card-bar-fill{background:#5a8aba}.ls-act-card1 .ls-act-card-bar-fill{background:#8a5aba}.ls-act-card2 .ls-act-card-bar-fill{background:#ba8a2a}.ls-act-card3 .ls-act-card-bar-fill{background:#ba3a6a}.ls-act-card4 .ls-act-card-bar-fill{background:#4ababa}.ls-act-card5 .ls-act-card-bar-fill{background:#da3a7a}
 .ls-act-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
 .ls-act-card-pct{font-size:.55rem;font-weight:900;color:#6a6a7a;font-variant-numeric:tabular-nums}
 .ls-act-card-stars{font-size:.45rem}
@@ -91,23 +91,23 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .ls-act0::before{background:linear-gradient(90deg,transparent,#2a4a6a,#5a8aba,transparent)}
 .ls-act1::before{background:linear-gradient(90deg,transparent,#4a2a6a,#8a5aba,transparent)}
 .ls-act2::before{background:linear-gradient(90deg,transparent,#6a4a1a,#ba8a2a,transparent)}
-.ls-act3::before{background:linear-gradient(90deg,transparent,#3a1a2a,#8a3a5a,transparent)}
+.ls-act3::before{background:linear-gradient(90deg,transparent,#4a1a3a,#ba3a6a,transparent)}
 .ls-act0::after{background:linear-gradient(180deg,#2a4a6a,transparent 40%)}
 .ls-act1::after{background:linear-gradient(180deg,#4a2a6a,transparent 40%)}
 .ls-act2::after{background:linear-gradient(180deg,#6a4a1a,transparent 40%)}
-.ls-act3::after{background:linear-gradient(180deg,#3a1a2a,transparent 40%)}
-.ls-act4::before{background:linear-gradient(90deg,transparent,#2a5a4a,#4a8a7a,transparent)}
-.ls-act4::after{background:linear-gradient(180deg,#2a5a4a,transparent 40%)}
-.ls-act5::before{background:linear-gradient(90deg,transparent,#3a1a3a,#9a3a6a,transparent)}
-.ls-act5::after{background:linear-gradient(180deg,#3a1a3a,transparent 40%)}
-.ls-act4 .ls-act-name{color:#4a8a7a}
-.ls-act4 .ls-act-bar-fill{background:linear-gradient(90deg,#1a3a3a,#4a8a7a)}
-.ls-act4 .ls-act-icon{background:rgba(74,138,122,.08)}
-.ls-act4 .ls-act-progress{color:#4a8a7a}
-.ls-act5 .ls-act-name{color:#9a3a6a}
-.ls-act5 .ls-act-bar-fill{background:linear-gradient(90deg,#3a1a2a,#9a3a6a)}
-.ls-act5 .ls-act-icon{background:rgba(154,58,106,.08)}
-.ls-act5 .ls-act-progress{color:#9a3a6a}
+.ls-act3::after{background:linear-gradient(180deg,#4a1a3a,transparent 40%)}
+.ls-act4::before{background:linear-gradient(90deg,transparent,#2a6a6a,#4ababa,transparent)}
+.ls-act4::after{background:linear-gradient(180deg,#2a6a6a,transparent 40%)}
+.ls-act5::before{background:linear-gradient(90deg,transparent,#4a1a3a,#da3a7a,transparent)}
+.ls-act5::after{background:linear-gradient(180deg,#4a1a3a,transparent 40%)}
+.ls-act4 .ls-act-name{color:#4ababa}
+.ls-act4 .ls-act-bar-fill{background:linear-gradient(90deg,#1a4a4a,#4ababa)}
+.ls-act4 .ls-act-icon{background:rgba(74,186,186,.08)}
+.ls-act4 .ls-act-progress{color:#4ababa}
+.ls-act5 .ls-act-name{color:#da3a7a}
+.ls-act5 .ls-act-bar-fill{background:linear-gradient(90deg,#4a1a3a,#da3a7a)}
+.ls-act5 .ls-act-icon{background:rgba(218,58,122,.08)}
+.ls-act5 .ls-act-progress{color:#da3a7a}
 .ls-act-inner{padding:6px 8px 6px;position:relative;z-index:1}
 .ls-act-header{display:flex;align-items:center;gap:6px;padding:0 0 5px;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:2px}
 .ls-act-icon{font-size:.75rem;opacity:.8;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:5px;background:rgba(255,255,255,.03);flex-shrink:0}
@@ -133,10 +133,10 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .ls-act2 .ls-act-bar-fill{background:linear-gradient(90deg,#5a3a0a,#ba8a2a)}
 .ls-act2 .ls-act-icon{background:rgba(186,138,42,.08)}
 .ls-act2 .ls-act-progress{color:#ba8a2a}
-.ls-act3 .ls-act-name{color:#8a3a5a}
-.ls-act3 .ls-act-bar-fill{background:linear-gradient(90deg,#2a0a1a,#8a3a5a)}
-.ls-act3 .ls-act-icon{background:rgba(138,58,90,.08)}
-.ls-act3 .ls-act-progress{color:#8a3a5a}
+.ls-act3 .ls-act-name{color:#ba3a6a}
+.ls-act3 .ls-act-bar-fill{background:linear-gradient(90deg,#4a1a3a,#ba3a6a)}
+.ls-act3 .ls-act-icon{background:rgba(186,58,106,.08)}
+.ls-act3 .ls-act-progress{color:#ba3a6a}
 .ls-cell{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:8px;display:flex;flex-direction:row;align-items:center;padding:6px 8px;cursor:pointer;transition:all .2s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;gap:8px;min-height:36px}
 .ls-cell:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
 .ls-cell:active{transform:scale(.97);transition:transform .08s}
@@ -418,6 +418,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 </head>
 <body>
 <div id="loading"><div class="loading-text">загрузка</div></div>
+<div id="level-transition" style="position:fixed;inset:0;z-index:1000;pointer-events:none;background:#000;opacity:0;transition:opacity 0.3s ease-in-out"></div>
 <div id="ui-layer">
   <div class="act-intro" id="act-intro">
     <canvas class="act-intro-bg" id="act-intro-bg"></canvas>
@@ -747,7 +748,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.16.0';
+var VOID_VERSION='2.17.0';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -2919,7 +2920,7 @@ function initPixi(){
     window.addEventListener('resize',onResize);onResize();
   });
 }
-function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);var act=getCurrentAct();var theme=ACT_THEMES[act]||ACT_THEMES[0];var vc=theme.skyTop;g.circle(cx,cy,mr);g.fill({color:vc,alpha:0.015})}
+function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);var theme=getLevelTheme();var vc=theme.skyTop;g.circle(cx,cy,mr);g.fill({color:vc,alpha:0.015})}
 function onResize(){if(!pixiApp)return;pixiApp.renderer.resize(window.innerWidth,window.innerHeight);drawVignette();if(lightCanvas){var sw=Math.max(1,Math.floor(pixiApp.screen.width)),sh=Math.max(1,Math.floor(pixiApp.screen.height));if(lightCanvas.width!==sw||lightCanvas.height!==sh){lightCanvas.width=sw;lightCanvas.height=sh;lightTexture=PIXI.Texture.from(lightCanvas);lightSprite.texture=lightTexture}}}
 
 // ═══ MATTER.JS SETUP ═══
@@ -4158,7 +4159,7 @@ function loadLevel(n){
   MWorld.add(world,MBodies.rectangle(lvl.width+50,lvl.height/2,100,lvl.height,{isStatic:true,label:'boundary'}));
   MWorld.add(world,MBodies.rectangle(lvl.width/2,lvl.height+50,lvl.width,100,{isStatic:true,label:'boundary'}));
   // Platforms (act-themed colors)
-  var actTheme=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];
+  var actTheme=getLevelTheme();
   for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.8});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(actTheme.platColor);spr.rect(0,0,p.w,2);spr.fill(actTheme.platTop);spr.rect(0,p.h-1,p.w,1);spr.fill(actTheme.platBot);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
   // Spikes (act-themed colors)
   if(lvl.spikes)for(var i=0;i<lvl.spikes.length;i++){var s=lvl.spikes[i];MWorld.add(world,MBodies.rectangle(s.x+s.w/2,s.y-10,s.w,20,{isStatic:true,isSensor:true,label:'deathZone'}));var spr=new PIXI.Graphics();var cnt=Math.floor(s.w/10);for(var j=0;j<cnt;j++){var tx=j*10;spr.moveTo(tx+5,s.y-12);spr.lineTo(tx,s.y+2);spr.lineTo(tx+10,s.y+2);spr.closePath();spr.fill(actTheme.spikeColor)}spr.x=s.x;gameContainer.addChild(spr);levelSprites.push(spr)}
@@ -4269,10 +4270,10 @@ function updateWeather(dt){
   weatherTime+=dt;
   var lvl=LEVELS[state.level];
   var actIdx=Math.floor(state.level/5);
-  var theme=ACT_THEMES[actIdx]||ACT_THEMES[0];
+  var theme=getLevelTheme();
   var weatherType=theme.weather||'ash';
-  // Spawn weather particles based on act weather type
-  var spawnRate=weatherType==='rain'?0.35:0.12;
+  // Spawn rate varies by act — deeper acts have more intense weather
+  var spawnRate=weatherType==='rain'?0.4:weatherType==='voidDust'?0.18:weatherType==='ember'?0.2:weatherType==='sparks'?0.15:weatherType==='crystal'?0.1:0.12;
   if(Math.random()<spawnRate){
     var px=player.body.position.x+(Math.random()-0.5)*600;
     var py=player.body.position.y-300;
@@ -4298,10 +4299,12 @@ function updateWeather(dt){
     }
     if(wp){
       var spr=new PIXI.Graphics();
-      if(wp.type==='rain'){spr.moveTo(0,0);spr.lineTo(0,wp.size*4);spr.stroke({width:0.5,color:0x4a6a9a,alpha:wp.alpha})}
-      else if(wp.type==='voidDust'){spr.circle(0,0,wp.size);spr.fill({color:0x3a1a2a,alpha:wp.alpha})}
-      else if(wp.type==='sparks'){spr.circle(0,0,wp.size);spr.fill({color:0x3a8a8a,alpha:wp.alpha})}
-      else{spr.circle(0,0,wp.size);spr.fill({color:wp.type==='crystal'?0x7a8aba:wp.type==='ember'?0x6a3a2a:0x4a4a5a,alpha:wp.alpha})}
+      if(wp.type==='rain'){spr.moveTo(0,0);spr.lineTo(0,wp.size*4);spr.stroke({width:0.5,color:theme.lightColor,alpha:wp.alpha})}
+      else if(wp.type==='voidDust'){spr.circle(0,0,wp.size);spr.fill({color:theme.horizonGlow,alpha:wp.alpha})}
+      else if(wp.type==='sparks'){spr.circle(0,0,wp.size);spr.fill({color:theme.horizonGlow,alpha:wp.alpha});spr.circle(0,0,wp.size*0.4);spr.fill({color:0xffffff,alpha:wp.alpha*0.5})}
+      else if(wp.type==='ember'){spr.circle(0,0,wp.size);spr.fill({color:theme.horizonGlow,alpha:wp.alpha});spr.circle(0,0,wp.size*1.5);spr.fill({color:theme.horizonGlow,alpha:wp.alpha*0.2})}
+      else if(wp.type==='crystal'){spr.circle(0,0,wp.size);spr.fill({color:theme.lightColor,alpha:wp.alpha});spr.moveTo(-wp.size,0);spr.lineTo(wp.size,0);spr.moveTo(0,-wp.size);spr.lineTo(0,wp.size);spr.stroke({color:0xffffff,alpha:wp.alpha*0.3,width:0.5})}
+      else{spr.circle(0,0,wp.size);spr.fill({color:theme.fogColor,alpha:wp.alpha})}
       fxContainer.addChild(spr);
       wp.sprite=spr;weatherParticles.push(wp);
     }
@@ -4615,17 +4618,67 @@ var bgFogSprites=[];
 var bgFgSprite=null;
 // Act themes: colors and atmosphere
 var ACT_THEMES=[
-  {name:'awakening',skyTop:0x060818,skyMid:0x0e1432,skyBot:0x1a3060,horizonGlow:0x3a6aaa,silColor:0x12203a,silColor2:0x182848,silColor3:0x1e3056,fogColor:0x12203a,fgColor:0x0a1220,moonTint:0x3a4a7a,lightColor:0x5a8aba,platColor:0x3a4a6a,platTop:0x4a6a8a,platBot:0x2a3a5a,spikeColor:0x7a3838,spikeGlow:0x3a6aaa,desc:'Ruins and arches',weather:'ash'},
-  {name:'depths',skyTop:0x080814,skyMid:0x14102e,skyBot:0x2a1c4e,horizonGlow:0x5a3a8a,silColor:0x10102a,silColor2:0x181840,silColor3:0x202050,fogColor:0x14102a,fgColor:0x0a0a16,moonTint:0x4a2a6a,lightColor:0x8a5aba,platColor:0x4a3a6a,platTop:0x6a5a8a,platBot:0x3a2a5a,spikeColor:0x6a2a5a,spikeGlow:0x5a3a8a,desc:'Industrial and pipes',weather:'rain'},
-  {name:'threads',skyTop:0x0e0c06,skyMid:0x201a0e,skyBot:0x3a3018,horizonGlow:0x6a5a2a,silColor:0x1a1608,silColor2:0x242010,silColor3:0x302818,fogColor:0x1a1608,fgColor:0x0e0c06,moonTint:0x4a4228,lightColor:0xba8a2a,platColor:0x4a4a2a,platTop:0x6a6a3a,platBot:0x3a3a1a,spikeColor:0x6a4a1a,spikeGlow:0x6a5a2a,desc:'Bridges and ropes',weather:'crystal'},
-  {name:'void',skyTop:0x04040c,skyMid:0x0a0816,skyBot:0x180e24,horizonGlow:0x4a1a3a,silColor:0x0a0814,silColor2:0x100e22,silColor3:0x161230,fogColor:0x0a0814,fgColor:0x06040a,moonTint:0x3a1a2a,lightColor:0xba3a6a,platColor:0x3a2a3a,platTop:0x5a3a5a,platBot:0x2a1a2a,spikeColor:0x5a1a2a,spikeGlow:0x4a1a3a,desc:'Void and cracks',weather:'voidDust'},
-  {name:'rebirth',skyTop:0x060e14,skyMid:0x0e1e2e,skyBot:0x1a3a48,horizonGlow:0x3a8a8a,silColor:0x0a1820,silColor2:0x102230,silColor3:0x162c40,fogColor:0x0e1a24,fgColor:0x081010,moonTint:0x2a6a6a,lightColor:0x4ababa,platColor:0x2a4a4a,platTop:0x3a6a6a,platBot:0x1a3a3a,spikeColor:0x3a5a4a,spikeGlow:0x3a8a8a,desc:'Fragments and reflections',weather:'sparks'},
-  {name:'exodus',skyTop:0x08040a,skyMid:0x14081a,skyBot:0x220e2a,horizonGlow:0x6a1a5a,silColor:0x100818,silColor2:0x180e24,silColor3:0x20142e,fogColor:0x120a18,fgColor:0x0a060c,moonTint:0x4a1a3a,lightColor:0xda3a7a,platColor:0x4a2a3a,platTop:0x6a3a4a,platBot:0x3a1a2a,spikeColor:0x6a2a3a,spikeGlow:0x6a1a5a,desc:'Final descent',weather:'ember'}
+  {name:'awakening',skyTop:0x04061a,skyMid:0x0c1236,skyBot:0x1a3268,horizonGlow:0x3a6aaa,silColor:0x0e1a34,silColor2:0x142448,silColor3:0x1a3058,fogColor:0x0e1a34,fgColor:0x081018,moonTint:0x3a4a7a,lightColor:0x5a8aba,platColor:0x2a3a58,platTop:0x4a6a8a,platBot:0x1a2a48,spikeColor:0x7a3838,spikeGlow:0x3a6aaa,desc:'Ruins and arches',weather:'ash',
+   skyTopEnd:0x081020,skyMidEnd:0x141840,skyBotEnd:0x1e3870,horizonGlowEnd:0x4a7aba,
+   auroraColor:0x2a4a7a,auroraAlpha:0.03,nebulaColor:0x1a2a5a,nebulaAlpha:0.02},
+  {name:'depths',skyTop:0x06060e,skyMid:0x120e28,skyBot:0x2a1c50,horizonGlow:0x5a3a8a,silColor:0x0c0c24,silColor2:0x141440,silColor3:0x1e1e54,fogColor:0x0e0e24,fgColor:0x08080e,moonTint:0x4a2a6a,lightColor:0x8a5aba,platColor:0x3a2a5a,platTop:0x6a5a8a,platBot:0x2a1a4a,spikeColor:0x6a2a5a,spikeGlow:0x5a3a8a,desc:'Industrial and pipes',weather:'rain',
+   skyTopEnd:0x0a0a18,skyMidEnd:0x1a1440,skyBotEnd:0x34225e,horizonGlowEnd:0x6a4a9a,
+   auroraColor:0x3a1a6a,auroraAlpha:0.04,nebulaColor:0x1a0a3a,nebulaAlpha:0.025},
+  {name:'threads',skyTop:0x0c0a04,skyMid:0x1e180c,skyBot:0x3a3018,horizonGlow:0x7a6a2a,silColor:0x161208,silColor2:0x201a0e,silColor3:0x2e2616,fogColor:0x161208,fgColor:0x0a0804,moonTint:0x5a4a28,lightColor:0xba8a2a,platColor:0x3a3a1e,platTop:0x6a6a3a,platBot:0x2a2a10,spikeColor:0x7a5a1a,spikeGlow:0x7a6a2a,desc:'Bridges and ropes',weather:'crystal',
+   skyTopEnd:0x100e06,skyMidEnd:0x262010,skyBotEnd:0x44381e,horizonGlowEnd:0x8a7a3a,
+   auroraColor:0x4a3a0a,auroraAlpha:0.02,nebulaColor:0x2a1a08,nebulaAlpha:0.015},
+  {name:'void',skyTop:0x020208,skyMid:0x080612,skyBot:0x140a20,horizonGlow:0x4a1a3a,silColor:0x060610,silColor2:0x0c0a1c,silColor3:0x120e28,fogColor:0x060610,fgColor:0x04020a,moonTint:0x3a1a2a,lightColor:0xba3a6a,platColor:0x2a1a2e,platTop:0x4a3a4e,platBot:0x1a0a1e,spikeColor:0x5a1a2a,spikeGlow:0x4a1a3a,desc:'Void and cracks',weather:'voidDust',
+   skyTopEnd:0x04040e,skyMidEnd:0x0c0a1a,skyBotEnd:0x1c1028,horizonGlowEnd:0x5a2a4a,
+   auroraColor:0x2a0a2a,auroraAlpha:0.015,nebulaColor:0x0a0410,nebulaAlpha:0.01},
+  {name:'rebirth',skyTop:0x040c12,skyMid:0x0c1c2c,skyBot:0x1a3a4c,horizonGlow:0x3a9a9a,silColor:0x08161e,silColor2:0x0e2030,silColor3:0x142a3e,fogColor:0x0a1822,fgColor:0x060e0e,moonTint:0x2a7a7a,lightColor:0x4ababa,platColor:0x1e4a4a,platTop:0x3a7a7a,platBot:0x0e3a3a,spikeColor:0x3a6a5a,spikeGlow:0x3a9a9a,desc:'Fragments and reflections',weather:'sparks',
+   skyTopEnd:0x081018,skyMidEnd:0x102236,skyBotEnd:0x224258,horizonGlowEnd:0x4aaaaa,
+   auroraColor:0x1a6a6a,auroraAlpha:0.035,nebulaColor:0x0a3a3a,nebulaAlpha:0.02},
+  {name:'exodus',skyTop:0x06020a,skyMid:0x12061a,skyBot:0x200c28,horizonGlow:0x7a1a5a,silColor:0x0c0614,silColor2:0x140a22,silColor3:0x1c102c,fogColor:0x0e0814,fgColor:0x08040a,moonTint:0x4a1a3a,lightColor:0xda3a7a,platColor:0x3e1e34,platTop:0x6a3a4e,platBot:0x2a0e1e,spikeColor:0x7a2a3a,spikeGlow:0x7a1a5a,desc:'Final descent',weather:'ember',
+   skyTopEnd:0x0a040e,skyMidEnd:0x180a22,skyBotEnd:0x281032,horizonGlowEnd:0x8a2a6a,
+   auroraColor:0x3a0a2a,auroraAlpha:0.04,nebulaColor:0x1a0614,nebulaAlpha:0.02}
 ];
 function getCurrentAct(){return Math.floor(state.level/5)}
-function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();bgLayers=[];bgStars=[];bgDistantLights=[];bgFogSprites=[];
+// Get interpolated theme for current level within act (progression 0..1 across 5 levels)
+function getLevelTheme(){
+  var act=getCurrentAct();
+  var theme=ACT_THEMES[act]||ACT_THEMES[0];
+  var lvlInAct=state.level%5;
+  var t=lvlInAct/4; // 0 at first level, 1 at last level of act
+  // Interpolate sky colors from start to end
+  var result={};
+  var fields=['skyTop','skyMid','skyBot','horizonGlow'];
+  for(var i=0;i<fields.length;i++){
+    var f=fields[i];
+    result[f]=theme[f];
+    var endKey=f+'End';
+    if(theme[endKey]!==undefined){
+      result[f]=lerpColor(theme[f],theme[endKey],t);
+    }
+  }
+  // Copy non-interpolated fields
+  var copyFields=['silColor','silColor2','silColor3','fogColor','fgColor','moonTint','lightColor','platColor','platTop','platBot','spikeColor','spikeGlow','auroraColor','auroraAlpha','nebulaColor','nebulaAlpha','weather','name','desc'];
+  for(var i=0;i<copyFields.length;i++){if(theme[copyFields[i]]!==undefined)result[copyFields[i]]=theme[copyFields[i]]}
+  return result;
+}
+// Smooth transition state between levels
+var bgTransition={active:false,progress:0,duration:0.8,oldTheme:null,newTheme:null};
+function startBgTransition(){bgTransition.active=true;bgTransition.progress=0;bgTransition.oldTheme=null;bgTransition.newTheme=null}
+// Smooth level transition with fade
+function transitionToLevel(lvlIdx,callback){
+  var transEl=document.getElementById('level-transition');
+  if(!transEl){callback();return}
+  transEl.style.transition='opacity 0.3s ease-in-out';
+  transEl.style.opacity='1';
+  setTimeout(function(){
+    callback();
+    setTimeout(function(){transEl.style.opacity='0'},50);
+  },300);
+}
+var bgAuroraSprite=null;
+var bgNebulaSprite=null;
+function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();bgLayers=[];bgStars=[];bgDistantLights=[];bgFogSprites=[];bgAuroraSprite=null;bgNebulaSprite=null;
 var act=getCurrentAct();
-var theme=ACT_THEMES[act]||ACT_THEMES[0];
+var theme=getLevelTheme();
 // Update PIXI background color to match act theme
 if(pixiApp&&pixiApp.renderer){pixiApp.renderer.background.color=theme.skyTop}
 // === SKY GRADIENT ===
@@ -4645,6 +4698,36 @@ for(var gy=0;gy<sh;gy+=4){
 bgSkySprite.circle(sw/2,sh*0.72,180);bgSkySprite.fill({color:theme.horizonGlow,alpha:0.08});
 bgSkySprite.circle(sw/2,sh*0.72,90);bgSkySprite.fill({color:theme.horizonGlow,alpha:0.05});
 bgContainer.addChild(bgSkySprite);bgLayers.push({sprite:bgSkySprite,speed:0.01});
+// === AURORA / NEBULA — atmospheric glow unique to each act ===
+if(theme.auroraAlpha&&theme.auroraAlpha>0){
+  bgAuroraSprite=new PIXI.Graphics();
+  // Draw 3 undulating aurora bands
+  for(var ab=0;ab<3;ab++){
+    var aY=200+ab*80+Math.random()*40;
+    var aLen=sw*0.6+Math.random()*sw*0.3;
+    var aStart=sw*0.1+Math.random()*sw*0.2;
+    bgAuroraSprite.moveTo(aStart,aY);
+    for(var as=0;as<8;as++){
+      var ax=aStart+as*(aLen/8);
+      var ay=aY+Math.sin(as*1.2+ab)*30;
+      bgAuroraSprite.quadraticCurveTo(ax+20,ay-20,ax+aLen/16,ay);
+    }
+    bgAuroraSprite.stroke({color:theme.auroraColor,alpha:theme.auroraAlpha*(1-ab*0.25),width:40-ab*8,cap:'round'});
+  }
+  bgContainer.addChild(bgAuroraSprite);bgLayers.push({sprite:bgAuroraSprite,speed:0.02});
+}
+if(theme.nebulaAlpha&&theme.nebulaAlpha>0){
+  bgNebulaSprite=new PIXI.Graphics();
+  // Faint nebula clouds — large soft circles
+  for(var nc=0;nc<4+Math.floor(Math.random()*3);nc++){
+    var nx=Math.random()*sw;
+    var ny=100+Math.random()*500;
+    var nr=80+Math.random()*160;
+    bgNebulaSprite.circle(nx,ny,nr);bgNebulaSprite.fill({color:theme.nebulaColor,alpha:theme.nebulaAlpha*(0.6+Math.random()*0.4)});
+    bgNebulaSprite.circle(nx,ny,nr*0.5);bgNebulaSprite.fill({color:theme.nebulaColor,alpha:theme.nebulaAlpha*0.8});
+  }
+  bgContainer.addChild(bgNebulaSprite);bgLayers.push({sprite:bgNebulaSprite,speed:0.015});
+}
 // === STARS ===
 bgStarSprite=new PIXI.Graphics();
 bgContainer.addChild(bgStarSprite);bgLayers.push({sprite:bgStarSprite,speed:0.03});
@@ -4727,57 +4810,134 @@ if(act===0){
     l3.moveTo(bx+bw/2,780-bh);l3.quadraticCurveTo(bx+bw/2+Math.random()*8-4,780-bh-25,bx+bw/2+Math.random()*4-2,780-bh-40-Math.random()*30);l3.stroke({color:theme.silColor2,width:2})
   }
 }else if(act===3){
-  // VOID: Cracks, crystals, emptiness
-  // Far: very sparse — floating debris, cracks
-  for(var i=0;i<6;i++){var bx=i*400+Math.random()*200;var bh=40+Math.random()*80;l1.moveTo(bx,780);l1.lineTo(bx+10,780-bh);l1.lineTo(bx+25,780);l1.closePath();l1.fill({color:theme.silColor,alpha:0.5})}
-  // Reality cracks — thin glowing lines
-  for(var i=0;i<8;i++){var cx=i*350+Math.random()*150;var cy=200+Math.random()*300;
-    l1.moveTo(cx,cy);l1.lineTo(cx+Math.random()*40-20,cy+30+Math.random()*50);l1.lineTo(cx+Math.random()*60-30,cy+80+Math.random()*80);l1.stroke({color:theme.horizonGlow,alpha:0.08,width:1.5})}
-  // Mid: almost nothing — floating shards
-  for(var i=0;i<10;i++){var bx=i*300+Math.random()*100;var by=400+Math.random()*200;
-    l2.moveTo(bx,by);l2.lineTo(bx+8,by-12);l2.lineTo(bx+16,by);l2.lineTo(bx+8,by+5);l2.closePath();l2.fill({color:theme.silColor2,alpha:0.4})}
-  // Near: void crystals
-  for(var i=0;i<6;i++){var bx=i*350+Math.random()*120;var by=500+Math.random()*150;
-    l3.moveTo(bx,by);l3.lineTo(bx+5,by-20);l3.lineTo(bx+10,by);l3.closePath();l3.fill({color:theme.silColor3,alpha:0.3});
-    l3.moveTo(bx+5,by-20);l3.lineTo(bx+3,by-25);l3.stroke({color:theme.horizonGlow,alpha:0.15,width:1})}
+  // VOID: Cracks, crystals, emptiness — more dramatic
+  // Far: sparse floating debris with faint glow halos
+  for(var i=0;i<8;i++){var bx=i*350+Math.random()*180;var bh=30+Math.random()*70;
+    l1.moveTo(bx,780);l1.lineTo(bx+8,780-bh);l1.lineTo(bx+22,780);l1.closePath();l1.fill({color:theme.silColor,alpha:0.5});
+    // Faint halo around debris
+    l1.circle(bx+11,780-bh*0.5,15+Math.random()*10);l1.fill({color:theme.horizonGlow,alpha:0.015})}
+  // Reality cracks — branching glowing veins
+  for(var i=0;i<12;i++){var cx=i*250+Math.random()*120;var cy=150+Math.random()*350;
+    l1.moveTo(cx,cy);
+    var bx1=cx+Math.random()*40-20;var by1=cy+30+Math.random()*40;
+    var bx2=bx1+Math.random()*50-25;var by2=by1+50+Math.random()*60;
+    l1.lineTo(bx1,by1);l1.lineTo(bx2,by2);
+    l1.stroke({color:theme.horizonGlow,alpha:0.1,width:1.5});
+    // Branch from crack
+    if(Math.random()>0.4){var bx3=bx1+Math.random()*30-15;var by3=by1+20+Math.random()*30;
+      l1.moveTo(bx1,by1);l1.lineTo(bx3,by3);l1.stroke({color:theme.horizonGlow,alpha:0.06,width:1})}
+  }
+  // Void rift — large jagged opening in the sky
+  var riftX=1200+Math.random()*800;
+  l1.moveTo(riftX,100);l1.lineTo(riftX+30,130);l1.lineTo(riftX+15,200);l1.lineTo(riftX+50,250);
+  l1.lineTo(riftX+25,310);l1.lineTo(riftX+45,370);l1.lineTo(riftX+20,420);
+  l1.stroke({color:theme.horizonGlow,alpha:0.07,width:2});
+  // Rift glow
+  l1.circle(riftX+25,260,60);l1.fill({color:theme.horizonGlow,alpha:0.015});
+  // Mid: floating crystal shards with faint inner glow
+  for(var i=0;i<14;i++){var bx=i*220+Math.random()*80;var by=350+Math.random()*250;
+    var cSize=8+Math.random()*14;
+    l2.moveTo(bx,by);l2.lineTo(bx+cSize*0.4,by-cSize);l2.lineTo(bx+cSize,by-cSize*0.3);l2.lineTo(bx+cSize*0.6,by+cSize*0.3);l2.closePath();
+    l2.fill({color:theme.silColor2,alpha:0.35});
+    // Crystal inner glow
+    l2.moveTo(bx+cSize*0.3,by-cSize*0.5);l2.lineTo(bx+cSize*0.5,by-cSize*0.7);
+    l2.stroke({color:theme.horizonGlow,alpha:0.1,width:1})}
+  // Near: void crystals with visible glow trails
+  for(var i=0;i<8;i++){var bx=i*300+Math.random()*100;var by=480+Math.random()*180;
+    var cs=6+Math.random()*10;
+    l3.moveTo(bx,by);l3.lineTo(bx+cs*0.5,by-cs*2);l3.lineTo(bx+cs,by);l3.closePath();
+    l3.fill({color:theme.silColor3,alpha:0.3});
+    // Crystal tip glow trail
+    l3.moveTo(bx+cs*0.5,by-cs*2);l3.lineTo(bx+cs*0.3,by-cs*2.5);l3.lineTo(bx+cs*0.5,by-cs*3);
+    l3.stroke({color:theme.horizonGlow,alpha:0.12,width:1});
+    // Subtle glow around crystal
+    l3.circle(bx+cs*0.5,by-cs,cs*1.5);l3.fill({color:theme.horizonGlow,alpha:0.01})}
 }else if(act===4){
   // REBIRTH: Teal/cyan — floating fragments, shattered mirrors, reconnecting threads
-  // Far: floating island fragments
-  for(var i=0;i<8;i++){var bx=i*350+Math.random()*100;var bh=20+Math.random()*60;var bw=30+Math.random()*50;
-    l1.moveTo(bx,780-bh);l1.lineTo(bx+bw*0.3,780-bh-15);l1.lineTo(bx+bw*0.7,780-bh-10);l1.lineTo(bx+bw,780-bh);l1.lineTo(bx+bw*0.8,780);l1.lineTo(bx+bw*0.2,780);l1.closePath();l1.fill(theme.silColor);
+  // Far: floating island fragments with glowing undersides
+  for(var i=0;i<10;i++){var bx=i*300+Math.random()*100;var bh=15+Math.random()*50;var bw=25+Math.random()*45;
+    l1.moveTo(bx,780-bh);l1.lineTo(bx+bw*0.3,780-bh-12);l1.lineTo(bx+bw*0.7,780-bh-8);l1.lineTo(bx+bw,780-bh);l1.lineTo(bx+bw*0.8,780);l1.lineTo(bx+bw*0.2,780);l1.closePath();l1.fill(theme.silColor);
+    // Glow underneath fragment
+    l1.circle(bx+bw/2,780-bh*0.3,bw*0.6);l1.fill({color:theme.horizonGlow,alpha:0.012});
     // Thread connecting fragments
-    if(i<7){l1.moveTo(bx+bw,780-bh*0.5);l1.quadraticCurveTo(bx+bw+80,780-bh*0.8,bx+bw+140,780-bh*0.3);l1.stroke({color:theme.horizonGlow,alpha:0.06,width:1})}
+    if(i<9){l1.moveTo(bx+bw,780-bh*0.5);l1.quadraticCurveTo(bx+bw+70,780-bh*0.7,bx+bw+130,780-bh*0.3);l1.stroke({color:theme.horizonGlow,alpha:0.06,width:1})}
   }
-  // Mid: broken mirrors — angular reflective shapes
-  for(var i=0;i<12;i++){var bx=i*200+Math.random()*60;var by=350+Math.random()*250;
-    l2.moveTo(bx,by);l2.lineTo(bx+Math.random()*20-5,by-15-Math.random()*20);l2.lineTo(bx+20+Math.random()*15,by-5);l2.lineTo(bx+15+Math.random()*10,by+10);l2.closePath();l2.fill({color:theme.silColor2,alpha:0.5});
-    // Mirror shine
-    l2.moveTo(bx+5,by-5);l2.lineTo(bx+8,by-12);l2.stroke({color:theme.horizonGlow,alpha:0.08,width:1})}
-  // Near: reconnected threads — glowing lines
-  for(var i=0;i<6;i++){var bx=i*300+Math.random()*100;
-    l3.moveTo(bx,780);l3.quadraticCurveTo(bx+50,780-200,bx+100,780-50);l3.stroke({color:theme.horizonGlow,alpha:0.1,width:2});
-    // Anchor point
-    l3.circle(bx+50,780-200,3);l3.fill(theme.silColor3)}
+  // Mid: broken mirrors — angular reflective shapes with bright edge highlights
+  for(var i=0;i<16;i++){var bx=i*160+Math.random()*50;var by=320+Math.random()*280;
+    var ms=12+Math.random()*18;
+    var angle=Math.random()*Math.PI;
+    l2.moveTo(bx,by);l2.lineTo(bx+Math.cos(angle)*ms,by-Math.sin(angle)*ms);
+    l2.lineTo(bx+Math.cos(angle+0.8)*ms*1.2,by-Math.sin(angle+0.8)*ms*1.2);
+    l2.lineTo(bx+Math.cos(angle+1.6)*ms*0.8,by-Math.sin(angle+1.6)*ms*0.8);
+    l2.closePath();l2.fill({color:theme.silColor2,alpha:0.45});
+    // Bright mirror edge
+    l2.moveTo(bx,by);l2.lineTo(bx+Math.cos(angle)*ms,by-Math.sin(angle)*ms);
+    l2.stroke({color:lerpColor(theme.horizonGlow,0xffffff,0.3),alpha:0.1,width:1});
+    // Mirror reflection flash
+    if(Math.random()>0.5){l2.circle(bx+ms*0.3,by-ms*0.3,2);l2.fill({color:0xffffff,alpha:0.04})}
+  }
+  // Floating light motes — rising hopeful particles in background
+  for(var i=0;i<10;i++){var mx=Math.random()*sw;var my=300+Math.random()*400;
+    l2.circle(mx,my,2+Math.random()*3);l2.fill({color:theme.horizonGlow,alpha:0.04});
+    l2.moveTo(mx,my);l2.lineTo(mx+Math.random()*4-2,my-15-Math.random()*20);
+    l2.stroke({color:theme.horizonGlow,alpha:0.03,width:1})}
+  // Near: reconnected threads — glowing arcs and anchor points
+  for(var i=0;i<8;i++){var bx=i*250+Math.random()*80;
+    var arcH=150+Math.random()*100;
+    l3.moveTo(bx,780);l3.quadraticCurveTo(bx+40,780-arcH,bx+80,780-40);l3.stroke({color:theme.horizonGlow,alpha:0.08,width:1.5});
+    // Anchor point with glow
+    l3.circle(bx+40,780-arcH,3);l3.fill({color:theme.horizonGlow,alpha:0.15});
+    l3.circle(bx+40,780-arcH,8);l3.fill({color:theme.horizonGlow,alpha:0.03})}
+  // Near: scattered fragments on ground
+  for(var i=0;i<6;i++){var fx=i*350+Math.random()*100;var fh=4+Math.random()*8;var fw=10+Math.random()*20;
+    l3.rect(fx,780-fh,fw,fh);l3.fill({color:theme.silColor3,alpha:0.25})}
 }else{
   // EXODUS: Deep purple/red — final descent, collapsing reality
-  // Far: collapsing structures
-  for(var i=0;i<10;i++){var bx=i*250+Math.random()*80;var bh=60+Math.random()*180;var tilt=Math.random()*0.3-0.15;
+  // Far: collapsing structures with tilt and debris
+  for(var i=0;i<12;i++){var bx=i*220+Math.random()*80;var bh=70+Math.random()*200;var tilt=Math.random()*0.3-0.15;
     l1.moveTo(bx,780);l1.lineTo(bx+8+tilt*40,780-bh);l1.lineTo(bx+18+tilt*40,780-bh);l1.lineTo(bx+26,780);l1.closePath();l1.fill(theme.silColor);
     // Crumble particles
     for(var c=0;c<3;c++){l1.circle(bx+Math.random()*30,780-bh-Math.random()*20,1.5);l1.fill({color:theme.horizonGlow,alpha:0.06})}
+    // Broken top piece
+    if(Math.random()>0.5){var topW=4+Math.random()*8;l1.rect(bx+8+tilt*40-2,780-bh-Math.random()*15,topW,topW);l1.fill({color:theme.silColor,alpha:0.6})}
   }
-  // Reality fractures — deep red cracks
-  for(var i=0;i<10;i++){var cx=i*300+Math.random()*100;var cy=150+Math.random()*400;
-    l1.moveTo(cx,cy);l1.lineTo(cx+Math.random()*30-15,cy+40+Math.random()*60);
-    l1.lineTo(cx+Math.random()*50-25,cy+100+Math.random()*100);l1.stroke({color:theme.horizonGlow,alpha:0.1,width:1.5})}
-  // Mid: final anchors — the last threads
-  for(var i=0;i<8;i++){var ax=i*350+Math.random()*100;var ay=400+Math.random()*200;
+  // Reality fractures — deep red branching cracks
+  for(var i=0;i<14;i++){var cx=i*220+Math.random()*80;var cy=120+Math.random()*400;
+    l1.moveTo(cx,cy);l1.lineTo(cx+Math.random()*30-15,cy+35+Math.random()*50);
+    l1.lineTo(cx+Math.random()*50-25,cy+90+Math.random()*90);l1.stroke({color:theme.horizonGlow,alpha:0.1,width:1.5});
+    // Branch
+    if(Math.random()>0.5){l1.moveTo(cx+Math.random()*20-10,cy+40);l1.lineTo(cx+Math.random()*40-20,cy+10);
+      l1.stroke({color:theme.horizonGlow,alpha:0.06,width:1})}
+  }
+  // Large rift tearing across the sky
+  var riftX=800+Math.random()*600;
+  for(var rs=0;rs<5;rs++){
+    var rx=riftX+rs*80+Math.random()*20;var ry=80+rs*50+Math.random()*30;
+    var rx2=rx+40+Math.random()*30;var ry2=ry+30+Math.random()*20;
+    l1.moveTo(rx,ry);l1.lineTo(rx2,ry2);l1.stroke({color:theme.horizonGlow,alpha:0.06+rs*0.01,width:2.5-rs*0.3});
+  }
+  // Mid: final anchors — the last threads, with dim glow
+  for(var i=0;i<10;i++){var ax=i*280+Math.random()*80;var ay=350+Math.random()*250;
     l2.circle(ax,ay,4);l2.fill(theme.silColor2);
-    l2.moveTo(ax,ay);l2.lineTo(ax+Math.random()*10-5,ay-30-Math.random()*40);l2.stroke({color:theme.horizonGlow,alpha:0.08,width:1.5})}
-  // Near: falling debris
-  for(var i=0;i<8;i++){var bx=i*280+Math.random()*80;var by=300+Math.random()*300;var sz=5+Math.random()*15;
+    l2.moveTo(ax,ay);l2.lineTo(ax+Math.random()*10-5,ay-30-Math.random()*40);
+    l2.stroke({color:theme.horizonGlow,alpha:0.08,width:1.5});
+    // Faint glow around anchor
+    l2.circle(ax,ay,10);l2.fill({color:theme.horizonGlow,alpha:0.015})}
+  // Falling ash and debris streaks
+  for(var i=0;i<8;i++){var dx=Math.random()*sw;var dy=Math.random()*400;
+    l2.moveTo(dx,dy);l2.lineTo(dx+Math.random()*4-2,dy+20+Math.random()*30);
+    l2.stroke({color:theme.silColor2,alpha:0.12,width:0.8})}
+  // Near: falling debris and broken pillars
+  for(var i=0;i<10;i++){var bx=i*240+Math.random()*80;var by=250+Math.random()*350;var sz=5+Math.random()*15;
     l3.rect(bx,by,sz,sz*0.6);l3.fill({color:theme.silColor3,alpha:0.25});
-    l3.moveTo(bx+sz/2,by);l3.lineTo(bx+sz/2,by-sz*0.3);l3.stroke({color:theme.horizonGlow,alpha:0.05,width:1})}
+    // Debris trail
+    l3.moveTo(bx+sz/2,by);l3.lineTo(bx+sz/2,by-sz*0.3);
+    l3.stroke({color:theme.horizonGlow,alpha:0.05,width:1})}
+  // Near: horizontal crack lines across the screen
+  for(var i=0;i<4;i++){var cy=300+Math.random()*300;
+    l3.moveTo(0,cy);
+    for(var cs=0;cs<8;cs++){l3.lineTo(cs*screenW/7+Math.random()*40,cy+Math.random()*20-10)}
+    l3.stroke({color:theme.horizonGlow,alpha:0.04,width:1})}
 }
 bgContainer.addChild(l1);bgLayers.push({sprite:l1,speed:0.08});
 bgContainer.addChild(l2);bgLayers.push({sprite:l2,speed:0.25});
@@ -4848,51 +5008,72 @@ if(act===0){
     bgFgSprite.rect(bx,780-bh,bw,bh);bgFgSprite.fill({color:theme.fgColor,alpha:0.15+Math.random()*0.1});
   }
 }else if(act===3){
-  // VOID: Almost nothing — just thin cracks and faint dust
-  for(var i=0;i<4;i++){var cx=Math.random()*screenW;var cy=Math.random()*780;
+  // VOID: Cracks, void wisps, and faint pulses
+  for(var i=0;i<6;i++){var cx=Math.random()*screenW;var cy=Math.random()*780;
     bgFgSprite.moveTo(cx,cy);bgFgSprite.lineTo(cx+Math.random()*30-15,cy+40+Math.random()*60);
     bgFgSprite.lineTo(cx+Math.random()*50-25,cy+100+Math.random()*80);
-    bgFgSprite.stroke({color:theme.fgColor,alpha:0.08,width:1});
+    bgFgSprite.stroke({color:theme.horizonGlow,alpha:0.05,width:1});
   }
-  // Void wisps — barely visible
-  for(var i=0;i<3;i++){var wx=Math.random()*screenW;var wy=200+Math.random()*400;
-    bgFgSprite.circle(wx,wy,2+Math.random()*4);bgFgSprite.fill({color:0x3a1a2a,alpha:0.06});
+  // Void wisps — faint pulsing orbs
+  for(var i=0;i<6;i++){var wx=Math.random()*screenW;var wy=150+Math.random()*500;
+    bgFgSprite.circle(wx,wy,3+Math.random()*5);bgFgSprite.fill({color:theme.horizonGlow,alpha:0.04});
+    bgFgSprite.circle(wx,wy,1.5);bgFgSprite.fill({color:theme.horizonGlow,alpha:0.08});
   }
+  // Thin horizontal void lines
+  for(var i=0;i<3;i++){var ly=200+i*200+Math.random()*80;
+    bgFgSprite.moveTo(0,ly);bgFgSprite.lineTo(screenW,ly+Math.random()*10-5);
+    bgFgSprite.stroke({color:theme.fgColor,alpha:0.03,width:0.5})}
 }else if(act===4){
-  // REBIRTH: Floating fragments, reconnecting threads, hopeful
-  for(var i=0;i<5;i++){var fx=Math.random()*screenW;var fy=100+Math.random()*500;var fw=8+Math.random()*15;var fh=4+Math.random()*8;
+  // REBIRTH: Floating fragments with rising light, reconnecting threads
+  for(var i=0;i<8;i++){var fx=Math.random()*screenW;var fy=80+Math.random()*500;var fw=6+Math.random()*12;var fh=3+Math.random()*6;
     bgFgSprite.rect(fx,fy,fw,fh);bgFgSprite.fill({color:theme.fgColor,alpha:0.15+Math.random()*0.1});
-    bgFgSprite.moveTo(fx+fw/2,fy);bgFgSprite.lineTo(fx+fw/2,fy-20-Math.random()*30);
-    bgFgSprite.stroke({color:0x3a8a8a,alpha:0.1,width:1});
+    // Rising light trail above fragment
+    bgFgSprite.moveTo(fx+fw/2,fy);bgFgSprite.lineTo(fx+fw/2+Math.random()*4-2,fy-25-Math.random()*35);
+    bgFgSprite.stroke({color:theme.horizonGlow,alpha:0.08,width:1});
   }
-  for(var i=0;i<3;i++){var tx=Math.random()*screenW;var ty=100+Math.random()*300;
-    bgFgSprite.moveTo(tx,ty);bgFgSprite.quadraticCurveTo(tx+40,ty+50,tx+80,ty-10);
-    bgFgSprite.stroke({color:0x2a6a6a,alpha:0.08,width:1});
+  // Reconnecting threads — curved arcs across screen
+  for(var i=0;i<5;i++){var tx=Math.random()*screenW;var ty=80+Math.random()*250;
+    bgFgSprite.moveTo(tx,ty);bgFgSprite.quadraticCurveTo(tx+50+Math.random()*30,ty+40+Math.random()*30,tx+80+Math.random()*40,ty-10+Math.random()*20);
+    bgFgSprite.stroke({color:theme.horizonGlow,alpha:0.06,width:1});
+    // Small knot at midpoint
+    bgFgSprite.circle(tx+40+Math.random()*20,ty+15+Math.random()*10,2);bgFgSprite.fill({color:theme.horizonGlow,alpha:0.1});
   }
-  // Rising spark trails
-  for(var i=0;i<4;i++){var sx=Math.random()*screenW;
-    bgFgSprite.moveTo(sx,780);bgFgSprite.quadraticCurveTo(sx+Math.random()*10-5,780-40,sx+Math.random()*6-3,780-70);
-    bgFgSprite.stroke({color:0x3a8a8a,alpha:0.06,width:1});
+  // Rising spark trails — hopeful upward motion
+  for(var i=0;i<6;i++){var sx=Math.random()*screenW;
+    bgFgSprite.moveTo(sx,780);bgFgSprite.quadraticCurveTo(sx+Math.random()*10-5,780-50,sx+Math.random()*6-3,780-90-Math.random()*40);
+    bgFgSprite.stroke({color:theme.horizonGlow,alpha:0.05,width:1});
+    // Spark tip
+    bgFgSprite.circle(sx+Math.random()*6-3,780-90-Math.random()*40,1.5);bgFgSprite.fill({color:0xffffff,alpha:0.06});
   }
 }else{
-  // EXODUS: Collapsing edges, falling debris
-  for(var i=0;i<6;i++){var ex=Math.random()*screenW;var ey=0;var elen=30+Math.random()*80;
+  // EXODUS: Collapsing edges, falling debris, cracking
+  for(var i=0;i<8;i++){var ex=Math.random()*screenW;var ey=0;var elen=30+Math.random()*80;
     bgFgSprite.moveTo(ex,ey);bgFgSprite.lineTo(ex+Math.random()*8-4,ey+elen);
     bgFgSprite.stroke({color:theme.fgColor,alpha:0.15,width:1.5});
-    // Debris
+    // Debris at end
     bgFgSprite.rect(ex-3+Math.random()*6,ey+elen-5,4+Math.random()*6,3+Math.random()*4);
     bgFgSprite.fill({color:theme.fgColor,alpha:0.12});
   }
-  for(var i=0;i<3;i++){var cx=Math.random()*screenW;var cy=Math.random()*780;
+  // Deep cracks
+  for(var i=0;i<5;i++){var cx=Math.random()*screenW;var cy=Math.random()*780;
     bgFgSprite.moveTo(cx,cy);bgFgSprite.lineTo(cx+Math.random()*20-10,cy+30+Math.random()*40);
     bgFgSprite.lineTo(cx+Math.random()*40-20,cy+80+Math.random()*60);
-    bgFgSprite.stroke({color:0x5a1a3a,alpha:0.1,width:1.5});
+    bgFgSprite.stroke({color:theme.horizonGlow,alpha:0.08,width:1.5});
   }
-  // Falling fragments
-  for(var i=0;i<5;i++){var dx=Math.random()*screenW;var dy=Math.random()*780;
+  // Falling fragments with embers
+  for(var i=0;i<8;i++){var dx=Math.random()*screenW;var dy=Math.random()*780;
     bgFgSprite.rect(dx,dy,3+Math.random()*6,2+Math.random()*4);
     bgFgSprite.fill({color:theme.fgColor,alpha:0.1});
+    // Tiny ember
+    if(Math.random()>0.5){bgFgSprite.circle(dx+2,dy-2,1);bgFgSprite.fill({color:theme.horizonGlow,alpha:0.08})}
   }
+  // Edge vignette cracks from screen corners
+  bgFgSprite.moveTo(0,0);bgFgSprite.lineTo(40+Math.random()*30,50+Math.random()*30);
+  bgFgSprite.lineTo(20+Math.random()*20,120+Math.random()*40);
+  bgFgSprite.stroke({color:theme.horizonGlow,alpha:0.04,width:1});
+  bgFgSprite.moveTo(screenW,0);bgFgSprite.lineTo(screenW-40-Math.random()*30,50+Math.random()*30);
+  bgFgSprite.lineTo(screenW-20-Math.random()*20,120+Math.random()*40);
+  bgFgSprite.stroke({color:theme.horizonGlow,alpha:0.04,width:1});
 }
 bgContainer.addChild(bgFgSprite);bgLayers.push({sprite:bgFgSprite,speed:0.6});
 }
@@ -4904,8 +5085,12 @@ function lerpColor(c1,c2,t){
 }
 function updateBackground(){bgTime+=0.016;
 var act=getCurrentAct();
-var theme=ACT_THEMES[act]||ACT_THEMES[0];
+var theme=getLevelTheme();
 for(var i=0;i<bgLayers.length;i++){bgLayers[i].sprite.x=-camera.x*bgLayers[i].speed;bgLayers[i].sprite.y=-camera.y*bgLayers[i].speed*0.3}
+// Aurora subtle drift
+if(bgAuroraSprite){bgAuroraSprite.x=-camera.x*0.02+Math.sin(bgTime*0.3)*5;bgAuroraSprite.alpha=0.8+Math.sin(bgTime*0.2)*0.2}
+// Nebula very slow shift
+if(bgNebulaSprite){bgNebulaSprite.x=-camera.x*0.015+Math.cos(bgTime*0.15)*3;bgNebulaSprite.alpha=0.9+Math.sin(bgTime*0.25)*0.1}
 // Twinkling stars (act-dependent density/brightness)
 if(bgStarSprite){bgStarSprite.clear();
   var starAlphaMul=act===3?0.3:act===4?1.3:act===5?0.6:1;
@@ -5063,7 +5248,7 @@ function showActIntro(actIdx,callback){
   var bgCtx=null;
   var bgParts=[];
   var bgAnim=null;
-  var actColors=[[0x5a8aba,0x2a4a6a],[0x8a5aba,0x4a2a6a],[0xba8a2a,0x6a4a1a],[0x8a3a5a,0x3a1a2a],[0x4a8a7a,0x2a5a4a],[0x9a3a6a,0x3a1a3a]];
+  var actColors=[[0x5a8aba,0x2a4a6a],[0x8a5aba,0x4a2a6a],[0xba8a2a,0x6a4a1a],[0xba3a6a,0x4a1a3a],[0x4ababa,0x2a6a6a],[0xda3a7a,0x6a1a5a]];
   if(bgCanvas){
     bgCanvas.width=window.innerWidth;bgCanvas.height=window.innerHeight;
     bgCtx=bgCanvas.getContext('2d');
@@ -5226,7 +5411,7 @@ function showActLevels(actIdx){
     // Click handler — launch level
     if(isUnlocked){
       (function(iidx){
-        function launchLevel(){try{state.level=iidx;state.deaths=0;challengeMode=false;if(engine)clearLevel();initAudio();startMusic();initMatter();createBackground();loadLevel(iidx);showStoryScreen(iidx)}catch(e){console.error('[VOID] Level launch error:',e)}}
+        function launchLevel(){try{state.level=iidx;state.deaths=0;challengeMode=false;transitionToLevel(iidx,function(){if(engine)clearLevel();initAudio();startMusic();initMatter();createBackground();loadLevel(iidx);showStoryScreen(iidx)})}catch(e){console.error('[VOID] Level launch error:',e)}}
         card.addEventListener('click',launchLevel);
         card.addEventListener('touchstart',function(e){e.preventDefault();tgHaptic('light');launchLevel()},{passive:false});
       })(idx);
@@ -5488,7 +5673,7 @@ function gameLoop(timestamp){
 function updateSoundButton(){var btn=document.getElementById('hud-sound');if(btn)btn.textContent=soundMuted?'✕':'♪';btn.style.color=soundMuted?'rgba(255,100,100,.3)':'rgba(255,255,255,.3)'}
 
 function bindUI(){
-  document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');challengeMode=false;syncProgressUnlocked();state.level=Math.min(progress.unlocked-1,LEVELS.length-1);state.deaths=0;initAudio();startMusic();initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
+  document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');challengeMode=false;syncProgressUnlocked();state.level=Math.min(progress.unlocked-1,LEVELS.length-1);state.deaths=0;transitionToLevel(state.level,function(){initAudio();startMusic();initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)})});
   document.getElementById('btn-levels').addEventListener('click',function(){showLevelSelect()});
   document.getElementById('btn-ls-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-ls-back').addEventListener('touchstart',function(e){e.preventDefault();showScreen('menu')},{passive:false});
@@ -5513,9 +5698,9 @@ function bindUI(){
     var prevAct=Math.floor((state.level-1)/5);
     var newAct=Math.floor(state.level/5);
     if(newAct>prevAct){
-      showActIntro(newAct,function(){clearLevel();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
+      showActIntro(newAct,function(){transitionToLevel(state.level,function(){clearLevel();createBackground();loadLevel(state.level);showStoryScreen(state.level)})});
     }else{
-      clearLevel();createBackground();loadLevel(state.level);showStoryScreen(state.level);
+      transitionToLevel(state.level,function(){clearLevel();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
     }
   });
   document.getElementById('btn-share').addEventListener('click',shareResult);
