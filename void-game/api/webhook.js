@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const GAME_URL = 'https://void-game-ruddy.vercel.app/';
 const CHANNEL_ID = '@void_game_official';
-const SUPPORT_CHANNEL_ID = process.env.SUPPORT_CHANNEL_ID || '@void_game_official'; // Will be updated with private support channel
+const SUPPORT_CHANNEL_ID = process.env.SUPPORT_CHANNEL_ID || '-1003857849729'; // VOID - SUPPORT (private)
 const VERSION = '0.14.0-beta';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jibtmyuxbeckanmkhuik.supabase.co';
