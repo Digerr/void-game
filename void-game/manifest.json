@@ -1,7 +1,7 @@
 {
   "name": "VOID — во тьму",
   "short_name": "VOID",
-  "description": "Платформер во тьме. 20 уровней. Telegram Mini App.",
+  "description": "Платформер во тьме. 30 уровней. Telegram Mini App.",
   "start_url": "/void-game/",
   "scope": "/void-game/",
   "display": "standalone",
