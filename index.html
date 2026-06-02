@@ -17,19 +17,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0e0e1e;font-family:
 canvas{display:block;position:fixed;inset:0;z-index:1}
 #ui-layer{position:fixed;inset:0;z-index:10;pointer-events:none}
 #ui-layer *{pointer-events:auto}
-#main-menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(6,6,14,0.97);overflow:hidden}
+#main-menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,rgba(20,20,45,0.97) 0%,rgba(6,6,14,0.99) 70%);overflow:hidden}
 #main-menu.hidden{display:none}
 .logo-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 #main-menu>.menu-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;width:100%;height:100%;pointer-events:none;padding:0 0 max(12px,env(safe-area-inset-bottom))}
 #main-menu>.menu-content>*{pointer-events:auto}
 .logo-sub{font-size:.65rem;color:#7a7a8a;letter-spacing:.5em;text-transform:uppercase;margin-bottom:2px}
 .logo-ver{font-size:.5rem;color:#5a5a6a;letter-spacing:.15em;margin-bottom:8px}
-.made-by{font-size:.5rem;color:#4a4a5a;letter-spacing:.3em;text-transform:uppercase}
-.btn{width:260px;padding:14px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.25em;background:transparent;border:1px solid #3a3a4a;color:#9a9aaa;font-family:inherit;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);margin-top:8px;border-radius:3px}
-.btn:hover{border-color:#5a5a6a;color:#ccccdd;background:rgba(255,255,255,.02)}
-.btn:active{transform:scale(.97)}
-.btn.primary{border-color:#3a5a7a;color:#7ab0d0}
-.btn.primary:hover{border-color:#4a7a9a;color:#9ac0e0;background:rgba(60,100,160,.04)}
+.made-by{font-size:.45rem;color:#3a3a4a;letter-spacing:.35em;text-transform:uppercase;opacity:.6}
+.btn{width:260px;padding:13px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.25em;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.08);color:#9a9aaa;font-family:inherit;cursor:pointer;transition:all .2s ease-out;margin-top:7px;border-radius:4px;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.03) 0%,transparent 50%);pointer-events:none}
+.btn:hover{border-color:rgba(255,255,255,.15);color:#ccccdd;background:rgba(255,255,255,.03);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.btn:active{transform:scale(.97) translateY(0);box-shadow:none}
+.btn.primary{border-color:rgba(60,100,160,.5);color:#7ab0d0;background:rgba(60,100,160,.06);text-shadow:0 0 12px rgba(100,160,220,.2)}
+.btn.primary:hover{border-color:rgba(80,130,200,.7);color:#9ac0e0;background:rgba(60,100,160,.1);box-shadow:0 4px 16px rgba(60,100,160,.15)}
 #level-select,#settings-screen,#faq-screen,#records-screen,#profile-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,1);flex-direction:column;align-items:center;justify-content:center;z-index:50}
 #level-select.active,#settings-screen.active,#faq-screen.active,#records-screen.active,#profile-screen.active{display:flex}
 #level-select{background:linear-gradient(180deg,rgba(6,6,14,.98) 0%,rgba(10,10,20,.97) 100%)}
@@ -283,23 +284,40 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .menu-top{display:flex;flex-direction:column;align-items:center;flex-shrink:0;position:relative;z-index:1}
 .menu-mid{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;justify-content:center}
 .menu-bottom-row{display:flex;align-items:center;justify-content:space-between;width:280px;flex-shrink:0}
-.menu-progress{width:280px;height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
-.menu-progress-fill{height:100%;background:linear-gradient(90deg,#2a3a4a,#3a5a7a);border-radius:2px;transition:width .5s}
-.menu-stats{display:flex;gap:20px;font-size:.42rem;color:#5a5a6a;letter-spacing:.08em;text-transform:uppercase;justify-content:center;flex-wrap:wrap}
-.menu-stats .stat-item{display:flex;align-items:center;gap:4px}
-.menu-stats .stat-val{color:#8a8a9a;font-weight:700;font-variant-numeric:tabular-nums}
-.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:280px}
-.menu-grid .btn{width:100%;margin:0}
-.menu-challenge{width:280px;padding:14px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em;background:transparent;border:1px solid rgba(100,80,140,.3);color:#8a7aaa;font-family:inherit;cursor:pointer;transition:all .2s;border-radius:3px}
-.menu-challenge:hover{border-color:rgba(140,110,180,.5);color:#a09aca;background:rgba(100,80,140,.05)}
-.menu-challenge:active{transform:scale(.97)}
+.menu-progress{width:280px;height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden;position:relative}
+.menu-progress-fill{height:100%;background:linear-gradient(90deg,#1a3a5a,#3a6a9a,#5a8aba);border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1);position:relative}
+.menu-progress-fill::after{content:'';position:absolute;right:0;top:0;width:20px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25));border-radius:0 2px 2px 0}
+.menu-stats{display:flex;gap:18px;font-size:.42rem;color:#4a4a5a;letter-spacing:.1em;text-transform:uppercase;justify-content:center;flex-wrap:wrap}
+.menu-stats .stat-item{display:flex;align-items:center;gap:5px;padding:4px 8px;background:rgba(255,255,255,.015);border-radius:3px}
+.menu-stats .stat-val{color:#8a9aaa;font-weight:700;font-variant-numeric:tabular-nums}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:280px}
+.menu-grid .btn{width:100%;margin:0;font-size:.72rem;letter-spacing:.2em}
+.menu-challenge{width:280px;padding:12px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.18em;background:rgba(100,80,140,.04);border:1px solid rgba(100,80,140,.25);color:#8a7aaa;font-family:inherit;cursor:pointer;transition:all .2s ease-out;border-radius:4px;position:relative;overflow:hidden}
+.menu-challenge::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(140,110,180,.03) 0%,transparent 50%);pointer-events:none}
+.menu-challenge:hover{border-color:rgba(140,110,180,.5);color:#a09aca;background:rgba(100,80,140,.08);transform:translateY(-1px);box-shadow:0 4px 12px rgba(100,80,140,.1)}
+.menu-challenge:active{transform:scale(.97) translateY(0)}
 .menu-challenge .ch-label{display:block;margin-bottom:2px}
 .menu-challenge .ch-sub{font-size:.35rem;color:#5a5a6a;letter-spacing:.1em;font-weight:400}
-.menu-icon-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.3);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-family:inherit}
-.menu-icon-btn:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.5)}
+.menu-icon-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.25);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s ease-out;font-family:inherit}
+.menu-icon-btn:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.5);transform:scale(1.05)}
 .menu-icon-btn:active{transform:scale(.9)}
 @keyframes screenFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .screen-fadein{animation:screenFadeIn .3s ease-out}
+@keyframes menuBtnGlow{0%,100%{box-shadow:0 0 8px rgba(60,100,160,.1)}50%{box-shadow:0 0 18px rgba(80,130,200,.2)}}
+.btn.primary{animation:menuBtnGlow 3s ease-in-out infinite}
+@keyframes menuFadeIn{from{opacity:0}to{opacity:1}}
+#main-menu{animation:menuFadeIn .5s ease-out}
+.menu-mid .btn,.menu-mid .menu-challenge,.menu-mid .menu-stats,.menu-mid .menu-progress,.menu-mid .player-info{animation:screenFadeIn .4s ease-out backwards}
+.menu-mid .player-info{animation-delay:.05s}
+.menu-mid .menu-stats{animation-delay:.1s}
+.menu-mid .menu-progress{animation-delay:.15s}
+.menu-mid .btn.primary{animation-delay:.2s;animation-name:screenFadeIn,menuBtnGlow;animation-duration:.4s,3s;animation-fill-mode:backwards,none;animation-delay:.2s,0s}
+.menu-mid .menu-grid{animation-delay:.25s}
+.menu-mid .menu-grid .btn:nth-child(1){animation:screenFadeIn .4s ease-out .25s backwards}
+.menu-mid .menu-grid .btn:nth-child(2){animation:screenFadeIn .4s ease-out .3s backwards}
+.menu-mid .btn:nth-of-type(3){animation:screenFadeIn .4s ease-out .35s backwards}
+.menu-mid .btn:nth-of-type(4){animation:screenFadeIn .4s ease-out .4s backwards}
+.menu-mid .menu-challenge{animation:screenFadeIn .4s ease-out .45s backwards}
 .tutorial-tip{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(10,10,20,.85);border:1px solid rgba(100,120,180,.2);border-radius:8px;padding:8px 14px;font-size:.55rem;color:#8a9aba;letter-spacing:.06em;text-align:center;pointer-events:none;z-index:25;white-space:nowrap;animation:tipFade 0.4s ease-out;backdrop-filter:blur(4px)}
 .tutorial-tip .tip-key{display:inline-block;background:rgba(100,120,180,.15);border:1px solid rgba(100,120,180,.3);border-radius:3px;padding:1px 5px;font-weight:700;color:#aabbdd;margin:0 2px;font-size:.6rem}
 @keyframes tipFade{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
@@ -2098,9 +2116,9 @@ function updateParticles(dt){for(var i=particles.length-1;i>=0;i--){var p=partic
 function clearParticles(){for(var i=0;i<particles.length;i++){if(particles[i].sprite)particles[i].sprite.destroy()}particles=[]}
 
 // ═══ PLAYER ═══
-var player={body:null,sprite:null,speed:6.5,accelGround:80,accelAir:45,decelGround:70,decelAir:28,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:16,dashDuration:0.14,dashCooldown:0.6,gravityUp:1.2,gravityDown:2.0,apexThreshold:2.0,apexGravityMult:0.6,airControlBonus:0.5,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0};
+var player={body:null,sprite:null,speed:6.5,accelGround:80,accelAir:45,decelGround:70,decelAir:28,jumpForce:-15,wallJumpForceX:10,wallJumpForceY:-13,dashSpeed:18,dashDuration:0.12,dashCooldown:0.55,gravityUp:1.2,gravityDown:2.0,apexThreshold:2.0,apexGravityMult:0.6,airControlBonus:0.5,onGround:false,wasOnGround:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0,squashDur:0.15,squashFromX:1,squashFromY:1};
 var playerSensorGround=null,playerSensorLeft=null,playerSensorRight=null;
-var COYOTE_DURATION=0.1,JUMP_BUFFER_DURATION=0.12,WALL_SLIDE_SPEED=2.2,PLAYER_W=18,PLAYER_H=34;
+var COYOTE_DURATION=0.08,JUMP_BUFFER_DURATION=0.1,WALL_SLIDE_SPEED=2.2,PLAYER_W=18,PLAYER_H=34;
 
 function createPlayer(x,y){
   player.body=MBodies.rectangle(x,y,PLAYER_W,PLAYER_H,{label:'player',friction:0.05,frictionStatic:0.3,restitution:0,density:0.002,inertia:Infinity,inverseInertia:0});
@@ -2121,7 +2139,7 @@ function createPlayer(x,y){
   player.onGround=false;player.wasOnGround=false;player.onWallLeft=false;player.onWallRight=false;
   player.wallSliding=false;player.alive=true;player.coyoteTime=0;player.jumpBuffer=0;player.facing=1;
   player.dashing=false;player.dashTimer=0;player.dashCooldownTimer=0;player.animTime=0;player.runCycle=0;
-  player.lastGroundY=y;player.justLanded=false;player.nearLever=null;player.velocityX=0;player.squashX=1;player.squashY=1;player.squashTimer=0;
+  player.lastGroundY=y;player.justLanded=false;player.nearLever=null;player.velocityX=0;player.squashX=1;player.squashY=1;player.squashTimer=0;player.squashFromX=1;player.squashFromY=1;
   setupPlayerSensors();
 }
 
@@ -2305,8 +2323,8 @@ function updatePlayer(dt){
   player.justLanded=false;
   if(player.onGround&&!player.wasOnGround){player.justLanded=true;var fd=player.lastGroundY-player.body.position.y;
     // Squash & stretch on landing
-    if(fd>20){player.squashX=1.25;player.squashY=0.75;player.squashTimer=0.2}
-    if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.4,size:3,gravity:1});state.shakeAmount=Math.min(fd*0.012,2.5);state.shakeTime=0.2;sfxLand(true)}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1});sfxLand(false)}player.lastGroundY=player.body.position.y;tgHaptic('light')}
+    if(fd>20){player.squashFromX=1.25;player.squashFromY=0.75;player.squashDur=0.15;player.squashTimer=0.15}
+    if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.4,size:3,gravity:1});state.shakeAmount=Math.min(fd*0.015,3);state.shakeTime=0.15;sfxLand(true)}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1});sfxLand(false)}player.lastGroundY=player.body.position.y;tgHaptic('light')}
   if(player.onGround)player.lastGroundY=player.body.position.y;
   if(player.onGround)player.coyoteTime=COYOTE_DURATION;else player.coyoteTime-=dt;
   if(player.inputJumpPressed){player.jumpBuffer=JUMP_BUFFER_DURATION;player.inputJumpPressed=false}else player.jumpBuffer-=dt;
@@ -2350,7 +2368,7 @@ function updatePlayer(dt){
   if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){
     // Challenge mode: no_dash modifier
     if(challengeMode&&currentChallenge&&currentChallenge.modifier.id==='no_dash'){player.inputDashPressed=false}
-    else{player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();unlockAchievement('dash_king');progress.stats.dashes=(progress.stats.dashes||0)+1;spawnParticles(player.body.position.x,player.body.position.y,12,0x6a6aaa,{angle:Math.PI+player.dashDir,spread:1.2,speed:3.5,life:0.4,size:3.5,gravity:0});spawnParticles(player.body.position.x,player.body.position.y,6,0x8a8acc,{angle:Math.PI+player.dashDir,spread:0.5,speed:2,life:0.3,size:2,gravity:0});player.squashX=1.4;player.squashY=0.7;player.squashTimer=0.1;state.slowMo=0.1;state.slowMoTimer=0.04;state.shakeAmount=3;state.shakeTime=0.1;state.flashColor=0x4a4a8a;state.flashAlpha=0.12;state.flashTimer=0.1}}
+    else{player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();unlockAchievement('dash_king');progress.stats.dashes=(progress.stats.dashes||0)+1;spawnParticles(player.body.position.x,player.body.position.y,12,0x6a6aaa,{angle:Math.PI+player.dashDir,spread:1.2,speed:3.5,life:0.4,size:3.5,gravity:0});spawnParticles(player.body.position.x,player.body.position.y,6,0x8a8acc,{angle:Math.PI+player.dashDir,spread:0.5,speed:2,life:0.3,size:2,gravity:0});player.squashFromX=1.35;player.squashFromY=0.7;player.squashDur=0.12;player.squashTimer=0.12;state.slowMo=0.15;state.slowMoTimer=0.03;state.shakeAmount=2;state.shakeTime=0.08;state.flashColor=0x4a4a8a;state.flashAlpha=0.12;state.flashTimer=0.1}}
   player.inputDashPressed=false;
   if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
@@ -2369,23 +2387,17 @@ function updatePlayer(dt){
       spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,5,0x4a4a8a,{angle:-Math.PI/2,spread:2,speed:2,life:0.3,size:2,gravity:1});
     }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.velocityX,y:player.jumpForce});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');sfxJump();spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:1.5,life:0.3,size:2,gravity:1});progress.stats.jumps=(progress.stats.jumps||0)+1;
     // Jump stretch
-    player.squashX=0.78;player.squashY=1.22;player.squashTimer=0.18;
-    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');sfxWallJump();unlockAchievement('wall_crawler');progress.stats.wallJumps=(progress.stats.wallJumps||0)+1;var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,8,0x5a5a6a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2.5,life:0.35,size:2.5,gravity:0.5});spawnParticles(wx2,player.body.position.y,4,0x7a7a9a,{angle:wd===1?0:Math.PI,spread:0.8,speed:1.5,life:0.25,size:1.5,gravity:0});player.squashX=0.7;player.squashY=1.3;player.squashTimer=0.08;
-    // Wall jump squash
-    player.squashX=0.7;player.squashY=1.2;player.squashTimer=0.1;
+    player.squashFromX=0.78;player.squashFromY=1.22;player.squashDur=0.15;player.squashTimer=0.15;
+    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});player.jumpBuffer=0;player.coyoteTime=0;tgHaptic('medium');sfxWallJump();unlockAchievement('wall_crawler');progress.stats.wallJumps=(progress.stats.wallJumps||0)+1;var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,8,0x5a5a6a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2.5,life:0.35,size:2.5,gravity:0.5});spawnParticles(wx2,player.body.position.y,4,0x7a7a9a,{angle:wd===1?0:Math.PI,spread:0.8,speed:1.5,life:0.25,size:1.5,gravity:0});player.squashFromX=0.7;player.squashFromY=1.25;player.squashDur=0.1;player.squashTimer=0.1;
     }
   }
   if(!player.inputJump&&player.body.velocity.y<-4)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.85});
 
   player.animTime+=dt;if(player.onGround&&Math.abs(player.body.velocity.x)>0.5)player.runCycle+=dt*Math.abs(player.body.velocity.x)*0.15;
-  // Squash & stretch animation (damped spring back to 1.0)
-  if(player.squashTimer>0){player.squashTimer-=dt;if(player.squashTimer<=0){player.squashX=1;player.squashY=1}else{var t=1-player.squashTimer/0.2;var spring=Math.cos(t*Math.PI*2.5)*Math.exp(-t*6);player.squashX=1+(player.squashX-1)*spring;player.squashY=1+(player.squashY-1)*spring;if(Math.abs(player.squashX-1)<0.02&&Math.abs(player.squashY-1)<0.02){player.squashX=1;player.squashY=1;player.squashTimer=0}}}
-  // Smooth visual position (lerp towards physics position, snap if far)
-  var dx=player.body.position.x-player._vx,dy=player.body.position.y-player._vy;
-  var dist=Math.sqrt(dx*dx+dy*dy);
-  var lerpRate=dist>20?0.8:0.22; // snap if teleporting, smooth otherwise
-  player._vx+=dx*lerpRate;player._vy+=dy*lerpRate;
-  player.sprite.x=player._vx;player.sprite.y=player._vy;
+  // Squash & stretch animation (damped spring from stored initial values → 1.0)
+  if(player.squashTimer>0){player.squashTimer-=dt;if(player.squashTimer<=0){player.squashX=1;player.squashY=1}else{var t=1-player.squashTimer/player.squashDur;var spring=Math.cos(t*Math.PI*2.5)*Math.exp(-t*7);player.squashX=1+(player.squashFromX-1)*spring;player.squashY=1+(player.squashFromY-1)*spring;if(Math.abs(player.squashX-1)<0.008&&Math.abs(player.squashY-1)<0.008){player.squashX=1;player.squashY=1;player.squashTimer=0}}}
+  // Snap visual position directly to physics (camera already provides smooth tracking)
+  player.sprite.x=player.body.position.x;player.sprite.y=player.body.position.y;
   // Apply squash & stretch scale
   player.sprite.scale.set(player.squashX,player.squashY);
   drawPlayerParts();
@@ -2398,7 +2410,7 @@ function updatePlayer(dt){
   engine.gravity.y=1.5;
 }
 
-function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.hitStop=0.04;state.shakeAmount=5;state.shakeTime=0.4;state.flashColor=0x2a1a1a;state.flashAlpha=0.3;state.flashTimer=0.4;state.slowMo=0.2;state.slowMoTimer=0.6;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
+function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:0x3e3e52;spawnParticles(px,py,25,dc,{speed:3.5,life:1,size:3.5,gravity:0.3});spawnParticles(px,py,8,0x6a6a9a,{speed:2,life:0.7,size:5,gravity:0});spawnParticles(px,py,3,0x99aacc,{speed:1,life:0.5,size:2,gravity:0});state.hitStop=0.03;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a1a1a;state.flashAlpha=0.25;state.flashTimer=0.3;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
   // Challenge: check fail conditions
   if(challengeMode&&currentChallenge){
     var mid=currentChallenge.modifier.id;
@@ -3027,7 +3039,7 @@ function updateExitGlow(dt){
     }
   }
 }
-function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var tx=player.body.position.x-sw*0.35;var ty=player.body.position.y-sh*0.5;var lvl=LEVELS[state.level];tx=Math.max(0,Math.min(tx,lvl.width-sw));ty=Math.max(-200,Math.min(ty,lvl.height-sh));camera.x+=(tx-camera.x)*0.055;camera.y+=(ty-camera.y)*0.04;var sx=0,sy=0;if(state.shakeTime>0){sx=(Math.random()-0.5)*state.shakeAmount*2;sy=(Math.random()-0.5)*state.shakeAmount*2}gameContainer.x=-camera.x+sx;gameContainer.y=-camera.y+sy}
+function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var tx=player.body.position.x-sw*0.35;var ty=player.body.position.y-sh*0.5;var lvl=LEVELS[state.level];tx=Math.max(0,Math.min(tx,lvl.width-sw));ty=Math.max(-200,Math.min(ty,lvl.height-sh));camera.x+=(tx-camera.x)*0.09;camera.y+=(ty-camera.y)*0.07;var sx=0,sy=0;if(state.shakeTime>0){sx=(Math.random()-0.5)*state.shakeAmount*2;sy=(Math.random()-0.5)*state.shakeAmount*2}gameContainer.x=-camera.x+sx;gameContainer.y=-camera.y+sy}
 
 // ═══ PLAYER LIGHT & FOG ═══
 var lightTime=0;
@@ -3408,7 +3420,7 @@ function winLevel(){player.alive=false;spawnParticles(player.body.position.x,pla
     if(mid==='max3'&&state.deaths>3)chComplete=false;
     endChallenge(chComplete);
   }
-  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2.5;state.shakeTime=0.35;state.flashColor=0x2a2a5a;state.flashAlpha=0.12;state.flashTimer=0.5;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
+  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
@@ -3744,9 +3756,9 @@ function gameLoop(timestamp){
   if(state.hitStop>0){state.hitStop-=rawDt;if(state.hitStop>0)return;state.hitStop=0}
   if(state.slowMoTimer>0){state.slowMoTimer-=rawDt;if(state.slowMoTimer<=0)state.slowMo=1}
   var dt=rawDt*state.slowMo;
-  if(state.shakeTime>0){state.shakeTime-=rawDt;state.shakeAmount*=0.96;if(state.shakeTime<=0||state.shakeAmount<0.3){state.shakeAmount=0;state.shakeTime=0}}
+  if(state.shakeTime>0){state.shakeTime-=rawDt;state.shakeAmount*=0.92;if(state.shakeTime<=0||state.shakeAmount<0.2){state.shakeAmount=0;state.shakeTime=0}}
   // Screen flash overlay
-  if(state.flashTimer>0){state.flashTimer-=rawDt;if(state.flashTimer<=0){state.flashAlpha=0;state.flashTimer=0}else{state.flashAlpha*=0.93}}
+  if(state.flashTimer>0){state.flashTimer-=rawDt;if(state.flashTimer<=0){state.flashAlpha=0;state.flashTimer=0}else{state.flashAlpha*=0.9}}
   if(state.screen==='playing'){readInput();updatePlayer(dt);progress.stats.playTime=(progress.stats.playTime||0)+rawDt;
   // Variable gravity: lighter going up, heavier down, reduced at apex
   if(player.alive&&player.body){
