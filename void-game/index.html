@@ -23,8 +23,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 #main-menu>.menu-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;width:100%;height:100%;pointer-events:none;padding:0 0 max(12px,env(safe-area-inset-bottom))}
 #main-menu>.menu-content>*{pointer-events:auto}
 .logo-sub{font-size:.7rem;color:#9a9aaa;letter-spacing:.5em;text-transform:uppercase;margin-bottom:2px;font-weight:500}
-.logo-ver{font-size:.65rem;color:#8a8a9a;letter-spacing:.2em;margin-bottom:8px;font-weight:600}
-.made-by{font-size:.58rem;color:#8a8a9a;letter-spacing:.35em;text-transform:uppercase;opacity:.8;font-weight:500}
+.logo-ver{font-size:.68rem;color:#9a9aaa;letter-spacing:.2em;font-weight:700}
+.made-by{font-size:.55rem;color:#7a7a8a;letter-spacing:.35em;text-transform:uppercase;opacity:.7;font-weight:500}
 .btn{width:260px;padding:14px 20px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.22em;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#b0b0c0;font-family:inherit;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);margin-top:8px;border-radius:8px;position:relative;overflow:hidden;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none;border-radius:8px}
 .btn:hover{border-color:rgba(255,255,255,.2);color:#dddde8;background:rgba(255,255,255,.06);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.05)}
@@ -459,7 +459,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
       <div class="menu-progress"><div class="menu-progress-fill" id="menu-progress-fill"></div></div>
       <button class="btn primary" id="btn-play">▼ спуститься</button>
       <div class="menu-grid">
-        <button class="btn" id="btn-levels">уровни</button>
+        <button class="btn" id="btn-levels">прогресс</button>
         <button class="btn" id="btn-records">рекорды</button>
       </div>
       <button class="btn" id="btn-leaderboard" style="border-color:#2a3a5a;color:#6a9aba;margin-top:4px">лидерборд</button>
@@ -472,7 +472,10 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <!-- BOTTOM: Icons + Credit -->
     <div class="menu-bottom-row">
       <button class="menu-icon-btn" id="btn-settings" title="Настройки">⚙</button>
-      <div class="made-by">made by SKUFI4</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+        <div class="logo-ver" id="menu-version"></div>
+        <div class="made-by">made by SKUFI4</div>
+      </div>
       <button class="menu-icon-btn" id="btn-faq" title="FAQ">?</button>
     </div>
     </div>
@@ -736,7 +739,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.12.0';
+var VOID_VERSION='2.13.0';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -5323,6 +5326,9 @@ function updateMenuStats(){
   // Update challenge button subtitle with today's modifier name
   var chSub=document.getElementById('ch-sub');
   if(chSub){var ch=generateDailyChallenge();chSub.textContent=ch.modifier.name}
+  // Version display in menu
+  var vEl=document.getElementById('menu-version');
+  if(vEl)vEl.textContent='ALPHA '+VOID_VERSION;
 }
 function togglePause(){if(state.screen==='playing')showScreen('paused');else if(state.screen==='paused')showScreen('playing')}
 
@@ -5844,11 +5850,6 @@ var logoAnim={
       ctx.font=''+Math.max(9,W*0.022)+'px "Courier New",monospace';
       ctx.letterSpacing='0.5em';
       ctx.fillText('ВО ТЬМУ',W/2,bottomY+10);
-      ctx.shadowBlur=0;
-      ctx.fillStyle='rgba(90,90,106,'+(0.5+Math.sin(this.time*0.3)*0.08)+')';
-      ctx.font=''+Math.max(8,W*0.017)+'px "Courier New",monospace';
-      ctx.letterSpacing='0.15em';
-      ctx.fillText('ALPHA '+VOID_VERSION,W/2,bottomY+26);
       ctx.letterSpacing='0px';
     }
     // Character
