@@ -106,6 +106,51 @@ export default async function handler(req, res) {
 
   const update = req.body;
 
+  // ── Inline query: @voide_game_bot in any chat ──
+  if (update.inline_query) {
+    const iq = update.inline_query;
+    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8858889318:AAGramLmQGRhpJAyRWcJC8lPwkyrbDBiHcw';
+    const results = [
+      {
+        type: 'article',
+        id: 'void_play',
+        title: '▶ ИГРАТЬ в VOID',
+        description: 'Платформер о памяти, которое забыло себя. 30 уровней, 6 актов.',
+        thumb_url: 'https://void-game-ruddy.vercel.app/',
+        input_message_content: {
+          message_text: '🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя.\n30 уровней · 6 актов · магнитный шарф · паркур\n\nНажми ▶ ИГРАТЬ чтобы начать →',
+          parse_mode: 'HTML'
+        },
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '▶ ИГРАТЬ', url: GAME_URL }
+          ]]
+        }
+      },
+      {
+        type: 'article',
+        id: 'void_stats',
+        title: '📊 Моя статистика VOID',
+        description: 'Узнать свой ранг, очки и прогресс',
+        input_message_content: {
+          message_text: '📊 Хочу узнать свою статистику в VOID!',
+          parse_mode: 'HTML'
+        }
+      }
+    ];
+
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerInlineQuery`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        inline_query_id: iq.id,
+        results,
+        cache_time: 30
+      })
+    });
+    return res.status(200).json({ ok: true });
+  }
+
   // Handle my_chat_member updates (bot added/removed from chats)
   if (update.my_chat_member) {
     const chat = update.my_chat_member.chat;
