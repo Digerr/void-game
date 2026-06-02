@@ -1,13 +1,18 @@
-# VOID — into darkness
+# VOID — во тьму
 
-A Limbo-inspired 2D side-scrolling platformer built with **Phaser 3**. Single HTML file, no build tools — just open and play.
+A Limbo-inspired 2D side-scrolling platformer built as a **Telegram Mini App**. Dark minimalist world, precise controls, atmospheric visuals — all in a single HTML file with no build tools.
+
+**Current version:** 2.9.0
 
 ## Tech Stack
 
-- **Phaser 3.80.1** (CDN) — game engine with Arcade Physics
+- **PixiJS 8.9.2** (CDN) — GPU-accelerated 2D rendering
+- **Matter.js** (CDN) — 2D physics engine
+- **Supabase** — cloud leaderboard, player profiles
+- **Telegram WebApp SDK** — Mini App integration, haptic feedback
 - **Web Audio API** — procedural music & SFX
 - **HTML/CSS overlay** — menus, HUD, touch controls
-- **localStorage** — save system
+- **localStorage** — offline save system
 
 ## Features
 
@@ -17,47 +22,79 @@ A Limbo-inspired 2D side-scrolling platformer built with **Phaser 3**. Single HT
 - **Ledge grab** — automatically grab ledges near platform edges
 - **Push boxes** — push boxes onto pressure plates to open doors
 - **Pull levers** — interact with levers to open doors
-- **Rope swing** — grab ropes and swing across gaps
-- **Vine grab** — swing on vines
-- **Ice** — slippery surfaces
-- **Lava** — instant death
-- **Flood** — rising water, climb fast
-- **Chase** — darkness pursues from behind
-- **Breakable platforms** — crumble under your feet
-- **Saws, spikes, pendulums, stalactites** — deadly traps
+- **Thread climb** — grab threads and climb or swing across gaps
+- **Ice** — slippery surfaces with reduced friction
+- **Springs** — bounce pads for high jumps
+- **Portals** — teleport between linked portals
+- **Wind zones** — push the player in a direction
+- **Moving platforms** — ride horizontally or vertically moving platforms
+- **Falling platforms** — crumble after stepping on them
+- **Pursuing Darkness** — wall of darkness chasing the player
+- **Gravity zones** — reverse gravity in specific areas
+- **Saws, spikes, pendulums** — deadly traps
 - **Shadow enemies** — patrolling hostiles
 - **Pressure plates + doors** — weight-activated mechanics
 - **Checkpoints** — save progress mid-level
-- **Light shards** — collect for the secret ending
-- **Two endings** — survive (normal) or transcend (all shards)
 
 ### Progression
-- **30 levels** across 4 acts (Awakening, Descent, The Abyss, Rebirth)
-- **Three difficulties** — Easy / Normal / Hard
+- **30 levels** across 6 acts:
+  - Act I — Пробуждение (Awakening)
+  - Act II — Глубины (Depths)
+  - Act III — Нити (Threads)
+  - Act IV — Пустота (Void)
+  - Act V — Возрождение (Rebirth)
+  - Act VI — Исход (Exodus)
+- **Star rating** — 1–3 stars per level based on completion time
+- **Rank system** — S / A / B / C / D rank based on total performance
 - **RU/EN** — full bilingual support
 
-### Audio (Procedural Web Audio API)
-- Ambient arpeggio music (Am→G→F→Em)
-- 14 SFX types: click, interact, lever, grab, release, door, death, jump, checkpoint, enemy, flood, chase, lightning, stalactite
+### Skins
+8 unlockable character skins:
+- **пустота** — default
+- **рассвет** — complete Act I
+- **бездна** — complete Act II
+- **искра** — complete Act III
+- **теневой** — complete Act IV
+- **возрождение** — complete Act V
+- **исход** — complete Act VI
+- **призрак** — get 3 stars on all levels
+
+### Achievements
+13 achievements to unlock: first step, wall crawler, thread master, dash king, no death, speedrun, explorer, halfway, void master, perfectionist, dark escape, light bearer, gravity master.
+
+### Leaderboard
+- Global leaderboard powered by **Supabase**
+- View top players by total time and stars
+- See your own rank
+
+### Daily Challenge
+- Unique challenge every day with special modifiers
+- Compete for the best time on a fixed seed
+
+### Audio
+- Ambient arpeggio music per act theme
+- SFX: click, interact, lever, grab, release, door, death, jump, checkpoint, enemy, chase, lightning, stalactite, and more
 
 ### Visual
-- Programmatic textures (16 types)
-- Custom Phaser Graphics rendering (aura, scarf, particles, vignette)
-- Dynamic torch lighting
+- Per-act themed backgrounds with parallax layers, stars, and moon
+- Dynamic torch/light system with fog and vignette
+- Programmatic textures (no external assets)
+- Act intro cutscenes with particle effects
 - Dark minimalist palette, Courier New typography
 
 ### Mobile
-- Touch controls with left/right/jump/interact buttons
+- Touch controls with left/right/jump/dash/interact/thread buttons
 - Pause button overlay
 - Safe area support (notch handling)
+- Haptic feedback via Telegram API
 
 ### Technical
-- **Save system** — localStorage saves checkpoints, deaths, best distances
-- **Quality settings** — low/med/high
-- **Brightness slider** — adjustable in settings
-- **Music volume** — 4 levels (0/♪/♪♪/♪♪♪)
+- **Save system** — localStorage saves progress, stars, deaths, best times
+- **No-cache headers** — aggressive cache busting for Telegram WebView
+- **Versioned URLs** — `/v2.9` style paths with Vercel rewrites
+- **Auto-update** — detects new version and reloads automatically
 - **FAQ tab** — in-game help for all mechanics
-- **Progress tab** — track completion across all 30 levels
+- **Profile** — view stats, rank, achievements, unlocked skins
 
 ## Controls
 
@@ -66,18 +103,23 @@ A Limbo-inspired 2D side-scrolling platformer built with **Phaser 3**. Single HT
 | Move | ← → or A D | ◀ ▶ |
 | Jump | Space or ↑ | ▲ |
 | Interact | E or Shift | E button |
-| Dash | X or L | — |
+| Dash | X or L | ○ dash |
+| Thread climb | W or ↑ near thread | ○ thread |
 | Respawn | R | — |
 | Pause | ESC | ❚❚ button |
-| Music | M | — |
+
+## Deployment
+
+- **Vercel** auto-deploys from `main` branch
+- Root directory: `void-game/`
+- `vercel.json` handles URL rewrites and no-cache headers
+- Telegram bot: @voide_game_bot
 
 ## Play
 
-Open `index.html` in any modern browser. Requires internet for Phaser CDN load (first time only, then cached).
-
-**Online:** https://digerr.github.io/void-game/
-
 **Telegram:** @voide_game_bot — tap "Играть" to launch as Mini App
+
+**Local:** Open `void-game/index.html` in any modern browser. Requires internet for CDN libraries (first load only).
 
 ## License
 
