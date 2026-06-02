@@ -780,7 +780,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.11.0-beta';
+var VOID_VERSION='0.11.1-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -811,7 +811,7 @@ document.addEventListener('visibilitychange',function(){
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — beta 0.11.0
+// VOID — beta 0.11.1
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
@@ -1162,13 +1162,43 @@ function startMusic(){
   // Store extra refs for cleanup
   musicNodes._chordInterval=chordInterval;
   musicNodes._padOscs=padOscs;
+  musicNodes._melOscs=melOscs;
+  musicNodes._sparkleTimeout=null;
+  musicNodes._padBus=padBus;
+  musicNodes._melBus=melBus;
+  musicNodes._convolver=convolver;
+  musicNodes._revGain=revGain;
+  musicNodes._delay=delay;
+  musicNodes._delayG=delayG;
+  // Override sparkle to track its timeout
+  var origSparkle=playSparkle;
+  playSparkle=function(){if(!musicPlaying)return;var t=setTimeout(origSparkle,5000+Math.random()*8000);if(musicNodes._sparkleTimeout)clearTimeout(musicNodes._sparkleTimeout);musicNodes._sparkleTimeout=t};
+  musicNodes._sparkleTimeout=setTimeout(playSparkle,4000);
 }
 
 function stopMusic(){
+  // Mark as not playing immediately to prevent new notes
+  musicPlaying=false;
+  // 1. Stop all timers
   if(melodyTimer){clearTimeout(melodyTimer);melodyTimer=null}
   if(musicNodes._chordInterval){clearInterval(musicNodes._chordInterval)}
-  if(musicNodes._padOscs){for(var p=0;p<musicNodes._padOscs.length;p++){try{musicNodes._padOscs[p].osc.stop();musicNodes._padOscs[p].osc.disconnect()}catch(e){}}}
+  if(musicNodes._sparkleTimeout){clearTimeout(musicNodes._sparkleTimeout)}
+  // 2. Fade out musicGain quickly to kill reverb tails and avoid clicks
+  if(musicGain&&audioCtx){
+    try{musicGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+0.15)}catch(e){}
+  }
+  // 3. Stop pad oscillators (current + fading-out ones)
+  if(musicNodes._padOscs){for(var p=0;p<musicNodes._padOscs.length;p++){try{musicNodes._padOscs[p].osc.stop();musicNodes._padOscs[p].osc.disconnect();musicNodes._padOscs[p].gain.disconnect()}catch(e){}}}
+  // 4. Stop melody oscillators
+  if(musicNodes._melOscs){for(var m=0;m<musicNodes._melOscs.length;m++){try{musicNodes._melOscs[m].stop();musicNodes._melOscs[m].disconnect()}catch(e){}}}
+  // 5. Stop core nodes (subOsc, subLfo, windSrc, windLfo)
   for(var i=0;i<musicNodes.length;i++){try{musicNodes[i].stop();musicNodes[i].disconnect()}catch(e){}}
+  // 6. Disconnect intermediate audio nodes to prevent residual signal
+  var auxNodes=['_padBus','_melBus','_convolver','_revGain','_delay','_delayG'];
+  for(var a=0;a<auxNodes.length;a++){try{if(musicNodes[auxNodes[a]])musicNodes[auxNodes[a]].disconnect()}catch(e){}}
+  // 7. Restore musicGain for next playback (after fade-out completes)
+  var mg=musicGain,sv=settings.musicVolume;
+  if(mg&&audioCtx){setTimeout(function(){try{mg.gain.cancelScheduledValues(audioCtx.currentTime);mg.gain.value=musicMuted?0:sv}catch(e){}},200)}
   musicNodes=[];musicPlaying=false;
 }
 
