@@ -1616,6 +1616,7 @@ function _doCloudSaveAttempt(){
   }catch(e){console.warn('[VOID] CloudStorage error:',e);_cloudRetryCount=0}
 }
 var _syncOk=false;
+var _userCheckTimer=3;
 function updateSyncIndicator(ok){_syncOk=ok;var el=document.getElementById('sync-indicator');if(el)el.textContent=ok?'☁ ✓':'☁ ✗';if(el)el.style.color=ok?'#4a6a5a':'#6a4a4a'}
 function debouncedCloudSave(){
   if(!tg||!tg.CloudStorage)return;
@@ -7096,7 +7097,6 @@ function gameLoop(timestamp){
   // Hit-stop: freeze all updates briefly for impact feel
   if(state.hitStop>0){state.hitStop-=rawDt;if(state.hitStop>0)return;state.hitStop=0}
   // User change detection: verify Telegram user hasn't changed (prevent cache mixing)
-  if(!_userCheckTimer)_userCheckTimer=0;
   _userCheckTimer-=rawDt;
   if(_userCheckTimer<=0){
     _userCheckTimer=3; // check every 3 seconds
