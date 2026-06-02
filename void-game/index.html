@@ -56,6 +56,9 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .ls-act-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
 .ls-act-card-pct{font-size:.55rem;font-weight:900;color:#6a6a7a;font-variant-numeric:tabular-nums}
 .ls-act-card-stars{font-size:.45rem}
+.ls-cutscene-btn{width:28px;height:28px;border-radius:50%;background:rgba(100,120,200,.1);border:1px solid rgba(100,120,200,.25);color:#7a8ab8;font-size:.55rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:inherit;padding:0;margin-bottom:4px}
+.ls-cutscene-btn:hover{background:rgba(100,120,200,.2);border-color:rgba(100,120,200,.4);color:#a0b0e0;transform:scale(1.1)}
+.ls-cutscene-btn:active{transform:scale(.9);transition:all .08s}
 .ls-act-card.stagger{opacity:0;animation:lsActStagger .35s ease-out forwards}
 .ls-lvl-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:10px 14px;cursor:pointer;transition:all .2s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;display:flex;align-items:center;gap:12px}
 .ls-lvl-card:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
@@ -422,9 +425,6 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .lore-chapter-title{font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.12em;margin-bottom:6px}
 .lore-chapter-text{font-size:.58rem;color:#6a6a8a;line-height:1.7}
 .lore-hint{font-size:.48rem;color:#5a5a7a;line-height:1.5;margin-top:4px;letter-spacing:.05em}
-.lore-cutscene-btn{margin-top:10px;padding:6px 14px;font-size:.48rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(100,120,200,.08);border:1px solid rgba(100,120,200,.2);color:#7a8ab8;border-radius:6px;cursor:pointer;transition:all .25s;font-family:inherit}
-.lore-cutscene-btn:hover{background:rgba(100,120,200,.15);border-color:rgba(100,120,200,.35);color:#9aaada}
-.lore-cutscene-btn:active{transform:scale(.95);transition:all .08s}
 .lore-section-title{font-size:.7rem;color:#7a8ab8;font-weight:700;letter-spacing:.1em;margin-bottom:6px}
 .lore-section-text{font-size:.58rem;color:#6a6a8a;line-height:1.7}
 #lore-content::-webkit-scrollbar{width:3px}
@@ -4596,15 +4596,15 @@ function updateLightAndFog(dt){
     // ═══ FLASHLIGHT MODE: narrow cone of light ═══
     // Step 1: Fill with heavy darkness
     lightCtx.globalCompositeOperation='source-over';
-    lightCtx.fillStyle='rgba(2,2,8,0.85)';
+    lightCtx.fillStyle='rgba(2,2,8,0.75)';
     lightCtx.fillRect(0,0,sw,sh);
 
     // Step 2: Cut a narrow flashlight cone in facing direction
     lightCtx.globalCompositeOperation='destination-out';
     var flDir=player.facing||1; // 1=right, -1=left
     var flAngle=flDir>0?0:Math.PI; // base angle
-    var flSpread=0.5; // cone half-angle in radians (~28 degrees each side)
-    var flLen=280+Math.sin(lightTime*3)*10; // flickering length
+    var flSpread=0.65; // cone half-angle in radians (~37 degrees each side)
+    var flLen=360+Math.sin(lightTime*3)*12; // flickering length
     // Draw cone shape
     lightCtx.save();
     lightCtx.translate(px,py);
@@ -4624,9 +4624,9 @@ function updateLightAndFog(dt){
     lightCtx.closePath();
     lightCtx.fill();
     // Small ambient glow around player (so you can see yourself)
-    var ambGrad=lightCtx.createRadialGradient(0,0,0,0,0,50);
-    ambGrad.addColorStop(0,'rgba(255,255,255,0.7)');
-    ambGrad.addColorStop(0.5,'rgba(255,255,255,0.3)');
+    var ambGrad=lightCtx.createRadialGradient(0,0,0,0,0,65);
+    ambGrad.addColorStop(0,'rgba(255,255,255,0.85)');
+    ambGrad.addColorStop(0.5,'rgba(255,255,255,0.4)');
     ambGrad.addColorStop(1,'rgba(255,255,255,0)');
     lightCtx.fillStyle=ambGrad;
     lightCtx.beginPath();
@@ -5595,10 +5595,6 @@ function renderLoreScreen(){
           if(sh&&sh.lore)html+='<div class="lore-shard-entry">💎 '+sh.lore+'</div>';
         }
       }
-      // Add cutscene replay button (acts 1-5 have a preceding cutscene)
-      if(a>0&&(a-1)<CUTSCENES.length&&actCompleted){
-        html+='<button class="lore-cutscene-btn" data-cs="'+(a-1)+'">▶ катсцена</button>';
-      }
       ch.innerHTML=html;
     }else{
       ch.className='lore-locked';
@@ -5614,27 +5610,10 @@ function renderLoreScreen(){
           }
         }
       }
-      // Add cutscene replay button even for locked chapters if player completed act
-      if(a>0&&(a-1)<CUTSCENES.length&&actCompleted){
-        html2+='<button class="lore-cutscene-btn" data-cs="'+(a-1)+'">▶ катсцена</button>';
-      }
       ch.innerHTML=html2;
     }
     c.appendChild(ch);
   }
-  // Delegate click for cutscene replay buttons
-  c.onclick=function(e){
-    var btn=e.target.closest&&e.target.closest('.lore-cutscene-btn');
-    if(!btn)return;
-    var csIdx=parseInt(btn.getAttribute('data-cs'));
-    if(isNaN(csIdx)||csIdx<0||csIdx>=CUTSCENES.length)return;
-    showScreen('lore'); // keep lore as current screen
-    playCutscene(csIdx,function(){
-      // Return to lore screen after cutscene
-      renderLoreScreen();
-      showScreen('lore');
-    });
-  };
 }
 
 // ═══ SCREEN MANAGEMENT ═══
@@ -5824,11 +5803,24 @@ function showLevelSelect(){
         starsHtml+='<span style="color:'+(actStars>=(j+1)*third?'#8ac070':'#2a2a3a')+'">★</span>';
       }
       var completedBadge=actCompleted===act.levels.length?'<span style="font-size:.32rem;color:#6a9a5a;letter-spacing:.06em;text-transform:uppercase;margin-left:6px">пройден</span>':'';
+      // Check if act has 2+ stars on any level (for cutscene replay)
+      var has2Stars=false;
+      for(var si=0;si<act.levels.length;si++){if(getLevelStars(act.levels[si])>=2){has2Stars=true;break}}
+      var cutsceneBtn='';
+      if(actIdx>0&&has2Stars&&(actIdx-1)<CUTSCENES.length){
+        cutsceneBtn='<button class="ls-cutscene-btn" data-cs="'+(actIdx-1)+'">▶</button>';
+      }
       card.innerHTML='<span class="ls-act-card-icon">'+act.icon+'</span>'+
         '<div class="ls-act-card-body"><div class="ls-act-card-name">'+act.name+completedBadge+'</div>'+
         '<div class="ls-act-card-meta"><span>'+actCompleted+'/'+act.levels.length+'</span><span>'+actStars+'/'+actPossible+' ★</span></div>'+
         '<div class="ls-act-card-bar"><div class="ls-act-card-bar-fill" style="width:'+actPct+'%"></div></div></div>'+
-        '<div class="ls-act-card-right"><span class="ls-act-card-pct">'+actPct+'%</span><span class="ls-act-card-stars">'+starsHtml+'</span></div>';
+        '<div class="ls-act-card-right">'+cutsceneBtn+'<span class="ls-act-card-pct">'+actPct+'%</span><span class="ls-act-card-stars">'+starsHtml+'</span></div>';
+      // Cutscene button click (stop propagation so it doesn't open act levels)
+      var csBtnEl=card.querySelector('.ls-cutscene-btn');
+      if(csBtnEl){
+        csBtnEl.addEventListener('click',function(e){e.stopPropagation();var csIdx2=parseInt(this.getAttribute('data-cs'));if(!isNaN(csIdx2)&&csIdx2>=0&&csIdx2<CUTSCENES.length){playCutscene(csIdx2,function(){showLevelSelect()})}});
+        csBtnEl.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();tgHaptic('light');var csIdx3=parseInt(this.getAttribute('data-cs'));if(!isNaN(csIdx3)&&csIdx3>=0&&csIdx3<CUTSCENES.length){playCutscene(csIdx3,function(){showLevelSelect()})}},{passive:false});
+      }
       card.addEventListener('click',function(){showActLevels(actIdx)});
       card.addEventListener('touchstart',function(e){e.preventDefault();tgHaptic('light');showActLevels(actIdx)},{passive:false});
       grid.appendChild(card);
