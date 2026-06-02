@@ -26,14 +26,16 @@
 - **Bot ID:** 8858889318
 - **Bot name:** VOID - Исследуй Пустоту
 - **Token:** 8858889318:AAGramLmQGRhpJAyRWcJC8lPwkyrbDBiHcw
-- **Webhook URL:** https://void-game-api.vercel.app/api/webhook
-- **Команды бота:**
-  - /start — Начать игру
-  - /play — Открыть VOID
-  - /help — Управление и советы
-  - /stats — Моя статистика
-  - /leaderboard — Таблица лидеров
-  - /news — Новости обновлений
+- **Webhook URL:** https://void-game-ruddy.vercel.app/api/webhook
+- **Команды бота (все реализованы):**
+  - /start — Начать игру (кнопка ▶ ИГРАТЬ)
+  - /play — Открыть VOID (кнопка ▶ ИГРАТЬ)
+  - /help — Управление и советы + список команд
+  - /stats — Личная статистика (ранг, очки, уровни, звёзды, осколки, ачивки, время)
+  - /leaderboard — Топ-10 мирового рейтинга + позиция игрока если вне топ-10
+  - /weekly — Топ-10 недельного рейтинга + таймер до сброса + награды
+  - /news — История обновлений игры
+- **Parse mode:** HTML (для надёжного форматирования)
 
 ### Supabase
 - **URL:** https://jibtmyuxbeckanmkhuik.supabase.co
@@ -43,7 +45,7 @@
 ### Vercel
 - **Production URL:** https://void-game-ruddy.vercel.app/
 - **API endpoint:** https://void-game-ruddy.vercel.app/api/leaderboard
-- **Webhook (отдельный проект):** https://void-game-api.vercel.app/api/webhook
+- **Webhook:** https://void-game-ruddy.vercel.app/api/webhook (ранее void-game-api.vercel.app)
 - **Деплой:** git push origin main → автодеплой Vercel
 - **НЕ ИСПОЛЬЗОВАТЬ:** `vercel --prod`
 
@@ -65,7 +67,7 @@ void-game/
 ├── .gitignore          # node_modules/
 ├── api/
 │   ├── leaderboard.js  # Supabase API (submit, profile, register, level_records, etc.)
-│   └── webhook.js      # Telegram bot webhook (/start, /play, /help)
+│   └── webhook.js      # Telegram bot webhook (/start, /play, /help, /stats, /leaderboard, /weekly, /news)
 ├── releases/           # Бэкапы предыдущих версий
 │   ├── CONTEXT-alpha-2.2.md
 │   ├── CONTEXT-beta-0.9.6.md
@@ -151,7 +153,14 @@ void-game/
 - `setup` — Проверка статуса таблиц (без SQL)
 
 ### POST /api/webhook
-- Обрабатывает /start, /play, /help команды Telegram бота
+- Обрабатывает команды Telegram бота:
+  - `/start`, `/play` — запуск игры + кнопка ▶ ИГРАТЬ
+  - `/help` — управление + список всех команд
+  - `/stats` — личная статистика из Supabase (ранг, очки, прогресс, время)
+  - `/leaderboard`, `/top` — топ-10 мирового рейтинга + позиция игрока вне топ-10
+  - `/weekly` — топ-10 недельного рейтинга + таймер сброса + награды
+  - `/news` — история обновлений игры
+  - Неизвестная команда — список доступных
 
 ---
 
@@ -330,11 +339,8 @@ score = completed × 5000
 ## 13. Известные проблемы / TODO
 
 1. **Weekly cron** — не настроен автоматический сброс (нужен pg_cron или Vercel cron)
-2. **Webhook URL** — указывает на `void-game-api.vercel.app`, а не на основной проект `void-game-ruddy.vercel.app`. Работает, но стоит унифицировать.
-3. **Катсцены** — вернуть кнопки в Chronicle, сделать кинематографичными, исправить наложение текста на сцену
-4. **Weekly rewards** — топ-3 скин и топ-10 бейдж ещё не реализованы (нет логики начисления)
-5. **`/stats` и `/leaderboard` команды бота** — не реализованы в webhook.js
-6. **`/news` команда бота** — не реализована в webhook.js
+2. **Катсцены** — вернуть кнопки в Chronicle, сделать кинематографичными, исправить наложение текста на сцену
+3. **Weekly rewards** — логика начисления скинов (топ-3) и бейджей (топ-10) не реализована
 
 ---
 
