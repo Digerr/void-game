@@ -810,6 +810,12 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
       <button class="lb-tab" data-tab="weekly">неделя</button>
       <button class="lb-tab" data-tab="level">уровни</button>
     </div>
+    <div id="lb-weekly-header" style="display:none;width:100%;max-width:380px;padding:0 10px;margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.45rem;color:#5a6a7a;letter-spacing:.06em">
+        <span id="lb-weekly-timer">до конца недели: --:--:--</span>
+        <span style="color:#6a5a3a">top3 = скин, top10 = бейдж</span>
+      </div>
+    </div>
     <div class="lb-list" id="lb-list">
       <div class="lb-loading">загрузка...</div>
     </div>
@@ -830,7 +836,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.13.0-beta';
+var VOID_VERSION='0.14.0-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -861,7 +867,7 @@ document.addEventListener('visibilitychange',function(){
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════
-// VOID — beta 0.12.0
+// VOID — beta 0.14.0
 // PixiJS v8 + Matter.js — Telegram Mini App
 // ═══════════════════════════════════════════════════════════════
 
@@ -1717,16 +1723,43 @@ function submitLB(){
     else console.log('[VOID] LB submit response:',d.error||d.message||d);
   }).catch(function(e){console.warn('[VOID] LB submit error:',e)});
 }
+var _weeklyTimerInterval=0;
+function updateWeeklyTimer(){
+  var now=new Date();
+  // Next Monday 00:00 UTC
+  var day=now.getUTCDay();
+  var daysUntilMon=day===0?1:8-day;
+  var nextMon=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+daysUntilMon,0,0,0));
+  var diff=nextMon.getTime()-now.getTime();
+  if(diff<=0)diff+=604800000;
+  var d=Math.floor(diff/86400000);
+  var h=Math.floor((diff%86400000)/3600000);
+  var m=Math.floor((diff%3600000)/60000);
+  var s=Math.floor((diff%60000)/1000);
+  var el=document.getElementById('lb-weekly-timer');
+  if(el)el.textContent='до сброса: '+d+'д '+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
 function showLeaderboard(tab){
   if(tab)lbCurrentTab=tab;
   if(!sbClient)initSupabase();
   showScreen('leaderboard');
+  // Show/hide weekly header
+  var wHeader=document.getElementById('lb-weekly-header');
+  if(wHeader)wHeader.style.display=lbCurrentTab==='weekly'?'block':'none';
+  // Start/stop weekly timer
+  if(_weeklyTimerInterval){clearInterval(_weeklyTimerInterval);_weeklyTimerInterval=0}
+  if(lbCurrentTab==='weekly'){updateWeeklyTimer();_weeklyTimerInterval=setInterval(updateWeeklyTimer,1000)}
   loadLB();
 }
 function loadLB(){
   if(!sbClient){renderLBOffline();return}
   var listEl=document.getElementById('lb-list');
   if(listEl)listEl.innerHTML='<div class="lb-loading">загрузка...</div>';
+  // Show/hide weekly header & timer
+  var wHeader=document.getElementById('lb-weekly-header');
+  if(wHeader)wHeader.style.display=lbCurrentTab==='weekly'?'block':'none';
+  if(_weeklyTimerInterval){clearInterval(_weeklyTimerInterval);_weeklyTimerInterval=0}
+  if(lbCurrentTab==='weekly'){updateWeeklyTimer();_weeklyTimerInterval=setInterval(updateWeeklyTimer,1000)}
   if(lbCurrentTab==='weekly'){
     // Weekly: fetch from weekly_scores table
     var weekKey=getWeekKey();
@@ -6193,9 +6226,22 @@ function showActLevels(actIdx){
       bodyDiv.appendChild(metaDiv);
     }
     card.appendChild(bodyDiv);
-    // Action button
+    // Action buttons
     if(isUnlocked){
       var rightDiv=document.createElement('div');rightDiv.className='ls-lvl-right';
+      // Trophy button for level records
+      if(stars>0){
+        var trophyBtn=document.createElement('button');trophyBtn.className='ls-lvl-trophy';
+        trophyBtn.innerHTML='🏆';trophyBtn.title='рекорды уровня';
+        trophyBtn.style.cssText='background:none;border:none;font-size:.7rem;cursor:pointer;padding:2px 4px;opacity:0.5;transition:opacity .2s';
+        trophyBtn.onmouseenter=function(){this.style.opacity='1'};
+        trophyBtn.onmouseleave=function(){this.style.opacity='0.5'};
+        (function(iidx){
+          trophyBtn.addEventListener('click',function(e){e.stopPropagation();lbSelectedLevel=iidx;showLeaderboard('level')});
+          trophyBtn.addEventListener('touchstart',function(e){e.preventDefault();e.stopPropagation();lbSelectedLevel=iidx;showLeaderboard('level');tgHaptic('light')},{passive:false});
+        })(idx);
+        rightDiv.appendChild(trophyBtn);
+      }
       var btn=document.createElement('button');btn.className='ls-lvl-btn';
       if(stars===3)btn.textContent='↻ повторить';
       else if(stars>0)btn.textContent='↻ улучшить';
@@ -6537,14 +6583,14 @@ function bindUI(){
   document.getElementById('btn-challenge').addEventListener('click',function(){showChallengeScreen()});
   document.getElementById('btn-ch-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-ch-play').addEventListener('click',function(){startChallenge()});
-  document.getElementById('btn-leaderboard').addEventListener('click',function(){showOverlayMsg('таблица лидеров скоро откроется!','следи за обновлениями')});
+  document.getElementById('btn-leaderboard').addEventListener('click',function(){showLeaderboard('global')});
   document.getElementById('btn-lb-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-profile').addEventListener('click',function(){showScreen('profile')});
   document.getElementById('btn-profile-back').addEventListener('click',function(){showScreen('menu')});
   // LB tab clicks
   document.querySelectorAll('.lb-tab').forEach(function(tab){
-    tab.addEventListener('click',function(){lbCurrentTab=this.getAttribute('data-tab');renderLB()});
-    tab.addEventListener('touchstart',function(e){e.preventDefault();lbCurrentTab=this.getAttribute('data-tab');renderLB();tgHaptic('light')},{passive:false});
+    tab.addEventListener('click',function(){lbCurrentTab=this.getAttribute('data-tab');loadLB()});
+    tab.addEventListener('touchstart',function(e){e.preventDefault();lbCurrentTab=this.getAttribute('data-tab');loadLB();tgHaptic('light')},{passive:false});
   });
   document.getElementById('btn-sfx-toggle').addEventListener('click',function(){toggleSound();saveSettings();updateSettingsUI()});
   document.getElementById('btn-music-toggle').addEventListener('click',function(){toggleMusic();saveSettings();updateSettingsUI()});
@@ -6663,7 +6709,7 @@ var logoAnim={
       {x:startX+slotW*3,y:topY-H*0.006,w:slotW*0.72,h:letterH*1.02,label:'D'},
     ];
     // Set menu-top height so mid section starts below sub-text
-    var subTextSpace=42; // "во тьму" + "beta 0.11.1" + margins
+    var subTextSpace=42; // "во тьму" + "beta 0.14.0" + margins
     var topHeight=topY+letterH+subTextSpace;
     var menuTop=document.getElementById('menu-top');
     if(menuTop)menuTop.style.height=topHeight+'px';
@@ -6953,7 +6999,7 @@ var logoAnim={
       }
       ctx.restore();
     }
-    // Sub-text below VOID letters: "во тьму" and "beta 0.11.1"
+    // Sub-text below VOID letters: "во тьму" and "beta 0.14.0"
     if(this.platforms.length>=4){
       var bottomY=Math.max(this.platforms[0].y+this.platforms[0].h,this.platforms[1].y+this.platforms[1].h,this.platforms[2].y+this.platforms[2].h,this.platforms[3].y+this.platforms[3].h);
       ctx.textAlign='center';ctx.textBaseline='top';
