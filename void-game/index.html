@@ -607,7 +607,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.4.0';
+var VOID_VERSION='2.4.1';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -621,7 +621,8 @@ var VOID_VERSION='2.4.0';
   }).catch(function(){});
 })();
 document.addEventListener('visibilitychange',function(){
-  if(!document.hidden)setTimeout(function(){
+  if(document.hidden){saveProgress();return}
+  setTimeout(function(){
     var checkUrl=location.origin+'/?_v='+Date.now();
     fetch(checkUrl,{cache:'no-store'}).then(function(r){return r.text()}).then(function(html){
       var m=html.match(/VOID_VERSION='([^']+)'/);
@@ -663,7 +664,7 @@ function updateSettingsUI(){
   if(sfxBtn)sfxBtn.textContent=soundMuted?'выкл':'вкл';
   if(musicBtn)musicBtn.textContent=musicMuted?'выкл':'вкл';
   if(hapticBtn)hapticBtn.textContent=settings.hapticEnabled?'вкл':'выкл';
-  if(autoBtn)autoBtn.textContent=settings.autoGrab?'вкл':'вкл';
+  if(autoBtn)autoBtn.textContent=settings.autoGrab?'вкл':'выкл';
   var toggles=[sfxBtn,musicBtn,hapticBtn,autoBtn];
   for(var i=0;i<toggles.length;i++){
     if(!toggles[i])continue;
@@ -755,6 +756,8 @@ function sfxDeath(cause){
   if(cause==='fall'){playTone(150,0.6,'sine',0.15,20)}
   else if(cause==='spikes'){playNoise(0.3,0.3,3000)}
   else if(cause==='saw'){playTone(400,0.3,'square',0.12,50)}
+  else if(cause==='enemy'){playTone(180,0.5,'square',0.15,40);playNoise(0.2,0.15,1200)}
+  else if(cause==='pendulum'){playTone(120,0.6,'sawtooth',0.2,60);playTone(80,0.4,'square',0.15,30)}
 }
 function sfxWallSlide(){
   playNoise(0.06,0.06,600);
@@ -1092,7 +1095,7 @@ function recordLevelComplete(n,deaths,time){
   if(!progress.levels[n]||stars>progress.levels[n].stars){
     progress.levels[n]={stars:stars,bestTime:Math.min(time,progress.levels[n]?progress.levels[n].bestTime:Infinity)};
   }
-  if(stars===3)progress.stats.perfectLevels=(progress.stats.perfectLevels||0)+1;
+  var prevStars=progress.levels[n]?progress.levels[n].stars:0;if(stars===3&&prevStars<3)progress.stats.perfectLevels=(progress.stats.perfectLevels||0)+1;
   if(n+1>=progress.unlocked&&n+1<LEVELS.length)progress.unlocked=n+2;
   syncProgressUnlocked(); // ensure sync
   saveProgress();
@@ -2330,8 +2333,8 @@ g.circle(0,bodyBob,player.dashing?22:18);g.fill({color:skin.aura,alpha:auraAlpha
 function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,-1)}}
-function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
-function checkSpecialCollision(a,b){if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(player.alive)winLevel()}if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
+function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
+function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel()}}if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}if((a.label==='pendulumZone'&&b.label==='player')||(b.label==='pendulumZone'&&a.label==='player')){killPlayer('pendulum')}if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
   // Checkpoint activation
   if((a.label==='checkpointZone'&&b.label==='player')||(b.label==='checkpointZone'&&a.label==='player')){
     var cpBody=(a.label==='checkpointZone')?a:b;
@@ -2398,6 +2401,8 @@ function updatePlayer(dt){
     MBody.setVelocity(player.body,{x:player.velocityX,y:player.body.velocity.y});
     if(player.onGround&&Math.abs(player.velocityX)>3&&Math.random()<0.3)spawnParticles(player.body.position.x-player.facing*4,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2+player.facing*0.3,spread:0.6,speed:0.8,life:0.25,size:1.8,gravity:0.5});
   }
+  // Challenge mode: only_dash modifier — prevent walking
+  if(challengeMode&&currentChallenge&&currentChallenge.modifier.id==='only_dash'&&!player.dashing){player.velocityX=0;player.inputX=0}
   if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){
     // Challenge mode: no_dash modifier
     if(challengeMode&&currentChallenge&&currentChallenge.modifier.id==='no_dash'){player.inputDashPressed=false}
@@ -2447,12 +2452,12 @@ function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.
   // Challenge: check fail conditions
   if(challengeMode&&currentChallenge){
     var mid=currentChallenge.modifier.id;
-    if(mid==='no_death'){endChallenge(false);setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showScreen('menu')},800);return}
-    if(mid==='max3'&&state.deaths>=3){endChallenge(false);setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showScreen('menu')},800);return}
+    if(mid==='no_death'){endChallenge(false);setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;clearLevel();stopMusic();showScreen('menu')},800);return}
+    if(mid==='max3'&&state.deaths>=3){endChallenge(false);setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;clearLevel();stopMusic();showScreen('menu')},800);return}
   }
   setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},700)}
 
-function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);state.levelStartTime=performance.now()}
+function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);/* timer NOT reset here — keeps total level time accurate */}
 
 // ═══ SAW BLADES ═══
 var sawBodies=[],sawSprites=[],sawTime=0;
@@ -2591,7 +2596,7 @@ function createPendulum(data){
   var rod=MConstraint.create({pointA:{x:pivotX,y:pivotY},bodyB:ball,length:length,stiffness:1,damping:0});
   MWorld.add(world,[ball,rod]);
   // Death sensor on ball
-  var sensor=MBodies.circle(pivotX,pivotY+length,ballR+4,{isStatic:true,isSensor:true,label:'sawZone'});
+  var sensor=MBodies.circle(pivotX,pivotY+length,ballR+4,{isStatic:true,isSensor:true,label:'pendulumZone'});
   MWorld.add(world,sensor);
   var spr=new PIXI.Container();gameContainer.addChild(spr);
   var g=new PIXI.Graphics();spr.addChild(g);
@@ -2778,6 +2783,7 @@ function detachThread(){
   if(!thread.active)return;
   thread.active=false;
   if(thread.constraint){MWorld.remove(world,thread.constraint);thread.constraint=null}
+  thread._gfx=null;
   if(thread.sprite){thread.sprite.destroy();thread.sprite=null}
   tgHaptic('light');sfxThreadDetach();
 }
@@ -2894,6 +2900,8 @@ function loadLevel(n){
   // Boundaries
   MWorld.add(world,MBodies.rectangle(lvl.width/2,-50,lvl.width,100,{isStatic:true,label:'boundary'}));
   MWorld.add(world,MBodies.rectangle(-50,lvl.height/2,100,lvl.height,{isStatic:true,label:'boundary'}));
+  MWorld.add(world,MBodies.rectangle(lvl.width+50,lvl.height/2,100,lvl.height,{isStatic:true,label:'boundary'}));
+  MWorld.add(world,MBodies.rectangle(lvl.width/2,lvl.height+50,lvl.width,100,{isStatic:true,label:'boundary'}));
   // Platforms
   for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.8});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(0x5a5a7a);spr.rect(0,0,p.w,2);spr.fill(0x7a7a9a);spr.rect(0,p.h-1,p.w,1);spr.fill(0x4a4a68);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
   // Spikes
@@ -2925,7 +2933,7 @@ function loadLevel(n){
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;espr._base=eg;espr._ew=lvl.exit.w;espr._eh=lvl.exit.h;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null}camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -3485,7 +3493,7 @@ function winLevel(){player.alive=false;spawnParticles(player.body.position.x,pla
     var chComplete=true;
     if(mid==='speed'&&elapsedSec>=25)chComplete=false;
     if(mid==='speed40'&&elapsedSec>=40)chComplete=false;
-    if(mid==='max3'&&state.deaths>3)chComplete=false;
+    if(mid==='max3'&&state.deaths>=3)chComplete=false;
     endChallenge(chComplete);
   }
   recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
@@ -3829,11 +3837,17 @@ function gameLoop(timestamp){
   if(state.flashTimer>0){state.flashTimer-=rawDt;if(state.flashTimer<=0){state.flashAlpha=0;state.flashTimer=0}else{state.flashAlpha*=0.9}}
   if(state.screen==='playing'){readInput();updatePlayer(dt);progress.stats.playTime=(progress.stats.playTime||0)+rawDt;
   // Variable gravity: lighter going up, heavier down, reduced at apex
+  // Apply to player body only via force, not global engine gravity
   if(player.alive&&player.body){
     var pvy=player.body.velocity.y;
-    if(pvy<0)engine.gravity.y=player.gravityUp;
-    else if(pvy>0)engine.gravity.y=player.gravityDown;
-    if(!player.onGround&&Math.abs(pvy)<player.apexThreshold)engine.gravity.y*=player.apexGravityMult;
+    var baseG=1.5; // default engine.gravity.y
+    var targetG=baseG;
+    if(pvy<0)targetG=player.gravityUp;
+    else if(pvy>0)targetG=player.gravityDown;
+    if(!player.onGround&&Math.abs(pvy)<player.apexThreshold)targetG*=player.apexGravityMult;
+    // Apply delta force to player body only
+    var gDelta=(targetG-baseG)*player.body.mass*0.001;
+    Matter.Body.applyForce(player.body,player.body.position,{x:0,y:gDelta});
   }
   MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
@@ -3869,7 +3883,7 @@ function gameLoop(timestamp){
 function updateSoundButton(){var btn=document.getElementById('hud-sound');if(btn)btn.textContent=soundMuted?'✕':'♪';btn.style.color=soundMuted?'rgba(255,100,100,.3)':'rgba(255,255,255,.3)'}
 
 function bindUI(){
-  document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');syncProgressUnlocked();state.level=Math.min(progress.unlocked-1,LEVELS.length-1);state.deaths=0;initAudio();startMusic();initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
+  document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');challengeMode=false;syncProgressUnlocked();state.level=Math.min(progress.unlocked-1,LEVELS.length-1);state.deaths=0;initAudio();startMusic();initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
   document.getElementById('btn-levels').addEventListener('click',function(){showLevelSelect()});
   document.getElementById('btn-ls-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-ls-back').addEventListener('touchstart',function(e){e.preventDefault();showScreen('menu')},{passive:false});
@@ -3881,7 +3895,7 @@ function bindUI(){
   document.getElementById('btn-resume').addEventListener('click',function(){showScreen('playing')});
   document.getElementById('btn-music').addEventListener('click',function(){toggleMusic();document.getElementById('btn-music').textContent='музыка: '+(musicMuted?'выкл':'вкл')});
   document.getElementById('btn-quit').addEventListener('click',function(){clearLevel();stopMusic();showScreen('menu')});
-  document.getElementById('btn-retry').addEventListener('click',function(){respawnPlayer();startPlaying()});
+  document.getElementById('btn-retry').addEventListener('click',function(){state.deaths=0;clearLevel();loadLevel(state.level);startPlaying()});
   document.getElementById('btn-next').addEventListener('click',function(){
     state.level++;state.deaths=0;
     if(state.level>=LEVELS.length){clearLevel();showScreen('menu');return}
@@ -3889,9 +3903,9 @@ function bindUI(){
     var prevAct=Math.floor((state.level-1)/5);
     var newAct=Math.floor(state.level/5);
     if(newAct>prevAct){
-      showActIntro(newAct,function(){clearLevel();loadLevel(state.level);showStoryScreen(state.level)});
+      showActIntro(newAct,function(){clearLevel();createBackground();loadLevel(state.level);showStoryScreen(state.level)});
     }else{
-      clearLevel();loadLevel(state.level);showStoryScreen(state.level);
+      clearLevel();createBackground();loadLevel(state.level);showStoryScreen(state.level);
     }
   });
   document.getElementById('btn-share').addEventListener('click',shareResult);
@@ -4536,7 +4550,7 @@ function startChallenge(){
   state.level=currentChallenge.level;
   state.deaths=0;
   if(engine)clearLevel();
-  initMatter();loadLevel(currentChallenge.level);
+  initAudio();startMusic();initMatter();createBackground();loadLevel(currentChallenge.level);
   showStoryScreen(currentChallenge.level);
 }
 function endChallenge(completed){
