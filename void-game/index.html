@@ -1731,7 +1731,13 @@ function loadLB(){
     // Weekly: fetch from weekly_scores table
     var weekKey=getWeekKey();
     sbClient.from('weekly_scores').select('*').eq('week_key',weekKey).order('score',{ascending:false}).limit(100).then(function(res){
-      if(res.error){console.warn('[VOID] Weekly LB error:',res.error);renderLBOffline();return}
+      if(res.error){
+        if(res.error.message&&res.error.message.indexOf('Could not find')>=0){
+          listEl.innerHTML='<div class="lb-empty">недельный рейтинг<br><div class="lb-sub">таблица ещё не создана — скоро будет доступна</div></div>';
+          if(rankEl)rankEl.textContent='';
+        }else{renderLBOffline()}
+        return;
+      }
       lbData=res.data||[];
       renderLB();
     }).catch(function(e){console.warn('[VOID] Weekly LB catch:',e);renderLBOffline()});
@@ -1741,8 +1747,15 @@ function loadLB(){
     // Level records: fetch from level_records table for selected level
     var lvlIdx=lbSelectedLevel||0;
     sbClient.from('level_records').select('*').eq('level_index',lvlIdx).order('best_time',{ascending:true}).limit(20).then(function(res){
-      if(res.error){console.warn('[VOID] Level records error:',res.error);lbLevelData=[];renderLBLevel()}
-      else{lbLevelData=res.data||[];renderLBLevel()}
+      if(res.error){
+        if(res.error.message&&res.error.message.indexOf('Could not find')>=0){
+          listEl.innerHTML='<div class="lb-empty">рекорды уровней<br><div class="lb-sub">таблица ещё не создана — скоро будет доступна</div></div>';
+          if(rankEl)rankEl.textContent='';
+        }else{lbLevelData=[];renderLBLevel()}
+        return;
+      }
+      lbLevelData=res.data||[];
+      renderLBLevel();
     }).catch(function(e){lbLevelData=[];renderLBLevel()});
     return;
   }
