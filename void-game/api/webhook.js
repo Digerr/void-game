@@ -3,7 +3,31 @@ import { createClient } from '@supabase/supabase-js';
 const GAME_URL = 'https://void-game-ruddy.vercel.app/';
 const CHANNEL_ID = '@void_game_official';
 const SUPPORT_CHANNEL_ID = process.env.SUPPORT_CHANNEL_ID || '-1003857849729'; // VOID - SUPPORT (private)
-const VERSION = '0.15.0-beta';
+const VERSION = '0.16.0-beta';
+
+// Reply Keyboard — постоянное меню кнопок
+const REPLY_KEYBOARD = {
+  keyboard: [
+    [{ text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }],
+    [{ text: '📊 Статистика' }, { text: '🏆 Рейтинг' }],
+    [{ text: '📅 Неделя' }, { text: '🐛 Баг' }],
+    [{ text: '❓ Помощь' }]
+  ],
+  resize_keyboard: true,
+  one_time_keyboard: false
+};
+
+// Bot commands for / menu
+const BOT_COMMANDS = [
+  { command: 'start', description: 'Начать игру' },
+  { command: 'play', description: 'Открыть VOID' },
+  { command: 'help', description: 'Управление и советы' },
+  { command: 'stats', description: 'Моя статистика' },
+  { command: 'leaderboard', description: 'Мировой рейтинг' },
+  { command: 'weekly', description: 'Рейтинг недели' },
+  { command: 'news', description: 'Обновления игры' },
+  { command: 'bug', description: 'Сообщить о баге' }
+];
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jibtmyuxbeckanmkhuik.supabase.co';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnRteXV4YmVja2FubWtodWlrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDMyMDQxMCwiZXhwIjoyMDk1ODk2NDEwfQ.BS61LXJPTKvE4KsZmKu0e7pPkR8VnMBXxRIJqUMX8VM';
@@ -62,6 +86,19 @@ async function sendMsg(token, chatId, text, extra = {}) {
   });
 }
 
+// Set bot commands menu (for / autocomplete)
+async function setBotCommands(token) {
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/setMyCommands`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commands: BOT_COMMANDS })
+    });
+  } catch (e) {
+    console.error('[VOID] setMyCommands error:', e);
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(200).json({ status: 'ok' });
@@ -83,14 +120,38 @@ export default async function handler(req, res) {
   const msg = update.message;
   const chatId = msg.chat.id;
   const userId = msg.from?.id;
-  const text = (msg.text || '').trim();
+  const rawText = (msg.text || '').trim();
+
+  // Map keyboard button labels to commands
+  const BTN_MAP = {
+    '📊 Статистика': '/stats',
+    '🏆 Рейтинг': '/leaderboard',
+    '📅 Неделя': '/weekly',
+    '🐛 Баг': '/bug',
+    '❓ Помощь': '/help'
+  };
+  const text = BTN_MAP[rawText] || rawText;
 
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8858889318:AAGramLmQGRhpJAyRWcJC8lPwkyrbDBiHcw';
 
   // ── /start and /play ──
   if (text === '/start' || text === '/play' || text.startsWith('/start ') || text.startsWith('/play ')) {
+    // Register bot commands on first /start
+    await setBotCommands(BOT_TOKEN);
+
     await sendMsg(BOT_TOKEN, chatId,
-      `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 30 уровней, 6 актов, магнитный шарф, паркур.\n\nv${VERSION}\n\nНажми кнопку ниже чтобы начать →`,
+      `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 30 уровней, 6 актов, магнитный шарф, паркур.\n\nv${VERSION}\n\nНажми ▶ ИГРАТЬ чтобы начать →`,
+      {
+        reply_markup: REPLY_KEYBOARD
+      }
+    );
+    return res.status(200).json({ ok: true });
+  }
+
+  // ── Keyboard button: ▶ ИГРАТЬ (when text arrives, offer inline button) ──
+  if (rawText === '▶ ИГРАТЬ') {
+    await sendMsg(BOT_TOKEN, chatId,
+      `🌑 <b>VOID — во тьму</b>\n\nНажми кнопку ▶ ИГРАТЬ ниже чтобы запустить игру!`,
       {
         reply_markup: {
           inline_keyboard: [[
