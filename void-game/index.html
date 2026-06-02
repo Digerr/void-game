@@ -747,7 +747,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.14.0';
+var VOID_VERSION='2.15.0';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -821,13 +821,17 @@ function updateSettingsUI(){
   if(sfxLabel){sfxLabel.textContent=Math.round(settings.sfxVolume*100)+'%'}
   if(musicSlider){musicSlider.value=Math.round(settings.musicVolume*100)}
   if(musicLabel){musicLabel.textContent=Math.round(settings.musicVolume*100)+'%'}
-  var toggles=[sfxBtn,musicBtn,hapticBtn,autoBtn,fpsBtn,qualBtn];
+  var toggles=[sfxBtn,musicBtn,hapticBtn,autoBtn];
   for(var i=0;i<toggles.length;i++){
     if(!toggles[i])continue;
     var isOn=toggles[i].textContent==='вкл';
     toggles[i].style.borderColor=isOn?'#2a4a2a':'#4a2a2a';
     toggles[i].style.color=isOn?'#5a8a5a':'#8a4a4a';
   }
+  // FPS button: blue tint always (not вкл/выкл)
+  if(fpsBtn){fpsBtn.style.borderColor='#2a3a5a';fpsBtn.style.color='#5a8aba'}
+  // Quality button: purple tint always
+  if(qualBtn){qualBtn.style.borderColor='#3a2a5a';qualBtn.style.color='#8a6aba'}
   // Skin selector
   var skinSel=document.getElementById('skin-selector');
   if(skinSel){
@@ -2898,8 +2902,8 @@ function initPixi(){
     ui.parentNode.insertBefore(pixiApp.canvas,ui);
     bgContainer=new PIXI.Container();gameContainer=new PIXI.Container();fxContainer=new PIXI.Container();
     pixiApp.stage.addChild(bgContainer);pixiApp.stage.addChild(gameContainer);pixiApp.stage.addChild(fxContainer);
-    // Apply FPS setting from saved settings
-    if(settings.targetFps)pixiApp.ticker.targetFPS=settings.targetFps;
+    // Stop PixiJS auto-ticker — we render manually in gameLoop for sync
+    pixiApp.ticker.stop();
     // Light overlay - canvas-based darkness with proper radial hole
     lightCanvas=document.createElement('canvas');
     lightCanvas.width=Math.max(1,Math.floor(pixiApp.screen.width));
@@ -2915,7 +2919,7 @@ function initPixi(){
     window.addEventListener('resize',onResize);onResize();
   });
 }
-function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);var act=getCurrentAct();var theme=ACT_THEMES[act]||ACT_THEMES[0];var vc=theme.skyTop;for(var i=0;i<4;i++){g.circle(cx,cy,mr*(1-i*0.12));g.fill({color:vc,alpha:i*0.008})}}
+function drawVignette(){if(!vignetteOverlay)return;var g=vignetteOverlay;g.clear();var w=pixiApp?pixiApp.screen.width:window.innerWidth;var h=pixiApp?pixiApp.screen.height:window.innerHeight;var cx=w/2,cy=h/2,mr=Math.sqrt(cx*cx+cy*cy);var act=getCurrentAct();var theme=ACT_THEMES[act]||ACT_THEMES[0];var vc=theme.skyTop;g.circle(cx,cy,mr);g.fill({color:vc,alpha:0.015})}
 function onResize(){if(!pixiApp)return;pixiApp.renderer.resize(window.innerWidth,window.innerHeight);drawVignette();if(lightCanvas){var sw=Math.max(1,Math.floor(pixiApp.screen.width)),sh=Math.max(1,Math.floor(pixiApp.screen.height));if(lightCanvas.width!==sw||lightCanvas.height!==sh){lightCanvas.width=sw;lightCanvas.height=sh;lightTexture=PIXI.Texture.from(lightCanvas);lightSprite.texture=lightTexture}}}
 
 // ═══ MATTER.JS SETUP ═══
@@ -3129,9 +3133,7 @@ if(isWallSlide){
   g.moveTo(-3,legBaseY);g.lineTo(legLX,legLY);g.stroke({width:2.5,color:0x5a5a7e});
   g.moveTo(3,legBaseY);g.lineTo(legRX,legRY);g.stroke({width:2.5,color:0x5a5a7e});
 }
-// === GLOW aura ===
-var auraAlpha=0.06+Math.sin(t*1.5)*0.02;if(player.dashing)auraAlpha=0.2;
-g.circle(0,bodyBob,player.dashing?22:18);g.fill({color:skin.aura,alpha:auraAlpha});
+// aura removed — lighting handled by canvas overlay
 }
 
 function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
@@ -4395,11 +4397,13 @@ var tx=player.body.position.x-sw*0.35+lookAheadX;
 var ty=player.body.position.y-sh*0.42+lookAheadY;
 tx=Math.max(0,Math.min(tx,lvl.width-sw));
 ty=Math.max(-200,Math.min(ty,lvl.height-sh));
-// Adaptive lerp: faster during dash, slower when still
-var speedX=0.10;var speedY=0.08;
-if(player.dashing){speedX=0.20;speedY=0.16}
-else if(Math.abs(player.body.velocity.x)<1&&player.onGround){speedX=0.06;speedY=0.05}
-camera.x+=(tx-camera.x)*speedX;camera.y+=(ty-camera.y)*speedY;
+// Adaptive lerp: dt-independent, faster during dash, slower when still
+var baseSpeedX=0.14;var baseSpeedY=0.12;
+if(player.dashing){baseSpeedX=0.28;baseSpeedY=0.22}
+else if(Math.abs(player.body.velocity.x)<1&&player.onGround){baseSpeedX=0.08;baseSpeedY=0.07}
+var lf=Math.min(1,1-Math.pow(1-baseSpeedX,dt*60));
+var lfy=Math.min(1,1-Math.pow(1-baseSpeedY,dt*60));
+camera.x+=(tx-camera.x)*lf;camera.y+=(ty-camera.y)*lfy;
 // Smoothed screen shake with decay
 var sx=0,sy=0;
 if(state.shakeTime>0){var intensity=state.shakeAmount*(state.shakeTime/0.3);sx=(Math.random()-0.5)*intensity*2;sy=(Math.random()-0.5)*intensity*2}
@@ -4516,22 +4520,19 @@ function updateLightAndFog(dt){
 
     lightCtx.globalCompositeOperation='source-over';
   }else{
-    // ═══ NORMAL MODE: wide radial light ═══
-    // Step 1: Fill everything with a very subtle darkness (ambient) — just enough for atmosphere
+    // ═══ NORMAL MODE: smooth radial light — single gradient, no banding ═══
+    // Step 1: Fill with subtle darkness (ambient)
     lightCtx.globalCompositeOperation='source-over';
-    lightCtx.fillStyle='rgba(2,2,8,0.03)';
+    lightCtx.fillStyle='rgba(4,4,12,0.08)';
     lightCtx.fillRect(0,0,sw,sh);
 
     // Step 2: Cut smooth radial hole around player (destination-out erases darkness)
     lightCtx.globalCompositeOperation='destination-out';
-    var lightR=800+Math.sin(lightTime*1.2)*30;
+    var lightR=900+Math.sin(lightTime*1.2)*20;
     var mainGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR);
     mainGrad.addColorStop(0,'rgba(255,255,255,1)');
-    mainGrad.addColorStop(0.25,'rgba(255,255,255,0.98)');
-    mainGrad.addColorStop(0.45,'rgba(255,255,255,0.92)');
-    mainGrad.addColorStop(0.6,'rgba(255,255,255,0.7)');
-    mainGrad.addColorStop(0.75,'rgba(255,255,255,0.35)');
-    mainGrad.addColorStop(0.88,'rgba(255,255,255,0.1)');
+    mainGrad.addColorStop(0.35,'rgba(255,255,255,0.97)');
+    mainGrad.addColorStop(0.65,'rgba(255,255,255,0.65)');
     mainGrad.addColorStop(1,'rgba(255,255,255,0)');
     lightCtx.fillStyle=mainGrad;
     lightCtx.beginPath();lightCtx.arc(px,py,lightR,0,Math.PI*2);lightCtx.fill();
@@ -4562,28 +4563,9 @@ function updateLightAndFog(dt){
       lightCtx.beginPath();lightCtx.arc(ax,ay,90,0,Math.PI*2);lightCtx.fill();
     }
 
-    // Step 4: Tint remaining darkness with subtle warm color (source-atop)
-    lightCtx.globalCompositeOperation='source-atop';
-    var tintGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*0.8);
-    tintGrad.addColorStop(0,'rgba(20,30,55,0.25)');
-    tintGrad.addColorStop(0.5,'rgba(10,15,30,0.1)');
-    tintGrad.addColorStop(1,'rgba(0,0,0,0)');
-    lightCtx.fillStyle=tintGrad;
-    lightCtx.fillRect(0,0,sw,sh);
-
-    // Step 5: Add ambient glow BEHIND the dark overlay (destination-over = behind existing pixels)
-    // This creates a warm light pool that makes the scene visible even beyond the cut-out
+    // Step 4: Add minimal ambient behind overlay so scene stays visible
     lightCtx.globalCompositeOperation='destination-over';
-    // Wide ambient glow around player
-    var glowGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*1.2);
-    glowGrad.addColorStop(0,'rgba(18,24,48,0.4)');
-    glowGrad.addColorStop(0.3,'rgba(14,18,36,0.3)');
-    glowGrad.addColorStop(0.6,'rgba(10,14,28,0.15)');
-    glowGrad.addColorStop(1,'rgba(0,0,0,0)');
-    lightCtx.fillStyle=glowGrad;
-    lightCtx.beginPath();lightCtx.arc(px,py,lightR*1.2,0,Math.PI*2);lightCtx.fill();
-    // Global ambient light so the whole scene has a minimum visibility
-    lightCtx.fillStyle='rgba(12,14,26,0.35)';
+    lightCtx.fillStyle='rgba(12,14,26,0.25)';
     lightCtx.fillRect(0,0,sw,sh);
 
     lightCtx.globalCompositeOperation='source-over';
@@ -5338,9 +5320,13 @@ function updateMenuStats(){
 function togglePause(){if(state.screen==='playing')showScreen('paused');else if(state.screen==='paused')showScreen('playing')}
 
 // ═══ GAME LOOP ═══
-var lastTime=0;
+var lastTime=0,lastRenderTime=0;
+var targetFrameInterval=1000/60;
 function gameLoop(timestamp){
   requestAnimationFrame(gameLoop);
+  // FPS limiting: skip frame if too soon
+  if(timestamp-lastRenderTime<targetFrameInterval*0.92)return;
+  lastRenderTime=timestamp;
   var rawDt=Math.min((timestamp-lastTime)/1000,0.05);lastTime=timestamp;
   // Hit-stop: freeze all updates briefly for impact feel
   if(state.hitStop>0){state.hitStop-=rawDt;if(state.hitStop>0)return;state.hitStop=0}
@@ -5389,6 +5375,8 @@ function gameLoop(timestamp){
   }else if(state._dashGfx){state._dashGfx.clear()}
   // Logo animation (menu only)
   logoAnim.tick(rawDt);
+  // Manual render — synchronized with game logic
+  if(pixiApp)pixiApp.renderer.render(pixiApp.stage);
 }
 
 // ═══ UI BINDINGS ═══
@@ -5456,7 +5444,7 @@ function bindUI(){
   // FPS toggle (60/120)
   document.getElementById('btn-fps-toggle').addEventListener('click',function(){
     settings.targetFps=settings.targetFps===60?120:60;
-    if(pixiApp)pixiApp.ticker.targetFPS=settings.targetFps;
+    targetFrameInterval=1000/settings.targetFps;
     saveSettings();updateSettingsUI();
   });
   // Quality toggle (low/medium/high)
@@ -6235,7 +6223,7 @@ function showAwakening(){
 }
 
 // ═══ INIT ═══
-async function init(){try{loadProgress();loadSettings();loadFromCloud();initSupabase();await initPixi();initInput();bindUI();initTelegramPlayer();registerPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
+async function init(){try{loadProgress();loadSettings();loadFromCloud();initSupabase();await initPixi();initInput();bindUI();initTelegramPlayer();registerPlayer();logoAnim.init();updateMenuStats();document.getElementById('loading').classList.add('hidden');targetFrameInterval=1000/(settings.targetFps||60);lastTime=performance.now();requestAnimationFrame(gameLoop);console.log('[VOID] Initialized');if(!progress.firstLaunch){showAwakening()}}catch(err){console.error('[VOID] Init failed:',err);var d=document.getElementById('loading');if(d){d.classList.remove('hidden');d.querySelector('.loading-text').textContent='ERROR: '+err.message}}}
 init();
 </script>
 </body>
