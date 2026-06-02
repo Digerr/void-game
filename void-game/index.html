@@ -499,10 +499,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
       <button class="btn primary" id="btn-play">играть</button>
       <div class="menu-grid">
         <button class="btn" id="btn-levels">уровни</button>
-        <button class="btn" id="btn-records">рейтинг</button>
+        <button class="btn" id="btn-profile" style="border-color:#3a3a5a;color:#8a7aaa">профиль</button>
       </div>
-      <button class="btn" id="btn-leaderboard" style="border-color:#2a3a5a;color:#6a9aba;margin-top:4px">таблица лидеров</button>
-      <button class="btn" id="btn-profile" style="border-color:#3a3a5a;color:#8a7aaa;margin-top:2px">профиль</button>
       <button class="menu-challenge" id="btn-challenge">
         <span class="ch-label">ежедневное испытание</span>
         <span class="ch-sub" id="ch-sub">ежедневный вызов</span>
@@ -2071,9 +2069,15 @@ function renderProfile(d){
     '<div class="prof-notif" style="border-bottom:none">'+
       '<span class="prof-notif-label">сохранить в облако</span>'+
       '<button class="btn" id="btn-cloud-save" style="width:80px;padding:8px;font-size:.55rem;margin:0;border-color:#2a3a4a;color:#5a8a6a">☁</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:6px;margin-top:10px;width:100%;justify-content:center">'+
+      '<button class="btn" id="btn-prof-records" style="flex:1;max-width:160px;padding:10px 12px;font-size:.58rem;border-color:#3a3a5a;color:#8a8aaa">рекорды</button>'+
+      '<button class="btn" id="btn-prof-leaderboard" style="flex:1;max-width:160px;padding:10px 12px;font-size:.58rem;border-color:#2a3a5a;color:#6a9aba">лидерборд</button>'+
     '</div>';
   document.getElementById('btn-notif-toggle').addEventListener('click',function(){toggleNotifications()});
   document.getElementById('btn-cloud-save').addEventListener('click',function(){manualCloudSave()});
+  document.getElementById('btn-prof-records').addEventListener('click',function(){showScreen('records')});
+  document.getElementById('btn-prof-leaderboard').addEventListener('click',function(){showLeaderboard('global')});
 }
 function toggleNotifications(){
   if(!tg||!tg.initData||!profileData)return;
@@ -7148,16 +7152,14 @@ function bindUI(){
   document.getElementById('btn-settings-back').addEventListener('click',function(){if(state.screen==='settings'&&state._prevScreen==='paused'){showScreen('paused')}else{showScreen('menu')}});
   document.getElementById('btn-faq-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-lore-back').addEventListener('click',function(){showScreen('menu')});
-  document.getElementById('btn-records').addEventListener('click',function(){showScreen('records')});
-  document.getElementById('btn-records-back').addEventListener('click',function(){showScreen('menu')});
+  document.getElementById('btn-records-back').addEventListener('click',function(){showScreen('profile')});
   document.getElementById('btn-rec-act-back').addEventListener('click',function(){document.getElementById('rec-overview').style.display='flex';document.getElementById('rec-act-detail').style.display='none'});
   document.getElementById('btn-rec-act-back').addEventListener('touchstart',function(e){e.preventDefault();document.getElementById('rec-overview').style.display='flex';document.getElementById('rec-act-detail').style.display='none'},{passive:false});
   document.getElementById('btn-records-back2').addEventListener('click',function(){document.getElementById('rec-overview').style.display='flex';document.getElementById('rec-act-detail').style.display='none'});
   document.getElementById('btn-challenge').addEventListener('click',function(){showChallengeScreen()});
   document.getElementById('btn-ch-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-ch-play').addEventListener('click',function(){startChallenge()});
-  document.getElementById('btn-leaderboard').addEventListener('click',function(){showLeaderboard('global')});
-  document.getElementById('btn-lb-back').addEventListener('click',function(){showScreen('menu')});
+  document.getElementById('btn-lb-back').addEventListener('click',function(){showScreen('profile')});
   document.getElementById('btn-profile').addEventListener('click',function(){showScreen('profile')});
   document.getElementById('btn-profile-back').addEventListener('click',function(){showScreen('menu')});
   // LB tab clicks
