@@ -3943,7 +3943,32 @@ var GROUND_GRACE=0.06;var _groundGraceTimer=0;function setupPlayerSensors(){play
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,true);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,false)}}
 function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
-function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;if((a.label==='fallZone'&&b.label==='player')||(b.label==='fallZone'&&a.label==='player')){killPlayer('fall')}else if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}else if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}else if((a.label==='pendulumZone'&&b.label==='player')||(b.label==='pendulumZone'&&a.label==='player')){killPlayer('pendulum')}else if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
+function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;
+  // Phantom collision guard: verify distance to moving death zones
+  // Enemies and pendulums use setPosition() which can cause stale collision events
+  function isPhantomCollision(zoneBody,realX,realY,margin){
+    if(!player.body)return false;
+    var dx=zoneBody.position.x-realX,dy=zoneBody.position.y-realY;
+    return(Math.abs(dx)>margin||Math.abs(dy)>margin);
+  }
+  if((a.label==='fallZone'&&b.label==='player')||(b.label==='fallZone'&&a.label==='player')){killPlayer('fall')}else if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}else if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}else if((a.label==='pendulumZone'&&b.label==='player')||(b.label==='pendulumZone'&&a.label==='player')){
+    // Verify pendulum sensor is near its actual ball position (anti-phantom)
+    var pdBody=(a.label==='pendulumZone')?a:b;
+    var isPhantom=false;
+    for(var pi=0;pi<pendulums.length;pi++){if(pendulums[pi].sensor===pdBody){
+      var bx=pendulums[pi].ball.position.x,by=pendulums[pi].ball.position.y;
+      if(Math.abs(pdBody.position.x-bx)>30||Math.abs(pdBody.position.y-by)>30){isPhantom=true}
+      break}}
+    if(!isPhantom)killPlayer('pendulum');
+  }else if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){
+    // Verify enemy body is near its logical position (anti-phantom)
+    var enBody=(a.label==='enemyZone')?a:b;
+    var isPhantom=false;
+    for(var ei=0;ei<levelEnemies.length;ei++){if(levelEnemies[ei].body===enBody){
+      if(Math.abs(enBody.position.x-levelEnemies[ei].currentX)>30){isPhantom=true}
+      break}}
+    if(!isPhantom)killPlayer('enemy');
+  }
   // Checkpoint activation
   if((a.label==='checkpointZone'&&b.label==='player')||(b.label==='checkpointZone'&&a.label==='player')){
     var cpBody=(a.label==='checkpointZone')?a:b;
@@ -7128,7 +7153,10 @@ function gameLoop(timestamp){
     var gDelta=(targetG-baseG)*player.body.mass*0.0012;
     Matter.Body.applyForce(player.body,player.body.position,{x:0,y:gDelta});
   }
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
+  // Update positions of all setPosition-based bodies BEFORE MEngine.update
+  // to prevent phantom collision detection with stale positions
+  updateMovingPlatforms(dt);updateEnemies(dt);updatePendulums();
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite&&settings.quality!=='low'){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
