@@ -5581,6 +5581,9 @@ function renderLoreScreen(){
     var ch=document.createElement('div');
     var shardCount=getActShardCount(a);
     var unlocked=isChapterUnlocked(a);
+    // Check if player has completed any level in this act (for cutscene replay)
+    var actCompleted=false;
+    for(var ci=a*5;ci<a*5+5;ci++){if(progress.levels[ci]&&progress.levels[ci].stars>0){actCompleted=true;break}}
     if(unlocked){
       ch.className='lore-unlocked';
       var html='<div class="lore-chapter-title">акт '+romanNums[a]+' — '+actNames[a]+'</div>';
@@ -5593,7 +5596,7 @@ function renderLoreScreen(){
         }
       }
       // Add cutscene replay button (acts 1-5 have a preceding cutscene)
-      if(a>0&&(a-1)<CUTSCENES.length){
+      if(a>0&&(a-1)<CUTSCENES.length&&actCompleted){
         html+='<button class="lore-cutscene-btn" data-cs="'+(a-1)+'">▶ катсцена</button>';
       }
       ch.innerHTML=html;
@@ -5610,6 +5613,10 @@ function renderLoreScreen(){
             if(sh2&&sh2.lore)html2+='<div class="lore-shard-entry">💎 '+sh2.lore+'</div>';
           }
         }
+      }
+      // Add cutscene replay button even for locked chapters if player completed act
+      if(a>0&&(a-1)<CUTSCENES.length&&actCompleted){
+        html2+='<button class="lore-cutscene-btn" data-cs="'+(a-1)+'">▶ катсцена</button>';
       }
       ch.innerHTML=html2;
     }
