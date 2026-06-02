@@ -227,9 +227,10 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .win-stat{text-align:center}
 .win-stat-val{font-size:1.1rem;font-weight:700;color:#7aaa7a}
 .win-stat-label{font-size:.45rem;color:#5a7a5a;letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
-.win-stars{display:flex;gap:6px;margin-bottom:16px;font-size:1.2rem}
-.win-star{color:#2a2a3a;transition:color .3s}
-.win-star.lit{color:#8aba7a}
+.win-stars{display:flex;gap:8px;margin-bottom:16px;font-size:1.4rem;justify-content:center}
+.win-star{color:#2a2a3a;transition:all .4s;opacity:0;transform:scale(0)}
+.win-star.lit{color:#6a9a5a;opacity:1;transform:scale(1)}
+.win-star.lit.pop{animation:starPop .4s ease-out}
 .win-sub{color:#5a7a5a;font-size:.7rem;margin-bottom:12px}
 .win-share{font-size:.5rem;color:#2a3a4a;letter-spacing:.1em;text-transform:uppercase;margin-top:6px;cursor:pointer;pointer-events:auto;padding:4px 12px;border:1px solid #1a2a3a;border-radius:2px;transition:all .15s}
 .win-share:hover{border-color:#3a5a6a;color:#5a8a9a}
@@ -237,10 +238,6 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 #loading.hidden{display:none}
 .loading-text{font-size:.7rem;color:#333;letter-spacing:.2em;text-transform:uppercase;animation:pulse 1.5s infinite}
 .win-best{font-size:.4rem;color:#2a3a2a;letter-spacing:.08em;margin-top:2px}
-.win-stars{display:flex;gap:8px;margin-bottom:16px;font-size:1.4rem;justify-content:center}
-.win-star{color:#2a2a3a;transition:all .4s;opacity:0;transform:scale(0)}
-.win-star.lit{color:#6a9a5a;opacity:1;transform:scale(1)}
-.win-star.lit.pop{animation:starPop .4s ease-out}
 @keyframes starPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.4);opacity:1}100%{transform:scale(1);opacity:1}}
 .win-total-stats{display:flex;gap:16px;margin-top:6px;margin-bottom:8px;justify-content:center}
 .win-total-stat{font-size:.4rem;color:#2a3a3a;letter-spacing:.08em;text-transform:uppercase}
@@ -401,9 +398,9 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
 .act-intro0 .act-intro-name{color:#5a8aba}.act-intro0 .act-intro-name::after{background:#5a8aba}
 .act-intro1 .act-intro-name{color:#8a5aba}.act-intro1 .act-intro-name::after{background:#8a5aba}
 .act-intro2 .act-intro-name{color:#ba8a2a}.act-intro2 .act-intro-name::after{background:#ba8a2a}
-.act-intro3 .act-intro-name{color:#8a3a5a}.act-intro3 .act-intro-name::after{background:#8a3a5a}
-.act-intro4 .act-intro-name{color:#4a8a7a}.act-intro4 .act-intro-name::after{background:#4a8a7a}
-.act-intro5 .act-intro-name{color:#9a3a6a}.act-intro5 .act-intro-name::after{background:#9a3a6a}
+.act-intro3 .act-intro-name{color:#ba3a6a}.act-intro3 .act-intro-name::after{background:#ba3a6a}
+.act-intro4 .act-intro-name{color:#4ababa}.act-intro4 .act-intro-name::after{background:#4ababa}
+.act-intro5 .act-intro-name{color:#da3a7a}.act-intro5 .act-intro-name::after{background:#da3a7a}
 .act-intro-line{width:40px;height:1px;background:rgba(255,255,255,.08);margin:14px 0;animation:actFadeIn 1.3s ease-out}
 .act-intro-text{font-size:.55rem;color:#7a7a9a;max-width:300px;text-align:center;line-height:1.8;animation:actFadeIn 1.5s ease-out;letter-spacing:.03em}
 .act-intro-hint{font-size:.4rem;color:#3a3a4a;letter-spacing:.15em;text-transform:uppercase;margin-top:20px;animation:actFadeIn 2s ease-out;cursor:pointer}
@@ -748,7 +745,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.17.0';
+var VOID_VERSION='2.17.1';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -1649,12 +1646,11 @@ function renderProfile(d){
   var daysStr='';
   if(d.created){var diff=Math.floor((Date.now()-new Date(d.created).getTime())/86400000);daysStr=diff===0?'первый день':diff+' '+pluralDays(diff)+' в пустоте'}
   var achCount=(progress.achievements||[]).length;
-  var achTotal=10;
+  var achTotal=ACHIEVEMENTS.length;
   var achHtml='';
-  var achIcons=['👣','🧗','🧵','💨','✨','⚡','🗺','👑','💎','🌑'];
   for(var i=0;i<achTotal;i++){
-    var unlocked=(progress.achievements||[]).indexOf(['first_step','wall_crawler','thread_master','dash_king','no_death','speedrun','five_levels','void_master','perfectionist','dark_escape'][i])>=0;
-    achHtml+='<div class="prof-ach'+(unlocked?' unlocked':'')+'">'+achIcons[i]+'</div>';
+    var unlocked=(progress.achievements||[]).indexOf(ACHIEVEMENTS[i].id)>=0;
+    achHtml+='<div class="prof-ach'+(unlocked?' unlocked':'')+'">'+ACHIEVEMENTS[i].icon+'</div>';
   }
   var notifEnabled=d.notifications_enabled!==false;
   c.innerHTML=
@@ -3141,7 +3137,7 @@ function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorCeilin
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,-1)}}
 function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
-function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel()}}if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}if((a.label==='pendulumZone'&&b.label==='player')||(b.label==='pendulumZone'&&a.label==='player')){killPlayer('pendulum')}if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
+function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}else if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}else if((a.label==='pendulumZone'&&b.label==='player')||(b.label==='pendulumZone'&&a.label==='player')){killPlayer('pendulum')}else if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
   // Checkpoint activation
   if((a.label==='checkpointZone'&&b.label==='player')||(b.label==='checkpointZone'&&a.label==='player')){
     var cpBody=(a.label==='checkpointZone')?a:b;
@@ -4202,7 +4198,7 @@ function loadLevel(n){
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;espr._base=eg;espr._ew=lvl.exit.w;espr._eh=lvl.exit.h;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -4637,7 +4633,7 @@ var ACT_THEMES=[
    skyTopEnd:0x0a040e,skyMidEnd:0x180a22,skyBotEnd:0x281032,horizonGlowEnd:0x8a2a6a,
    auroraColor:0x3a0a2a,auroraAlpha:0.04,nebulaColor:0x1a0614,nebulaAlpha:0.02}
 ];
-function getCurrentAct(){return Math.floor(state.level/5)}
+function getCurrentAct(){return Math.min(Math.floor(state.level/5),ACT_THEMES.length-1)}
 // Get interpolated theme for current level within act (progression 0..1 across 5 levels)
 function getLevelTheme(){
   var act=getCurrentAct();
@@ -4676,7 +4672,7 @@ function transitionToLevel(lvlIdx,callback){
 }
 var bgAuroraSprite=null;
 var bgNebulaSprite=null;
-function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();bgLayers=[];bgStars=[];bgDistantLights=[];bgFogSprites=[];bgAuroraSprite=null;bgNebulaSprite=null;
+function createBackground(){if(!bgContainer)return;var bgc=bgContainer.children.slice();for(var i=0;i<bgc.length;i++){if(bgc[i].destroy)bgc[i].destroy()}bgContainer.removeChildren();bgLayers=[];bgStars=[];bgDistantLights=[];bgFogSprites=[];bgAuroraSprite=null;bgNebulaSprite=null;
 var act=getCurrentAct();
 var theme=getLevelTheme();
 // Update PIXI background color to match act theme
@@ -5160,6 +5156,8 @@ function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.lef
 
 // ═══ SCREEN MANAGEMENT ═══
 function showScreen(name){
+  // Reset input when leaving gameplay to prevent stuck keys
+  if(state.screen==='playing'||state.screen==='story'||state.screen==='paused'){keys={};touchState={left:false,right:false,jump:false,climbUp:false,climbDown:false}}
   state.screen=name;
   // Hide ALL overlay screens first to prevent any mixing
   var overlays=['level-select','settings-screen','faq-screen','records-screen','challenge-screen','leaderboard-screen','profile-screen','story-screen','pause-screen','death-screen','win-screen'];
@@ -5186,8 +5184,8 @@ function showScreen(name){
   if(name==='records')showRecords();
   if(name==='profile')loadProfile();
 }
-function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
-function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name;var flEl=document.getElementById('hud-flashlight');if(flEl)flEl.style.display=(LEVELS[state.level].flashlight)?'block':'none'}
+function showStoryScreen(n){if(n<0||n>=LEVELS.length)return;var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
+function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';if(state.level<0||state.level>=LEVELS.length)return;document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name;var flEl=document.getElementById('hud-flashlight');if(flEl)flEl.style.display=(LEVELS[state.level].flashlight)?'block':'none'}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником',darkness:'тьма настигла тебя'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'с начала уровня';var cpBtn=document.getElementById('btn-checkpoint');if(cpBtn)cpBtn.style.display=state.lastCheckpoint?'block':'none';showScreen('dead')}
 function winLevel(){player.alive=false;var lvl=LEVELS[state.level];spawnParticles(player.body.position.x,player.body.position.y,20,0x6a5aaa,{speed:2.5,life:1,size:3.5,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,12,0x8a7aca,{speed:3.5,life:1.2,size:2.5,gravity:0.1});spawnParticles(player.body.position.x,player.body.position.y,6,0xaaaaff,{speed:1.5,life:0.8,size:1.5,gravity:0});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;var elapsedSec=elapsed/1000;
   // Challenge: check completion and speed conditions
@@ -5199,8 +5197,9 @@ function winLevel(){player.alive=false;var lvl=LEVELS[state.level];spawnParticle
     if(mid==='max3'&&state.deaths>=3)chComplete=false;
     endChallenge(chComplete);
   }
-  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsedSec<20)unlockAchievement('speedrun');if(levelDarkness.length>0)unlockAchievement('dark_escape');if(lvl&&lvl.flashlight)unlockAchievement('light_bearer');if(levelGravityZones.length>0)unlockAchievement('gravity_master');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
+  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsedSec<20)unlockAchievement('speedrun');if(levelDarkness.length>0)unlockAchievement('dark_escape');if(lvl&&lvl.flashlight)unlockAchievement('light_bearer');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
 function showWinScreen(elapsed){
+  if(state.level<0||state.level>=LEVELS.length){showScreen('menu');return}
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
   var bestTime=getLevelBestTime(state.level);
@@ -5670,7 +5669,7 @@ function gameLoop(timestamp){
 }
 
 // ═══ UI BINDINGS ═══
-function updateSoundButton(){var btn=document.getElementById('hud-sound');if(btn)btn.textContent=soundMuted?'✕':'♪';btn.style.color=soundMuted?'rgba(255,100,100,.3)':'rgba(255,255,255,.3)'}
+function updateSoundButton(){var btn=document.getElementById('hud-sound');if(btn){btn.textContent=soundMuted?'✕':'♪';btn.style.color=soundMuted?'rgba(255,100,100,.3)':'rgba(255,255,255,.3)'}}
 
 function bindUI(){
   document.getElementById('btn-play').addEventListener('click',function(){document.getElementById('main-menu').classList.add('hidden');challengeMode=false;syncProgressUnlocked();state.level=Math.min(progress.unlocked-1,LEVELS.length-1);state.deaths=0;transitionToLevel(state.level,function(){initAudio();startMusic();initMatter();createBackground();loadLevel(state.level);showStoryScreen(state.level)})});
