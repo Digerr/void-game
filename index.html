@@ -604,8 +604,30 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
   }
 })();
 var VOID_VERSION='1.0.0-pre';
-(function checkVersion(){fetch(location.href,{cache:'no-store'}).then(function(r){return r.text()}).then(function(html){var m=html.match(/VOID_VERSION='([^']+)'/);if(m&&m[1]!==VOID_VERSION){console.log('[VOID] New version:',m[1],'— reloading');if('caches' in window)caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}).then(function(){location.reload(true)});else location.reload(true)}}).catch(function(){})})();
-document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(function(){fetch(location.href,{cache:'no-store'}).then(function(r){return r.text()}).then(function(html){var m=html.match(/VOID_VERSION='([^']+)'/);if(m&&m[1]!==VOID_VERSION){if('caches' in window)caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}).then(function(){location.reload(true)});else location.reload(true)}}).catch(function(){})},1000)});
+(function checkVersion(){
+  // Use root path with cache-busting query to bypass TG WebView cache
+  var checkUrl=location.origin+'/?_v='+Date.now();
+  fetch(checkUrl,{cache:'no-store'}).then(function(r){return r.text()}).then(function(html){
+    var m=html.match(/VOID_VERSION='([^']+)'/);
+    if(m&&m[1]!==VOID_VERSION){
+      console.log('[VOID] New version detected:',m[1],'(current:',VOID_VERSION,') — reloading');
+      if('caches' in window)caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}).then(function(){location.replace(location.origin+'/v'+m[1].replace(/\./g,''))});
+      else location.replace(location.origin+'/v'+m[1].replace(/\./g,''));
+    }
+  }).catch(function(){});
+})();
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden)setTimeout(function(){
+    var checkUrl=location.origin+'/?_v='+Date.now();
+    fetch(checkUrl,{cache:'no-store'}).then(function(r){return r.text()}).then(function(html){
+      var m=html.match(/VOID_VERSION='([^']+)'/);
+      if(m&&m[1]!==VOID_VERSION){
+        console.log('[VOID] New version on resume:',m[1]);
+        location.replace(location.origin+'/v'+m[1].replace(/\./g,''));
+      }
+    }).catch(function(){});
+  },1500);
+});
 </script>
 <script>
 'use strict';
