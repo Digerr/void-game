@@ -269,17 +269,17 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .rec-row-time{font-size:.42rem;color:#5a7a6a;font-variant-numeric:tabular-nums;min-width:32px;text-align:right}
 .rec-row-time.na{color:#2a2a3a}
 /* Awakening cutscene */
-#awakening{position:absolute;inset:0;display:none;background:#020208;z-index:150;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;padding-top:5%}
-#awakening.active{display:flex}
+#awakening{position:absolute;inset:0;display:none;background:#020208;z-index:150;cursor:pointer;overflow:hidden}
+#awakening.active{display:block}
 .aw-dark{position:absolute;inset:0;background:#020208;opacity:1;transition:opacity 2s ease-out;pointer-events:none}
 .aw-dark.fade{opacity:0}
-.aw-creature{position:relative;z-index:2;opacity:0;transform:scale(0.5);transition:all 2s cubic-bezier(.2,0,.2,1)}
-.aw-creature.visible{opacity:1;transform:scale(1)}
-.aw-creature.awake{transform:scale(1.05)}
-.aw-glow{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(90,90,170,.15) 0%,transparent 70%);top:42%;left:50%;transform:translate(-50%,-50%);opacity:0;transition:opacity 2.5s ease-out;z-index:1}
+.aw-glow{position:absolute;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(90,90,170,.15) 0%,transparent 70%);top:28%;left:50%;transform:translate(-50%,-50%);opacity:0;transition:opacity 2.5s ease-out;z-index:1}
 .aw-glow.visible{opacity:1}
-.aw-text{position:relative;z-index:2;font-size:.75rem;color:#5a5a7a;letter-spacing:.1em;text-align:center;opacity:0;transform:translateY(12px);transition:all 1.5s ease-out;line-height:2;max-width:300px;margin-top:28px}
-.aw-text.visible{opacity:1;transform:translateY(0)}
+.aw-creature{position:absolute;top:28%;left:50%;transform:translate(-50%,-50%) scale(0.5);z-index:2;opacity:0;transition:all 2s cubic-bezier(.2,0,.2,1)}
+.aw-creature.visible{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.aw-creature.awake{transform:translate(-50%,-50%) scale(1.05)}
+.aw-text{position:absolute;top:52%;left:50%;transform:translateX(-50%);z-index:2;font-size:.75rem;color:#5a5a7a;letter-spacing:.1em;text-align:center;opacity:0;transition:opacity 1.5s ease-out;line-height:2;max-width:300px;white-space:nowrap}
+.aw-text.visible{opacity:1}
 .aw-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;font-size:.4rem;color:#2a2a3a;letter-spacing:.15em;text-transform:uppercase;z-index:2;opacity:0;transition:opacity 1s ease-out}
 .aw-hint.visible{opacity:1;animation:pulse 2s infinite}
 /* Challenge screen */
@@ -472,7 +472,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     <div class="aw-creature" id="aw-creature">
       <canvas id="aw-creature-canvas" width="100" height="80" style="width:100px;height:80px"></canvas>
     </div>
-    <div class="aw-text" id="aw-text">ты очнулся во тьме<br>не помнишь кто ты<br>но нужно двигаться</div>
+    <div class="aw-text" id="aw-text">пустота<br>ты не помнишь кто ты<br>но шарф ещё тёплый</div>
     <div class="aw-hint" id="aw-hint">нажми чтобы продолжить</div>
   </div>
   <div id="main-menu">
