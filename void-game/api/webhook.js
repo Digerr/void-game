@@ -109,7 +109,26 @@ export default async function handler(req, res) {
   // Handle my_chat_member updates (bot added/removed from chats)
   if (update.my_chat_member) {
     const chat = update.my_chat_member.chat;
-    console.log('[VOID] my_chat_member:', chat.id, chat.title, chat.type);
+    const newStatus = update.my_chat_member.new_chat_member?.status;
+    const oldStatus = update.my_chat_member.old_chat_member?.status;
+    console.log('[VOID] my_chat_member:', chat.id, chat.title, chat.type, oldStatus, '→', newStatus);
+
+    // Bot was added to a group/channel — send welcome with ИГРАТЬ button
+    const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8858889318:AAGramLmQGRhpJAyRWcJC8lPwkyrbDBiHcw';
+    if (newStatus === 'administrator' || newStatus === 'member') {
+      if (chat.type === 'group' || chat.type === 'supergroup' || chat.type === 'channel') {
+        await sendMsg(BOT_TOKEN, chat.id,
+          '🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя.\n30 уровней · 6 актов · магнитный шарф · паркур\n\nНажми кнопку ниже чтобы начать →',
+          {
+            reply_markup: {
+              inline_keyboard: [[
+                { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+              ]]
+            }
+          }
+        );
+      }
+    }
     return res.status(200).json({ ok: true });
   }
 
@@ -130,21 +149,40 @@ export default async function handler(req, res) {
     '🐛 Баг': '/bug',
     '❓ Помощь': '/help'
   };
-  const text = BTN_MAP[rawText] || rawText;
+
+  // Strip @botname suffix from commands in groups (e.g. /start@voide_game_bot → /start)
+  const strippedText = rawText.replace(/@(voide_game_bot)\b/gi, '');
+  const text = BTN_MAP[strippedText] || strippedText;
 
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8858889318:AAGramLmQGRhpJAyRWcJC8lPwkyrbDBiHcw';
+
+  const isGroupChat = msg.chat?.type === 'group' || msg.chat?.type === 'supergroup' || msg.chat?.type === 'channel';
 
   // ── /start and /play ──
   if (text === '/start' || text === '/play' || text.startsWith('/start ') || text.startsWith('/play ')) {
     // Register bot commands on first /start
     await setBotCommands(BOT_TOKEN);
 
-    await sendMsg(BOT_TOKEN, chatId,
-      `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 30 уровней, 6 актов, магнитный шарф, паркур.\n\nv${VERSION}\n\nНажми ▶ ИГРАТЬ чтобы начать →`,
-      {
-        reply_markup: REPLY_KEYBOARD
-      }
-    );
+    // In groups: use inline keyboard (Reply Keyboard doesn't work in groups)
+    if (isGroupChat) {
+      await sendMsg(BOT_TOKEN, chatId,
+        `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 30 уровней, 6 актов, магнитный шарф, паркур.\n\nНажми ▶ ИГРАТЬ чтобы начать →`,
+        {
+          reply_markup: {
+            inline_keyboard: [[
+              { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+            ]]
+          }
+        }
+      );
+    } else {
+      await sendMsg(BOT_TOKEN, chatId,
+        `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 30 уровней, 6 актов, магнитный шарф, паркур.\n\nv${VERSION}\n\nНажми ▶ ИГРАТЬ чтобы начать →`,
+        {
+          reply_markup: REPLY_KEYBOARD
+        }
+      );
+    }
     return res.status(200).json({ ok: true });
   }
 
