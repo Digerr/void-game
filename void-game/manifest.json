@@ -2,6 +2,7 @@
   "name": "VOID — во тьму",
   "short_name": "VOID",
   "description": "VOID — платформер во тьме. 30 уровней, 6 актов. Бета-версия. Telegram Mini App.",
+  "version": "0.11.1",
   "start_url": "/void-game/",
   "scope": "/void-game/",
   "display": "standalone",

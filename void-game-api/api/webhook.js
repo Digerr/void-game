@@ -1,4 +1,4 @@
-const GAME_URL = 'https://void-game-ruddy.vercel.app/v2.5.0';
+const GAME_URL = 'https://void-game-ruddy.vercel.app/v0.11.1-beta';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   if (text === '/start' || text === '/play' || text.startsWith('/start ') || text.startsWith('/play ')) {
     const reply = {
       chat_id: chatId,
-      text: '🌑 *VOID — Исследуй Пустоту*\n\nМрачный платформер во тьме. 20 уровней, нить-верёвка, лидерборд.\n\nНажми кнопку ниже чтобы начать →',
+      text: '🌑 *VOID — Исследуй Пустоту*\n\nМрачный платформер во тьме. 30 уровней, 6 актов, нить-верёвка, испытания.\n\nНажми кнопку ниже чтобы начать →',
       parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: [[

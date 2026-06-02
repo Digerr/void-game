@@ -5941,7 +5941,7 @@ var logoAnim={
       {x:startX+slotW*3,y:topY-H*0.006,w:slotW*0.72,h:letterH*1.02,label:'D'},
     ];
     // Set menu-top height so mid section starts below sub-text
-    var subTextSpace=42; // "во тьму" + "alpha 2.4" + margins
+    var subTextSpace=42; // "во тьму" + "beta 0.11.1" + margins
     var topHeight=topY+letterH+subTextSpace;
     var menuTop=document.getElementById('menu-top');
     if(menuTop)menuTop.style.height=topHeight+'px';
@@ -6231,7 +6231,7 @@ var logoAnim={
       }
       ctx.restore();
     }
-    // Sub-text below VOID letters: "во тьму" and "alpha 2.4"
+    // Sub-text below VOID letters: "во тьму" and "beta 0.11.1"
     if(this.platforms.length>=4){
       var bottomY=Math.max(this.platforms[0].y+this.platforms[0].h,this.platforms[1].y+this.platforms[1].h,this.platforms[2].y+this.platforms[2].h,this.platforms[3].y+this.platforms[3].h);
       ctx.textAlign='center';ctx.textBaseline='top';
