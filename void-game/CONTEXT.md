@@ -1,9 +1,9 @@
-# VOID — v0.14.0-beta — Полный контекст проекта
+# VOID — v0.15.0-beta — Полный контекст проекта
 
 **Дата аудита:** 2026-06-03  
-**Версия:** 0.14.0-beta  
+**Версия:** 0.15.0-beta  
 **Статус:** Beta  
-**Последнее обновление:** 2026-06-03 — фикс прилипания + звук
+**Последнее обновление:** 2026-06-03 — фикс платформ, кешей, версий
 
 ---
 
@@ -11,7 +11,7 @@
 
 - **Название:** VOID — во тьму
 - **Тип:** Платформер, HTML5 Canvas, Telegram Mini App
-- **Архитектура:** Однофайловая HTML5 игра (index.html ~7590 строк)
+- **Архитектура:** Однофайловая HTML5 игра (index.html ~8100 строк)
 - **Рендерер:** PixiJS v8.9.2
 - **Физика:** Matter.js v0.20.0
 - **База данных:** Supabase (PostgreSQL)
@@ -36,17 +36,19 @@
   - /leaderboard — Топ-10 мирового рейтинга + позиция игрока если вне топ-10
   - /weekly — Топ-10 недельного рейтинга + таймер до сброса + награды
   - /news — История обновлений игры
-- **Parse mode:** HTML (для надёжного форматирования)
+  - /bug — Сообщить о баге (пересылка в канал поддержки)
 
 ### Supabase
 - **URL:** https://jibtmyuxbeckanmkhuik.supabase.co
 - **Anon Key:** eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnRteXV4YmVja2FubWtodWlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjA0MTAsImV4cCI6MjA5NTg5NjQxMH0.x1oT9Lym80rZNj9dJA39nA-pBSWzKhAOJGHZisOoFok
 - **Service Key:** eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnRteXV4YmVja2FubWtodWlrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDMyMDQxMCwiZXhwIjoyMDk1ODk2NDEwfQ.BS61LXJPTKvE4KsZmKu0e7pPkR8VnMBXxRIJqUMX8VM
+- **Таблицы:** leaderboard, weekly_scores, level_records, players (4 таблицы)
+- **bug_reports:** НЕ существует (не используется в текущем коде)
 
 ### Vercel
 - **Production URL:** https://void-game-ruddy.vercel.app/
 - **API endpoint:** https://void-game-ruddy.vercel.app/api/leaderboard
-- **Webhook:** https://void-game-ruddy.vercel.app/api/webhook (ранее void-game-api.vercel.app)
+- **Webhook:** https://void-game-ruddy.vercel.app/api/webhook
 - **Деплой:** git push origin main → автодеплой Vercel
 - **НЕ ИСПОЛЬЗОВАТЬ:** `vercel --prod`
 
@@ -61,18 +63,20 @@
 
 ```
 void-game/
-├── index.html          # Основной и единственный файл игры (~7590 строк)
-├── manifest.json       # PWA манифест (v0.14.0)
+├── index.html          # Основной и единственный файл игры (~8100 строк)
+├── manifest.json       # PWA манифест (v0.15.0-beta)
 ├── package.json        # Node зависимости (supabase-js ^2.0.0)
 ├── vercel.json         # Реврайты + no-cache заголовки
 ├── .gitignore          # node_modules/
+├── CONTEXT.md          # Этот файл
 ├── api/
 │   ├── leaderboard.js  # Supabase API (submit, profile, register, level_records, etc.)
-│   └── webhook.js      # Telegram bot webhook (/start, /play, /help, /stats, /leaderboard, /weekly, /news)
+│   └── webhook.js      # Telegram bot webhook (v0.15.0-beta)
 ├── releases/           # Бэкапы предыдущих версий
 │   ├── CONTEXT-alpha-2.2.md
 │   ├── CONTEXT-beta-0.9.6.md
 │   ├── CONTEXT-beta-0.10.0.md
+│   ├── manifest-alpha-2.2.json
 │   ├── index-alpha-2.2-release.html
 │   ├── index-alpha-2.3-release.html
 │   ├── index-beta-0.9.6-release.html
@@ -89,7 +93,7 @@ void-game/
 |---------|-----|----------|
 | id | TEXT (PK) | tg_{user_id} |
 | name | TEXT | Имя игрока |
-| score | INTEGER | Очки по формуле |
+| score | BIGINT | Очки по формуле |
 | completed | SMALLINT | Пройдено уровней |
 | total_stars | SMALLINT | Всего звёзд |
 | total_time | REAL | Общее время (сек) |
@@ -161,14 +165,15 @@ void-game/
   - `/leaderboard`, `/top` — топ-10 мирового рейтинга + позиция игрока вне топ-10
   - `/weekly` — топ-10 недельного рейтинга + таймер сброса + награды
   - `/news` — история обновлений игры
-  - Неизвестная команда — список доступных
+  - `/bug` — инструкция по сообщению о багах
+  - Свободный текст в приватном чате → пересылка в канал поддержки
 
 ---
 
 ## 6. Система сохранений
 
 ### Трёхслойная система:
-1. **localStorage** (`void_progress`) — мгновенное, локальное
+1. **localStorage** (`void_progress_{tg_user_id}`) — мгновенное, локальное, изолировано по пользователю
 2. **Telegram CloudStorage** (`void_data`) — облачное, привязано к TG аккаунту
 3. **Supabase** — лидерборд, рекорды, профиль
 
@@ -186,16 +191,18 @@ void-game/
     threadsUsed, playTime,
     perfectLevels
   },
-  totalDeaths: Number,        // Смерти (в progress с v0.14.0)
+  totalDeaths: Number,        // Смерти
   achievements: [],           // Ачивки
   challenges: {},             // Испытания
-  firstLaunch: Boolean
+  firstLaunch: Boolean,
+  _tgUserId: String,          // ID пользователя для защиты от смешивания
+  _v29_migrated: Boolean      // Флаг миграции
 }
 ```
 
 ### Cloud save (v2 формат):
 ```js
-{ v:2, unlocked, levels, skin, shards, stats, achievements, challenges, firstLaunch, totalDeaths }
+{ v:2, _tgUserId, unlocked, levels, skin, shards, stats, achievements, challenges, firstLaunch, totalDeaths }
 ```
 
 ### Ключевые механизмы:
@@ -204,7 +211,9 @@ void-game/
 - **updateSyncIndicator()** — ☁ ✓ / ☁ ✗ в меню
 - **manualCloudSave()** — принудительное сохранение (кнопка ☁ в профиле)
 - **loadFromCloud() + mergeCloudData()** — слияние: лучший результат побеждает
-- **Account isolation** — проверка `void_tg_user` в localStorage, при смене аккаунта — сброс
+- **Account isolation** — _tgUserId в progress + cloud data, проверка при загрузке
+- **User change detection** — проверка каждые 3 сек в gameLoop, авто-перезагрузка при смене аккаунта
+- **localStorage keys** — `void_progress_{tg_id}`, `void_settings_{tg_id}`, `void_device_id_{tg_id}`
 
 ---
 
@@ -242,11 +251,12 @@ score = completed × 5000
 ## 8. Профиль игрока
 
 Показывает:
-- Аватарка (48px) + ник (0.75rem) + ☁ индикатор (0.8rem)
+- Аватарка + ник + ☁ индикатор
 - Ранг в лидерборде + лучший ранг
 - Дней в пустоте
 - Статистика: уровни, звёзды, осколки, идеальные, ачивки, смерти, время, score, weekly rank
 - Сетка достижений
+- Кнопки: рекорды, лидерборд
 - Уведомления (вкл/выкл)
 - Принудительное сохранение в облако (☁ → ✓/✗)
 
@@ -256,10 +266,16 @@ score = completed × 5000
 
 ### Движение:
 - Бег (влево/вправо)
-- Прыжок + coyote jump
+- Прыжок + coyote jump + jump buffer
 - Wall slide + wall jump
 - Dash (рывок, перезарядка ~0.6 сек)
 - Нить (раскачивание на якоре, маятник)
+
+### Сенсорная система (v0.15.0):
+- **Set-based tracking** — вместо инкремент/декремент счётчика, используется Set с ID тел
+- **Ground grace period** — 60мс после потери контакта с землёй, onGround остаётся true
+- **Ground sensor** — 6px высотой, смещён на 1px ниже игрока
+- **Boundary exclusion** — невидимые стены уровня не определяются как твёрдые поверхности
 
 ### Ловушки и объекты:
 - Шипы (мгновенная смерть)
@@ -300,7 +316,6 @@ score = completed × 5000
 
 ## 10. Физика нити (thread)
 
-Настроена в v0.13.0-beta после фикса:
 - Swing force: 0.035
 - Constraint stiffness: 0.85
 - Damping: 0.05
@@ -331,9 +346,9 @@ score = completed × 5000
 | tg_7913080778 | INAGENT YAMAL | 2026-06-01 |
 | tg_5047132087 | Артём | 2026-06-02 |
 
-**В leaderboard:** 1 запись (SKUFI4, score: 20262, 2 уровня)
-**В weekly_scores:** 0 записей
-**В level_records:** 0 записей
+**В leaderboard:** 1 запись (SKUFI4, score: 44269, 7 уровней)
+**В weekly_scores:** 1 запись (SKUFI4)
+**В level_records:** 7 записей (SKUFI4, уровни 0-6)
 
 ---
 
@@ -347,106 +362,55 @@ score = completed × 5000
    - Stage 3: Чекпоинты и осколки (ручная расстановка)
    - Stage 4: Вертикальные стены для wall jump
    - Stage 5: Проверка проходимости всех уровней
+4. **players.chat_id** —暴露ан анонимным читателям (privacy concern)
+5. **initData validation** — сервер не проверяет HMAC подпись Telegram initData
 
 ---
 
-## 14. История фиксов (2026-06-03, поздняя сессия)
-
-### Фикс прилипания к платформам
-- **Проблема:** Платформы с белым оттенком — персонаж прилипал и не мог прыгать
-- **Причина:** Все платформы `friction: 0.8`, игрок `frictionStatic: 0.3`. Эффективное трение = 0.24 — Matter.js «замораживал» игрока на поверхности
-- **Решение:**
-  - Игрок: `friction: 0.05 → 0.001`, `frictionStatic: 0.3 → 0.001`
-  - Все платформы (обычные, движущиеся, падающие, исчезающие, timed spike, пружины): `friction: 0.8 → 0.05`
-  - Трение не нужно — движение управляется `MBody.setVelocity` напрямую
-
-### Фикс звука — помехи и перегруз
-- **Проблема:** Звук с помехами, клиппинг, перегруз
-- **Причина:** Множественные осцилляторы + ревербератор + делей с обратной связью складывались без компрессора
-- **Решение:**
-  - Добавлен `DynamicsCompressor` (threshold -18dB, ratio 8:1, attack 3ms, release 150ms)
-  - masterGain: `1.0 → 0.85`
-  - SFX/Music gain множитель: `×0.7` на всех точках установки
-  - Reverb gain: `0.3 → 0.18`
-  - Delay feedback: `0.3 → 0.2`, delay mix: `0.2 → 0.12`
-  - Pad bus: `0.7 → 0.45`, Melody bus: `0.55 → 0.4`
-  - Sub drone: `0.06 → 0.04`, Wind: `0.02 → 0.012`
-  - Melody note vol: `0.04+0.03 → 0.03+0.02`
-  - Pad chord vol: `0.035 → 0.025`
-  - Death SFX громкости снижены на ~25%
-
----
-
-## 15. История изменений сессии (2026-06-03, ранняя сессия)
-
-### Бот команды (реализовано)
-- /start, /play — запуск игры + кнопка ▶ ИГРАТЬ
-- /help — управление + список всех команд
-- /stats — личная статистика из Supabase
-- /leaderboard, /top — топ-10 мирового + позиция игрока
-- /weekly — топ-10 недельного + таймер + награды
-- /news — история обновлений
-- Неизвестная команда → список доступных
-- Parse mode: HTML (переключено с MarkdownV2 для надёжности)
-- Webhook: перенесён с void-game-api.vercel.app → void-game-ruddy.vercel.app
-
-### Логотип (реализовано)
-- Отцентрирован: каждый символ V/O/I/D имеет свою ширину (22%/24%/12%/22%)
-- Зазор I-D сокращён до 75% от нормального
-- Центрирование через startX = (W - totalW) / 2
-
-### Анимация логотипа — паркур (заменила верёвку)
-- **Прямой путь (V→O→I→D):** idle V → prep_jump → jump V→O → land O → idle → jump O→I → land I → idle → jump I→D → land D
-- **Скольжение и подъём:** slide_down D → idle_bottom → climb_up D → idle
-- **Обратный путь (D→I→O→V):** jump D→I → land I → wall_slide I → idle_bottom → jump I→O → land O → idle → **dash O→V** → land V
-- **Победа:** wave на V
-- Новые типы шагов: climb_up, wall_slide, dash, idle_bottom, slide_down
-- Веревка убрана из кода отрисовки
-- Анимации замедлены на ~25-35% для плавности
-- Squash recovery: 5→3.5 для мягких приземлений
-
-### Персонаж логотипа (котик)
-- Тело: ellipse 6.5×8.5, rgba(85,85,125,0.9)
-- Голова: arc r=8.5, rgba(90,90,135,0.95)
-- Ушки: треугольники с внутренней частью rgba(130,100,160,0.45)
-- Шарф: двухслойный, rgba(120,80,160,0.8) + rgba(100,65,140,0.5)
-- Глаза: с бликами, эмоции (neutral, happy, surprised, focused, curious)
-- Рот: улыбка/удивление/любопытство/нейтральный
-- Аура: rgba(120,140,210) пульсирующая
-- Позы: idle, jumping, climbing (чередование рук), dash (горизонтальный), wall-slide, wave
-
-### Катсцены — персонаж + фиксы (реализовано)
-- **drawSilhouette переписана** — теперь рисует того же котика что на логотипе:
-  - Сигнатура: `drawSilhouette(ctx, sx, sy, sc, alpha, legPhase, armPhase, emotion, facing)`
-  - Вместо пропорциональных размеров (w*0.36) — фиксированные размеры как у logo-кота (6.5×8.5, r=8.5)
-  - Цвета: body rgba(85,85,125), head rgba(90,90,135), scarf rgba(120,80,160)
-- **Исправлено двоение:**
-  - Условие пропуска `>` → `>=` (frame-perfect переход между шагами)
-  - Катсцена 2 (Fading): зазор 0.1с между stand (duration:1.9) и dissolve (startAt:2.1)
-- **Позиции персонажей:** сдвинуты выше (y: 0.42-0.56 вместо 0.5-0.66)
-- **Текст не перекрывается:**
-  - Катсцены: текст на bottom:15%, z-index:5, усиленный text-shadow
-  - Awakening: абсолютная раскладка — персонаж top:28%, текст top:52%
-
-### Awakening (интро) сцена (реализовано)
-- Персонаж полностью перерисован в стиле логотип-кота (закрытые + открытые глаза)
-- Canvas: 100×80 (было 100×90)
-- Убрана зависимость от getCurrentSkin() — единый стиль
-- Раскладка: `display:block` с абсолютным позиционированием
-  - Персонаж: top:28%, left:50%, transform:translate(-50%,-50%)
-  - Glow: top:28%, left:50%, увеличен до 140px
-  - Текст: top:52%, left:50%, transform:translateX(-50%)
-- **Текст обновлён под лор:**
-  - Было: «ты очнулся во тьме / не помнишь кто ты / но нужно двигаться»
-  - Стало: **«пустота / ты не помнишь кто ты / но шарф ещё тёплый»**
-  — отсылка к ключевому элементу лора (шарф — единственное тёплое в Пустоте)
-
----
-
-## 16. Правила разработки
+## 14. Правила разработки
 
 - **НЕ переписывать с нуля** — только фиксить на месте
 - **Деплой:** git push origin main → Vercel автодеплой
 - **НЕ ИСПОЛЬЗОВАТЬ** `vercel --prod`
 - **Единственный файл игры:** index.html
-- **Версия:** обновлять VOID_VERSION + manifest.json + комментарии
+- **Версия:** обновлять VOID_VERSION + manifest.json + webhook.js + CONTEXT.md
+
+---
+
+## 15. История фиксов (2026-06-03)
+
+### Фикс прилипания к платформам (v0.14.0)
+- Все платформы friction: 0.8→0.05, frictionStatic: 0.001
+- Игрок friction: 0.05→0.001, frictionStatic: 0.3→0.001
+
+### Фикс звука (v0.14.0)
+- DynamicsCompressor (threshold -18dB, ratio 8:1)
+- Все gain уровни снижены на 20-35%
+
+### Фикс платформ — прыжок не работает (v0.15.0)
+- Set-based сенсоры вместо counter-based (устойчивость к рассинхрону)
+- Ground grace period 60мс
+- Ground sensor увеличен до 6px, смещён на 1px ниже
+- frictionStatic:0.001 для всех типов платформ
+
+### Фикс эксплойта — невидимая стенка (v0.15.0)
+- 'boundary' добавлен в список исключений сенсоров
+- Невозможно wall-jump от граничных стен уровня
+
+### Фикс кешей разных аккаунтов (v0.15.0)
+- _tgUserId в progress и cloud data
+- Верификация при загрузке localStorage и CloudStorage
+- Периодическая проверка каждые 3 сек в gameLoop
+- Сброс state.totalDeaths при смене пользователя
+
+### Фикс rankEl ReferenceError (v0.15.0)
+- Добавлена var rankEl в loadLB()
+
+### Фикс state.totalDeaths (v0.15.0)
+- Синхронизация state.totalDeaths = progress.totalDeaths при загрузке
+- Сброс при сбросе прогресса
+- Сброс при смене пользователя
+
+### Синхронизация версий (v0.15.0)
+- webhook.js: 0.14.0-beta → 0.15.0-beta
+- manifest.json: 0.15.0 → 0.15.0-beta

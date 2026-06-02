@@ -1510,6 +1510,7 @@ function loadProgress(){
       // Stamp with current user ID
       if(currentTgId)progress._tgUserId=currentTgId;
       if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};if(progress.totalDeaths===undefined)progress.totalDeaths=0;
+      state.totalDeaths=progress.totalDeaths||0;
       // Migration: convert bestTime from ms to seconds (pre-v2.9)
       if(!progress._v29_migrated){var migrated=false;for(var k in progress.levels){if(progress.levels.hasOwnProperty(k)){var lv=progress.levels[k];if(lv.bestTime&&lv.bestTime>100){lv.bestTime=lv.bestTime/1000;migrated=true}}}if(migrated){saveProgress();console.log('[VOID] Migrated bestTime ms→sec')}progress._v29_migrated=true;saveProgress()}
       syncProgressUnlocked();
@@ -1828,6 +1829,7 @@ function showLeaderboard(tab){
 function loadLB(){
   if(!sbClient){renderLBOffline();return}
   var listEl=document.getElementById('lb-list');
+  var rankEl=document.getElementById('lb-my-rank');
   if(listEl)listEl.innerHTML='<div class="lb-loading">загрузка...</div>';
   // Show/hide weekly header & timer
   var wHeader=document.getElementById('lb-weekly-header');
@@ -7104,6 +7106,7 @@ function gameLoop(timestamp){
     if(curId&&progress._tgUserId&&curId!==progress._tgUserId){
       console.warn('[VOID] User changed! Reloading progress. Old:',progress._tgUserId,'New:',curId);
       progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false,_tgUserId:curId};
+      state.totalDeaths=0;
       loadProgress();loadFromCloud();updateMenuStats();
       if(state.screen==='playing'){clearLevel();stopMusic();showScreen('menu')}
     }
@@ -7250,7 +7253,7 @@ function bindUI(){
   // Volume sliders
   document.getElementById('sfx-vol-slider').addEventListener('input',function(){settings.sfxVolume=this.value/100;if(sfxGain&&!soundMuted)sfxGain.gain.value=settings.sfxVolume*0.7;document.getElementById('sfx-vol-label').textContent=this.value+'%';saveSettings()});
   document.getElementById('music-vol-slider').addEventListener('input',function(){settings.musicVolume=this.value/100;if(musicGain&&!musicMuted)musicGain.gain.value=settings.musicVolume*0.7;document.getElementById('music-vol-label').textContent=this.value+'%';saveSettings()});
-  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem(_progressKey());if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false};saveProgress();updateMenuStats();showScreen('menu')}});
+  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem(_progressKey());if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}var resetId=getCurrentTgUserId();progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false,_tgUserId:resetId};state.totalDeaths=0;saveProgress();updateMenuStats();showScreen('menu')}});
   // Global menu click sound for all .btn and .menu-icon-btn elements
   var allBtns=document.querySelectorAll('.btn,.menu-icon-btn,.menu-challenge,.tb');
   for(var bi=0;bi<allBtns.length;bi++){(function(btn){btn.addEventListener('click',function(){sfxMenuClick()})})(allBtns[bi])}
