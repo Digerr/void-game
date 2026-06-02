@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const GAME_URL = 'https://void-game-ruddy.vercel.app/';
 const CHANNEL_ID = '@void_game_official';
+const SUPPORT_CHANNEL_ID = process.env.SUPPORT_CHANNEL_ID || '@void_game_official'; // Will be updated with private support channel
 const VERSION = '0.14.0-beta';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jibtmyuxbeckanmkhuik.supabase.co';
@@ -366,7 +367,7 @@ export default async function handler(req, res) {
       `👤 ${userName}\n` +
       `💬 ${esc(text)}`;
 
-    await sendMsg(BOT_TOKEN, CHANNEL_ID, reportText);
+    await sendMsg(BOT_TOKEN, SUPPORT_CHANNEL_ID, reportText);
 
     await sendMsg(BOT_TOKEN, chatId,
       '✅ Спасибо! Передал разработчику. Если нужно дополнить — просто напиши ещё.',
