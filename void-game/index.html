@@ -417,6 +417,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="hud-sound" id="hud-sound" style="position:absolute;top:10px;right:52px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;transition:all .15s">♪</div>
     <div class="hud-interact" id="hud-interact">✋</div>
     <div id="hud-darkness-warn" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:1.4rem;color:#3a1a4a;animation:darkPulse 0.8s infinite;display:none;pointer-events:none;z-index:25;text-shadow:0 0 12px rgba(60,20,80,.6)">▶</div>
+    <div id="hud-flashlight" style="position:absolute;bottom:100px;right:12px;font-size:.5rem;color:#5a5a3a;letter-spacing:.1em;text-transform:uppercase;display:none;pointer-events:none;z-index:25">🔦 фонарик</div>
     <div class="tutorial-tip" id="tutorial-tip" style="display:none"></div>
   </div>
   <div id="touch-controls">
@@ -1006,7 +1007,8 @@ var ACHIEVEMENTS=[
   {id:'halfway',name:'полпути',desc:'пройди 10 уровней',icon:'🌗'},
   {id:'void_master',name:'властелин пустоты',desc:'пройди все уровни',icon:'👑'},
   {id:'perfectionist',name:'перфекционист',desc:'получи ★★★ на любом уровне',icon:'💎'},
-  {id:'dark_escape',name:'бегство',desc:'убеги от настигающей тьмы',icon:'🌑'}
+  {id:'dark_escape',name:'бегство',desc:'убеги от настигающей тьмы',icon:'🌑'},
+  {id:'light_bearer',name:'носитель света',desc:'пройди уровень с фонариком',icon:'🔦'}
 ];
 var achievementQueue=[];
 var achievementShowing=false;
@@ -1867,7 +1869,8 @@ var LEVELS=[
     anchors:[{x:400,y:200},{x:1000,y:500},{x:1600,y:600},{x:2300,y:700}],
     checkpoints:[{x:500,y:830},{x:1500,y:930},{x:2800,y:1030}],
     wind:[{x:800,y:650,w:150,h:200,forceX:-2,forceY:0},{x:2000,y:900,w:200,h:150,forceX:0,forceY:-4}],
-    darkness:[{startX:-200,speed:0.8,height:1400}]
+    darkness:[{startX:-200,speed:0.8,height:1400}],
+    flashlight:true
   },
   {
     name:'Эхо',story:'Шаги повторяются. Тени множатся. Каждое эхо — враг, каждое отражение — ловушка. Во тьме нет ничего страшнее собственных следов.',
@@ -1998,6 +2001,7 @@ var LEVELS=[
     ],
     checkpoints:[{x:2000,y:580},{x:4050,y:430},{x:4850,y:380}],
     wind:[{x:1500,y:300,w:200,h:300,forceX:0,forceY:-3},{x:3500,y:400,w:150,h:200,forceX:2,forceY:0}],
+    flashlight:true
   },
   {
     name:'Тень нити',story:'Нить ведёт через самое сердце тьмы — где враги патрулируют, пилы вращаются, и одно неверное движение на нити означает конец. Держись крепче. И тише.',
@@ -2038,7 +2042,8 @@ var LEVELS=[
     ],
     checkpoints:[{x:1700,y:500},{x:3400,y:460},{x:4600,y:380}],
     ice:[{x:750,y:596,w:80,h:16},{x:2800,y:476,w:80,h:16},{x:4300,y:416,w:80,h:16}],
-    darkness:[{startX:-100,speed:1.0,height:1000}]
+    darkness:[{startX:-100,speed:1.0,height:1000}],
+    flashlight:true
   },
   {
     name:'Вихрь',story:'Всё кружится. Платформы движутся, пилы вращаются, враги патрулируют. В центре вихря — нить, ведущая сквозь хаос. Доверяйся ей, но проверяй.',
@@ -3364,6 +3369,7 @@ var tutorial={
     {id:'ice',level:9,trigger:'time',delay:2,text:'лёд скользкий — трудно остановиться. Планируй заранее'},
     {id:'wind',level:11,trigger:'time',delay:2,text:'ветер толкает — используй его или борись'},
     {id:'darkness',level:15,trigger:'time',delay:2,text:'тьма наступает! Не останавливайся — беги!'},
+    {id:'flashlight',level:15,trigger:'time',delay:0.5,text:'видимость ограничена — свети фонариком в направлении движения'},
   ],
   timer:0,activeTip:null
 };
@@ -3552,80 +3558,180 @@ function updateLightAndFog(dt){
   var px=player.body?(player.body.position.x-camera.x):sw/2;
   var py=player.body?(player.body.position.y-camera.y):sh/2;
 
+  // Check if current level has flashlight mode
+  var lvl=LEVELS[state.level];
+  var isFlashlight=lvl&&lvl.flashlight;
+
   // ═══ GLOBAL LIGHTING — all in one smooth canvas pass ═══
   lightCtx.clearRect(0,0,sw,sh);
 
-  // Step 1: Fill everything with a very subtle darkness (ambient) — just enough for atmosphere
-  lightCtx.globalCompositeOperation='source-over';
-  lightCtx.fillStyle='rgba(2,2,8,0.03)';
-  lightCtx.fillRect(0,0,sw,sh);
+  if(isFlashlight){
+    // ═══ FLASHLIGHT MODE: narrow cone of light ═══
+    // Step 1: Fill with heavy darkness
+    lightCtx.globalCompositeOperation='source-over';
+    lightCtx.fillStyle='rgba(2,2,8,0.85)';
+    lightCtx.fillRect(0,0,sw,sh);
 
-  // Step 2: Cut smooth radial hole around player (destination-out erases darkness)
-  lightCtx.globalCompositeOperation='destination-out';
-  var lightR=800+Math.sin(lightTime*1.2)*30;
-  var mainGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR);
-  mainGrad.addColorStop(0,'rgba(255,255,255,1)');
-  mainGrad.addColorStop(0.25,'rgba(255,255,255,0.98)');
-  mainGrad.addColorStop(0.45,'rgba(255,255,255,0.92)');
-  mainGrad.addColorStop(0.6,'rgba(255,255,255,0.7)');
-  mainGrad.addColorStop(0.75,'rgba(255,255,255,0.35)');
-  mainGrad.addColorStop(0.88,'rgba(255,255,255,0.1)');
-  mainGrad.addColorStop(1,'rgba(255,255,255,0)');
-  lightCtx.fillStyle=mainGrad;
-  lightCtx.beginPath();lightCtx.arc(px,py,lightR,0,Math.PI*2);lightCtx.fill();
+    // Step 2: Cut a narrow flashlight cone in facing direction
+    lightCtx.globalCompositeOperation='destination-out';
+    var flDir=player.facing||1; // 1=right, -1=left
+    var flAngle=flDir>0?0:Math.PI; // base angle
+    var flSpread=0.5; // cone half-angle in radians (~28 degrees each side)
+    var flLen=280+Math.sin(lightTime*3)*10; // flickering length
+    // Draw cone shape
+    lightCtx.save();
+    lightCtx.translate(px,py);
+    lightCtx.rotate(flAngle);
+    // Cone gradient
+    var coneGrad=lightCtx.createRadialGradient(0,0,10,0,0,flLen);
+    coneGrad.addColorStop(0,'rgba(255,255,255,1)');
+    coneGrad.addColorStop(0.15,'rgba(255,255,255,0.95)');
+    coneGrad.addColorStop(0.4,'rgba(255,255,255,0.75)');
+    coneGrad.addColorStop(0.65,'rgba(255,255,255,0.4)');
+    coneGrad.addColorStop(0.85,'rgba(255,255,255,0.12)');
+    coneGrad.addColorStop(1,'rgba(255,255,255,0)');
+    lightCtx.fillStyle=coneGrad;
+    lightCtx.beginPath();
+    lightCtx.moveTo(0,0);
+    lightCtx.arc(0,0,flLen,-flSpread,flSpread);
+    lightCtx.closePath();
+    lightCtx.fill();
+    // Small ambient glow around player (so you can see yourself)
+    var ambGrad=lightCtx.createRadialGradient(0,0,0,0,0,50);
+    ambGrad.addColorStop(0,'rgba(255,255,255,0.7)');
+    ambGrad.addColorStop(0.5,'rgba(255,255,255,0.3)');
+    ambGrad.addColorStop(1,'rgba(255,255,255,0)');
+    lightCtx.fillStyle=ambGrad;
+    lightCtx.beginPath();
+    lightCtx.arc(0,0,50,0,Math.PI*2);
+    lightCtx.fill();
+    lightCtx.restore();
 
-  // Step 3: Cut smaller holes for exit and thread (soft light sources)
-  var lvl=LEVELS[state.level];
-  // Exit glow
-  if(lvl&&lvl.exit){
-    var ex=lvl.exit.x+lvl.exit.w/2-camera.x,ey=lvl.exit.y+lvl.exit.h/2-camera.y;
-    var exitR=160+Math.sin(lightTime*2.5)*25;
-    var exitGrad=lightCtx.createRadialGradient(ex,ey,0,ex,ey,exitR);
-    exitGrad.addColorStop(0,'rgba(200,200,255,0.85)');
-    exitGrad.addColorStop(0.2,'rgba(160,160,240,0.6)');
-    exitGrad.addColorStop(0.4,'rgba(120,120,210,0.3)');
-    exitGrad.addColorStop(0.7,'rgba(80,80,170,0.12)');
-    exitGrad.addColorStop(1,'rgba(40,40,120,0)');
-    lightCtx.fillStyle=exitGrad;
-    lightCtx.beginPath();lightCtx.arc(ex,ey,exitR,0,Math.PI*2);lightCtx.fill();
+    // Step 3: Exit glow (dimmer in flashlight mode)
+    if(lvl&&lvl.exit){
+      var ex=lvl.exit.x+lvl.exit.w/2-camera.x,ey=lvl.exit.y+lvl.exit.h/2-camera.y;
+      var exitR=80+Math.sin(lightTime*2.5)*15;
+      var exitGrad=lightCtx.createRadialGradient(ex,ey,0,ex,ey,exitR);
+      exitGrad.addColorStop(0,'rgba(200,200,255,0.6)');
+      exitGrad.addColorStop(0.3,'rgba(160,160,240,0.3)');
+      exitGrad.addColorStop(0.6,'rgba(120,120,210,0.1)');
+      exitGrad.addColorStop(1,'rgba(80,80,170,0)');
+      lightCtx.fillStyle=exitGrad;
+      lightCtx.beginPath();lightCtx.arc(ex,ey,exitR,0,Math.PI*2);lightCtx.fill();
+    }
+    // Thread anchor glow (dimmer)
+    if(thread.active){
+      var ax=thread.anchorX-camera.x,ay=thread.anchorY-camera.y;
+      var anchorGrad=lightCtx.createRadialGradient(ax,ay,0,ax,ay,60);
+      anchorGrad.addColorStop(0,'rgba(255,255,255,0.4)');
+      anchorGrad.addColorStop(0.5,'rgba(255,255,255,0.15)');
+      anchorGrad.addColorStop(1,'rgba(255,255,255,0)');
+      lightCtx.fillStyle=anchorGrad;
+      lightCtx.beginPath();lightCtx.arc(ax,ay,60,0,Math.PI*2);lightCtx.fill();
+    }
+    // Checkpoint glows (dim beacons)
+    for(var ci=0;ci<levelCheckpoints.length;ci++){
+      var cp=levelCheckpoints[ci];
+      if(cp.activated){
+        var cpx=cp.x-camera.x,cpy=cp.y-camera.y;
+        var cpGrad=lightCtx.createRadialGradient(cpx,cpy,0,cpx,cpy,50);
+        cpGrad.addColorStop(0,'rgba(100,180,255,0.3)');
+        cpGrad.addColorStop(0.5,'rgba(100,180,255,0.1)');
+        cpGrad.addColorStop(1,'rgba(100,180,255,0)');
+        lightCtx.fillStyle=cpGrad;
+        lightCtx.beginPath();lightCtx.arc(cpx,cpy,50,0,Math.PI*2);lightCtx.fill();
+      }
+    }
+
+    // Step 4: Warm tint on light areas
+    lightCtx.globalCompositeOperation='source-atop';
+    var tintGrad2=lightCtx.createRadialGradient(px,py,0,px,py,flLen*0.6);
+    tintGrad2.addColorStop(0,'rgba(30,40,65,0.3)');
+    tintGrad2.addColorStop(0.5,'rgba(15,20,40,0.1)');
+    tintGrad2.addColorStop(1,'rgba(0,0,0,0)');
+    lightCtx.fillStyle=tintGrad2;
+    lightCtx.fillRect(0,0,sw,sh);
+
+    // Step 5: Deep darkness behind everything
+    lightCtx.globalCompositeOperation='destination-over';
+    lightCtx.fillStyle='rgba(4,4,10,0.5)';
+    lightCtx.fillRect(0,0,sw,sh);
+
+    lightCtx.globalCompositeOperation='source-over';
+  }else{
+    // ═══ NORMAL MODE: wide radial light ═══
+    // Step 1: Fill everything with a very subtle darkness (ambient) — just enough for atmosphere
+    lightCtx.globalCompositeOperation='source-over';
+    lightCtx.fillStyle='rgba(2,2,8,0.03)';
+    lightCtx.fillRect(0,0,sw,sh);
+
+    // Step 2: Cut smooth radial hole around player (destination-out erases darkness)
+    lightCtx.globalCompositeOperation='destination-out';
+    var lightR=800+Math.sin(lightTime*1.2)*30;
+    var mainGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR);
+    mainGrad.addColorStop(0,'rgba(255,255,255,1)');
+    mainGrad.addColorStop(0.25,'rgba(255,255,255,0.98)');
+    mainGrad.addColorStop(0.45,'rgba(255,255,255,0.92)');
+    mainGrad.addColorStop(0.6,'rgba(255,255,255,0.7)');
+    mainGrad.addColorStop(0.75,'rgba(255,255,255,0.35)');
+    mainGrad.addColorStop(0.88,'rgba(255,255,255,0.1)');
+    mainGrad.addColorStop(1,'rgba(255,255,255,0)');
+    lightCtx.fillStyle=mainGrad;
+    lightCtx.beginPath();lightCtx.arc(px,py,lightR,0,Math.PI*2);lightCtx.fill();
+
+    // Step 3: Cut smaller holes for exit and thread (soft light sources)
+    // Exit glow
+    if(lvl&&lvl.exit){
+      var ex=lvl.exit.x+lvl.exit.w/2-camera.x,ey=lvl.exit.y+lvl.exit.h/2-camera.y;
+      var exitR=160+Math.sin(lightTime*2.5)*25;
+      var exitGrad=lightCtx.createRadialGradient(ex,ey,0,ex,ey,exitR);
+      exitGrad.addColorStop(0,'rgba(200,200,255,0.85)');
+      exitGrad.addColorStop(0.2,'rgba(160,160,240,0.6)');
+      exitGrad.addColorStop(0.4,'rgba(120,120,210,0.3)');
+      exitGrad.addColorStop(0.7,'rgba(80,80,170,0.12)');
+      exitGrad.addColorStop(1,'rgba(40,40,120,0)');
+      lightCtx.fillStyle=exitGrad;
+      lightCtx.beginPath();lightCtx.arc(ex,ey,exitR,0,Math.PI*2);lightCtx.fill();
+    }
+    // Thread anchor glow
+    if(thread.active){
+      var ax=thread.anchorX-camera.x,ay=thread.anchorY-camera.y;
+      var anchorGrad=lightCtx.createRadialGradient(ax,ay,0,ax,ay,90);
+      anchorGrad.addColorStop(0,'rgba(255,255,255,0.6)');
+      anchorGrad.addColorStop(0.4,'rgba(255,255,255,0.3)');
+      anchorGrad.addColorStop(0.7,'rgba(255,255,255,0.1)');
+      anchorGrad.addColorStop(1,'rgba(255,255,255,0)');
+      lightCtx.fillStyle=anchorGrad;
+      lightCtx.beginPath();lightCtx.arc(ax,ay,90,0,Math.PI*2);lightCtx.fill();
+    }
+
+    // Step 4: Tint remaining darkness with subtle warm color (source-atop)
+    lightCtx.globalCompositeOperation='source-atop';
+    var tintGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*0.8);
+    tintGrad.addColorStop(0,'rgba(20,30,55,0.25)');
+    tintGrad.addColorStop(0.5,'rgba(10,15,30,0.1)');
+    tintGrad.addColorStop(1,'rgba(0,0,0,0)');
+    lightCtx.fillStyle=tintGrad;
+    lightCtx.fillRect(0,0,sw,sh);
+
+    // Step 5: Add ambient glow BEHIND the dark overlay (destination-over = behind existing pixels)
+    // This creates a warm light pool that makes the scene visible even beyond the cut-out
+    lightCtx.globalCompositeOperation='destination-over';
+    // Wide ambient glow around player
+    var glowGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*1.2);
+    glowGrad.addColorStop(0,'rgba(18,24,48,0.4)');
+    glowGrad.addColorStop(0.3,'rgba(14,18,36,0.3)');
+    glowGrad.addColorStop(0.6,'rgba(10,14,28,0.15)');
+    glowGrad.addColorStop(1,'rgba(0,0,0,0)');
+    lightCtx.fillStyle=glowGrad;
+    lightCtx.beginPath();lightCtx.arc(px,py,lightR*1.2,0,Math.PI*2);lightCtx.fill();
+    // Global ambient light so the whole scene has a minimum visibility
+    lightCtx.fillStyle='rgba(12,14,26,0.35)';
+    lightCtx.fillRect(0,0,sw,sh);
+
+    lightCtx.globalCompositeOperation='source-over';
   }
-  // Thread anchor glow
-  if(thread.active){
-    var ax=thread.anchorX-camera.x,ay=thread.anchorY-camera.y;
-    var anchorGrad=lightCtx.createRadialGradient(ax,ay,0,ax,ay,90);
-    anchorGrad.addColorStop(0,'rgba(255,255,255,0.6)');
-    anchorGrad.addColorStop(0.4,'rgba(255,255,255,0.3)');
-    anchorGrad.addColorStop(0.7,'rgba(255,255,255,0.1)');
-    anchorGrad.addColorStop(1,'rgba(255,255,255,0)');
-    lightCtx.fillStyle=anchorGrad;
-    lightCtx.beginPath();lightCtx.arc(ax,ay,90,0,Math.PI*2);lightCtx.fill();
-  }
 
-  // Step 4: Tint remaining darkness with subtle warm color (source-atop)
-  lightCtx.globalCompositeOperation='source-atop';
-  var tintGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*0.8);
-  tintGrad.addColorStop(0,'rgba(20,30,55,0.25)');
-  tintGrad.addColorStop(0.5,'rgba(10,15,30,0.1)');
-  tintGrad.addColorStop(1,'rgba(0,0,0,0)');
-  lightCtx.fillStyle=tintGrad;
-  lightCtx.fillRect(0,0,sw,sh);
-
-  // Step 5: Add ambient glow BEHIND the dark overlay (destination-over = behind existing pixels)
-  // This creates a warm light pool that makes the scene visible even beyond the cut-out
-  lightCtx.globalCompositeOperation='destination-over';
-  // Wide ambient glow around player
-  var glowGrad=lightCtx.createRadialGradient(px,py,0,px,py,lightR*1.2);
-  glowGrad.addColorStop(0,'rgba(18,24,48,0.4)');
-  glowGrad.addColorStop(0.3,'rgba(14,18,36,0.3)');
-  glowGrad.addColorStop(0.6,'rgba(10,14,28,0.15)');
-  glowGrad.addColorStop(1,'rgba(0,0,0,0)');
-  lightCtx.fillStyle=glowGrad;
-  lightCtx.beginPath();lightCtx.arc(px,py,lightR*1.2,0,Math.PI*2);lightCtx.fill();
-  // Global ambient light so the whole scene has a minimum visibility
-  lightCtx.fillStyle='rgba(12,14,26,0.35)';
-  lightCtx.fillRect(0,0,sw,sh);
-
-  lightCtx.globalCompositeOperation='source-over';
   lightTexture.source.update();
 
   // ═══ FOG: subtle depth mist at bottom ═══
@@ -3912,7 +4018,7 @@ function showScreen(name){
   if(name==='profile')loadProfile();
 }
 function showStoryScreen(n){var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
-function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name}
+function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name;var flEl=document.getElementById('hud-flashlight');if(flEl)flEl.style.display=(LEVELS[state.level].flashlight)?'block':'none'}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником',darkness:'тьма настигла тебя'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'respawn с начала уровня';showScreen('dead')}
 function winLevel(){player.alive=false;spawnParticles(player.body.position.x,player.body.position.y,20,0x6a5aaa,{speed:2.5,life:1,size:3.5,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,12,0x8a7aca,{speed:3.5,life:1.2,size:2.5,gravity:0.1});spawnParticles(player.body.position.x,player.body.position.y,6,0xaaaaff,{speed:1.5,life:0.8,size:1.5,gravity:0});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;var elapsedSec=elapsed/1000;
   // Challenge: check completion and speed conditions
@@ -3924,7 +4030,7 @@ function winLevel(){player.alive=false;spawnParticles(player.body.position.x,pla
     if(mid==='max3'&&state.deaths>=3)chComplete=false;
     endChallenge(chComplete);
   }
-  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');if(levelDarkness.length>0)unlockAchievement('dark_escape');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
+  recordLevelComplete(state.level,state.deaths,elapsed);checkAchievements();if(state.deaths===0)unlockAchievement('no_death');if(elapsed<20000)unlockAchievement('speedrun');if(levelDarkness.length>0)unlockAchievement('dark_escape');if(lvl&&lvl.flashlight)unlockAchievement('light_bearer');submitLB();state.slowMo=0.25;state.slowMoTimer=1.0;state.shakeAmount=2;state.shakeTime=0.25;state.flashColor=0x2a2a5a;state.flashAlpha=0.1;state.flashTimer=0.3;setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showWinScreen(elapsed)},900)}
 function showWinScreen(elapsed){
   var lvl=LEVELS[state.level];
   var stars=calculateStars(state.deaths,elapsed/1000);
