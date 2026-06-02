@@ -604,6 +604,14 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
         <button class="btn" id="btn-haptic-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">вкл</button>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:.65rem;color:#8a8a9a;letter-spacing:.1em;text-transform:uppercase">fps</span>
+        <button class="btn" id="btn-fps-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">60</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:.65rem;color:#8a8a9a;letter-spacing:.1em;text-transform:uppercase">качество</span>
+        <button class="btn" id="btn-quality-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">среднее</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
         <span style="font-size:.65rem;color:#8a8a9a;letter-spacing:.1em;text-transform:uppercase">нить — автозахват</span>
         <button class="btn" id="btn-autograb-toggle" style="width:80px;padding:8px;font-size:.55rem;margin:0">вкл</button>
       </div>
@@ -785,7 +793,7 @@ function tgHaptic(t){if(!settings.hapticEnabled)return;if(!tg||!tg.HapticFeedbac
 var audioCtx=null,masterGain=null,musicGain=null,sfxGain=null,musicPlaying=false;
 var audioInited=false,soundMuted=false,musicMuted=false;
 // Settings
-var settings={hapticEnabled:true,autoGrab:true,sfxVolume:0.6,musicVolume:0.15};
+var settings={hapticEnabled:true,autoGrab:true,sfxVolume:0.6,musicVolume:0.15,targetFps:60,quality:'medium'};
 function loadSettings(){try{var s=localStorage.getItem('void_settings');if(s)settings=Object.assign(settings,JSON.parse(s))}catch(e){}}
 function saveSettings(){try{localStorage.setItem('void_settings',JSON.stringify(settings))}catch(e){}}
 function updateSettingsUI(){
@@ -797,6 +805,13 @@ function updateSettingsUI(){
   if(musicBtn)musicBtn.textContent=musicMuted?'выкл':'вкл';
   if(hapticBtn)hapticBtn.textContent=settings.hapticEnabled?'вкл':'выкл';
   if(autoBtn)autoBtn.textContent=settings.autoGrab?'вкл':'выкл';
+  // FPS toggle
+  var fpsBtn=document.getElementById('btn-fps-toggle');
+  if(fpsBtn)fpsBtn.textContent=settings.targetFps===120?'120':'60';
+  // Quality toggle
+  var qualBtn=document.getElementById('btn-quality-toggle');
+  var qualNames={low:'низкое',medium:'среднее',high:'высокое'};
+  if(qualBtn)qualBtn.textContent=qualNames[settings.quality]||'среднее';
   // Volume sliders
   var sfxSlider=document.getElementById('sfx-vol-slider');
   var sfxLabel=document.getElementById('sfx-vol-label');
@@ -806,7 +821,7 @@ function updateSettingsUI(){
   if(sfxLabel){sfxLabel.textContent=Math.round(settings.sfxVolume*100)+'%'}
   if(musicSlider){musicSlider.value=Math.round(settings.musicVolume*100)}
   if(musicLabel){musicLabel.textContent=Math.round(settings.musicVolume*100)+'%'}
-  var toggles=[sfxBtn,musicBtn,hapticBtn,autoBtn];
+  var toggles=[sfxBtn,musicBtn,hapticBtn,autoBtn,fpsBtn,qualBtn];
   for(var i=0;i<toggles.length;i++){
     if(!toggles[i])continue;
     var isOn=toggles[i].textContent==='вкл';
@@ -2883,6 +2898,8 @@ function initPixi(){
     ui.parentNode.insertBefore(pixiApp.canvas,ui);
     bgContainer=new PIXI.Container();gameContainer=new PIXI.Container();fxContainer=new PIXI.Container();
     pixiApp.stage.addChild(bgContainer);pixiApp.stage.addChild(gameContainer);pixiApp.stage.addChild(fxContainer);
+    // Apply FPS setting from saved settings
+    if(settings.targetFps)pixiApp.ticker.targetFPS=settings.targetFps;
     // Light overlay - canvas-based darkness with proper radial hole
     lightCanvas=document.createElement('canvas');
     lightCanvas.width=Math.max(1,Math.floor(pixiApp.screen.width));
@@ -2909,7 +2926,11 @@ function initMatter(){engine=MEngine.create({gravity:{x:0,y:1.5},positionIterati
 
 // ═══ PARTICLES ═══
 var particles=[];
-function spawnParticles(x,y,count,color,opts){opts=opts||{};for(var i=0;i<count;i++){var angle=opts.angle!==undefined?opts.angle+(Math.random()-0.5)*(opts.spread||1):Math.random()*Math.PI*2;var speed=(opts.speed||2)*(0.5+Math.random());var life=(opts.life||0.5)*(0.5+Math.random());var size=(opts.size||3)*(0.5+Math.random()*0.5);var spr=new PIXI.Graphics();spr.circle(0,0,size);spr.fill({color:color,alpha:0.8});fxContainer.addChild(spr);particles.push({x:x,y:y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life:life,maxLife:life,size:size,color:color,gravity:opts.gravity||0.5,sprite:spr})}}
+function spawnParticles(x,y,count,color,opts){opts=opts||{};
+  // Quality: reduce particle count on low/medium
+  var qMul=settings.quality==='low'?0.3:settings.quality==='medium'?0.65:1;
+  var realCount=Math.max(1,Math.round(count*qMul));
+  for(var i=0;i<realCount;i++){var angle=opts.angle!==undefined?opts.angle+(Math.random()-0.5)*(opts.spread||1):Math.random()*Math.PI*2;var speed=(opts.speed||2)*(0.5+Math.random());var life=(opts.life||0.5)*(0.5+Math.random());var size=(opts.size||3)*(0.5+Math.random()*0.5);var spr=new PIXI.Graphics();spr.circle(0,0,size);spr.fill({color:color,alpha:0.8});fxContainer.addChild(spr);particles.push({x:x,y:y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life:life,maxLife:life,size:size,color:color,gravity:opts.gravity||0.5,sprite:spr})}}
 function updateParticles(dt){for(var i=particles.length-1;i>=0;i--){var p=particles[i];p.life-=dt;if(p.life<=0){if(p.sprite)p.sprite.destroy();particles.splice(i,1);continue}p.vy+=p.gravity*dt*60;p.x+=p.vx*dt*60;p.y+=p.vy*dt*60;var alpha=Math.max(0,p.life/p.maxLife);if(p.sprite){p.sprite.x=p.x-camera.x;p.sprite.y=p.y-camera.y;p.sprite.alpha=alpha;p.sprite.scale.set(0.5+alpha*0.5)}}}
 function clearParticles(){for(var i=0;i<particles.length;i++){if(particles[i].sprite)particles[i].sprite.destroy()}particles=[]}
 
@@ -5432,6 +5453,19 @@ function bindUI(){
   document.getElementById('btn-music-toggle').addEventListener('click',function(){toggleMusic();saveSettings();updateSettingsUI()});
   document.getElementById('btn-haptic-toggle').addEventListener('click',function(){settings.hapticEnabled=!settings.hapticEnabled;saveSettings();updateSettingsUI()});
   document.getElementById('btn-autograb-toggle').addEventListener('click',function(){settings.autoGrab=!settings.autoGrab;saveSettings();updateSettingsUI()});
+  // FPS toggle (60/120)
+  document.getElementById('btn-fps-toggle').addEventListener('click',function(){
+    settings.targetFps=settings.targetFps===60?120:60;
+    if(pixiApp)pixiApp.ticker.targetFPS=settings.targetFps;
+    saveSettings();updateSettingsUI();
+  });
+  // Quality toggle (low/medium/high)
+  document.getElementById('btn-quality-toggle').addEventListener('click',function(){
+    var qOrder=['low','medium','high'];
+    var qi=qOrder.indexOf(settings.quality);
+    settings.quality=qOrder[(qi+1)%3];
+    saveSettings();updateSettingsUI();
+  });
   // Volume sliders
   document.getElementById('sfx-vol-slider').addEventListener('input',function(){settings.sfxVolume=this.value/100;if(sfxGain&&!soundMuted)sfxGain.gain.value=settings.sfxVolume;document.getElementById('sfx-vol-label').textContent=this.value+'%';saveSettings()});
   document.getElementById('music-vol-slider').addEventListener('input',function(){settings.musicVolume=this.value/100;if(musicGain&&!musicMuted)musicGain.gain.value=settings.musicVolume;document.getElementById('music-vol-label').textContent=this.value+'%';saveSettings()});
