@@ -4399,7 +4399,7 @@ function updateExitGlow(dt){
     }
   }
 }
-function updateCamera(){if(!player.body||!pixiApp)return;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var lvl=LEVELS[state.level];
+function updateCamera(dt){if(!player.body||!pixiApp)return;dt=dt||0.016;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var lvl=LEVELS[state.level];
 // Enhanced look-ahead: based on facing AND velocity for predictive framing
 var velPredictX=player.body.velocity.x*0.12;
 var lookAheadX=player.facing*sw*0.08+velPredictX;
@@ -5636,7 +5636,7 @@ function gameLoop(timestamp){
     var gDelta=(targetG-baseG)*player.body.mass*0.0012;
     Matter.Body.applyForce(player.body,player.body.position,{x:0,y:gDelta});
   }
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera();updateBackground();updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground();updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
@@ -5644,7 +5644,7 @@ function gameLoop(timestamp){
   // Update dash trails
   for(var ti=state.dashTrails.length-1;ti>=0;ti--){state.dashTrails[ti].life-=rawDt;state.dashTrails[ti].alpha-=rawDt*2;if(state.dashTrails[ti].life<=0)state.dashTrails.splice(ti,1)}
   var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);var ts=mins+':'+(secs%60<10?'0':'')+(secs%60);var ds='смерти: '+state.deaths;if(ts!==state._lastHudTime){document.getElementById('hud-timer').textContent=ts;state._lastHudTime=ts}if(ds!==state._lastHudDeaths){document.getElementById('hud-deaths').textContent=ds;state._lastHudDeaths=ds}}
-  if(state.screen==='story'){updateCamera();updateBackground()}
+  if(state.screen==='story'){updateCamera(rawDt);updateBackground()}
   if(state.screen!=='playing')updateParticles(rawDt);
   // Draw flash overlay (reuse persistent Graphics to avoid GC thrashing)
   if(state.flashAlpha>0.01&&pixiApp){
