@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 const GAME_URL = 'https://void-game-ruddy.vercel.app/';
+const CHANNEL_ID = '@void_game_official';
+const VERSION = '0.14.0-beta';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jibtmyuxbeckanmkhuik.supabase.co';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnRteXV4YmVja2FubWtodWlrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDMyMDQxMCwiZXhwIjoyMDk1ODk2NDEwfQ.BS61LXJPTKvE4KsZmKu0e7pPkR8VnMBXxRIJqUMX8VM';
@@ -80,7 +82,7 @@ export default async function handler(req, res) {
   // ── /start and /play ──
   if (text === '/start' || text === '/play' || text.startsWith('/start ') || text.startsWith('/play ')) {
     await sendMsg(BOT_TOKEN, chatId,
-      '🌑 <b>VOID — Исследуй Пустоту</b>\n\nМрачный платформер во тьме. 30 уровней, 6 актов, нить-верёвка, испытания.\n\nНажми кнопку ниже чтобы начать →',
+      `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 30 уровней, 6 актов, магнитный шарф, паркур.\n\nv${VERSION}\n\nНажми кнопку ниже чтобы начать →`,
       {
         reply_markup: {
           inline_keyboard: [[
@@ -100,13 +102,14 @@ export default async function handler(req, res) {
       '⬆ — прыжок\n' +
       '⚡ — рывок (dash)\n' +
       '✋ — взаимодействие\n' +
-      '↗ — нить (на уровнях с якорями)\n\n' +
+      '↗ — магнитный шарф\n\n' +
       '💡 Приседай на краю для coyote jump\n' +
       '💡 Упор в стену = медленное скольжение\n\n' +
       '📊 /stats — моя статистика\n' +
       '🏆 /leaderboard — мировой рейтинг\n' +
       '📅 /weekly — рейтинг недели\n' +
-      '📰 /news — обновления'
+      '📰 /news — обновления\n' +
+      '🐛 /bug — сообщить о баге'
     );
     return res.status(200).json({ ok: true });
   }
@@ -284,21 +287,33 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
+  // ── /bug — сообщить о баге ──
+  if (text === '/bug') {
+    await sendMsg(BOT_TOKEN, chatId,
+      '🐛 <b>Сообщить о проблеме</b>\n\n' +
+      'Напиши описание бага или проблемы прямо сюда — я передам разработчику.\n\n' +
+      'Что указать:\n' +
+      '• Что случилось\n' +
+      '• На каком уровне\n' +
+      '• Что ожидал vs что произошло\n\n' +
+      'Просто напиши текст — и я его отправлю!'
+    );
+    return res.status(200).json({ ok: true });
+  }
+
   // ── /news — обновления игры ──
   if (text === '/news') {
     const newsText =
-      '📰 <b>Обновления VOID</b>\n\n' +
-      '🔶 <b>v0.14.0-beta</b> — текущая\n' +
+      `📰 <b>Обновления VOID</b>\n\n` +
+      `🔶 <b>v${VERSION}</b> — текущая\n` +
+      '• Катсцены с персонажем-котиком\n' +
+      '• Сцена пробуждения «но шарф ещё тёплый»\n' +
       '• Лидерборд: глобальный, недельный, по уровням\n' +
-      '• 3 вкладки: мир, неделя, уровни\n' +
-      '• Недельный рейтинг с таймером сброса\n' +
-      '• Кнопка 🏆 рекордов на уровне\n' +
-      '• Защита очков после сброса прогресса\n' +
-      '• Синхронизация ника во все таблицы\n' +
-      '• Изоляция аккаунтов на одном устройстве\n' +
-      '• Принудительное облачное сохранение ☁\n\n' +
+      '• Магнитный шарф вместо нити-верёвки\n' +
+      '• Облачные сохранения ☁\n' +
+      '• Система достижений и испытаний\n\n' +
       '🔹 <b>v0.13.0-beta</b>\n' +
-      '• Фикс физики нити (маятник)\n' +
+      '• Фикс физики шарфа (маятник)\n' +
       '• Настройка параметров swing/constraint\n\n' +
       '🔸 <b>v0.12.0-beta</b>\n' +
       '• Облачные сохранения (TG CloudStorage)\n' +
@@ -308,7 +323,7 @@ export default async function handler(req, res) {
       '⬇️ <b>Более ранние версии</b>\n' +
       '• 30 уровней, 6 актов\n' +
       '• Скины, лор, катсцены\n' +
-      '• Фонарик, нить, dash, wall-jump';
+      '• Фонарик, шарф, dash, wall-jump';
 
     await sendMsg(BOT_TOKEN, chatId, newsText, {
       reply_markup: {
@@ -329,7 +344,32 @@ export default async function handler(req, res) {
       '/stats — моя статистика\n' +
       '/leaderboard — мировой рейтинг\n' +
       '/weekly — рейтинг недели\n' +
-      '/news — обновления'
+      '/news — обновления\n' +
+      '/bug — сообщить о баге'
+    );
+    return res.status(200).json({ ok: true });
+  }
+
+  // ── Free-text message → bug report / feedback ──
+  if (text && chatId === userId) {
+    // Only in private chat — forward to channel as bug report
+    const userName = msg.from?.username ? '@' + msg.from.username : esc(msg.from?.first_name || 'Аноним');
+    const reportText =
+      `🐛 <b>Баг-репорт</b>\n` +
+      `👤 ${userName}\n` +
+      `💬 ${esc(text)}`;
+
+    await sendMsg(BOT_TOKEN, CHANNEL_ID, reportText);
+
+    await sendMsg(BOT_TOKEN, chatId,
+      '✅ Спасибо! Передал разработчику. Если нужно дополнить — просто напиши ещё.',
+      {
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+          ]]
+        }
+      }
     );
     return res.status(200).json({ ok: true });
   }
