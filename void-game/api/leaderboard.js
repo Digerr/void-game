@@ -127,24 +127,12 @@ export default async function handler(req, res) {
       Math.round(totalTime * 0.5)
     );
 
-    // Upsert leaderboard entry
-    const { error: lbErr } = await sb.from('leaderboard').upsert({
-      id: playerId,
-      name: user.name,
-      score,
-      completed,
-      total_stars: totalStars,
-      total_time: totalTime || 0,
-      level_data: levelData,
-      total_shards: totalShards,
-      achievements_count: achievementsCount,
-      perfect_levels: perfectLevels,
-      challenge_wins: challengeWins,
-    }, { onConflict: 'id' });
+    // Only update leaderboard if new score is higher than existing (protect after reset)
+    const { data: existing } = await sb.from('leaderboard').select('score').eq('id', playerId).single();
+    const existingScore = existing ? existing.score : -1;
 
-    if (lbErr) {
-      // If new columns don't exist, try without them
-      const { error: lbErr2 } = await sb.from('leaderboard').upsert({
+    if (score > existingScore) {
+      const { error: lbErr } = await sb.from('leaderboard').upsert({
         id: playerId,
         name: user.name,
         score,
@@ -152,16 +140,34 @@ export default async function handler(req, res) {
         total_stars: totalStars,
         total_time: totalTime || 0,
         level_data: levelData,
+        total_shards: totalShards,
+        achievements_count: achievementsCount,
+        perfect_levels: perfectLevels,
+        challenge_wins: challengeWins,
       }, { onConflict: 'id' });
 
-      if (lbErr2) return res.status(200).json({ ok: false, error: lbErr2.message });
-    }
+      if (lbErr) {
+        // If new columns don't exist, try without them
+        const { error: lbErr2 } = await sb.from('leaderboard').upsert({
+          id: playerId,
+          name: user.name,
+          score,
+          completed,
+          total_stars: totalStars,
+          total_time: totalTime || 0,
+          level_data: levelData,
+        }, { onConflict: 'id' });
 
-    // Get rank
+        if (lbErr2) return res.status(200).json({ ok: false, error: lbErr2.message });
+      }
+    } // end if score > existingScore
+
+    // Get rank (based on best score, which may be the existing one)
+    const bestScore = score > existingScore ? score : existingScore;
     const { count } = await sb
       .from('leaderboard')
       .select('*', { count: 'exact', head: true })
-      .gt('score', score);
+      .gt('score', bestScore);
 
     const rank = (count || 0) + 1;
 
@@ -174,19 +180,24 @@ export default async function handler(req, res) {
       }
     }
 
-    // Upsert weekly score
+    // Upsert weekly score (only if better)
     const weekKey = getWeekKey();
     try {
-      await sb.from('weekly_scores').upsert({
-        id: playerId + '_' + weekKey,
-        name: user.name,
-        score,
-        completed,
-        total_stars: totalStars,
-        total_shards: totalShards,
-        achievements: achievementsCount,
-        week_key: weekKey,
-      }, { onConflict: 'id' });
+      const { data: existingWeekly } = await sb.from('weekly_scores')
+        .select('score').eq('id', playerId + '_' + weekKey).single();
+      const existingWeeklyScore = existingWeekly ? existingWeekly.score : -1;
+      if (score > existingWeeklyScore) {
+        await sb.from('weekly_scores').upsert({
+          id: playerId + '_' + weekKey,
+          name: user.name,
+          score,
+          completed,
+          total_stars: totalStars,
+          total_shards: totalShards,
+          achievements: achievementsCount,
+          week_key: weekKey,
+        }, { onConflict: 'id' });
+      }
     } catch (e) {}
 
     // Upsert level records
