@@ -68,6 +68,13 @@ export default async function handler(req, res) {
 
   const update = req.body;
 
+  // Handle my_chat_member updates (bot added/removed from chats)
+  if (update.my_chat_member) {
+    const chat = update.my_chat_member.chat;
+    console.log('[VOID] my_chat_member:', chat.id, chat.title, chat.type);
+    return res.status(200).json({ ok: true });
+  }
+
   if (!update || !update.message) {
     return res.status(200).json({ ok: true });
   }
