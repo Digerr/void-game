@@ -10,7 +10,7 @@ Work Log:
 - Added 4 new levels: Падение, Зеркало, Ядро, Исход (20 total, Act IV: Пустота)
 - Repositioned checkpoints in existing levels to be after hard sections
 - Fixed thread swing: reduced force 0.15→0.08, added angular velocity cap (2) and damping (0.92)
-- Added touch climb buttons ↑↓ (HTML + CSS + JS event listeners + touchState)
+- Added touch climb buttons (HTML + CSS + JS event listeners + touchState)
 - Updated updateThread() to show/hide climb buttons and handle touch+keyboard climb input
 - UI overhaul: glassmorphism buttons (backdrop-filter:blur, border-radius:8px), brighter colors
 - Brighter fonts: HUD, death/win screen, level select, menu stats, version text
@@ -25,3 +25,37 @@ Stage Summary:
 - Touch climb buttons appear when hanging on thread
 - UI looks modern (2026 not 2016)
 - Logo and character animation UNTOUCHED
+
+---
+Task ID: 2.7.0
+Agent: Main Agent
+Task: v2.7.0 — Gravity Zones mechanic (anti-gravity zones where player walks on ceiling)
+
+Work Log:
+- Added ceiling sensor (playerSensorCeiling) alongside ground sensor
+- Added player.gravityDir property (1=normal, -1=inverted)
+- Modified updatePlayer() to detect inverted gravity: ceiling becomes ground
+- Modified jump logic: jumpForce direction flips in inverted gravity
+- Modified variable jump height: condition flips for inverted gravity
+- Added gravity transition effects (particles, flash, haptic)
+- Player sprite flips vertically when in inverted gravity (scale.y * gravityDir)
+- Added fall death detection for inverted gravity (y < -100)
+- Created createGravityZone() function with Matter.js sensor body
+- Created updateGravityZones() — runs BEFORE updatePlayer to set gravityDir
+- Created updateGravityZonesVisuals() — applies force + draws visuals after physics
+- Gravity zone visuals: deep purple glow, border animation, floating upward chevrons, particles
+- HUD indicator when in gravity zone
+- Added gravity_master achievement
+- Added tutorial tip for gravity zones
+- Spring bounce now works in inverted gravity
+- Added gravity zones to 4 levels (5, 9, 18, 19)
+- Updated clearLevel, respawnPlayer, checkSensorCollision
+- Version bumped to 2.7.0
+- Deployed to Vercel successfully
+
+Stage Summary:
+- New mechanic: Gravity Zones with inverted gravity
+- Player can walk on ceiling, jump off ceiling, wall slide in gravity zones
+- Visual effects: purple glow zone, floating arrows, particles
+- Achievement + tutorial + HUD indicator complete
+- 4 levels now feature gravity zones
