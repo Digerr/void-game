@@ -411,9 +411,14 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 #cutscene-overlay{position:absolute;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;background:#000}
 #cutscene-overlay.active{display:flex}
 #cutscene-canvas{position:absolute;inset:0;width:100%;height:100%}
-#cutscene-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(138,154,202,.9);font-size:.65rem;letter-spacing:.15em;text-align:center;opacity:0;transition:opacity .8s;pointer-events:none;max-width:280px;line-height:1.6}
+#cutscene-letterbox-top,#cutscene-letterbox-bot{position:absolute;left:0;right:0;height:12%;background:#000;z-index:2;pointer-events:none}
+#cutscene-letterbox-top{top:0}
+#cutscene-letterbox-bot{bottom:0}
+#cutscene-text{position:absolute;bottom:13%;left:50%;transform:translateX(-50%);color:rgba(180,190,220,.95);font-size:.62rem;letter-spacing:.18em;text-align:center;opacity:0;transition:opacity 1s;pointer-events:none;max-width:300px;line-height:1.7;z-index:3}
 #cutscene-text.visible{opacity:1}
-#cutscene-skip{position:absolute;bottom:20px;right:20px;color:rgba(255,255,255,.15);font-size:.4rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+#cutscene-act-label{position:absolute;top:13%;left:50%;transform:translateX(-50%);color:rgba(120,130,160,.5);font-size:.38rem;letter-spacing:.25em;text-transform:uppercase;opacity:0;transition:opacity 1s;pointer-events:none;z-index:3}
+#cutscene-act-label.visible{opacity:1}
+#cutscene-skip{position:absolute;bottom:13%;right:16px;color:rgba(255,255,255,.12);font-size:.36rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;z-index:3}
 .achievement-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(10,10,25,.9);border:1px solid rgba(180,160,60,.3);border-radius:8px;padding:8px 16px;z-index:200;animation:achieveIn .4s ease-out;display:flex;align-items:center;gap:8px;backdrop-filter:blur(4px)}
 .achievement-toast .ach-icon{font-size:1rem}
 .achievement-toast .ach-text{font-size:.5rem;color:#caba6a;letter-spacing:.08em;text-transform:uppercase}
@@ -425,6 +430,9 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .lore-chapter-title{font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.12em;margin-bottom:6px}
 .lore-chapter-text{font-size:.58rem;color:#6a6a8a;line-height:1.7}
 .lore-hint{font-size:.48rem;color:#5a5a7a;line-height:1.5;margin-top:4px;letter-spacing:.05em}
+.lore-cutscene-btn{margin-top:10px;padding:6px 14px;font-size:.48rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(100,120,200,.08);border:1px solid rgba(100,120,200,.2);color:#7a8ab8;border-radius:6px;cursor:pointer;transition:all .25s;font-family:inherit}
+.lore-cutscene-btn:hover{background:rgba(100,120,200,.15);border-color:rgba(100,120,200,.35);color:#9aaada}
+.lore-cutscene-btn:active{transform:scale(.95);transition:all .08s}
 .lore-section-title{font-size:.7rem;color:#7a8ab8;font-weight:700;letter-spacing:.1em;margin-bottom:6px}
 .lore-section-text{font-size:.58rem;color:#6a6a8a;line-height:1.7}
 #lore-content::-webkit-scrollbar{width:3px}
@@ -450,8 +458,11 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
   </div>
   <div id="cutscene-overlay">
     <canvas id="cutscene-canvas"></canvas>
+    <div id="cutscene-letterbox-top"></div>
+    <div id="cutscene-letterbox-bot"></div>
+    <div id="cutscene-act-label"></div>
     <div id="cutscene-text"></div>
-    <div id="cutscene-skip">нажми чтобы пропустить</div>
+    <div id="cutscene-skip">пропустить</div>
   </div>
   <div id="awakening">
     <canvas id="aw-canvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:0"></canvas>
@@ -5308,52 +5319,64 @@ function setupTouchButton(id,action){var el=document.getElementById(id);if(!el)r
 function readInput(){var ix=0;if(keys['ArrowLeft']||keys['KeyA']||touchState.left)ix-=1;if(keys['ArrowRight']||keys['KeyD']||touchState.right)ix+=1;player.inputX=ix;player.inputJump=keys['Space']||keys['ArrowUp']||keys['KeyW']||touchState.jump}
 
 // ═══ CUTSCENE SYSTEM ═══
+var CUTSCENE_LABELS=['акт ii — глубины','акт iii — нити','акт iv — пустота','акт v — возрождение','акт vi — исход'];
 var CUTSCENES=[
   { // 0: Act 1→2: The Descent
-    text:'И земля ушла из-под ног',
+    label:0,
     steps:[
-      {type:'silhouette',x:0.3,y:0.6,w:16,h:24,color:'rgba(138,154,202,0.8)',action:'run',duration:2},
-      {type:'ground',y:0.75,color:'rgba(42,58,88,0.6)',action:'crack',duration:2,startAt:1.5},
-      {type:'silhouette',x:0.5,y:0.6,w:16,h:24,color:'rgba(138,154,202,0.8)',action:'fall',duration:3,startAt:2},
-      {type:'text',content:'И земля ушла из-под ног',startAt:3,duration:3}
+      {type:'fade',from:1,to:0,duration:1.5},
+      {type:'ambient',count:20,color:'rgba(60,80,140,0.15)',duration:9},
+      {type:'ground',y:0.72,color:'rgba(42,58,88,0.5)',duration:9},
+      {type:'silhouette',x:0.2,y:0.66,w:18,h:28,color:'rgba(138,154,202,0.9)',action:'run',duration:2.5},
+      {type:'ground',y:0.72,color:'rgba(42,58,88,0.5)',action:'crack',duration:3,startAt:2},
+      {type:'silhouette',x:0.5,y:0.66,w:18,h:28,color:'rgba(138,154,202,0.9)',action:'fall',duration:3.5,startAt:3},
+      {type:'text',content:'И земля ушла из-под ног',startAt:4.5,duration:3}
     ]
   },
   { // 1: Act 2→3: The Thread
-    text:'Из темноты протянулась нить',
+    label:1,
     steps:[
-      {type:'silhouette',x:0.5,y:0.5,w:16,h:24,color:'rgba(138,154,202,0.5)',action:'hang',duration:2},
-      {type:'line',x1:0.5,y1:0.1,x2:0.5,y2:0.45,color:'rgba(100,120,200,0.6)',action:'extend',duration:1.5,startAt:1},
-      {type:'silhouette',x:0.5,y:0.5,w:16,h:24,color:'rgba(138,154,202,0.8)',action:'reach',duration:2,startAt:2.5},
-      {type:'text',content:'Из темноты протянулась нить',startAt:3,duration:3}
+      {type:'fade',from:1,to:0,duration:1.5},
+      {type:'ambient',count:15,color:'rgba(80,60,140,0.12)',duration:9},
+      {type:'silhouette',x:0.5,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.4)',action:'hang',duration:2.5},
+      {type:'line',x1:0.5,y1:0.08,x2:0.5,y2:0.45,color:'rgba(120,140,220,0.7)',action:'extend',duration:2,startAt:1.5},
+      {type:'silhouette',x:0.5,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.9)',action:'reach',duration:2.5,startAt:3},
+      {type:'text',content:'Из темноты протянулась нить',startAt:4.5,duration:3}
     ]
   },
   { // 2: Act 3→4: Fading
-    text:'Ты почти исчез. Но что-то держит.',
+    label:2,
     steps:[
-      {type:'silhouette',x:0.5,y:0.5,w:16,h:24,color:'rgba(138,154,202,0.8)',action:'stand',duration:1.5},
-      {type:'silhouette',x:0.5,y:0.5,w:16,h:24,color:'rgba(138,154,202,0.5)',action:'dissolve',duration:3,startAt:1.5},
-      {type:'glow',x:0.5,y:0.55,r:4,color:'rgba(200,140,100,0.6)',action:'grow',duration:2,startAt:3},
-      {type:'text',content:'Ты почти исчез. Но что-то держит.',startAt:3.5,duration:3}
+      {type:'fade',from:1,to:0,duration:1.5},
+      {type:'ambient',count:10,color:'rgba(50,30,60,0.1)',duration:9},
+      {type:'silhouette',x:0.5,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.9)',action:'stand',duration:2},
+      {type:'silhouette',x:0.5,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.7)',action:'dissolve',duration:3.5,startAt:2},
+      {type:'glow',x:0.5,y:0.55,r:5,color:'rgba(200,140,100,0.8)',action:'grow',duration:2.5,startAt:4},
+      {type:'text',content:'Ты почти исчез. Но что-то держит.',startAt:5,duration:3}
     ]
   },
   { // 3: Act 4→5: Return
-    text:'Воспоминание отказывается быть забытым',
+    label:3,
     steps:[
-      {type:'particles',x:0.5,y:0.5,color:'rgba(138,154,202,0.4)',action:'drift',duration:2},
-      {type:'particles',x:0.5,y:0.5,color:'rgba(138,154,202,0.6)',action:'converge',duration:2,startAt:2},
-      {type:'silhouette',x:0.5,y:0.5,w:16,h:24,color:'rgba(138,154,202,0.9)',action:'rise',duration:2,startAt:3.5},
-      {type:'glow',x:0.5,y:0.48,r:3,color:'rgba(200,180,100,0.7)',action:'grow',duration:1.5,startAt:4},
-      {type:'text',content:'Воспоминание отказывается быть забытым',startAt:4,duration:3}
+      {type:'fade',from:1,to:0,duration:1.5},
+      {type:'ambient',count:30,color:'rgba(40,80,80,0.12)',duration:9},
+      {type:'particles',x:0.5,y:0.5,color:'rgba(138,154,202,0.35)',action:'drift',duration:2.5},
+      {type:'particles',x:0.5,y:0.5,color:'rgba(138,154,202,0.6)',action:'converge',duration:2.5,startAt:2},
+      {type:'silhouette',x:0.5,y:0.55,w:18,h:28,color:'rgba(138,154,202,0.95)',action:'rise',duration:2,startAt:4},
+      {type:'glow',x:0.5,y:0.46,r:4,color:'rgba(200,180,100,0.8)',action:'grow',duration:2,startAt:4.5},
+      {type:'text',content:'Воспоминание отказывается быть забытым',startAt:5,duration:3}
     ]
   },
   { // 4: Act 5→6: The Choice
-    text:'Он выбрал вернуться',
+    label:4,
     steps:[
-      {type:'silhouette',x:0.5,y:0.5,w:16,h:24,color:'rgba(138,154,202,0.7)',action:'stand',duration:1.5},
-      {type:'divide',y:0.5,color1:'rgba(20,10,30,0.8)',color2:'rgba(120,140,200,0.15)',duration:2,startAt:1.5},
-      {type:'silhouette',x:0.5,y:0.5,w:16,h:24,color:'rgba(138,154,202,0.9)',action:'walk_right',duration:2,startAt:3},
-      {type:'glow',x:0.7,y:0.5,r:20,color:'rgba(180,200,240,0.15)',action:'grow',duration:2,startAt:3.5},
-      {type:'text',content:'Он выбрал вернуться',startAt:4,duration:3}
+      {type:'fade',from:1,to:0,duration:1.5},
+      {type:'ambient',count:12,color:'rgba(100,40,70,0.12)',duration:9},
+      {type:'silhouette',x:0.4,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.8)',action:'stand',duration:2},
+      {type:'divide',y:0.5,color1:'rgba(15,8,25,0.9)',color2:'rgba(140,160,220,0.12)',duration:2.5,startAt:2},
+      {type:'silhouette',x:0.4,y:0.5,w:18,h:28,color:'rgba(138,154,202,0.95)',action:'walk_right',duration:2.5,startAt:3.5},
+      {type:'glow',x:0.72,y:0.5,r:25,color:'rgba(180,200,240,0.2)',action:'grow',duration:2.5,startAt:4},
+      {type:'text',content:'Он выбрал вернуться',startAt:5,duration:3}
     ]
   }
 ];
@@ -5367,56 +5390,114 @@ function playCutscene(idx,callback){
   var overlay=document.getElementById('cutscene-overlay');
   var canvas=document.getElementById('cutscene-canvas');
   var textEl=document.getElementById('cutscene-text');
+  var labelEl=document.getElementById('cutscene-act-label');
   if(!overlay||!canvas){if(callback)callback();return}
+  // Show act label
+  if(labelEl&&cs.label!==undefined){labelEl.textContent=CUTSCENE_LABELS[cs.label]||'';labelEl.classList.add('visible')}
   overlay.classList.add('active');
   canvas.width=window.innerWidth;canvas.height=window.innerHeight;
   var ctx=canvas.getContext('2d');
   _cutsceneActive=true;
   var startTime=performance.now();
-  var totalDuration=7; // seconds
+  var totalDuration=8;
   var skipHandler=function(){
     if(!_cutsceneActive)return;
     _cutsceneActive=false;
     if(_cutsceneRAF)cancelAnimationFrame(_cutsceneRAF);
     overlay.classList.remove('active');
-    textEl.classList.remove('visible');
-    textEl.textContent='';
+    textEl.classList.remove('visible');textEl.textContent='';textEl.style.opacity='';
+    labelEl.classList.remove('visible');labelEl.textContent='';
     overlay.removeEventListener('click',skipHandler);
-    overlay.removeEventListener('touchstart',skipHandler);
-    if(callback)setTimeout(callback,100);
+    overlay.removeEventListener('touchstart',touchSkip);
+    if(callback)setTimeout(callback,150);
   };
+  function touchSkip(e){e.preventDefault();skipHandler()}
   overlay.addEventListener('click',skipHandler);
-  overlay.addEventListener('touchstart',function(e){e.preventDefault();skipHandler()},{passive:false});
-  // Particle system for dissolve/converge/drift
+  overlay.addEventListener('touchstart',touchSkip,{passive:false});
+  // Ambient particles (background floating dots)
+  var ambients=[];
+  function initAmbients(count,color){
+    ambients=[];
+    var W=canvas.width,H=canvas.height;
+    for(var i=0;i<count;i++){
+      ambients.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.4,vy:-0.15-Math.random()*0.3,r:0.8+Math.random()*1.5,a:0.15+Math.random()*0.25,color:color,phase:Math.random()*Math.PI*2});
+    }
+  }
+  // Particles for dissolve/converge/drift
   var particles=[];
   function initParticles(cx,cy,count){
     particles=[];
     for(var i=0;i<count;i++){
-      particles.push({x:cx+(Math.random()-0.5)*80,y:cy+(Math.random()-0.5)*80,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,r:1+Math.random()*2,phase:Math.random()*Math.PI*2});
+      particles.push({x:cx+(Math.random()-0.5)*100,y:cy+(Math.random()-0.5)*100,vx:(Math.random()-0.5)*2,vy:(Math.random()-0.5)*2,r:1.2+Math.random()*2,phase:Math.random()*Math.PI*2});
     }
   }
+  // Silhouette drawing — cinematic style with glow
   function drawSilhouette(ctx2,sx,sy,w,h,color,alpha,legPhase,armPhase){
-    ctx2.save();ctx2.globalAlpha=alpha;
+    ctx2.save();
+    // Outer glow
+    if(alpha>0.3){
+      ctx2.globalAlpha=alpha*0.12;
+      ctx2.beginPath();ctx2.arc(sx,sy-h*0.1,w*1.8,0,Math.PI*2);
+      var glowG=ctx2.createRadialGradient(sx,sy-h*0.1,0,sx,sy-h*0.1,w*1.8);
+      glowG.addColorStop(0,color);glowG.addColorStop(1,'rgba(0,0,0,0)');
+      ctx2.fillStyle=glowG;ctx2.fill();
+    }
+    ctx2.globalAlpha=alpha;
+    // Scarf (small flowing shape behind neck)
+    ctx2.beginPath();
+    var scarfWave=Math.sin((legPhase||0)*0.5)*3;
+    ctx2.moveTo(sx-w*0.2,sy-h*0.3);
+    ctx2.quadraticCurveTo(sx-w*0.8+scarfWave,sy-h*0.2,sx-w*1.0+scarfWave*1.5,sy-h*0.15);
+    ctx2.lineWidth=3;ctx2.strokeStyle=color;ctx2.lineCap='round';ctx2.stroke();
     // Head
-    ctx2.beginPath();ctx2.arc(sx,sy-h*0.35,w*0.4,0,Math.PI*2);ctx2.fillStyle=color;ctx2.fill();
+    ctx2.beginPath();ctx2.arc(sx,sy-h*0.38,w*0.38,0,Math.PI*2);ctx2.fillStyle=color;ctx2.fill();
+    // Eyes (two tiny bright dots)
+    if(alpha>0.4){
+      ctx2.globalAlpha=alpha*0.8;
+      ctx2.beginPath();ctx2.arc(sx-w*0.12,sy-h*0.4,1.2,0,Math.PI*2);ctx2.fillStyle='rgba(200,210,240,0.9)';ctx2.fill();
+      ctx2.beginPath();ctx2.arc(sx+w*0.12,sy-h*0.4,1.2,0,Math.PI*2);ctx2.fill();
+      ctx2.globalAlpha=alpha;
+    }
     // Body
-    ctx2.beginPath();ctx2.moveTo(sx-w*0.3,sy-h*0.2);ctx2.lineTo(sx+w*0.3,sy-h*0.2);
-    ctx2.lineTo(sx+w*0.2,sy+h*0.15);ctx2.lineTo(sx-w*0.2,sy+h*0.15);ctx2.closePath();ctx2.fill();
+    ctx2.beginPath();ctx2.moveTo(sx-w*0.28,sy-h*0.2);ctx2.lineTo(sx+w*0.28,sy-h*0.2);
+    ctx2.lineTo(sx+w*0.18,sy+h*0.15);ctx2.lineTo(sx-w*0.18,sy+h*0.15);ctx2.closePath();
+    ctx2.fillStyle=color;ctx2.fill();
     // Legs
     var lp=legPhase||0;
-    ctx2.beginPath();ctx2.moveTo(sx-w*0.1,sy+h*0.15);ctx2.lineTo(sx-w*0.2+Math.sin(lp)*w*0.3,sy+h*0.5);ctx2.lineWidth=2;ctx2.strokeStyle=color;ctx2.stroke();
-    ctx2.beginPath();ctx2.moveTo(sx+w*0.1,sy+h*0.15);ctx2.lineTo(sx+w*0.2+Math.sin(lp+Math.PI)*w*0.3,sy+h*0.5);ctx2.stroke();
+    ctx2.lineWidth=2.5;ctx2.lineCap='round';ctx2.strokeStyle=color;
+    ctx2.beginPath();ctx2.moveTo(sx-w*0.08,sy+h*0.15);ctx2.lineTo(sx-w*0.15+Math.sin(lp)*w*0.3,sy+h*0.5);ctx2.stroke();
+    ctx2.beginPath();ctx2.moveTo(sx+w*0.08,sy+h*0.15);ctx2.lineTo(sx+w*0.15+Math.sin(lp+Math.PI)*w*0.3,sy+h*0.5);ctx2.stroke();
     // Arms
     var ap=armPhase||0;
-    ctx2.beginPath();ctx2.moveTo(sx-w*0.3,sy-h*0.15);ctx2.lineTo(sx-w*0.5+Math.sin(ap)*w*0.2,sy+Math.cos(ap)*h*0.1);ctx2.stroke();
-    ctx2.beginPath();ctx2.moveTo(sx+w*0.3,sy-h*0.15);ctx2.lineTo(sx+w*0.5+Math.sin(ap+Math.PI)*w*0.2,sy+Math.cos(ap+Math.PI)*h*0.1);ctx2.stroke();
+    ctx2.lineWidth=2;
+    ctx2.beginPath();ctx2.moveTo(sx-w*0.28,sy-h*0.12);ctx2.lineTo(sx-w*0.5+Math.sin(ap)*w*0.2,sy+Math.cos(ap)*h*0.12);ctx2.stroke();
+    ctx2.beginPath();ctx2.moveTo(sx+w*0.28,sy-h*0.12);ctx2.lineTo(sx+w*0.5+Math.sin(ap+Math.PI)*w*0.2,sy+Math.cos(ap+Math.PI)*h*0.12);ctx2.stroke();
     ctx2.restore();
   }
+  // Track if ambient was initialized
+  var ambientInited=false;
+  var particleInited=false;
   function animate(now){
     if(!_cutsceneActive)return;
     var elapsed=(now-startTime)/1000;
     if(elapsed>=totalDuration){skipHandler();return}
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    var W=canvas.width,H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    // Draw ambient particles (background atmosphere)
+    for(var ai=0;ai<cs.steps.length;ai++){
+      if(cs.steps[ai].type==='ambient'&&!ambientInited){initAmbients(cs.steps[ai].count,cs.steps[ai].color);ambientInited=true}
+    }
+    if(ambients.length>0){
+      for(var aj=0;aj<ambients.length;aj++){
+        var ap=ambients[aj];
+        ap.x+=ap.vx;ap.y+=ap.vy;ap.phase+=0.015;
+        if(ap.y<-10){ap.y=H+10;ap.x=Math.random()*W}
+        if(ap.x<-10)ap.x=W+10;if(ap.x>W+10)ap.x=-10;
+        ctx.beginPath();ctx.arc(ap.x+Math.sin(ap.phase)*4,ap.y+Math.cos(ap.phase)*2,ap.r,0,Math.PI*2);
+        ctx.fillStyle=ap.color;ctx.globalAlpha=ap.a+0.1*Math.sin(ap.phase);ctx.fill();
+      }
+      ctx.globalAlpha=1;
+    }
     // Process each step
     for(var i=0;i<cs.steps.length;i++){
       var step=cs.steps[i];
@@ -5424,57 +5505,71 @@ function playCutscene(idx,callback){
       if(elapsed<stepStart)continue;
       var stepElapsed=elapsed-stepStart;
       var stepProgress=Math.min(stepElapsed/step.duration,1);
-      var W=canvas.width,H=canvas.height;
-      if(step.type==='silhouette'){
+      if(step.type==='fade'){
+        // Fade from black at start
+        if(step.from!==undefined){
+          var fadeAlpha=step.from+(step.to-step.from)*stepProgress;
+          ctx.fillStyle='rgba(0,0,0,'+fadeAlpha+')';ctx.fillRect(0,0,W,H);
+        }
+      }else if(step.type==='silhouette'){
         var sx2=step.x*W,sy2=step.y*H;
-        var alpha=1;
         if(step.action==='run'){
-          sx2=(step.x+stepProgress*0.3)*W;
-          var lp2=stepElapsed*8;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.6+0.4*stepProgress,lp2,0);
+          sx2=(step.x+stepProgress*0.35)*W;
+          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.5+0.5*stepProgress,stepElapsed*7,0);
         }else if(step.action==='fall'){
-          sy2=(step.y+stepProgress*stepProgress*0.4)*H;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,1-stepProgress*0.3,0,-stepProgress*2);
+          sy2=(step.y+stepProgress*stepProgress*0.45)*H;
+          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,1-stepProgress*0.4,stepElapsed*0.5,-stepProgress*2.5);
         }else if(step.action==='hang'){
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.3+0.2*Math.sin(stepElapsed*2),0,0);
+          var sway=Math.sin(stepElapsed*1.5)*8;
+          drawSilhouette(ctx,sx2+sway,sy2,step.w,step.h,step.color,0.25+0.15*Math.sin(stepElapsed*2),0,0);
         }else if(step.action==='reach'){
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.5+0.5*stepProgress,0,-1+stepProgress*0.5);
+          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.4+0.6*stepProgress,stepElapsed*0.3,-1.2+stepProgress*0.7);
         }else if(step.action==='stand'){
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,1,0,0);
+          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.7+0.3*Math.sin(stepElapsed*0.8),stepElapsed*0.1,0);
         }else if(step.action==='dissolve'){
-          alpha=1-stepProgress;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,alpha*0.8,0,0);
-          // Dissolve particles
-          var pCount=Math.floor(stepProgress*30);
+          var alpha=1-stepProgress;
+          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,alpha*0.8,stepElapsed*0.1,0);
+          // Dissolve particles rising
+          var pCount=Math.floor(stepProgress*40);
           for(var p=0;p<pCount;p++){
-            var px=sx2+(Math.random()-0.5)*step.w*2;
-            var py=sy2+(Math.random()-0.5)*step.h*2;
-            ctx.beginPath();ctx.arc(px,py,1+Math.random(),0,Math.PI*2);
-            ctx.fillStyle=step.color;ctx.globalAlpha=alpha*0.4*Math.random();ctx.fill();ctx.globalAlpha=1;
+            var px=sx2+(Math.random()-0.5)*step.w*3;
+            var py=sy2+(Math.random()-0.5)*step.h*2-stepProgress*30;
+            ctx.beginPath();ctx.arc(px,py,0.8+Math.random()*1.5,0,Math.PI*2);
+            ctx.fillStyle=step.color;ctx.globalAlpha=alpha*0.3*Math.random();ctx.fill();ctx.globalAlpha=1;
           }
         }else if(step.action==='rise'){
-          sy2=(0.7-stepProgress*0.2)*H;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.3+0.7*stepProgress,0,0);
+          sy2=(0.65-stepProgress*0.18)*H;
+          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.2+0.8*stepProgress,stepElapsed*0.5,0);
         }else if(step.action==='walk_right'){
-          sx2=(step.x+stepProgress*0.15)*W;
-          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.7+0.3*stepProgress,stepElapsed*6,0);
+          sx2=(step.x+stepProgress*0.22)*W;
+          drawSilhouette(ctx,sx2,sy2,step.w,step.h,step.color,0.6+0.4*stepProgress,stepElapsed*5,0);
         }
       }else if(step.type==='ground'){
         var gy=step.y*H;
-        ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.strokeStyle=step.color;ctx.lineWidth=2;ctx.stroke();
+        // Draw atmospheric ground line with subtle glow
+        ctx.save();
+        ctx.shadowColor=step.color;ctx.shadowBlur=8;
+        ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.strokeStyle=step.color;ctx.lineWidth=1.5;ctx.stroke();
+        ctx.restore();
         if(step.action==='crack'&&stepProgress>0){
           var crackX=W*0.5;
-          var gap=stepProgress*30;
-          ctx.clearRect(crackX-gap,gy-2,gap*2,4);
+          var gap=stepProgress*40;
+          ctx.clearRect(crackX-gap,gy-3,gap*2,6);
+          ctx.save();ctx.shadowColor=step.color;ctx.shadowBlur=6;
           ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(crackX-gap,gy);ctx.stroke();
           ctx.beginPath();ctx.moveTo(crackX+gap,gy);ctx.lineTo(W,gy);ctx.stroke();
-          // Falling pieces
-          if(stepProgress>0.3){
-            var fallP=(stepProgress-0.3)/0.7;
-            ctx.globalAlpha=0.3*(1-fallP);
-            ctx.beginPath();ctx.moveTo(crackX-gap-20,gy);ctx.lineTo(crackX-gap,gy);ctx.lineTo(crackX-gap,gy+fallP*40);ctx.lineTo(crackX-gap-20,gy+fallP*30);ctx.fillStyle=step.color;ctx.fill();
-            ctx.beginPath();ctx.moveTo(crackX+gap,gy);ctx.lineTo(crackX+gap+20,gy);ctx.lineTo(crackX+gap+20,gy+fallP*35);ctx.lineTo(crackX+gap,gy+fallP*40);ctx.fill();
-            ctx.globalAlpha=1;
+          ctx.restore();
+          // Falling debris with glow
+          if(stepProgress>0.2){
+            var fallP=Math.min((stepProgress-0.2)/0.8,1);
+            ctx.globalAlpha=0.4*(1-fallP);
+            ctx.save();ctx.shadowColor=step.color;ctx.shadowBlur=4;
+            for(var di=0;di<5;di++){
+              var dx=crackX+(di-2)*12+(di%2===0?-gap:gap)*0.5;
+              var dy2=gy+fallP*fallP*60+di*4;
+              ctx.beginPath();ctx.arc(dx,dy2,1.5-di*0.2,0,Math.PI*2);ctx.fillStyle=step.color;ctx.fill();
+            }
+            ctx.restore();ctx.globalAlpha=1;
           }
         }
       }else if(step.type==='line'){
@@ -5482,59 +5577,67 @@ function playCutscene(idx,callback){
         if(step.action==='extend'){
           var ex=lx1+(lx2-lx1)*stepProgress;
           var ey=ly1+(ly2-ly1)*stepProgress;
+          ctx.save();
+          ctx.shadowColor=step.color;ctx.shadowBlur=6;
           ctx.beginPath();ctx.moveTo(lx1,ly1);ctx.lineTo(ex,ey);ctx.strokeStyle=step.color;ctx.lineWidth=1.5;ctx.stroke();
-          // Glow at end
-          ctx.beginPath();ctx.arc(ex,ey,3,0,Math.PI*2);ctx.fillStyle=step.color;ctx.globalAlpha=0.5;ctx.fill();ctx.globalAlpha=1;
+          // Bright tip
+          ctx.beginPath();ctx.arc(ex,ey,3+Math.sin(stepElapsed*4),0,Math.PI*2);
+          ctx.fillStyle=step.color;ctx.globalAlpha=0.6;ctx.fill();ctx.globalAlpha=1;
+          ctx.restore();
         }
       }else if(step.type==='glow'){
         var gx=step.x*W,gy2=step.y*H;
-        var gr=step.r+step.r*stepProgress*4;
-        var galpha=stepProgress*0.8;
+        var gr=step.r+step.r*stepProgress*5;
+        var galpha=stepProgress*0.9;
         var grad=ctx.createRadialGradient(gx,gy2,0,gx,gy2,gr);
         grad.addColorStop(0,step.color.replace(/[\d.]+\)$/,galpha+')'));
+        grad.addColorStop(0.5,step.color.replace(/[\d.]+\)$/,(galpha*0.3)+')'));
         grad.addColorStop(1,'rgba(0,0,0,0)');
         ctx.fillStyle=grad;ctx.fillRect(gx-gr,gy2-gr,gr*2,gr*2);
       }else if(step.type==='text'){
-        if(step.action===undefined||step.action===''){
-          var fadeIn=Math.min(stepProgress*3,1);
-          var fadeOut=stepProgress>0.7?(1-(stepProgress-0.7)/0.3):1;
-          textEl.style.opacity=Math.min(fadeIn,fadeOut);
-          textEl.textContent=step.content;
-          textEl.classList.add('visible');
-        }
+        var fadeIn=Math.min(stepProgress*4,1);
+        var fadeOut=stepProgress>0.6?(1-(stepProgress-0.6)/0.4):1;
+        textEl.style.opacity=Math.min(fadeIn,fadeOut);
+        textEl.textContent=step.content;
+        textEl.classList.add('visible');
       }else if(step.type==='particles'){
         var pcx=step.x*W,pcy=step.y*H;
-        if(particles.length===0)initParticles(pcx,pcy,40);
+        if(!particleInited){initParticles(pcx,pcy,50);particleInited=true}
         if(step.action==='drift'){
           for(var pi=0;pi<particles.length;pi++){
             var pp=particles[pi];
-            pp.x+=pp.vx*0.5;pp.y+=pp.vy*0.5;
+            pp.x+=pp.vx*0.6;pp.y+=pp.vy*0.6;
             pp.phase+=0.02;
-            ctx.beginPath();ctx.arc(pp.x+Math.sin(pp.phase)*3,pp.y+Math.cos(pp.phase)*3,pp.r,0,Math.PI*2);
-            ctx.fillStyle=step.color;ctx.globalAlpha=0.3+0.2*Math.sin(pp.phase);ctx.fill();ctx.globalAlpha=1;
+            ctx.beginPath();ctx.arc(pp.x+Math.sin(pp.phase)*4,pp.y+Math.cos(pp.phase)*3,pp.r,0,Math.PI*2);
+            ctx.fillStyle=step.color;ctx.globalAlpha=0.25+0.15*Math.sin(pp.phase);ctx.fill();ctx.globalAlpha=1;
           }
         }else if(step.action==='converge'){
           for(var pi2=0;pi2<particles.length;pi2++){
             var pp2=particles[pi2];
-            pp2.x+=(pcx-pp2.x)*0.02*stepProgress;
-            pp2.y+=(pcy-pp2.y)*0.02*stepProgress;
+            pp2.x+=(pcx-pp2.x)*0.025*stepProgress;
+            pp2.y+=(pcy-pp2.y)*0.025*stepProgress;
             ctx.beginPath();ctx.arc(pp2.x,pp2.y,pp2.r*(1-stepProgress*0.3),0,Math.PI*2);
-            ctx.fillStyle=step.color;ctx.globalAlpha=0.3+0.5*stepProgress;ctx.fill();ctx.globalAlpha=1;
+            ctx.fillStyle=step.color;ctx.globalAlpha=0.2+0.6*stepProgress;ctx.fill();ctx.globalAlpha=1;
           }
         }
       }else if(step.type==='divide'){
-        var dy=step.y*H;
         if(stepProgress>0){
-          var divW=stepProgress*W*0.3;
-          // Dark side (left)
-          ctx.fillStyle=step.color1;ctx.globalAlpha=stepProgress*0.6;
+          var divW=stepProgress*W*0.35;
+          ctx.fillStyle=step.color1;ctx.globalAlpha=stepProgress*0.7;
           ctx.fillRect(0,0,0.5*W-divW,H);
-          // Light side (right)
-          ctx.fillStyle=step.color2;ctx.globalAlpha=stepProgress*0.5;
+          ctx.fillStyle=step.color2;ctx.globalAlpha=stepProgress*0.6;
           ctx.fillRect(0.5*W+divW,0,0.5*W-divW,H);
+          // Subtle divider line
+          ctx.globalAlpha=stepProgress*0.3;
+          ctx.beginPath();ctx.moveTo(0.5*W,0);ctx.lineTo(0.5*W,H);ctx.strokeStyle='rgba(180,200,240,0.3)';ctx.lineWidth=1;ctx.stroke();
           ctx.globalAlpha=1;
         }
       }
+    }
+    // Fade to black at the end (last 1 second)
+    if(elapsed>totalDuration-1){
+      var endFade=(elapsed-(totalDuration-1))/1;
+      ctx.fillStyle='rgba(0,0,0,'+endFade+')';ctx.fillRect(0,0,W,H);
     }
     _cutsceneRAF=requestAnimationFrame(animate);
   }
@@ -5595,6 +5698,10 @@ function renderLoreScreen(){
           if(sh&&sh.lore)html+='<div class="lore-shard-entry">💎 '+sh.lore+'</div>';
         }
       }
+      // Cutscene replay button (acts II-VI, if any level has 2+ stars)
+      if(a>0&&(a-1)<CUTSCENES.length&&actCompleted){
+        html+='<button class="lore-cutscene-btn" data-cs="'+(a-1)+'">▶ катсцена</button>';
+      }
       ch.innerHTML=html;
     }else{
       ch.className='lore-locked';
@@ -5610,10 +5717,25 @@ function renderLoreScreen(){
           }
         }
       }
+      // Cutscene replay button even if locked (if player has 2+ stars)
+      if(a>0&&(a-1)<CUTSCENES.length&&actCompleted){
+        html2+='<button class="lore-cutscene-btn" data-cs="'+(a-1)+'">▶ катсцена</button>';
+      }
       ch.innerHTML=html2;
     }
     c.appendChild(ch);
   }
+  // Delegate click for cutscene replay buttons in lore
+  c.onclick=function(e){
+    var btn=e.target.closest&&e.target.closest('.lore-cutscene-btn');
+    if(!btn)return;
+    var csIdx=parseInt(btn.getAttribute('data-cs'));
+    if(isNaN(csIdx)||csIdx<0||csIdx>=CUTSCENES.length)return;
+    playCutscene(csIdx,function(){
+      renderLoreScreen();
+      showScreen('lore');
+    });
+  };
 }
 
 // ═══ SCREEN MANAGEMENT ═══
