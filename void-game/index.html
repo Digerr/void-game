@@ -6702,43 +6702,43 @@ var logoAnim={
   flyWaypoints:[],
   sequence:[
     // === Phase 1: V → O → I → D (forward journey) ===
-    {type:'idle',platform:0,duration:2.0,emotion:'neutral'},
-    {type:'prep_jump',toPlatform:1,duration:0.4},
-    {type:'jump',toPlatform:1,duration:0.7},
-    {type:'land',platform:1,duration:0.4,emotion:'happy'},
-    {type:'idle',platform:1,duration:0.8},
-    {type:'prep_jump',toPlatform:2,duration:0.35},
-    {type:'jump',toPlatform:2,duration:0.65},
-    {type:'land',platform:2,duration:0.4,emotion:'happy'},
-    {type:'idle',platform:2,duration:0.6},
-    {type:'prep_jump',toPlatform:3,duration:0.35},
-    {type:'jump',toPlatform:3,duration:0.7},
-    {type:'land',platform:3,duration:0.5,emotion:'curious'},
-    {type:'idle',platform:3,duration:0.8,emotion:'curious'},
+    {type:'idle',platform:0,duration:2.5,emotion:'neutral'},
+    {type:'prep_jump',toPlatform:1,duration:0.55},
+    {type:'jump',toPlatform:1,duration:0.9},
+    {type:'land',platform:1,duration:0.55,emotion:'happy'},
+    {type:'idle',platform:1,duration:1.0},
+    {type:'prep_jump',toPlatform:2,duration:0.5},
+    {type:'jump',toPlatform:2,duration:0.85},
+    {type:'land',platform:2,duration:0.55,emotion:'happy'},
+    {type:'idle',platform:2,duration:0.8},
+    {type:'prep_jump',toPlatform:3,duration:0.5},
+    {type:'jump',toPlatform:3,duration:0.9},
+    {type:'land',platform:3,duration:0.6,emotion:'curious'},
+    {type:'idle',platform:3,duration:1.0,emotion:'curious'},
     // === Phase 2: Slide down D, look around ===
-    {type:'slide_down',platform:3,duration:1.2},
-    {type:'idle_bottom',platform:3,duration:0.8,emotion:'curious'},
+    {type:'slide_down',platform:3,duration:1.6},
+    {type:'idle_bottom',platform:3,duration:1.0,emotion:'curious'},
     // === Phase 3: Climb back up D ===
-    {type:'climb_up',platform:3,duration:1.5},
-    {type:'idle',platform:3,duration:0.5,emotion:'focused'},
+    {type:'climb_up',platform:3,duration:2.0},
+    {type:'idle',platform:3,duration:0.7,emotion:'focused'},
     // === Phase 4: Parkour back D → I → O → V ===
-    {type:'prep_jump',toPlatform:2,duration:0.35},
-    {type:'jump',toPlatform:2,duration:0.7},
-    {type:'land',platform:2,duration:0.35,emotion:'happy'},
+    {type:'prep_jump',toPlatform:2,duration:0.5},
+    {type:'jump',toPlatform:2,duration:0.9},
+    {type:'land',platform:2,duration:0.5,emotion:'happy'},
     // Wall-slide down I
-    {type:'wall_slide',platform:2,duration:0.8},
-    {type:'idle_bottom',platform:2,duration:0.4,emotion:'curious'},
+    {type:'wall_slide',platform:2,duration:1.1},
+    {type:'idle_bottom',platform:2,duration:0.6,emotion:'curious'},
     // Jump from I bottom to O
-    {type:'prep_jump',toPlatform:1,duration:0.35},
-    {type:'jump',toPlatform:1,duration:0.65},
-    {type:'land',platform:1,duration:0.4,emotion:'happy'},
-    {type:'idle',platform:1,duration:0.4},
+    {type:'prep_jump',toPlatform:1,duration:0.5},
+    {type:'jump',toPlatform:1,duration:0.85},
+    {type:'land',platform:1,duration:0.55,emotion:'happy'},
+    {type:'idle',platform:1,duration:0.6},
     // Dash from O to V
-    {type:'dash',toPlatform:0,duration:0.5},
-    {type:'land',platform:0,duration:0.5,emotion:'happy'},
+    {type:'dash',toPlatform:0,duration:0.65},
+    {type:'land',platform:0,duration:0.6,emotion:'happy'},
     // === Phase 5: Victory wave ===
-    {type:'wave',platform:0,duration:2.0},
-    {type:'idle',platform:0,duration:1.0},
+    {type:'wave',platform:0,duration:2.5},
+    {type:'idle',platform:0,duration:1.5},
   ],
   // Stars
   stars:[],
@@ -6841,7 +6841,7 @@ var logoAnim={
     // Emotion timer
     if(c.emotionTimer>0){c.emotionTimer-=dt;if(c.emotionTimer<=0)c.emotion='neutral';}
     // Squash recovery — softer
-    c.squashX+=(1-c.squashX)*5*dt;c.squashY+=(1-c.squashY)*5*dt;
+    c.squashX+=(1-c.squashX)*3.5*dt;c.squashY+=(1-c.squashY)*3.5*dt;
     // Prep squash recovery
     c.prepSquash*=Math.pow(0.01,dt);
     // Sparkles
