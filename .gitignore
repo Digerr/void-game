@@ -1,2 +1,22 @@
-releases/
+# Sensitive
 CREDENTIALS.md
+
+# Uploads (temporary screenshots etc)
+upload/
+
+# Old releases archive
+releases/
+
+# Vercel local config (auto-generated)
+.vercel/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/

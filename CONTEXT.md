@@ -6,202 +6,165 @@
 
 ## КРИТИЧЕСКИЕ ПРАВИЛА
 
-1. **Единый HTML-файл** (index.html) — так и должно оставаться
+1. **Единый HTML-файл** (index.html) — так и должно оставаться, НИКОГДА не переписывать с нуля
 2. **PixiJS v8 + Matter.js** — движок и физика, загружаются через CDN
 3. **Никакого Phaser** — мы на нём больше не работаем
-4. **Push на GitHub после каждого изменения** — main ветка, мгновенный деплой
-5. **Сохранять визуальный стиль** — тёмная палитра (0x222240), минимализм, Courier New
-6. **HTML/CSS для UI, Canvas для игры** — никакого смешивания
-7. **Работаем напрямую в main** — без ветки dev
-8. **Цветовая схема персонажа**: тело 0x5a5a7e, шарф 0x7a5a9a, глаза 0x1a1a3a, блик 0xccddef
-9. **Цветовая схема портала/финиша**: фиолетовая (0x4a4a8a, 0x6a5aaa, 0x8a7aca), НЕ зелёная
+4. **Сохранять визуальный стиль** — тёмная палитра (0x222240), минимализм
+5. **HTML/CSS для UI, Canvas для игры** — никакого смешивания
+6. **Работаем напрямую в main** — без ветки dev, push после каждого изменения
+7. **НЕ ПЕРЕМЕЩАТЬ ФАЙЛЫ** — index.html, vercel.json, manifest.json лежат в void-game/ и Vercel настроен на rootDirectory: "void-game"
+8. **НЕ ИСПОЛЬЗОВАТЬ `vercel --prod`** — только git push, Vercel авто-деплоит с GitHub
+9. **Логотип + анимация персонажа** — НЕ ТРОГАТЬ без явного разрешения
 10. **Музыка**: процедурная пентатоника Am, НЕ монотонный гул
-11. **СПРАШИВАЙ РАЗРЕШЕНИЕ** перед изменением кода — пользователь просил не писать код без одобрения
 
 ---
 
 ## ТЕКУЩИЙ СТАТУС
 
-- **Версия**: Beta 0.9.9 (profile + notifications) ✅ РЕАЛИЗОВАНО
+- **Версия**: Alpha 2.4 (VOID_VERSION = '2.4.0')
 - **Стек**: PixiJS 8.9.2 + Matter.js 0.20.0 + Supabase JS 2.x
-- **Файл**: index.html (единый файл, ~4477 строк)
-- **Хостинг**: Vercel → https://void-game-ruddy.vercel.app
-- **GitHub**: https://github.com/Digerr/void-game/
-- **API GitHub**: https://github.com/Digerr/void-game-api/
-- **API хостинг**: Vercel → https://api-deploy2.vercel.app (Project ID: prj_Mkp1a4elZu0GvOUBQGaE2KkHBHcU)
-- **Telegram бот**: @voide_game_bot (id: 8858889318)
-- **Локальный путь**: /home/z/my-project/void-game/
-- **API локальный путь**: /home/z/my-project/void-game-api/
+- **Файл игры**: void-game/index.html (единый файл, ~288KB)
+- **Git tag**: v2.4.0
 
 ---
 
-## АРХИТЕКТУРА
+## СТРУКТУРА РЕПОЗИТОРИЯ
+
+```
+/home/z/my-project/          ← git root (git rev-parse --show-toplevel)
+├── .gitignore
+├── CONTEXT.md               ← этот файл
+├── README.md                ← описание для GitHub
+├── bot-logo.png
+├── worklog.md               ← лог изменений
+├── void-game/               ← ROOT DIRECTORY для Vercel
+│   ├── index.html           ← ИГРА (единственный файл)
+│   ├── manifest.json        ← PWA манифест
+│   └── vercel.json          ← реврайты + no-cache заголовки
+└── void-game-api/           ← API сервер (отдельный Vercel проект)
+    ├── api/leaderboard.js
+    ├── package.json
+    └── vercel.json
+```
+
+### ВАЖНО: Структура файлов
+
+Файлы игры (`index.html`, `manifest.json`, `vercel.json`) находятся в подкаталоге `void-game/`.
+Vercel проект настроен с `rootDirectory: "void-game"`.
+**НЕ перемещать эти файлы** — иначе сломается деплой.
+
+---
+
+## ПАЙПЛАЙН РАЗВЁРТЫВАНИЯ (DEPLOYMENT)
+
+### Как это работает
+```
+Правка кода → git add → git commit → git push origin main → Vercel auto-deploy → Telegram показывает обновление
+```
+
+### Пошагово
+1. Редактируешь `void-game/index.html`
+2. `cd /home/z/my-project && git add void-game/index.html`
+3. `git commit -m "описание правки"`
+4. `git push origin main`
+5. Vercel подхватывает push и деплоит (обычно 30-60 секунд)
+6. Проверка: `curl -s https://void-game-ruddy.vercel.app/ | head -3`
+
+### ЧЕГО ДЕЛАТЬ НЕЛЬЗЯ
+- ❌ `vercel --prod` — вызывает конфликт с GitHub интеграцией
+- ❌ Перемещать файлы из void-game/ в корень или наоборот
+- ❌ Менять rootDirectory в Vercel без необходимости
+- ❌ Создавать новый Vercel проект — только void-game-ruddy
+
+### Как обойти кэш Telegram WebView
+Если Telegram показывает старую версию:
+1. Обновить `VOID_VERSION` в index.html (например 2.4.0 → 2.4.1)
+2. Push на GitHub
+3. Обновить URL бота: `https://void-game-ruddy.vercel.app/v{VERSION}`
+4. Vercel rewrite `/v:ver` → `/index.html` обеспечивает доступ по версионному URL
+
+---
+
+## ХОСТИНГ И СЕРВИСЫ
+
+### Vercel — Игра
+- **URL**: https://void-game-ruddy.vercel.app
+- **Версионный URL**: https://void-game-ruddy.vercel.app/v2.4.0
+- **Project ID**: prj_sns11zIAoxZ74i5w3dzqRQbAGMk5
+- **Team ID**: team_WnSETytVcJMHnNfLZdIOqcSQ
+- **rootDirectory**: void-game
+- **GitHub**: Digerr/void-game, ветка main
+- **SSO Protection**: ОТКЛЮЧЕНА
+
+### Vercel — API
+- **URL**: https://void-api-deploy.vercel.app
+- **Project ID**: prj_oGXmNFTdkiJjEOC9wrhUAdxowwlx
+- **GitHub**: Digerr/void-game-api
+- **SSO Protection**: ОТКЛЮЧЕНА
+
+### Supabase
+- **URL**: https://jibtmyuxbeckanmkhuik.supabase.co
+- **Таблицы**: leaderboard, players
+- **Realtime**: ВКЛЮЧЁН
+
+### Telegram
+- **Бот**: @voide_game_bot (id: 8858889318)
+- **Web App URL**: https://void-game-ruddy.vercel.app/v2.4.0
+- **has_main_web_app**: true
+
+---
+
+## АРХИТЕКТУРА ИГРЫ
 
 ```
 index.html (единый файл)
-├── CSS (встроенный) — тёмная тема, UI стили, анимации, тач-контролы, лидерборд
+├── CSS (встроенный) — тёмная тема, glassmorphism UI, тач-контролы, кнопки ↑↓ для нити
 ├── HTML — UI слой (меню, HUD, экраны, тач-контролы, settings, faq, level-select, leaderboard)
 └── JavaScript
-    ├── Audio System — Web Audio API
-    │   ├── SFX (jump, land, dash, death, wall slide/jump, thread, lever, level complete, spike)
-    │   └── Music — процедурная пентатоника Am (мелодия + пэды + искры + реверб + делей)
+    ├── Audio System — Web Audio API (SFX + процедурная мелодия Am)
     ├── PixiJS — рендеринг (спрайты, параллакс, эффекты, частицы, свет/туман)
     ├── Matter.js — физика (тела, столкновения, constraint)
     ├── Game Loop — requestAnimationFrame, slow-mo
-    ├── Player — движение, прыжок, wall jump, wall slide, дэш, нить (верёвка)
+    ├── Player — движение, прыжок, wall jump, wall slide, дэш, нить
     ├── Level Loader — JSON данные → Matter тела + PixiJS спрайты
     ├── Camera — плавное следование за игроком + shake
-    ├── Input — клавиатура + тач-кнопки
+    ├── Input — клавиатура + тач-контролы + кнопки подъёма по нити
+    ├── Checkpoints — вертикальный луч света, кристалл, пульсация, радиус 26
+    ├── Thread/Rope — damping 0.92, angular cap 2, swing force 0.08, кнопки ↑↓
     ├── Screen Manager — меню/игра/пауза/смерть/победа/settings/faq/levels/leaderboard
-    ├── Logo Animation — scripted sequence
+    ├── Logo Animation — scripted sequence (НЕ ТРОГАТЬ)
     ├── Light & Fog — 2D туман с отверстиями
     ├── Telegram SDK — WebApp интеграция, haptic, CloudStorage
     └── Supabase Leaderboard — real-time таблица лидеров
 ```
 
-```
-void-game-api/ (Vercel Serverless)
-├── api/leaderboard.js — POST endpoint (verify initData, actions: score/submit, register, profile, toggle_notifications)
-│   ├── score submit: compute score, upsert leaderboard, register player, check rank change → notify via Bot API
-│   ├── register: upsert player (id, chat_id, name)
-│   ├── profile: return player info + leaderboard stats + rank
-│   └── toggle_notifications: enable/disable notifications for player
-├── package.json — @supabase/supabase-js dependency
-└── vercel.json — CORS headers, rewrites
-```
-
----
-
-## ЛИДЕРБОРД — АРХИТЕКТУРА
-
-```
-Клиент (index.html)
-  │
-  ├── ЧТЕНИЕ: Supabase anon key → REST + Realtime (postgres_changes)
-  │
-  └── ЗАПИСЬ: tg.initData + levelData → Vercel API (POST)
-                │
-                ├── 1. Проверка HMAC подписи initData (anti-cheat)
-                ├── 2. Rate limit (10с на юзера, in-memory)
-                ├── 3. Вычисление score сервером: completed*10000 + stars*100 - round(time)
-                ├── 4. Upsert в Supabase (service_role, обходит RLS)
-                └── 5. Возврат ранга клиенту
-```
-
-### Формула score
-```
-score = completed × 10000 + totalStars × 100 − round(totalTime)
-```
-
-### 3 вкладки лидерборда
-- **Мир** (global): сортировка по score (composite)
-- **Скорость** (speed): сортировка по total_time ASC (только completed>0)
-- **Звёзды** (stars): сортировка по total_stars DESC
-
-### Supabase таблица leaderboard
-| Колонка | Тип | Описание |
-|---------|-----|----------|
-| id | text PK | tg_{userId} или local_{deviceId} |
-| name | text | Имя из Telegram |
-| score | bigint | Вычисленный сервером |
-| completed | integer | Кол-во пройденных уровней |
-| total_stars | integer | Сумма всех звёзд |
-| total_time | float8 | Суммарное время (сек) |
-| level_data | jsonb | Детали по уровням {stars, bestTime} |
-| updated | timestamptz | Время последнего обновления |
-
-### RLS политика
-- **anon**: SELECT только (чтение)
-- **service_role**: полный доступ (запись через Vercel API)
-
-### Supabase таблица players
-| Колонка | Тип | Описание |
-|---------|-----|----------|
-| id | text PK | tg_{userId} (совпадает с leaderboard.id) |
-| chat_id | bigint | Telegram user ID (для отправки уведомлений) |
-| name | text | Имя из Telegram (first_name только, без username) |
-| notifications_enabled | boolean | Уведомления вкл/выкл (default: true) |
-| best_rank | integer | Лучший ранг за всё время |
-| created | timestamptz | Дата регистрации |
-
-### RLS политика (players)
-- **anon**: SELECT, INSERT, UPDATE (публичный доступ)
-- **service_role**: полный доступ
-
-### Ключевые функции в index.html
-- `initSupabase()` — создаёт Supabase клиент
-- `computeLBScore()` — считает score на клиенте (для отображения)
-- `submitLB()` — отправляет результат на Vercel API
-- `showLeaderboard(tab)` — открывает экран лидерборда
-- `loadLB()` — загружает данные + подписка на Realtime
-- `renderLB()` — рендерит список, учитывает вкладку
-- `getMyLBId()` — возвращает ID текущего игрока
-- `registerPlayer()` — регистрирует игрока при запуске (POST action=register)
-- `loadProfile()` — загружает данные профиля с сервера
-- `renderProfile(d)` — рендерит экран профиля
-- `toggleNotifications()` — переключает уведомления
-
-### Вызов submitLB()
-Срабатывает автоматически при завершении уровня (в функции win-level).
-
----
-
-## ПЕРСОНАЖ
-
-Рисуется процедурно в `drawPlayerParts()`:
-- **Тело**: эллипс 0x5a5a7e с хайлайтом
-- **Голова**: круг 0x5a5a80 с хайлайтом
-- **Уши**: треугольники с внутренней частью 0x8a6aa0
-- **Глаза**: большие эллипсы 0x1a1a3a с бликами 0xccddef, моргание каждые 4с
-- **Рот**: smile, O (удивление), neutral, scared
-- **Шарф**: 2 линии 0x7a5a9a/0x6a4a8a, развевается
-- **Руки/ноги**: линии 0x5a5a7e, разные позы по состояниям
-- **Аура**: мягкий круг 0x6a6aaa, ярче при дэше
-
 ---
 
 ## МЕХАНИКИ
 
-Движение, прыжок (переменная высота), wall slide/jump, coyote time, jump buffer, дэш, нить/верёвка (grappling hook), шипы, пилы, маятники, враги, рычаги+двери (linkId), движущиеся/падающие платформы, чекпоинты, портал финиша, параллакс (3 слоя), туман+свет, slow-mo, squash/stretch
-
----
-
-## ЭКРАНЫ
-
-Меню (3 зоны), Story, HUD, Тач-контролы, Пауза, Смерть, Победа, Настройки, FAQ, Выбор уровня (карточки актов), Рекорды, Испытание дня, Awakening заставка, Act intro, Лидерборд (3 вкладки)
+Движение, прыжок (переменная высота), wall slide/jump, coyote time, jump buffer, дэш (скорость 18, 0.12с, кд 0.55с), нить (swing 0.08, damping 0.92, angular cap 2, кнопки ↑↓ для подъёма), шипы, пилы, маятники, враги, рычаги+двери (linkId), движущиеся/падающие платформы, чекпоинты (луч света + кристалл), портал финиша, параллакс (3 слоя), туман+свет, slow-mo, squash/stretch
 
 ---
 
 ## УРОВНИ
 
 20 уровней, 4 акта:
-- **Акт 1 "Пробуждение"** (1-5), **Акт 2 "Глубины"** (6-10), **Акт 3 "Нити"** (11-15), **Акт 4 "Пустота"** (16-20)
+- **Акт 1 "Пробуждение"** (1-5)
+- **Акт 2 "Глубины"** (6-10)
+- **Акт 3 "Нити"** (11-15)
+- **Акт 4 "Пустота"** (16-20)
+
+Чекпоинты размещены логически — после сложных участков, видны издалека.
 
 ---
 
-## РЕЙТИНГ И ПРОГРЕСС
+## ПЕРСОНАЖ
 
-★★★/★★/★ на основе смертей + времени. localStorage + TG CloudStorage. Ранги S/A/B/C/D.
-
----
-
-## СЕРВИСЫ И КЛЮЧИ
-
-> Подробности в CREDENTIALS.md (не коммитить в публичный доступ)
-
-### Vercel
-- **Игра**: https://void-game-ruddy.vercel.app (Project ID: prj_sns11zIAoxZ74i5w3dzqRQbAGMk5)
-- **API**: https://void-game-api-sergo-s-projects1.vercel.app (Project ID: prj_7APxhhiAwpyY8rIN5ajOFPr5YzfZ)
-- **Team ID**: team_WnSETytVcJMHnNfLZdIOqcSQ
-- **SSO Protection**: ОТКЛЮЧЕНА на обоих проектах
-
-### Supabase
-- **URL**: https://jibtmyuxbeckanmkhuik.supabase.co
-- **Таблица**: leaderboard
-- **Realtime**: ВКЛЮЧЁН
-
-### Telegram
-- **Бот**: @voide_game_bot (id: 8858889318)
+Рисуется процедурно в `drawPlayerParts()`:
+- Тело: эллипс 0x5a5a7e, голова: круг 0x5a5a80
+- Уши: треугольники 0x8a6aa0, глаза: 0x1a1a3a с бликами 0xccddef
+- Шарф: 2 линии 0x7a5a9a/0x6a4a8a
+- Аура: мягкий круг 0x6a6aaa
 
 ---
 
@@ -209,11 +172,14 @@ score = completed × 10000 + totalStars × 100 − round(totalTime)
 
 | Фаза | Статус |
 |------|--------|
-| 0-12. Фундамент → PWA | ✅ |
-| 13. Лидерборд (Supabase + Vercel) | ✅ |
-| 14. 30+ уровней | ⬜ |
-| 15. Социальное (профиль + уведомления) | ✅ |
-| 16. Полировка | ⬜ |
+| Фундамент, механики, PWA | ✅ |
+| Лидерборд (Supabase + Vercel) | ✅ |
+| Профиль + уведомления | ✅ |
+| Phase 1: Чекпоинты + уровни | ✅ Alpha 2.4 |
+| Phase 2: Нити (фикс вращения, кнопки ↑↓, якоря) | ✅ Alpha 2.4 |
+| Phase 3: UI/UX (glassmorphism, шрифты, современный вид) | ✅ Alpha 2.4 |
+| 30+ уровней | ⬜ |
+| Полировка | ⬜ |
 
 ---
 
@@ -226,7 +192,21 @@ score = completed × 10000 + totalStars × 100 − round(totalTime)
 | alpha 2.0 | Персонаж с эмоциями, логотип, портал, мелодия |
 | alpha 2.1 | Скины (6), достижения (10), актовые заставки, туториал |
 | alpha 2.2 | Levels redesign, ранги, awakening, profile stats, daily challenge, perf |
-| alpha 2.3 | Фикс: персонаж не залезает на текст, существо на заставке = меню, меню на весь экран |
+| alpha 2.3 | Фикс: персонаж не залезает на текст, меню на весь экран |
 | beta 0.9.7 | Pre-release полировка |
-| beta 0.9.8 | Лидерборд: Supabase + Vercel API, 3 вкладки, real-time, anti-cheat (HMAC initData) |
-| beta 0.9.9 | Профиль игрока (аватарка из TG, ранг, статы, достижения, дни в игре), уведомления при обгоне в лидерборде (Telegram Bot API), toggle уведомлений, players таблица в Supabase |
+| beta 0.9.8 | Лидерборд: Supabase + Vercel API, 3 вкладки, real-time, anti-cheat |
+| beta 0.9.9 | Профиль игрока, уведомления при обгоне, players таблица |
+| alpha 2.4 | Чекпоинты (луч+кристалл), 20 уровней, нить (damping+кнопки ↑↓), glassmorphism UI |
+
+---
+
+## ПРОЦЕДУРА ПРИ КАЖДОЙ ПРАВКЕ
+
+1. Читать этот CONTEXT.md перед началом
+2. Править `void-game/index.html` на месте (НЕ переписывать с нуля)
+3. Обновить `VOID_VERSION` в index.html если это значимая правка
+4. `cd /home/z/my-project && git add -A && git commit -m "описание" && git push origin main`
+5. Дождаться деплоя Vercel (~30-60с)
+6. Проверить: `curl -s https://void-game-ruddy.vercel.app/ | grep VOID_VERSION`
+7. Записать правку в worklog.md
+8. Если менялась версия — обновить URL бота и тег в git
