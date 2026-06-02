@@ -4619,12 +4619,12 @@ var bgFogSprites=[];
 var bgFgSprite=null;
 // Act themes: colors and atmosphere
 var ACT_THEMES=[
-  {name:'awakening',skyTop:0x0a0a1e,skyMid:0x141432,skyBot:0x1e2a4a,horizonGlow:0x2a4a6a,silColor:0x161630,silColor2:0x1c1c3a,silColor3:0x222244,fogColor:0x1a1a34,fgColor:0x0e0e20,moonTint:0x2a2a55,lightColor:0x4a6a9a,desc:'Ruins and arches'},
-  {name:'depths',skyTop:0x0a0a18,skyMid:0x12102a,skyBot:0x1e1840,horizonGlow:0x3a2a5a,silColor:0x141228,silColor2:0x1a1638,silColor3:0x201a44,fogColor:0x161230,fgColor:0x0c0c1a,moonTint:0x3a2a55,lightColor:0x6a4a8a,desc:'Industrial and pipes'},
-  {name:'threads',skyTop:0x0e0c0a,skyMid:0x1a1610,skyBot:0x2a2418,horizonGlow:0x4a3a1a,silColor:0x161410,silColor2:0x1e1a14,silColor3:0x28221a,fogColor:0x1a1810,fgColor:0x0e0c08,moonTint:0x3a3228,lightColor:0x8a7a4a,desc:'Bridges and ropes'},
-  {name:'void',skyTop:0x06060e,skyMid:0x0a0a16,skyBot:0x14101e,horizonGlow:0x2a1a2a,silColor:0x0c0c18,silColor2:0x101020,silColor3:0x161628,fogColor:0x0e0e1a,fgColor:0x08080e,moonTint:0x2a1a2a,lightColor:0x7a3a5a,desc:'Void and cracks'},
-  {name:'rebirth',skyTop:0x0a0e1a,skyMid:0x141a30,skyBot:0x1e2a3a,horizonGlow:0x2a5a6a,silColor:0x121a2a,silColor2:0x182038,silColor3:0x1e2844,fogColor:0x141a2a,fgColor:0x0a0e18,moonTint:0x2a4a6a,lightColor:0x4a8a7a,desc:'Fragments and reflections'},
-  {name:'exodus',skyTop:0x04040a,skyMid:0x080812,skyBot:0x100a1a,horizonGlow:0x3a1a3a,silColor:0x08081a,silColor2:0x0c0c22,silColor3:0x10102a,fogColor:0x0a0a16,fgColor:0x06060c,moonTint:0x3a1a3a,lightColor:0x9a3a6a,desc:'Final descent'}
+  {name:'awakening',skyTop:0x060818,skyMid:0x0e1432,skyBot:0x1a3060,horizonGlow:0x3a6aaa,silColor:0x12203a,silColor2:0x182848,silColor3:0x1e3056,fogColor:0x12203a,fgColor:0x0a1220,moonTint:0x3a4a7a,lightColor:0x5a8aba,desc:'Ruins and arches'},
+  {name:'depths',skyTop:0x080814,skyMid:0x14102e,skyBot:0x2a1c4e,horizonGlow:0x5a3a8a,silColor:0x10102a,silColor2:0x181840,silColor3:0x202050,fogColor:0x14102a,fgColor:0x0a0a16,moonTint:0x4a2a6a,lightColor:0x8a5aba,desc:'Industrial and pipes'},
+  {name:'threads',skyTop:0x0e0c06,skyMid:0x201a0e,skyBot:0x3a3018,horizonGlow:0x6a5a2a,silColor:0x1a1608,silColor2:0x242010,silColor3:0x302818,fogColor:0x1a1608,fgColor:0x0e0c06,moonTint:0x4a4228,lightColor:0xba8a2a,desc:'Bridges and ropes'},
+  {name:'void',skyTop:0x04040c,skyMid:0x0a0816,skyBot:0x180e24,horizonGlow:0x4a1a3a,silColor:0x0a0814,silColor2:0x100e22,silColor3:0x161230,fogColor:0x0a0814,fgColor:0x06040a,moonTint:0x3a1a2a,lightColor:0xba3a6a,desc:'Void and cracks'},
+  {name:'rebirth',skyTop:0x060e14,skyMid:0x0e1e2e,skyBot:0x1a3a48,horizonGlow:0x3a8a8a,silColor:0x0a1820,silColor2:0x102230,silColor3:0x162c40,fogColor:0x0e1a24,fgColor:0x081010,moonTint:0x2a6a6a,lightColor:0x4ababa,desc:'Fragments and reflections'},
+  {name:'exodus',skyTop:0x08040a,skyMid:0x14081a,skyBot:0x220e2a,horizonGlow:0x6a1a5a,silColor:0x100818,silColor2:0x180e24,silColor3:0x20142e,fogColor:0x120a18,fgColor:0x0a060c,moonTint:0x4a1a3a,lightColor:0xda3a7a,desc:'Final descent'}
 ];
 function getCurrentAct(){return Math.floor(state.level/5)}
 function createBackground(){if(!bgContainer)return;bgContainer.removeChildren();bgLayers=[];bgStars=[];bgDistantLights=[];bgFogSprites=[];
