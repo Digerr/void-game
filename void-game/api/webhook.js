@@ -122,7 +122,7 @@ export default async function handler(req, res) {
           {
             reply_markup: {
               inline_keyboard: [[
-                { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+                { text: '▶ ИГРАТЬ', url: GAME_URL }
               ]]
             }
           }
@@ -164,14 +164,14 @@ export default async function handler(req, res) {
     // Register bot commands on first /start
     await setBotCommands(BOT_TOKEN);
 
-    // In groups: use inline keyboard (Reply Keyboard doesn't work in groups)
+    // In groups/channels: use URL button (web_app only works in private chats)
     if (isGroupChat) {
       await sendMsg(BOT_TOKEN, chatId,
         `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 30 уровней, 6 актов, магнитный шарф, паркур.\n\nНажми ▶ ИГРАТЬ чтобы начать →`,
         {
           reply_markup: {
             inline_keyboard: [[
-              { text: '▶ ИГРАТЬ', web_app: { url: GAME_URL } }
+              { text: '▶ ИГРАТЬ', url: GAME_URL }
             ]]
           }
         }
