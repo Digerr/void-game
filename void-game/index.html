@@ -950,11 +950,16 @@ function initAudio(){
   if(audioInited)return;
   try{
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    masterGain=audioCtx.createGain();masterGain.gain.value=1;masterGain.connect(audioCtx.destination);
-    sfxGain=audioCtx.createGain();sfxGain.gain.value=soundMuted?0:settings.sfxVolume;sfxGain.connect(masterGain);
-    musicGain=audioCtx.createGain();musicGain.gain.value=musicMuted?0:settings.musicVolume;musicGain.connect(masterGain);
+    // Compressor/limiter to prevent clipping and distortion
+    var compressor=audioCtx.createDynamicsCompressor();
+    compressor.threshold.value=-18;compressor.knee.value=12;compressor.ratio.value=8;
+    compressor.attack.value=0.003;compressor.release.value=0.15;
+    masterGain=audioCtx.createGain();masterGain.gain.value=0.85;
+    masterGain.connect(compressor);compressor.connect(audioCtx.destination);
+    sfxGain=audioCtx.createGain();sfxGain.gain.value=soundMuted?0:settings.sfxVolume*0.7;sfxGain.connect(masterGain);
+    musicGain=audioCtx.createGain();musicGain.gain.value=musicMuted?0:settings.musicVolume*0.7;musicGain.connect(masterGain);
     audioInited=true;
-    console.log('[VOID] Audio initialized');
+    console.log('[VOID] Audio initialized with compressor');
   }catch(e){console.warn('[VOID] Audio failed:',e)}
 }
 
@@ -1003,13 +1008,13 @@ function sfxDash(){
   playNoise(0.1,0.2,1500);playTone(200,0.08,'sawtooth',0.1,400);
 }
 function sfxDeath(cause){
-  playTone(200,0.4,'sawtooth',0.2,30);playNoise(0.5,0.25,800);
-  if(cause==='fall'){playTone(150,0.6,'sine',0.15,20)}
-  else if(cause==='spikes'){playNoise(0.3,0.3,3000)}
-  else if(cause==='saw'){playTone(400,0.3,'square',0.12,50)}
-  else if(cause==='enemy'){playTone(180,0.5,'square',0.15,40);playNoise(0.2,0.15,1200)}
-  else if(cause==='pendulum'){playTone(120,0.6,'sawtooth',0.2,60);playTone(80,0.4,'square',0.15,30)}
-  else if(cause==='darkness'){playTone(80,0.8,'sawtooth',0.25,15);playTone(50,0.6,'sine',0.2,10);playNoise(0.6,0.3,400)}
+  playTone(200,0.4,'sawtooth',0.15,30);playNoise(0.5,0.18,800);
+  if(cause==='fall'){playTone(150,0.6,'sine',0.1,20)}
+  else if(cause==='spikes'){playNoise(0.3,0.2,3000)}
+  else if(cause==='saw'){playTone(400,0.3,'square',0.08,50)}
+  else if(cause==='enemy'){playTone(180,0.5,'square',0.1,40);playNoise(0.2,0.1,1200)}
+  else if(cause==='pendulum'){playTone(120,0.6,'sawtooth',0.15,60);playTone(80,0.4,'square',0.1,30)}
+  else if(cause==='darkness'){playTone(80,0.8,'sawtooth',0.18,15);playTone(50,0.6,'sine',0.12,10);playNoise(0.6,0.2,400)}
 }
 function sfxWallSlide(){
   playNoise(0.06,0.06,600);
@@ -1084,26 +1089,26 @@ function startMusic(){
   var revBuf=ctx.createBuffer(2,Math.max(1,Math.floor(revLen)),ctx.sampleRate);
   for(var ch=0;ch<2;ch++){var d=revBuf.getChannelData(ch);for(var i=0;i<d.length;i++){d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.5)}}
   var convolver=ctx.createConvolver();convolver.buffer=revBuf;
-  var revGain=ctx.createGain();revGain.gain.value=0.3;
+  var revGain=ctx.createGain();revGain.gain.value=0.18;
   convolver.connect(revGain);revGain.connect(musicGain);
 
   // Delay effect
   var delay=ctx.createDelay(1);delay.delayTime.value=0.4;
-  var delayFb=ctx.createGain();delayFb.gain.value=0.3;
-  var delayG=ctx.createGain();delayG.gain.value=0.2;
+  var delayFb=ctx.createGain();delayFb.gain.value=0.2;
+  var delayG=ctx.createGain();delayG.gain.value=0.12;
   delay.connect(delayFb);delayFb.connect(delay);delay.connect(delayG);delayG.connect(musicGain);
 
   // Pad mix bus (goes to reverb + direct)
-  var padBus=ctx.createGain();padBus.gain.value=0.7;
+  var padBus=ctx.createGain();padBus.gain.value=0.45;
   padBus.connect(convolver);padBus.connect(musicGain);
 
   // Melody mix bus (goes to reverb + delay + direct)
-  var melBus=ctx.createGain();melBus.gain.value=0.55;
+  var melBus=ctx.createGain();melBus.gain.value=0.4;
   melBus.connect(convolver);melBus.connect(delay);melBus.connect(musicGain);
 
   // Soft sub drone (very quiet, just foundation)
   var subOsc=ctx.createOscillator();subOsc.type='sine';subOsc.frequency.value=55;
-  var subG=ctx.createGain();subG.gain.value=0.06;
+  var subG=ctx.createGain();subG.gain.value=0.04;
   var subLfo=ctx.createOscillator();subLfo.type='sine';subLfo.frequency.value=0.1;
   var subLfoG=ctx.createGain();subLfoG.gain.value=0.03;
   subLfo.connect(subLfoG);subLfoG.connect(subG.gain);subLfo.start();
@@ -1133,7 +1138,7 @@ function startMusic(){
     for(var n=0;n<notes.length;n++){
       var osc=ctx.createOscillator();osc.type='sine';osc.frequency.value=notes[n];
       var g=ctx.createGain();g.gain.value=0;
-      g.gain.linearRampToValueAtTime(0.035,ctx.currentTime+1.5);
+      g.gain.linearRampToValueAtTime(0.025,ctx.currentTime+1.5);
       osc.connect(g);g.connect(padBus);osc.start();
       padOscs.push({osc:osc,gain:g});
     }
@@ -1162,7 +1167,7 @@ function startMusic(){
     osc.frequency.value=freq;
     var g=ctx.createGain();
     g.gain.value=0;
-    var vol=0.04+Math.random()*0.03;
+    var vol=0.03+Math.random()*0.02;
     g.gain.linearRampToValueAtTime(vol,ctx.currentTime+0.15);
     g.gain.linearRampToValueAtTime(vol*0.6,ctx.currentTime+0.8);
     g.gain.linearRampToValueAtTime(0,ctx.currentTime+2);
@@ -1211,7 +1216,7 @@ function startMusic(){
   var windLfo=ctx.createOscillator();windLfo.type='sine';windLfo.frequency.value=0.06;
   var windLfoG=ctx.createGain();windLfoG.gain.value=100;
   windLfo.connect(windLfoG);windLfoG.connect(windFilt.frequency);windLfo.start();
-  var windG=ctx.createGain();windG.gain.value=0.02;
+  var windG=ctx.createGain();windG.gain.value=0.012;
   windSrc.connect(windFilt);windFilt.connect(windG);windG.connect(musicGain);windSrc.start();
 
   musicNodes=[subOsc,subLfo,windSrc,windLfo];
@@ -1260,11 +1265,11 @@ function stopMusic(){
 
 function toggleMusic(){
   musicMuted=!musicMuted;
-  if(musicGain){musicGain.gain.value=musicMuted?0:settings.musicVolume}
+  if(musicGain){musicGain.gain.value=musicMuted?0:settings.musicVolume*0.7}
 }
 function toggleSound(){
   soundMuted=!soundMuted;
-  if(sfxGain){sfxGain.gain.value=soundMuted?0:settings.sfxVolume}
+  if(sfxGain){sfxGain.gain.value=soundMuted?0:settings.sfxVolume*0.7}
 }
 
 // ═══ GAME STATE ═══
@@ -3689,7 +3694,7 @@ var playerSensorGround=null,playerSensorCeiling=null,playerSensorLeft=null,playe
 var COYOTE_DURATION=0.12,JUMP_BUFFER_DURATION=0.12,WALL_SLIDE_SPEED=2.0,PLAYER_W=18,PLAYER_H=34,TERMINAL_VELOCITY=16,JUMP_CUT_MULTIPLIER=0.55;
 
 function createPlayer(x,y){
-  player.body=MBodies.rectangle(x,y,PLAYER_W,PLAYER_H,{label:'player',friction:0.05,frictionStatic:0.3,restitution:0,density:0.002,inertia:Infinity,inverseInertia:0});
+  player.body=MBodies.rectangle(x,y,PLAYER_W,PLAYER_H,{label:'player',friction:0.001,frictionStatic:0.001,restitution:0,density:0.002,inertia:Infinity,inverseInertia:0});
   playerSensorGround=MBodies.rectangle(x,y+PLAYER_H/2,PLAYER_W-4,4,{label:'sensorGround',isSensor:true,isStatic:false});
   playerSensorCeiling=MBodies.rectangle(x,y-PLAYER_H/2,PLAYER_W-4,4,{label:'sensorCeiling',isSensor:true,isStatic:false});
   playerSensorLeft=MBodies.rectangle(x-PLAYER_W/2,y,4,PLAYER_H-8,{label:'sensorLeft',isSensor:true,isStatic:false});
@@ -4151,7 +4156,7 @@ function updateSaws(dt){sawTime+=dt;for(var i=0;i<sawSprites.length;i++){var saw
 // ═══ MOVING PLATFORMS ═══
 var movingPlatforms=[];
 function createMovingPlatform(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'movingPlatform',friction:0.8});
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'movingPlatform',friction:0.05});
   MWorld.add(world,body);
   var spr=new PIXI.Graphics();var mpTheme=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];spr.rect(0,0,data.w,data.h);spr.fill(lerpColor(mpTheme.platColor,0x2a3a2a,0.5));spr.rect(0,0,data.w,2);spr.fill(lerpColor(mpTheme.platTop,0x3a5a3a,0.5));spr.x=data.x;spr.y=data.y;
   gameContainer.addChild(spr);
@@ -4169,7 +4174,7 @@ function updateMovingPlatforms(dt){
 // ═══ FALLING PLATFORMS ═══
 var fallingPlatforms=[];
 function createFallingPlatform(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'fallingPlatform',friction:0.8});
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'fallingPlatform',friction:0.05});
   MWorld.add(world,body);
   var spr=new PIXI.Graphics();var fpTheme=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];spr.rect(0,0,data.w,data.h);spr.fill(lerpColor(fpTheme.platColor,0x1a0a0a,0.6));spr.rect(0,0,data.w,2);spr.fill(lerpColor(fpTheme.platTop,0x2a1a1a,0.5));spr.x=data.x;spr.y=data.y;
   gameContainer.addChild(spr);
@@ -4209,7 +4214,7 @@ function updateFallingPlatforms(dt){
 // ═══ DISAPPEARING PLATFORMS ═══
 var levelDisappearingPlatforms=[];
 function createDisappearingPlatform(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'disappearingPlatform',friction:0.8});
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'disappearingPlatform',friction:0.05});
   MWorld.add(world,body);
   var fpTheme=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];
   var spr=new PIXI.Graphics();
@@ -4244,7 +4249,7 @@ function updateDisappearingPlatforms(dt){
       if(dp.timer>=dp.hiddenTime){
         // Reappear
         var fpTheme2=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];
-        dp.body=MBodies.rectangle(dp.x+dp.w/2,dp.y+dp.h/2,dp.w,dp.h,{isStatic:true,label:'disappearingPlatform',friction:0.8});
+        dp.body=MBodies.rectangle(dp.x+dp.w/2,dp.y+dp.h/2,dp.w,dp.h,{isStatic:true,label:'disappearingPlatform',friction:0.05});
         MWorld.add(world,dp.body);
         dp.state='visible';dp.timer=0;dp.alpha=0.5;
         dp.sprite.visible=true;
@@ -4258,7 +4263,7 @@ function updateDisappearingPlatforms(dt){
 // ═══ TIMED SPIKE PLATFORMS ═══
 var levelTimedSpikePlatforms=[];
 function createTimedSpikePlatform(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'platform',friction:0.8});
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'platform',friction:0.05});
   MWorld.add(world,body);
   var fpTheme=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];
   var spr=new PIXI.Graphics();gameContainer.addChild(spr);
@@ -4547,7 +4552,7 @@ function updateAnchors(){
 
 // ═══ SPRINGS / TRAMPOLINES ═══
 function createSpring(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'springZone',friction:0.8});
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'springZone',friction:0.05});
   MWorld.add(world,body);
   var spr=new PIXI.Container();gameContainer.addChild(spr);
   var g=new PIXI.Graphics();spr.addChild(g);
@@ -5029,7 +5034,7 @@ function loadLevel(n){
   // Bottom boundary removed — player falls through and dies via fallZone sensor + position check
   // Platforms (act-themed colors)
   var actTheme=getLevelTheme();
-  for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.8});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(actTheme.platColor);spr.rect(0,0,p.w,2);spr.fill(actTheme.platTop);spr.rect(0,p.h-1,p.w,1);spr.fill(actTheme.platBot);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
+  for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.05});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(actTheme.platColor);spr.rect(0,0,p.w,2);spr.fill(actTheme.platTop);spr.rect(0,p.h-1,p.w,1);spr.fill(actTheme.platBot);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
   // Spikes (act-themed colors)
   if(lvl.spikes)for(var i=0;i<lvl.spikes.length;i++){var s=lvl.spikes[i];MWorld.add(world,MBodies.rectangle(s.x+s.w/2,s.y-10,s.w,20,{isStatic:true,isSensor:true,label:'deathZone'}));var spr=new PIXI.Graphics();var cnt=Math.floor(s.w/10);for(var j=0;j<cnt;j++){var tx=j*10;spr.moveTo(tx+5,s.y-12);spr.lineTo(tx,s.y+2);spr.lineTo(tx+10,s.y+2);spr.closePath();spr.fill(actTheme.spikeColor)}spr.x=s.x;gameContainer.addChild(spr);levelSprites.push(spr)}
   // Saws
@@ -7104,7 +7109,7 @@ function bindUI(){
   document.getElementById('hud-sound').addEventListener('click',function(){toggleSound();updateSoundButton()});
   document.getElementById('hud-sound').addEventListener('touchstart',function(e){e.preventDefault();toggleSound();updateSoundButton()},{passive:false});
   document.getElementById('btn-resume').addEventListener('click',function(){showScreen('playing')});
-  document.getElementById('btn-music').addEventListener('click',function(){var wasAllMuted=soundMuted&&musicMuted;if(wasAllMuted){soundMuted=false;musicMuted=false;if(sfxGain)sfxGain.gain.value=settings.sfxVolume;if(musicGain)musicGain.gain.value=settings.musicVolume}else{soundMuted=true;musicMuted=true;if(sfxGain)sfxGain.gain.value=0;if(musicGain)musicGain.gain.value=0}document.getElementById('btn-music').textContent='звук: '+(soundMuted?'выкл':'вкл')});
+  document.getElementById('btn-music').addEventListener('click',function(){var wasAllMuted=soundMuted&&musicMuted;if(wasAllMuted){soundMuted=false;musicMuted=false;if(sfxGain)sfxGain.gain.value=settings.sfxVolume*0.7;if(musicGain)musicGain.gain.value=settings.musicVolume*0.7}else{soundMuted=true;musicMuted=true;if(sfxGain)sfxGain.gain.value=0;if(musicGain)musicGain.gain.value=0}document.getElementById('btn-music').textContent='звук: '+(soundMuted?'выкл':'вкл')});
   document.getElementById('btn-quit').addEventListener('click',function(){if(confirm('Прогресс текущего уровня будет потерян. Выйти?')){clearLevel();stopMusic();showScreen('menu')}});
   // Pause settings button
   document.getElementById('btn-pause-settings').addEventListener('click',function(){showScreen('settings')});
@@ -7178,8 +7183,8 @@ function bindUI(){
     saveSettings();updateSettingsUI();
   });
   // Volume sliders
-  document.getElementById('sfx-vol-slider').addEventListener('input',function(){settings.sfxVolume=this.value/100;if(sfxGain&&!soundMuted)sfxGain.gain.value=settings.sfxVolume;document.getElementById('sfx-vol-label').textContent=this.value+'%';saveSettings()});
-  document.getElementById('music-vol-slider').addEventListener('input',function(){settings.musicVolume=this.value/100;if(musicGain&&!musicMuted)musicGain.gain.value=settings.musicVolume;document.getElementById('music-vol-label').textContent=this.value+'%';saveSettings()});
+  document.getElementById('sfx-vol-slider').addEventListener('input',function(){settings.sfxVolume=this.value/100;if(sfxGain&&!soundMuted)sfxGain.gain.value=settings.sfxVolume*0.7;document.getElementById('sfx-vol-label').textContent=this.value+'%';saveSettings()});
+  document.getElementById('music-vol-slider').addEventListener('input',function(){settings.musicVolume=this.value/100;if(musicGain&&!musicMuted)musicGain.gain.value=settings.musicVolume*0.7;document.getElementById('music-vol-label').textContent=this.value+'%';saveSettings()});
   document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem('void_progress');if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},achievements:[],challenges:{},firstLaunch:false};saveProgress();updateMenuStats();showScreen('menu')}});
   // Global menu click sound for all .btn and .menu-icon-btn elements
   var allBtns=document.querySelectorAll('.btn,.menu-icon-btn,.menu-challenge,.tb');
