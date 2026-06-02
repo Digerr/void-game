@@ -745,7 +745,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.17.1';
+var VOID_VERSION='2.17.2';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -3133,10 +3133,10 @@ if(isWallSlide){
 // aura removed — lighting handled by canvas overlay
 }
 
-function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
+function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,-1)}}
-function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
+function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
 function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}else if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}else if((a.label==='pendulumZone'&&b.label==='player')||(b.label==='pendulumZone'&&a.label==='player')){killPlayer('pendulum')}else if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
   // Checkpoint activation
   if((a.label==='checkpointZone'&&b.label==='player')||(b.label==='checkpointZone'&&a.label==='player')){
@@ -3374,7 +3374,7 @@ function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.
   }
   setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},700)}
 
-function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorCeiling'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);/* timer NOT reset here — keeps total level time accurate */// Reset pursuing darkness position to behind the respawn point
+function respawnPlayer(){if(player.sprite){player.sprite.destroy();player.sprite=null;player._gfx=null}if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorCeiling'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);/* timer NOT reset here — keeps total level time accurate */// Reset pursuing darkness position to behind the respawn point
 for(var di=0;di<levelDarkness.length;di++){var dk=levelDarkness[di];dk.x=Math.min(dk.x,sp.x-400);dk.warningShown=false}}
 
 // ═══ SAW BLADES ═══
@@ -3513,7 +3513,7 @@ function updateEnemies(dt){
 // ═══ PENDULUMS ═══
 var pendulums=[];
 function createPendulum(data){
-  var pivotX=data.px,pivotY=data.py,length=data.len||150,ballR=data.r||15;
+  var pivotX=data.x,pivotY=data.y,length=data.length||150,ballR=data.r||15;
   var ball=MBodies.circle(pivotX,pivotY+length,ballR,{label:'pendulumBall',density:0.005});
   var rod=MConstraint.create({pointA:{x:pivotX,y:pivotY},bodyB:ball,length:length,stiffness:1,damping:0});
   MWorld.add(world,[ball,rod]);
@@ -4198,7 +4198,7 @@ function loadLevel(n){
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;espr._base=eg;espr._ew=lvl.exit.w;espr._eh=lvl.exit.h;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -4252,7 +4252,7 @@ function updateTutorial(dt){
       tutorial.activeTip=tip.id;
       tgHaptic('light');
       // Auto-hide after 4s
-      setTimeout(function(){if(tutorial.activeTip===tip.id){tipEl.style.display='none';tutorial.activeTip=null}},4000);
+      (function(tipId){setTimeout(function(){if(tutorial.activeTip===tipId){tipEl.style.display='none';tutorial.activeTip=null}},4000)})(tip.id);
       break;
     }
   }
@@ -4399,7 +4399,7 @@ function updateExitGlow(dt){
     }
   }
 }
-function updateCamera(dt){if(!player.body||!pixiApp)return;dt=dt||0.016;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var lvl=LEVELS[state.level];
+function updateCamera(dt){if(!player.body||!pixiApp||!player.alive)return;dt=dt||0.016;var sw=pixiApp.screen.width,sh=pixiApp.screen.height;var lvl=LEVELS[state.level];
 // Enhanced look-ahead: based on facing AND velocity for predictive framing
 var velPredictX=player.body.velocity.x*0.12;
 var lookAheadX=player.facing*sw*0.08+velPredictX;
@@ -5079,7 +5079,7 @@ function lerpColor(c1,c2,t){
   var r=Math.round(r1+(r2-r1)*t),g=Math.round(g1+(g2-g1)*t),b=Math.round(b1+(b2-b1)*t);
   return(r<<16)|(g<<8)|b;
 }
-function updateBackground(){bgTime+=0.016;
+function updateBackground(dt){bgTime+=(dt||0.016);
 var act=getCurrentAct();
 var theme=getLevelTheme();
 for(var i=0;i<bgLayers.length;i++){bgLayers[i].sprite.x=-camera.x*bgLayers[i].speed;bgLayers[i].sprite.y=-camera.y*bgLayers[i].speed*0.3}
@@ -5160,8 +5160,8 @@ function showScreen(name){
   if(state.screen==='playing'||state.screen==='story'||state.screen==='paused'){keys={};touchState={left:false,right:false,jump:false,climbUp:false,climbDown:false}}
   state.screen=name;
   // Hide ALL overlay screens first to prevent any mixing
-  var overlays=['level-select','settings-screen','faq-screen','records-screen','challenge-screen','leaderboard-screen','profile-screen','story-screen','pause-screen','death-screen','win-screen'];
-  for(var i=0;i<overlays.length;i++){document.getElementById(overlays[i]).classList.remove('active')}
+  var overlays=['level-select','settings-screen','faq-screen','records-screen','challenge-screen','leaderboard-screen','profile-screen','story-screen','pause-screen','death-screen','win-screen','awakening','act-intro'];
+  for(var i=0;i<overlays.length;i++){var ov=document.getElementById(overlays[i]);if(ov)ov.classList.remove('active')}
   // Now show only the target
   document.getElementById('main-menu').classList.toggle('hidden',name!=='menu');
   document.getElementById('game-hud').classList.toggle('active',name==='playing'||name==='story');
@@ -5636,7 +5636,7 @@ function gameLoop(timestamp){
     var gDelta=(targetG-baseG)*player.body.mass*0.0012;
     Matter.Body.applyForce(player.body,player.body.position,{x:0,y:gDelta});
   }
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground();updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateMovingPlatforms(dt);updateFallingPlatforms(dt);updateLevers();updateEnemies(dt);updatePendulums();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
@@ -5644,7 +5644,7 @@ function gameLoop(timestamp){
   // Update dash trails
   for(var ti=state.dashTrails.length-1;ti>=0;ti--){state.dashTrails[ti].life-=rawDt;state.dashTrails[ti].alpha-=rawDt*2;if(state.dashTrails[ti].life<=0)state.dashTrails.splice(ti,1)}
   var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);var ts=mins+':'+(secs%60<10?'0':'')+(secs%60);var ds='смерти: '+state.deaths;if(ts!==state._lastHudTime){document.getElementById('hud-timer').textContent=ts;state._lastHudTime=ts}if(ds!==state._lastHudDeaths){document.getElementById('hud-deaths').textContent=ds;state._lastHudDeaths=ds}}
-  if(state.screen==='story'){updateCamera(rawDt);updateBackground()}
+  if(state.screen==='story'){updateCamera(rawDt);updateBackground(rawDt)}
   if(state.screen!=='playing')updateParticles(rawDt);
   // Draw flash overlay (reuse persistent Graphics to avoid GC thrashing)
   if(state.flashAlpha>0.01&&pixiApp){
@@ -5746,7 +5746,7 @@ function bindUI(){
   // Volume sliders
   document.getElementById('sfx-vol-slider').addEventListener('input',function(){settings.sfxVolume=this.value/100;if(sfxGain&&!soundMuted)sfxGain.gain.value=settings.sfxVolume;document.getElementById('sfx-vol-label').textContent=this.value+'%';saveSettings()});
   document.getElementById('music-vol-slider').addEventListener('input',function(){settings.musicVolume=this.value/100;if(musicGain&&!musicMuted)musicGain.gain.value=settings.musicVolume;document.getElementById('music-vol-label').textContent=this.value+'%';saveSettings()});
-  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem('void_progress');if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},achievements:[],challenges:{},firstLaunch:true};saveProgress();updateMenuStats();showScreen('menu')}});
+  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem('void_progress');if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},achievements:[],challenges:{},firstLaunch:false};saveProgress();updateMenuStats();showScreen('menu')}});
   // Global menu click sound for all .btn and .menu-icon-btn elements
   var allBtns=document.querySelectorAll('.btn,.menu-icon-btn,.menu-challenge,.tb');
   for(var bi=0;bi<allBtns.length;bi++){(function(btn){btn.addEventListener('click',function(){sfxMenuClick()})})(allBtns[bi])}
