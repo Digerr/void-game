@@ -23,7 +23,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 #main-menu>.menu-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;width:100%;height:100%;pointer-events:none;padding:0 0 max(12px,env(safe-area-inset-bottom))}
 #main-menu>.menu-content>*{pointer-events:auto}
 .logo-sub{font-size:.7rem;color:#9a9aaa;letter-spacing:.5em;text-transform:uppercase;margin-bottom:2px;font-weight:500}
-.logo-ver{font-size:.68rem;color:#9a9aaa;letter-spacing:.2em;font-weight:700}
+.logo-ver{font-size:.62rem;color:#9a9aaa;letter-spacing:.15em;font-weight:700;white-space:nowrap}
 .made-by{font-size:.55rem;color:#7a7a8a;letter-spacing:.35em;text-transform:uppercase;opacity:.7;font-weight:500}
 .btn{width:260px;padding:14px 20px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.22em;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#b0b0c0;font-family:inherit;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);margin-top:8px;border-radius:8px;position:relative;overflow:hidden;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,transparent 50%);pointer-events:none;border-radius:8px}
@@ -350,7 +350,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .ls-cell.locked::after{content:none}
 .menu-top{display:flex;flex-direction:column;align-items:center;flex-shrink:0;position:relative;z-index:1}
 .menu-mid{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;justify-content:center}
-.menu-bottom-row{display:flex;align-items:center;justify-content:space-between;width:280px;flex-shrink:0}
+.menu-bottom-row{display:flex;align-items:center;justify-content:space-between;width:320px;flex-shrink:0}
 .menu-progress{width:280px;height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden;position:relative}
 .menu-progress-fill{height:100%;background:linear-gradient(90deg,#1a3a5a,#3a6a9a,#5a8aba);border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1);position:relative}
 .menu-progress-fill::after{content:'';position:absolute;right:0;top:0;width:20px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25));border-radius:0 2px 2px 0}
