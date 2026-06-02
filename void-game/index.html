@@ -491,7 +491,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     <div class="hud-interact" id="hud-interact">✋</div>
     <div id="hud-darkness-warn" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:1.4rem;color:#3a1a4a;animation:darkPulse 0.8s infinite;display:none;pointer-events:none;z-index:25;text-shadow:0 0 12px rgba(60,20,80,.6)">▶</div>
     <div id="hud-flashlight" style="position:absolute;bottom:100px;right:12px;font-size:.5rem;color:#5a5a3a;letter-spacing:.1em;text-transform:uppercase;display:none;pointer-events:none;z-index:25">🔦 фонарик</div>
-    <div id="hud-gravity" style="position:absolute;bottom:130px;right:12px;font-size:.5rem;color:#6a4a8a;letter-spacing:.1em;text-transform:uppercase;display:none;pointer-events:none;z-index:25">⇅ анти-гравитация</div>
+
     <div class="tutorial-tip" id="tutorial-tip" style="display:none"></div>
   </div>
   <div id="touch-controls">
@@ -739,7 +739,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='2.13.0';
+var VOID_VERSION='2.14.0';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -1769,8 +1769,6 @@ var LEVELS=[
     movingPlatforms:[
       {x:2100,y:600,w:100,h:16,axis:'x',range:300,speed:1.2},
     ],
-    // Ceiling platforms for gravity zone
-    gravityZones:[{x:1900,y:50,w:600,h:700,dir:-1}],
   },
   {
     name:'Тени',story:'Ты не один во тьме. Что-то движется в глубине — тёмные силуэты, патрулирующие свои владения. Они не видят, но чувствуют.',
@@ -1987,8 +1985,6 @@ var LEVELS=[
     saws:[{x:2500,y:730,r:25}],
     checkpoints:[{x:1900,y:400},{x:3900,y:360}],
     portals:[{x1:440,y1:500,x2:1700,y2:460,r:18}],
-    // Gravity zone section with ceiling platforms
-    gravityZones:[{x:3200,y:100,w:500,h:700,dir:-1}],
   },
   {
     name:'Лабиринт',story:'Стены смыкаются, образуя коридоры. Каждый поворот — выбор. Каждый тупик — смерть. Лабиринт тьмы не прощает ошибок, но тому, кто найдёт выход, откроется новая истина.',
@@ -2282,8 +2278,6 @@ var LEVELS=[
     checkpoints:[{x:1700,y:480},{x:3400,y:460}],
     springs:[{x:700,y:560,w:40,h:16,force:-24}],
     portals:[{x1:3100,y1:460,x2:4100,y2:390,r:18}],
-    // Gravity zone in the chaos section
-    gravityZones:[{x:2600,y:80,w:400,h:700,dir:-1}],
   },
   {
     name:'Врата',story:'Последние врата перед глубиной. Заперты на три замка — три рычага в разных концах тьмы. Каждый рычаг — испытание. Каждая дверь — шаг ближе к истине.',
@@ -2332,8 +2326,6 @@ var LEVELS=[
     checkpoints:[{x:750,y:530},{x:1900,y:460},{x:3300,y:430}],
     wind:[{x:3000,y:300,w:200,h:250,forceX:0,forceY:-3}],
     darkness:[{startX:-100,speed:1.1,height:900}],
-    // Gravity zone in final section
-    gravityZones:[{x:4000,y:50,w:500,h:700,dir:-1}]
   },
   // ═══ ACT V: ВОЗРОЖДЕНИЕ (уровни 21-25) ═══
   {
@@ -2411,10 +2403,6 @@ var LEVELS=[
     ],
     spikes:[{x:440,y:780,w:60},{x:960,y:780,w:60},{x:2050,y:780,w:80}],
     saws:[{x:1700,y:730,r:25},{x:2900,y:730,r:28},{x:4100,y:730,r:25}],
-    gravityZones:[
-      {x:1050,y:50,w:500,h:750,dir:-1},
-      {x:2300,y:50,w:500,h:750,dir:-1},
-    ],
     anchors:[{x:800,y:300},{x:1600,y:200},{x:2200,y:150},{x:3000,y:120},{x:3800,y:100}],
     portals:[{x1:450,y1:510,x2:1700,y2:460,r:18}],
     checkpoints:[{x:1200,y:460},{x:2400,y:430},{x:4250,y:430}],
@@ -2561,7 +2549,6 @@ var LEVELS=[
       {x:2200,y:200,r:30,length:250,speed:2.0},
       {x:4400,y:180,r:35,length:280,speed:1.8},
     ],
-    gravityZones:[{x:1450,y:50,w:500,h:800,dir:-1}],
     anchors:[{x:500,y:400},{x:1100,y:300},{x:1800,y:200},{x:2500,y:150},{x:3100,y:120},{x:3800,y:100},{x:4500,y:80},{x:5200,y:60}],
     enemies:[
       {x:1500,y:810,range:200,speed:2.0},
@@ -2670,10 +2657,6 @@ var LEVELS=[
     saws:[{x:1600,y:780,r:28},{x:2400,y:780,r:25},{x:3700,y:780,r:28},{x:5300,y:780,r:25}],
     levers:[
       {x:3780,y:384,doorX:3900,doorY:750,doorW:20,doorH:100,id:'vortex1'},
-    ],
-    gravityZones:[
-      {x:600,y:50,w:500,h:800,dir:-1},
-      {x:2400,y:50,w:500,h:800,dir:-1},
     ],
     anchors:[{x:500,y:400},{x:1100,y:300},{x:1800,y:200},{x:2500,y:150},{x:3200,y:120},{x:3900,y:100},{x:4600,y:80},{x:5300,y:60}],
     enemies:[
@@ -2802,7 +2785,6 @@ var LEVELS=[
       {x:3200,y:180,r:30,length:250,speed:2.2},
       {x:4600,y:160,r:32,length:280,speed:2.0},
     ],
-    gravityZones:[{x:3450,y:50,w:500,h:750,dir:-1}],
     anchors:[{x:800,y:300},{x:1200,y:200},{x:1900,y:150},{x:2500,y:120},{x:3200,y:100},{x:4000,y:80},{x:4700,y:60},{x:5400,y:50}],
     enemies:[
       {x:1100,y:760,range:180,speed:2.0},
@@ -2867,7 +2849,6 @@ var LEVELS=[
       {x:1700,y:250,r:30,length:250,speed:2.2},
       {x:4400,y:200,r:35,length:280,speed:2.0},
     ],
-    gravityZones:[{x:2000,y:50,w:500,h:850,dir:-1}],
     levers:[
       {x:3080,y:464,doorX:3200,doorY:800,doorW:20,doorH:100,id:'exodus1'},
     ],
@@ -2933,9 +2914,9 @@ function updateParticles(dt){for(var i=particles.length-1;i>=0;i--){var p=partic
 function clearParticles(){for(var i=0;i<particles.length;i++){if(particles[i].sprite)particles[i].sprite.destroy()}particles=[]}
 
 // ═══ PLAYER ═══
-var player={body:null,sprite:null,speed:7.5,accelGround:100,accelAir:65,decelGround:85,decelAir:35,jumpForce:-15,wallJumpForceX:11,wallJumpForceY:-14,dashSpeed:21,dashDuration:0.14,dashCooldown:0.45,gravityUp:0.95,gravityDown:2.3,apexThreshold:3.0,apexGravityMult:0.4,airControlBonus:0.75,onGround:false,wasOnGround:false,onCeiling:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0,squashDur:0.15,squashFromX:1,squashFromY:1,gravityDir:1,prevGravityDir:1};
+var player={body:null,sprite:null,speed:6.5,accelGround:80,accelAir:55,decelGround:70,decelAir:30,jumpForce:-13.5,wallJumpForceX:10,wallJumpForceY:-12.5,dashSpeed:18,dashDuration:0.13,dashCooldown:0.4,gravityUp:1.1,gravityDown:2.0,apexThreshold:2.5,apexGravityMult:0.5,airControlBonus:0.85,terminalVelocity:16,onGround:false,wasOnGround:false,onCeiling:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0,squashDur:0.15,squashFromX:1,squashFromY:1,landSquashTimer:0,visualFacing:1,visualFacingTimer:0};
 var playerSensorGround=null,playerSensorCeiling=null,playerSensorLeft=null,playerSensorRight=null;
-var COYOTE_DURATION=0.15,JUMP_BUFFER_DURATION=0.15,WALL_SLIDE_SPEED=1.8,PLAYER_W=18,PLAYER_H=34;
+var COYOTE_DURATION=0.12,JUMP_BUFFER_DURATION=0.12,WALL_SLIDE_SPEED=2.0,PLAYER_W=18,PLAYER_H=34,TERMINAL_VELOCITY=16,JUMP_CUT_MULTIPLIER=0.55;
 
 function createPlayer(x,y){
   player.body=MBodies.rectangle(x,y,PLAYER_W,PLAYER_H,{label:'player',friction:0.05,frictionStatic:0.3,restitution:0,density:0.002,inertia:Infinity,inverseInertia:0});
@@ -2958,16 +2939,17 @@ function createPlayer(x,y){
   player.onGround=false;player.wasOnGround=false;player.onWallLeft=false;player.onWallRight=false;
   player.wallSliding=false;player.alive=true;player.coyoteTime=0;player.jumpBuffer=0;player.facing=1;
   player.dashing=false;player.dashTimer=0;player.dashCooldownTimer=0;player.animTime=0;player.runCycle=0;
-  player.lastGroundY=y;player.justLanded=false;player.nearLever=null;player.velocityX=0;player.squashX=1;player.squashY=1;player.squashTimer=0;player.squashFromX=1;player.squashFromY=1;player.gravityDir=1;player.prevGravityDir=1;
+  player.lastGroundY=y;player.justLanded=false;player.nearLever=null;player.velocityX=0;player.squashX=1;player.squashY=1;player.squashTimer=0;player.squashFromX=1;player.squashFromY=1;player.landSquashTimer=0;player.visualFacing=1;player.visualFacingTimer=0;
   setupPlayerSensors();
 }
 
 function drawPlayerParts(){if(!player.sprite||!player._gfx)return;var g=player._gfx;g.clear();var vx=player.body.velocity.x,vy=player.body.velocity.y,t=player.animTime;var isRunning=player.onGround&&Math.abs(vx)>0.5;var isJumping=!player.onGround&&vy<-1;var isFalling=!player.onGround&&vy>1;var isIdle=player.onGround&&Math.abs(vx)<0.5;var isSwinging=thread.active;var isWallSlide=player.wallSliding;var bodyBob=0;if(isRunning)bodyBob=Math.sin(player.runCycle*12)*1.5;if(isIdle)bodyBob=Math.sin(t*2)*0.5;
 var skin=getCurrentSkin();
+var vf=player.visualFacing;
 // === SCARF (behind body, flowing) ===
-var scarfWave=isRunning?Math.sin(t*10-1)*0.4:isWallSlide?Math.sin(t*6)*0.3:Math.sin(t*1.5)*0.15;var scarfEndX=-player.facing*6+Math.sin(scarfWave)*6;var scarfEndY=-PLAYER_H/2-2+bodyBob*0.3+Math.sin(t*2)*2;
-g.moveTo(-1,-PLAYER_H/2+3+bodyBob*0.3);g.quadraticCurveTo(scarfEndX,scarfEndY+4,scarfEndX-player.facing*3,scarfEndY+10);g.stroke({width:2.5,color:skin.scarf});
-g.moveTo(0,-PLAYER_H/2+4+bodyBob*0.3);g.quadraticCurveTo(scarfEndX+2,scarfEndY+6,scarfEndX-player.facing*1,scarfEndY+12);g.stroke({width:2,color:skin.scarf2});
+var scarfWave=isRunning?Math.sin(t*10-1)*0.4:isWallSlide?Math.sin(t*6)*0.3:Math.sin(t*1.5)*0.15;var scarfEndX=-vf*6+Math.sin(scarfWave)*6;var scarfEndY=-PLAYER_H/2-2+bodyBob*0.3+Math.sin(t*2)*2;
+g.moveTo(-1,-PLAYER_H/2+3+bodyBob*0.3);g.quadraticCurveTo(scarfEndX,scarfEndY+4,scarfEndX-vf*3,scarfEndY+10);g.stroke({width:2.5,color:skin.scarf});
+g.moveTo(0,-PLAYER_H/2+4+bodyBob*0.3);g.quadraticCurveTo(scarfEndX+2,scarfEndY+6,scarfEndX-vf*1,scarfEndY+12);g.stroke({width:2,color:skin.scarf2});
 // === BODY (cute rounded) ===
 var torsoY=-PLAYER_H/2+6+bodyBob;g.ellipse(0,torsoY+3,7,9);g.fill(skin.body);
 // Body highlight
@@ -2984,7 +2966,7 @@ g.moveTo(6,headY-5);g.lineTo(10,headY-16-earWiggle);g.lineTo(2,headY-8);g.closeP
 g.moveTo(-5,headY-6);g.lineTo(-8,headY-14+earWiggle);g.lineTo(-3,headY-8);g.closePath();g.fill({color:0x8a6aa0,alpha:0.5});
 g.moveTo(5,headY-6);g.lineTo(8,headY-14-earWiggle);g.lineTo(3,headY-8);g.closePath();g.fill({color:0x8a6aa0,alpha:0.5});
 // === EYES (big, expressive, cute) ===
-var ex=player.facing*2;var eyeY=headY+0;
+var ex=vf*2;var eyeY=headY+0;
 var blinkPhase=t%4;var isBlinking=(blinkPhase>3.8&&blinkPhase<3.95);
 var blinkScale=isBlinking?0.1:1;
 // Left eye
@@ -3141,12 +3123,10 @@ function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZ
     for(var spi=0;spi<levelSprings.length;spi++){
       if(levelSprings[spi].body===spBody){
         var sp=levelSprings[spi];
-        var springForce=player.gravityDir===-1?-sp.force:sp.force;
-        MBody.setVelocity(player.body,{x:player.body.velocity.x,y:springForce});
+        MBody.setVelocity(player.body,{x:player.body.velocity.x,y:sp.force});
         sp.compressed=true;sp.compressTimer=0.2;
-        var springDir=player.gravityDir===-1?1:-1;
-        spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2*springDir,8,0x3a7a6a,{angle:-Math.PI/2*springDir,spread:2,speed:3,life:0.4,size:2.5,gravity:1});
-        spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2*springDir,4,0x4a8a7a,{angle:-Math.PI/2*springDir,spread:1,speed:2,life:0.3,size:1.5,gravity:0.5});
+        spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,8,0x3a7a6a,{angle:-Math.PI/2,spread:2,speed:3,life:0.4,size:2.5,gravity:1});
+        spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x4a8a7a,{angle:-Math.PI/2,spread:1,speed:2,life:0.3,size:1.5,gravity:0.5});
         tgHaptic('medium');sfxSpring();
         break;
       }
@@ -3175,30 +3155,36 @@ function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZ
 
 function updatePlayer(dt){
   if(!player.alive||!player.body)return;
-  // Gravity direction: 1=normal (down), -1=inverted (up)
-  player.prevGravityDir=player.gravityDir;
+  // Ground/wall detection from sensors
+  player.wasOnGround=player.onGround;
+  player.onGround=playerSensorGround._colliding>0;
   player.onCeiling=playerSensorCeiling._colliding>0;
-  // In inverted gravity, ceiling IS the ground
-  if(player.gravityDir===-1){
-    player.wasOnGround=player.onGround;player.onGround=player.onCeiling;
-  }else{
-    player.wasOnGround=player.onGround;player.onGround=playerSensorGround._colliding>0;
-  }
-  player.onWallLeft=playerSensorLeft._colliding>0;player.onWallRight=playerSensorRight._colliding>0;
+  player.onWallLeft=playerSensorLeft._colliding>0;
+  player.onWallRight=playerSensorRight._colliding>0;
   player.justLanded=false;
-  // Gravity transition effect
-  if(player.gravityDir!==player.prevGravityDir){
-    state.flashColor=0x4a2a6a;state.flashAlpha=0.15;state.flashTimer=0.2;
-    spawnParticles(player.body.position.x,player.body.position.y,15,0x6a4a8a,{speed:3,life:0.6,size:3,gravity:0});
-    tgHaptic('medium');sfxGravityFlip();
+  // Landing detection + squash
+  if(player.onGround&&!player.wasOnGround){
+    player.justLanded=true;
+    var fd=player.lastGroundY-player.body.position.y;
+    if(fd>15){
+      var sqAmt=Math.min(1+(fd-15)/60,1.45);
+      player.squashFromX=sqAmt;player.squashFromY=2-sqAmt;
+      player.squashDur=0.2;player.squashTimer=0.2;
+      player.landSquashTimer=0.12;
+    }
+    if(fd>50){
+      spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,12,0x4a4a5a,{angle:-Math.PI/2,spread:2.5,speed:2,life:0.5,size:3.5,gravity:1});
+      spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,5,0x6a6a8a,{angle:-Math.PI/2,spread:1.5,speed:1.2,life:0.35,size:2,gravity:0.8});
+      state.shakeAmount=Math.min(fd*0.02,4);state.shakeTime=0.2;sfxLand(true);
+    }else if(fd>12){
+      spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,4,0x3a3a4a,{angle:-Math.PI/2,spread:1.5,speed:1,life:0.3,size:2,gravity:1});
+      sfxLand(false);
+    }
+    player.lastGroundY=player.body.position.y;
+    tgHaptic('light');
   }
-  if(player.onGround&&!player.wasOnGround){player.justLanded=true;var fd=player.lastGroundY-player.body.position.y;
-    // Squash & stretch on landing
-    if(fd>20){var sqAmt=Math.min(1+(fd-20)/80,1.4);player.squashFromX=sqAmt;player.squashFromY=2-sqAmt;player.squashDur=0.18;player.squashTimer=0.18}
-    var landDir=player.gravityDir===-1?-1:1;
-    var landOffY=PLAYER_H/2*landDir;
-    if(fd>50){spawnParticles(player.body.position.x,player.body.position.y+landOffY,12,0x4a4a5a,{angle:-Math.PI/2*landDir,spread:2.5,speed:2,life:0.5,size:3.5,gravity:1});spawnParticles(player.body.position.x,player.body.position.y+landOffY,5,0x6a6a8a,{angle:-Math.PI/2*landDir,spread:1.5,speed:1.2,life:0.35,size:2,gravity:0.8});state.shakeAmount=Math.min(fd*0.02,4);state.shakeTime=0.2;sfxLand(true)}else if(fd>15){spawnParticles(player.body.position.x,player.body.position.y+landOffY,4,0x3a3a4a,{angle:-Math.PI/2*landDir,spread:1.5,speed:1,life:0.3,size:2,gravity:1});sfxLand(false)}player.lastGroundY=player.body.position.y;tgHaptic('light')}
   if(player.onGround)player.lastGroundY=player.body.position.y;
+  // Coyote time + jump buffer
   if(player.onGround)player.coyoteTime=COYOTE_DURATION;else player.coyoteTime-=dt;
   if(player.inputJumpPressed){player.jumpBuffer=JUMP_BUFFER_DURATION;player.inputJumpPressed=false}else player.jumpBuffer-=dt;
 
@@ -3213,17 +3199,21 @@ function updatePlayer(dt){
 
   // Dash
   player.dashCooldownTimer-=dt;
-  if(player.dashing){player.dashTimer-=dt;if(player.dashTimer<=0)player.dashing=false;else{player.velocityX=player.dashDir*player.dashSpeed;MBody.setVelocity(player.body,{x:player.velocityX,y:0});if(Math.random()<0.7)spawnParticles(player.body.position.x-player.dashDir*10,player.body.position.y,1,0x5a5a8a,{angle:Math.PI+player.dashDir*0.5,spread:0.5,speed:1.5,life:0.25,size:2.5,gravity:0})}}
+  if(player.dashing){
+    player.dashTimer-=dt;
+    if(player.dashTimer<=0)player.dashing=false;
+    else{
+      player.velocityX=player.dashDir*player.dashSpeed;
+      MBody.setVelocity(player.body,{x:player.velocityX,y:0});
+      if(Math.random()<0.7)spawnParticles(player.body.position.x-player.dashDir*10,player.body.position.y,1,0x5a5a8a,{angle:Math.PI+player.dashDir*0.5,spread:0.5,speed:1.5,life:0.25,size:2.5,gravity:0});
+    }
+  }
   else if(thread.active){
-    // While on thread: swing with left/right, with angular velocity damping
+    // While on thread: swing with left/right
     var swingForce=player.inputX*0.08;
     MBody.applyForce(player.body,player.body.position,{x:swingForce,y:0});
-    // Anti-spin: cap angular velocity and apply damping
     var angVel=player.body.angularVelocity||0;
-    if(Math.abs(angVel)>2){
-      MBody.setAngularVelocity(player.body,Math.sign(angVel)*2);
-    }
-    // Gradual angular damping while on thread
+    if(Math.abs(angVel)>2)MBody.setAngularVelocity(player.body,Math.sign(angVel)*2);
     MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.92);
     player.velocityX=player.body.velocity.x;
   }
@@ -3231,13 +3221,11 @@ function updatePlayer(dt){
     // Smooth acceleration/deceleration
     var targetVx=player.inputX*player.speed;
     if(player.inputX!==0){
-      // Accelerating
       var accel=player.onGround?player.accelGround:player.accelAir;
-      // Air control bonus: allow faster direction change in air
-      if(!player.onGround&&player.inputX!==0&&Math.sign(targetVx)!==Math.sign(player.velocityX))accel+=player.airControlBonus*60;
+      // Air control bonus: faster direction change in air
+      if(!player.onGround&&Math.sign(targetVx)!==Math.sign(player.velocityX))accel+=player.airControlBonus*60;
       player.velocityX+=(targetVx-player.velocityX)*Math.min(1,accel*dt);
     }else{
-      // Decelerating
       var decel=player.onGround?player.decelGround:player.decelAir;
       player.velocityX*=(1-Math.min(1,decel*dt));
       if(Math.abs(player.velocityX)<0.1)player.velocityX=0;
@@ -3245,60 +3233,105 @@ function updatePlayer(dt){
     MBody.setVelocity(player.body,{x:player.velocityX,y:player.body.velocity.y});
     if(player.onGround&&Math.abs(player.velocityX)>3&&Math.random()<0.3)spawnParticles(player.body.position.x-player.facing*4,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:-Math.PI/2+player.facing*0.3,spread:0.6,speed:0.8,life:0.25,size:1.8,gravity:0.5});
   }
-  // Challenge mode: only_dash modifier — prevent walking
+  // Challenge mode: only_dash modifier
   if(challengeMode&&currentChallenge&&currentChallenge.modifier.id==='only_dash'&&!player.dashing){player.velocityX=0;player.inputX=0}
   if(player.inputDashPressed&&!player.dashing&&player.dashCooldownTimer<=0){
-    // Challenge mode: no_dash modifier
     if(challengeMode&&currentChallenge&&currentChallenge.modifier.id==='no_dash'){player.inputDashPressed=false}
-    else{player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();unlockAchievement('dash_king');progress.stats.dashes=(progress.stats.dashes||0)+1;spawnParticles(player.body.position.x,player.body.position.y,12,0x6a6aaa,{angle:Math.PI+player.dashDir,spread:1.2,speed:3.5,life:0.4,size:3.5,gravity:0});spawnParticles(player.body.position.x,player.body.position.y,6,0x8a8acc,{angle:Math.PI+player.dashDir,spread:0.5,speed:2,life:0.3,size:2,gravity:0});player.squashFromX=1.35;player.squashFromY=0.7;player.squashDur=0.12;player.squashTimer=0.12;state.slowMo=0.15;state.slowMoTimer=0.03;state.shakeAmount=2;state.shakeTime=0.08;state.flashColor=0x4a4a8a;state.flashAlpha=0.12;state.flashTimer=0.1}}
+    else{player.dashing=true;player.dashTimer=player.dashDuration;player.dashCooldownTimer=player.dashCooldown;player.dashDir=player.inputX!==0?(player.inputX>0?1:-1):player.facing;player.inputDashPressed=false;tgHaptic('medium');sfxDash();unlockAchievement('dash_king');progress.stats.dashes=(progress.stats.dashes||0)+1;spawnParticles(player.body.position.x,player.body.position.y,12,0x6a6aaa,{angle:Math.PI+player.dashDir,spread:1.2,speed:3.5,life:0.4,size:3.5,gravity:0});spawnParticles(player.body.position.x,player.body.position.y,6,0x8a8acc,{angle:Math.PI+player.dashDir,spread:0.5,speed:2,life:0.3,size:2,gravity:0});player.squashFromX=1.35;player.squashFromY=0.7;player.squashDur=0.12;player.squashTimer=0.12;state.slowMo=0.15;state.slowMoTimer=0.03;state.shakeAmount=2;state.shakeTime=0.08;state.flashColor=0x4a4a8a;state.flashAlpha=0.12;state.flashTimer=0.1}
+  }
   player.inputDashPressed=false;
   if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
   // Wall slide
-  var _wasWallSliding=player.wallSliding;player.wallSliding=false;if(!player.onGround&&(player.onWallLeft||player.onWallRight)){if((player.onWallLeft&&player.inputX<0)||(player.onWallRight&&player.inputX>0)){player.wallSliding=true;if(!_wasWallSliding){var wxg=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wxg,player.body.position.y,5,0x5a5a7a,{angle:player.onWallLeft?0:Math.PI,spread:1.5,speed:1.5,life:0.3,size:2,gravity:0.5})}var vy2=player.body.velocity.y;if(vy2>WALL_SLIDE_SPEED)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:WALL_SLIDE_SPEED});if(Math.random()<0.1){var wx=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:player.onWallLeft?0:Math.PI,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.3});sfxWallSlide()}}}
+  var _wasWallSliding=player.wallSliding;player.wallSliding=false;
+  if(!player.onGround&&(player.onWallLeft||player.onWallRight)){
+    if((player.onWallLeft&&player.inputX<0)||(player.onWallRight&&player.inputX>0)){
+      player.wallSliding=true;
+      if(!_wasWallSliding){
+        var wxg=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;
+        spawnParticles(wxg,player.body.position.y,5,0x5a5a7a,{angle:player.onWallLeft?0:Math.PI,spread:1.5,speed:1.5,life:0.3,size:2,gravity:0.5});
+      }
+      var vy2=player.body.velocity.y;
+      if(vy2>WALL_SLIDE_SPEED)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:WALL_SLIDE_SPEED});
+      if(Math.random()<0.1){
+        var wx=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;
+        spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:player.onWallLeft?0:Math.PI,spread:0.5,speed:0.5,life:0.2,size:1.5,gravity:0.3});sfxWallSlide();
+      }
+    }
+  }
 
   // Jump
-  var jf=player.gravityDir===-1?-player.jumpForce:player.jumpForce;
-  var jumpLandOffY=PLAYER_H/2*player.gravityDir;
-  var jumpAngle=-Math.PI/2*player.gravityDir;
   if(player.jumpBuffer>0){
     if(thread.active){
-      // Swing-jump: detach thread with upward boost
       var cvx=player.body.velocity.x;var cvy=player.body.velocity.y;
       detachThread();
-      MBody.setVelocity(player.body,{x:cvx*1.1,y:Math.min(cvy,jf*0.7)});
+      MBody.setVelocity(player.body,{x:cvx*1.1,y:Math.min(cvy,player.jumpForce*0.7)});
       player.jumpBuffer=0;player.coyoteTime=0;
       tgHaptic('medium');sfxJump();
-      spawnParticles(player.body.position.x,player.body.position.y+jumpLandOffY,5,0x4a4a8a,{angle:jumpAngle,spread:2,speed:2,life:0.3,size:2,gravity:1});
-    }else if(player.onGround||player.coyoteTime>0){MBody.setVelocity(player.body,{x:player.velocityX,y:jf});player.coyoteTime=0;player.jumpBuffer=0;tgHaptic('light');sfxJump();spawnParticles(player.body.position.x,player.body.position.y+jumpLandOffY,6,0x4a4a5a,{angle:jumpAngle,spread:2,speed:2,life:0.35,size:2.5,gravity:1});spawnParticles(player.body.position.x,player.body.position.y+jumpLandOffY,3,0x7a7aaa,{angle:jumpAngle,spread:1,speed:1,life:0.25,size:1.5,gravity:0.5});progress.stats.jumps=(progress.stats.jumps||0)+1;
-    // Jump stretch
-    player.squashFromX=0.78;player.squashFromY=1.22;player.squashDur=0.15;player.squashTimer=0.15;
-    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){var wd=player.onWallLeft?1:-1;player.velocityX=wd*player.wallJumpForceX;var wjf=player.gravityDir===-1?-player.wallJumpForceY:player.wallJumpForceY;MBody.setVelocity(player.body,{x:player.velocityX,y:wjf});player.jumpBuffer=0;player.coyoteTime=COYOTE_DURATION*0.5;tgHaptic('medium');sfxWallJump();unlockAchievement('wall_crawler');progress.stats.wallJumps=(progress.stats.wallJumps||0)+1;var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;spawnParticles(wx2,player.body.position.y,8,0x5a5a6a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2.5,life:0.35,size:2.5,gravity:0.5});spawnParticles(wx2,player.body.position.y,4,0x7a7a9a,{angle:wd===1?0:Math.PI,spread:0.8,speed:1.5,life:0.25,size:1.5,gravity:0});player.squashFromX=0.7;player.squashFromY=1.25;player.squashDur=0.1;player.squashTimer=0.1;
+      spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,5,0x4a4a8a,{angle:-Math.PI/2,spread:2,speed:2,life:0.3,size:2,gravity:1});
+    }else if(player.onGround||player.coyoteTime>0){
+      MBody.setVelocity(player.body,{x:player.velocityX,y:player.jumpForce});
+      player.coyoteTime=0;player.jumpBuffer=0;
+      tgHaptic('light');sfxJump();
+      spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,6,0x4a4a5a,{angle:-Math.PI/2,spread:2,speed:2,life:0.35,size:2.5,gravity:1});
+      spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2,3,0x7a7aaa,{angle:-Math.PI/2,spread:1,speed:1,life:0.25,size:1.5,gravity:0.5});
+      progress.stats.jumps=(progress.stats.jumps||0)+1;
+      // Jump stretch
+      player.squashFromX=0.78;player.squashFromY=1.22;player.squashDur=0.15;player.squashTimer=0.15;
+    }else if(player.wallSliding||player.onWallLeft||player.onWallRight){
+      var wd=player.onWallLeft?1:-1;
+      player.velocityX=wd*player.wallJumpForceX;
+      MBody.setVelocity(player.body,{x:player.velocityX,y:player.wallJumpForceY});
+      player.jumpBuffer=0;player.coyoteTime=COYOTE_DURATION*0.5;
+      tgHaptic('medium');sfxWallJump();unlockAchievement('wall_crawler');progress.stats.wallJumps=(progress.stats.wallJumps||0)+1;
+      var wx2=player.onWallLeft?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;
+      spawnParticles(wx2,player.body.position.y,8,0x5a5a6a,{angle:wd===1?0:Math.PI,spread:1.5,speed:2.5,life:0.35,size:2.5,gravity:0.5});
+      spawnParticles(wx2,player.body.position.y,4,0x7a7a9a,{angle:wd===1?0:Math.PI,spread:0.8,speed:1.5,life:0.25,size:1.5,gravity:0});
+      player.squashFromX=0.7;player.squashFromY=1.25;player.squashDur=0.1;player.squashTimer=0.1;
     }
   }
   // Variable jump height: releasing jump early cuts velocity for short hops
-  if(player.gravityDir===-1){
-    if(!player.inputJump&&player.body.velocity.y>2)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.75});
-  }else{
-    if(!player.inputJump&&player.body.velocity.y<-2)MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*0.75});
+  if(!player.inputJump&&player.body.velocity.y<-2){
+    MBody.setVelocity(player.body,{x:player.body.velocity.x,y:player.body.velocity.y*JUMP_CUT_MULTIPLIER});
   }
 
-  player.animTime+=dt;if(player.onGround&&Math.abs(player.body.velocity.x)>0.5)player.runCycle+=dt*Math.abs(player.body.velocity.x)*0.15;
-  // Squash & stretch animation (damped spring from stored initial values → 1.0)
-  if(player.squashTimer>0){player.squashTimer-=dt;if(player.squashTimer<=0){player.squashX=1;player.squashY=1}else{var t=1-player.squashTimer/player.squashDur;var spring=Math.cos(t*Math.PI*2.5)*Math.exp(-t*7);player.squashX=1+(player.squashFromX-1)*spring;player.squashY=1+(player.squashFromY-1)*spring;if(Math.abs(player.squashX-1)<0.008&&Math.abs(player.squashY-1)<0.008){player.squashX=1;player.squashY=1;player.squashTimer=0}}}
-  // Snap visual position directly to physics (camera already provides smooth tracking)
+  // Terminal velocity cap
+  if(player.body.velocity.y>TERMINAL_VELOCITY){
+    MBody.setVelocity(player.body,{x:player.body.velocity.x,y:TERMINAL_VELOCITY});
+  }
+
+  player.animTime+=dt;
+  if(player.onGround&&Math.abs(player.body.velocity.x)>0.5)player.runCycle+=dt*Math.abs(player.body.velocity.x)*0.15;
+  // Squash & stretch animation (damped spring)
+  if(player.squashTimer>0){
+    player.squashTimer-=dt;
+    if(player.squashTimer<=0){player.squashX=1;player.squashY=1}
+    else{
+      var t=1-player.squashTimer/player.squashDur;
+      var spring=Math.cos(t*Math.PI*2.5)*Math.exp(-t*7);
+      player.squashX=1+(player.squashFromX-1)*spring;
+      player.squashY=1+(player.squashFromY-1)*spring;
+      if(Math.abs(player.squashX-1)<0.008&&Math.abs(player.squashY-1)<0.008){player.squashX=1;player.squashY=1;player.squashTimer=0}
+    }
+  }
+  // Land squash timer (for visual state)
+  if(player.landSquashTimer>0)player.landSquashTimer-=dt;
+  // Smooth visual facing (no instant flip)
+  player.visualFacingTimer+=dt;
+  if(player.facing!==player.visualFacing&&player.visualFacingTimer>0.03){
+    player.visualFacing=player.facing;player.visualFacingTimer=0;
+  }
+  // Snap visual position to physics
   player.sprite.x=player.body.position.x;player.sprite.y=player.body.position.y;
-  // Apply squash & stretch scale + gravity flip
-  player.sprite.scale.set(player.squashX,player.squashY*player.gravityDir);
+  // Apply squash & stretch scale
+  player.sprite.scale.set(player.squashX,player.squashY);
   drawPlayerParts();
-  var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+100||(player.gravityDir===-1&&player.body.position.y<-100))killPlayer('fall');
+  // Death: fall off bottom
+  var lvl=LEVELS[state.level];if(player.body.position.y>lvl.height+100)killPlayer('fall');
   var dashReady=player.dashCooldownTimer<=0&&!player.dashing;document.getElementById('hud-dash').style.color=dashReady?'#3a5a6a':'#1a2a3a';
   var threadReady=!thread.active&&levelAnchors.length>0;var nearAnchor=false;
   if(threadReady&&player.body){for(var ai=0;ai<levelAnchors.length;ai++){var adx=player.body.position.x-levelAnchors[ai].x,ady=player.body.position.y-levelAnchors[ai].y;if(Math.sqrt(adx*adx+ady*ady)<thread.range){nearAnchor=true;break}}}
   document.getElementById('hud-thread').style.color=(thread.active||nearAnchor)?'#4a4a7a':'#1a2a2a';
-  // Restore default gravity after variable gravity calculations (so it doesn't affect other bodies permanently)
-  // Note: gravity is managed by updateGravityZones now, only reset if not in a gravity zone
-  if(player.gravityDir===1)engine.gravity.y=1.5;
 }
 
 function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:cause==='darkness'?0x1a0a2a:0x3e3e52;spawnParticles(px,py,30,dc,{speed:4,life:1.2,size:4,gravity:0.3});spawnParticles(px,py,12,0x6a6a9a,{speed:2.5,life:0.8,size:5,gravity:0});spawnParticles(px,py,5,0x99aacc,{speed:1.5,life:0.6,size:2.5,gravity:0});state.hitStop=0.03;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a1a1a;state.flashAlpha=0.25;state.flashTimer=0.3;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
@@ -3310,7 +3343,7 @@ function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.
   }
   setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},700)}
 
-function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorCeiling'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;player.gravityDir=1;createPlayer(sp.x,sp.y);/* timer NOT reset here — keeps total level time accurate */// Reset pursuing darkness position to behind the respawn point
+function respawnPlayer(){if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorCeiling'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);/* timer NOT reset here — keeps total level time accurate */// Reset pursuing darkness position to behind the respawn point
 for(var di=0;di<levelDarkness.length;di++){var dk=levelDarkness[di];dk.x=Math.min(dk.x,sp.x-400);dk.warningShown=false}}
 
 // ═══ SAW BLADES ═══
@@ -3774,70 +3807,10 @@ function updateWind(dt){
   }
 }
 
-// ═══ GRAVITY ZONES ═══
+// ═══ GRAVITY ZONES (removed — no longer used) ═══
 var levelGravityZones=[];
-function createGravityZone(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,isSensor:true,label:'gravityZone'});
-  MWorld.add(world,body);
-  var spr=new PIXI.Container();gameContainer.addChild(spr);
-  var g=new PIXI.Graphics();spr.addChild(g);
-  levelGravityZones.push({body:body,sprite:spr,_gfx:g,x:data.x,y:data.y,w:data.w,h:data.h,dir:data.dir||-1,particleTimer:0});
-}
-function updateGravityZones(dt){
-  // Detect if player is in a gravity zone (runs BEFORE updatePlayer)
-  var inZone=false;
-  if(player.alive&&player.body){
-    for(var i=0;i<levelGravityZones.length;i++){
-      var gz=levelGravityZones[i];
-      var px=player.body.position.x;var py=player.body.position.y;
-      if(px>gz.x&&px<gz.x+gz.w&&py>gz.y&&py<gz.y+gz.h){
-        inZone=true;
-        player.gravityDir=gz.dir;
-        break;
-      }
-    }
-  }
-  if(!inZone&&player.body)player.gravityDir=1;
-  // HUD gravity indicator
-  var gravHud=document.getElementById('hud-gravity');
-  if(gravHud)gravHud.style.display=(player.gravityDir===-1)?'block':'none';
-}
-function updateGravityZonesVisuals(dt){
-  // Apply inverted gravity force to player body
-  if(player.alive&&player.body&&player.gravityDir===-1){
-    var baseG=1.5;
-    Matter.Body.applyForce(player.body,player.body.position,{x:0,y:-baseG*2*player.body.mass*0.0012});
-  }
-  // Draw gravity zones
-  for(var i=0;i<levelGravityZones.length;i++){
-    var gz=levelGravityZones[i];
-    var g=gz._gfx;g.clear();
-    var t=sawTime;
-    // Zone background — deep purple glow
-    g.rect(0,0,gz.w,gz.h);g.fill({color:0x2a1a4a,alpha:0.08+Math.sin(t*2)*0.03});
-    // Border glow
-    g.rect(0,0,gz.w,gz.h);g.stroke({width:1,color:0x6a4a8a,alpha:0.2+Math.sin(t*1.5)*0.1});
-    // Floating direction indicators (arrows pointing up for inverted)
-    var arrowCount=Math.floor(gz.w/80);if(arrowCount<2)arrowCount=2;if(arrowCount>8)arrowCount=8;
-    gz.particleTimer+=dt;
-    for(var j=0;j<arrowCount;j++){
-      var phase=((t*0.3+j*0.25)%1);
-      var ax=gz.w*(0.15+0.7*((j*0.618)%1));
-      var ay=gz.h*(0.85-phase*0.7);
-      var arrowAlpha=0.25*(1-Math.abs(phase-0.5)*2);
-      // Upward chevron
-      g.moveTo(ax-6,ay+4);g.lineTo(ax,ay-4);g.lineTo(ax+6,ay+4);
-      g.stroke({width:1.5,color:0x8a6aaa,alpha:arrowAlpha});
-    }
-    // Occasional floating particles
-    if(Math.random()<0.06){
-      var ppx=gz.x+Math.random()*gz.w;
-      var ppy=gz.y+gz.h-Math.random()*gz.h*0.3;
-      spawnParticles(ppx,ppy,1,0x6a4a8a,{angle:-Math.PI/2,spread:0.5,speed:1,life:0.8,size:1.5,gravity:-0.3});
-    }
-    gz.sprite.x=gz.x;gz.sprite.y=gz.y;
-  }
-}
+function updateGravityZones(dt){}
+function updateGravityZonesVisuals(dt){}
 
 // ═══ PURSUING DARKNESS ═══
 var levelDarkness=[];
@@ -4177,7 +4150,7 @@ function loadLevel(n){
   // Wind
   levelWind=[];if(lvl.wind)for(var i=0;i<lvl.wind.length;i++)createWind(lvl.wind[i]);
   // Gravity zones
-  levelGravityZones=[];if(lvl.gravityZones)for(var i=0;i<lvl.gravityZones.length;i++)createGravityZone(lvl.gravityZones[i]);
+  levelGravityZones=[];
   // Pursuing Darkness
   levelDarkness=[];if(lvl.darkness)for(var i=0;i<lvl.darkness.length;i++)createDarkness(lvl.darkness[i]);
   // Checkpoints
@@ -4193,7 +4166,7 @@ function loadLevel(n){
   if(lvl.exit){MWorld.add(world,MBodies.rectangle(lvl.exit.x+lvl.exit.w/2,lvl.exit.y+lvl.exit.h/2,lvl.exit.w,lvl.exit.h,{isStatic:true,isSensor:true,label:'exitZone'}));var espr=new PIXI.Container();var eg=new PIXI.Graphics();espr.addChild(eg);var eglow=new PIXI.Graphics();espr.addChild(eglow);espr.x=lvl.exit.x;espr.y=lvl.exit.y;espr._isExit=true;espr._glow=eglow;espr._base=eg;espr._ew=lvl.exit.w;espr._eh=lvl.exit.h;gameContainer.addChild(espr)}
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null;player._gfx=null}player.gravityDir=1;state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer)gameContainer.removeChildren();if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -5346,15 +5319,13 @@ function gameLoop(timestamp){
   if(state.flashTimer>0){state.flashTimer-=rawDt;if(state.flashTimer<=0){state.flashAlpha=0;state.flashTimer=0}else{state.flashAlpha*=0.9}}
   if(state.screen==='playing'){readInput();updateGravityZones(dt);updatePlayer(dt);progress.stats.playTime=(progress.stats.playTime||0)+rawDt;
   // Variable gravity: lighter going up, heavier down, reduced at apex
-  // Apply to player body only via force, not global engine gravity
-  if(player.alive&&player.body&&player.gravityDir===1){
+  if(player.alive&&player.body){
     var pvy=player.body.velocity.y;
-    var baseG=1.5; // default engine.gravity.y
+    var baseG=1.5;
     var targetG=baseG;
     if(pvy<0)targetG=player.gravityUp;
     else if(pvy>0)targetG=player.gravityDown;
     if(!player.onGround&&Math.abs(pvy)<player.apexThreshold)targetG*=player.apexGravityMult;
-    // Apply delta force to player body only
     var gDelta=(targetG-baseG)*player.body.mass*0.0012;
     Matter.Body.applyForce(player.body,player.body.position,{x:0,y:gDelta});
   }
