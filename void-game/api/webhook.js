@@ -110,15 +110,64 @@ export default async function handler(req, res) {
   if (update.inline_query) {
     const iq = update.inline_query;
     const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8858889318:AAGramLmQGRhpJAyRWcJC8lPwkyrbDBiHcw';
-    const results = [
-      {
+    const iqUserId = iq.from?.id;
+    const iqUserName = esc(iq.from?.first_name || iq.from?.username || 'Игрок');
+
+    // Try to fetch user's stats from Supabase for personalized results
+    let playerStats = null;
+    let playerRank = -1;
+    if (iqUserId) {
+      try {
+        const sb = getSupabase();
+        const playerId = 'tg_' + iqUserId;
+        const { data: lbData } = await sb.from('leaderboard').select('*').eq('id', playerId).single();
+        if (lbData) {
+          const { count } = await sb.from('leaderboard').select('*', { count: 'exact', head: true }).gt('score', lbData.score);
+          playerRank = (count || 0) + 1;
+          playerStats = lbData;
+        }
+      } catch (e) {
+        console.error('[VOID] inline stats error:', e);
+      }
+    }
+
+    const results = [];
+
+    // Result 1: ▶ ИГРАТЬ
+    results.push({
+      type: 'article',
+      id: 'void_play',
+      title: '▶ ИГРАТЬ в VOID',
+      description: 'Платформер о памяти, которое забыло себя. 30 уровней, 6 актов.',
+      input_message_content: {
+        message_text: '🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя.\n30 уровней · 6 актов · магнитный шарф · паркур\n\nНажми ▶ ИГРАТЬ чтобы начать →',
+        parse_mode: 'HTML'
+      },
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '▶ ИГРАТЬ', url: GAME_URL }
+        ]]
+      }
+    });
+
+    // Result 2: 📊 Моя статистика (personalized or generic)
+    if (playerStats) {
+      results.push({
         type: 'article',
-        id: 'void_play',
-        title: '▶ ИГРАТЬ в VOID',
-        description: 'Платформер о памяти, которое забыло себя. 30 уровней, 6 актов.',
-        thumb_url: 'https://void-game-ruddy.vercel.app/',
+        id: 'void_stats',
+        title: `📊 ${iqUserName} — #${playerRank} в мире`,
+        description: `Уровни: ${playerStats.completed}/30 · ⭐${playerStats.total_stars} · Очки: ${playerStats.score}`,
         input_message_content: {
-          message_text: '🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя.\n30 уровней · 6 актов · магнитный шарф · паркур\n\nНажми ▶ ИГРАТЬ чтобы начать →',
+          message_text:
+            `📊 <b>Статистика ${iqUserName}</b> в VOID\n\n` +
+            `🏆 Ранг: <b>#${playerRank}</b>\n` +
+            `📊 Уровни: ${playerStats.completed}/30\n` +
+            `⭐ Звёзды: ${playerStats.total_stars}/90\n` +
+            `💎 Осколки: ${playerStats.total_shards || 0}\n` +
+            `✨ Идеальные: ${playerStats.perfect_levels || 0}\n` +
+            `🏅 Ачивки: ${playerStats.achievements_count || 0}\n` +
+            `⏳ Время: ${fmtTime(playerStats.total_time)}\n` +
+            `🔢 Очки: <b>${playerStats.score}</b>`,
           parse_mode: 'HTML'
         },
         reply_markup: {
@@ -126,18 +175,66 @@ export default async function handler(req, res) {
             { text: '▶ ИГРАТЬ', url: GAME_URL }
           ]]
         }
-      },
-      {
+      });
+
+      // Result 3: ⚔️ Вызов! (challenge others)
+      results.push({
+        type: 'article',
+        id: 'void_challenge',
+        title: '⚔️ Бросить вызов!',
+        description: `Мой результат: #${playerRank} с ${playerStats.score} очками. Побьёшь?`,
+        input_message_content: {
+          message_text:
+            `⚔️ <b>Вызов в VOID!</b>\n\n` +
+            `${iqUserName} бросает вызов!\n\n` +
+            `🏆 Ранг: <b>#${playerRank}</b>\n` +
+            `📊 Уровни: ${playerStats.completed}/30\n` +
+            `⭐ Звёзды: ${playerStats.total_stars}/90\n` +
+            `🔢 Очки: <b>${playerStats.score}</b>\n\n` +
+            `Сможешь побить? 👇`,
+          parse_mode: 'HTML'
+        },
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '⚔️ Принять вызов!', url: GAME_URL }
+          ]]
+        }
+      });
+    } else {
+      // No stats yet — show generic stats option
+      results.push({
         type: 'article',
         id: 'void_stats',
         title: '📊 Моя статистика VOID',
-        description: 'Узнать свой ранг, очки и прогресс',
+        description: 'Ты ещё не играл. Начни и попади в рейтинг!',
         input_message_content: {
-          message_text: '📊 Хочу узнать свою статистику в VOID!',
+          message_text: '🌑 <b>VOID — во тьму</b>\n\nТы ещё не играл в VOID!\nПройди уровни и попади в мировой рейтинг 🏆',
           parse_mode: 'HTML'
+        },
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '▶ ИГРАТЬ', url: GAME_URL }
+          ]]
         }
+      });
+    }
+
+    // Result 4: 🏆 Топ-10
+    results.push({
+      type: 'article',
+      id: 'void_top',
+      title: '🏆 Мировой рейтинг',
+      description: 'Топ-10 лучших игроков VOID',
+      input_message_content: {
+        message_text: '🏆 <b>Мировой рейтинг VOID</b>\n\nСмотри кто лучший → /leaderboard в @voide_game_bot',
+        parse_mode: 'HTML'
+      },
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '▶ ИГРАТЬ', url: GAME_URL }
+        ]]
       }
-    ];
+    });
 
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerInlineQuery`, {
       method: 'POST',
@@ -145,7 +242,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         inline_query_id: iq.id,
         results,
-        cache_time: 30
+        cache_time: 15
       })
     });
     return res.status(200).json({ ok: true });
