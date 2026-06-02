@@ -1460,8 +1460,12 @@ function getCurrentTgUserId(){if(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)r
 function _progressKey(){var uid=getCurrentTgUserId();return uid?'void_progress_'+uid:'void_progress'}
 function _settingsKey(){var uid=getCurrentTgUserId();return uid?'void_settings_'+uid:'void_settings'}
 function _deviceKey(){var uid=getCurrentTgUserId();return uid?'void_device_id_'+uid:'void_device_id'}
+function _lastUserIdKey(){return'void_last_user'}
 function loadProgress(){
   try{
+    var currentTgId=getCurrentTgUserId();
+    // Store current user ID for cross-session verification
+    if(currentTgId){localStorage.setItem(_lastUserIdKey(),currentTgId)}
     var pKey=_progressKey();
     var s=localStorage.getItem(pKey);
     // Migration: if user-specific key doesn't exist but old generic key does, migrate it
@@ -1470,12 +1474,16 @@ function loadProgress(){
       if(oldS){
         // Only migrate if the old data belongs to current user
         var storedTgId=localStorage.getItem('void_tg_user');
-        var currentTgId=getCurrentTgUserId();
         if(!storedTgId||storedTgId===currentTgId){
           localStorage.setItem(pKey,oldS);
           localStorage.removeItem('void_progress');
           console.log('[VOID] Migrated progress to user-specific key:',pKey);
           s=oldS;
+        }else{
+          // Old data belongs to different user — discard it
+          localStorage.removeItem('void_progress');
+          localStorage.removeItem('void_tg_user');
+          console.log('[VOID] Discarded old progress from different user');
         }
       }
     }
@@ -1484,18 +1492,32 @@ function loadProgress(){
     if(!localStorage.getItem(sKey)&&sKey!=='void_settings'){
       var oldSettings=localStorage.getItem('void_settings');
       var storedTgId=localStorage.getItem('void_tg_user');
-      var currentTgId=getCurrentTgUserId();
       if(oldSettings&&(!storedTgId||storedTgId===currentTgId)){localStorage.setItem(sKey,oldSettings);localStorage.removeItem('void_settings');console.log('[VOID] Migrated settings to user-specific key')}
+      else if(oldSettings&&storedTgId&&storedTgId!==currentTgId){localStorage.removeItem('void_settings');console.log('[VOID] Discarded old settings from different user')}
+    }
+    // Clean up legacy keys
+    localStorage.removeItem('void_tg_user');
+    if(s){
+      var parsed=JSON.parse(s);
+      // Verify data belongs to current user (anti-cross-account protection)
+      if(parsed._tgUserId&&currentTgId&&parsed._tgUserId!==currentTgId){
+        console.warn('[VOID] Progress belongs to different user, resetting');
+        s=null;
+      }
     }
     if(s){
       progress=JSON.parse(s);
+      // Stamp with current user ID
+      if(currentTgId)progress._tgUserId=currentTgId;
       if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};if(progress.totalDeaths===undefined)progress.totalDeaths=0;
       // Migration: convert bestTime from ms to seconds (pre-v2.9)
       if(!progress._v29_migrated){var migrated=false;for(var k in progress.levels){if(progress.levels.hasOwnProperty(k)){var lv=progress.levels[k];if(lv.bestTime&&lv.bestTime>100){lv.bestTime=lv.bestTime/1000;migrated=true}}}if(migrated){saveProgress();console.log('[VOID] Migrated bestTime ms→sec')}progress._v29_migrated=true;saveProgress()}
-      // User-specific keys already isolate accounts — no need for void_tg_user check
       syncProgressUnlocked();
+      saveProgress(); // Save with user ID stamp
     }else{
-      // No local progress for this user
+      // No local progress for this user — fresh start
+      if(currentTgId)progress._tgUserId=currentTgId;
+      saveProgress();
     }
   }catch(e){console.warn('[VOID] loadProgress error:',e)}
 }
@@ -1550,6 +1572,7 @@ function saveToCloud(){
     // Save the FULL progress object to cloud so nothing is lost
     var data={
       v:2, // version for migration
+      _tgUserId:getCurrentTgUserId()||'local',
       unlocked:progress.unlocked||1,
       levels:progress.levels||{},
       skin:progress.skin||0,
@@ -1563,7 +1586,6 @@ function saveToCloud(){
     tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){if(err)console.warn('[VOID] Cloud save error:',err);else console.log('[VOID] Cloud saved')});
   }catch(e){console.warn('[VOID] CloudStorage error:',e)}
 }
-// Cloud save with retry (3 attempts)
 var _cloudRetryCount=0;
 function saveToCloudWithRetry(){
   if(!tg||!tg.CloudStorage)return;
@@ -1579,7 +1601,7 @@ function _doCloudSaveAttempt(){
   // Override callback to add retry
   try{
     var data={
-      v:2,unlocked:progress.unlocked||1,levels:progress.levels||{},skin:progress.skin||0,
+      v:2,_tgUserId:getCurrentTgUserId()||'local',unlocked:progress.unlocked||1,levels:progress.levels||{},skin:progress.skin||0,
       shards:progress.shards||[],stats:progress.stats||{},achievements:progress.achievements||[],
       challenges:progress.challenges||{},firstLaunch:progress.firstLaunch||false,
       totalDeaths:progress.totalDeaths||state.totalDeaths||0
@@ -1607,6 +1629,12 @@ function loadFromCloud(){
       if(err||!val){console.log('[VOID] No cloud data');return}
       try{
         var data=JSON.parse(val);
+        // Verify cloud data belongs to current user
+        var currentTgId=getCurrentTgUserId();
+        if(data._tgUserId&&currentTgId&&data._tgUserId!==currentTgId){
+          console.warn('[VOID] Cloud data belongs to different user, ignoring. Cloud:',data._tgUserId,'Current:',currentTgId);
+          return;
+        }
         if(data.v===2){
           // Full progress sync — merge cloud data with local
           mergeCloudData(data);
@@ -3717,13 +3745,13 @@ var COYOTE_DURATION=0.12,JUMP_BUFFER_DURATION=0.12,WALL_SLIDE_SPEED=2.0,PLAYER_W
 
 function createPlayer(x,y){
   player.body=MBodies.rectangle(x,y,PLAYER_W,PLAYER_H,{label:'player',friction:0.001,frictionStatic:0.001,restitution:0,density:0.002,inertia:Infinity,inverseInertia:0});
-  playerSensorGround=MBodies.rectangle(x,y+PLAYER_H/2,PLAYER_W-4,4,{label:'sensorGround',isSensor:true,isStatic:false});
+  playerSensorGround=MBodies.rectangle(x,y+PLAYER_H/2+1,PLAYER_W-4,6,{label:'sensorGround',isSensor:true,isStatic:false});
   playerSensorCeiling=MBodies.rectangle(x,y-PLAYER_H/2,PLAYER_W-4,4,{label:'sensorCeiling',isSensor:true,isStatic:false});
   playerSensorLeft=MBodies.rectangle(x-PLAYER_W/2,y,4,PLAYER_H-8,{label:'sensorLeft',isSensor:true,isStatic:false});
   playerSensorRight=MBodies.rectangle(x+PLAYER_W/2,y,4,PLAYER_H-8,{label:'sensorRight',isSensor:true,isStatic:false});
   var comp=MComposite.create({label:'playerComposite'});
   MComposite.add(comp,[player.body,playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight]);
-  MComposite.add(comp,MConstraint.create({bodyA:player.body,pointA:{x:0,y:PLAYER_H/2},bodyB:playerSensorGround,pointB:{x:0,y:0},stiffness:1,damping:0,length:0}));
+  MComposite.add(comp,MConstraint.create({bodyA:player.body,pointA:{x:0,y:PLAYER_H/2+1},bodyB:playerSensorGround,pointB:{x:0,y:0},stiffness:1,damping:0,length:0}));
   MComposite.add(comp,MConstraint.create({bodyA:player.body,pointA:{x:0,y:-PLAYER_H/2},bodyB:playerSensorCeiling,pointB:{x:0,y:0},stiffness:1,damping:0,length:0}));
   MComposite.add(comp,MConstraint.create({bodyA:player.body,pointA:{x:-PLAYER_W/2,y:0},bodyB:playerSensorLeft,pointB:{x:0,y:0},stiffness:1,damping:0,length:0}));
   MComposite.add(comp,MConstraint.create({bodyA:player.body,pointA:{x:PLAYER_W/2,y:0},bodyB:playerSensorRight,pointB:{x:0,y:0},stiffness:1,damping:0,length:0}));
@@ -3908,10 +3936,10 @@ if(isWallSlide){
 // aura removed — lighting handled by canvas overlay
 }
 
-function setupPlayerSensors(){playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
-function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,1);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
-function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,-1)}}
-function checkSensorCollision(a,b,delta){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'){s._colliding=Math.max(0,(s._colliding||0)+delta)}}}}
+var GROUND_GRACE=0.06;var _groundGraceTimer=0;function setupPlayerSensors(){playerSensorGround._collidingSet=new Set();playerSensorCeiling._collidingSet=new Set();playerSensorLeft._collidingSet=new Set();playerSensorRight._collidingSet=new Set();playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;_groundGraceTimer=0;MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
+function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,true);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
+function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,false)}}
+function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
 function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;if((a.label==='fallZone'&&b.label==='player')||(b.label==='fallZone'&&a.label==='player')){killPlayer('fall')}else if((a.label==='deathZone'&&b.label==='player')||(b.label==='deathZone'&&a.label==='player')){killPlayer('spikes')}else if((a.label==='sawZone'&&b.label==='player')||(b.label==='sawZone'&&a.label==='player')){killPlayer('saw')}else if((a.label==='pendulumZone'&&b.label==='player')||(b.label==='pendulumZone'&&a.label==='player')){killPlayer('pendulum')}else if((a.label==='enemyZone'&&b.label==='player')||(b.label==='enemyZone'&&a.label==='player')){killPlayer('enemy')}
   // Checkpoint activation
   if((a.label==='checkpointZone'&&b.label==='player')||(b.label==='checkpointZone'&&a.label==='player')){
@@ -3961,9 +3989,12 @@ function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZ
 
 function updatePlayer(dt){
   if(!player.alive||!player.body)return;
-  // Ground/wall detection from sensors
+  // Ground/wall detection from sensors (Set-based, robust against desync)
+  var sensorGround=playerSensorGround._colliding>0;
   player.wasOnGround=player.onGround;
-  player.onGround=playerSensorGround._colliding>0;
+  // Ground grace period: keep onGround true briefly after sensor loses contact
+  if(sensorGround){_groundGraceTimer=GROUND_GRACE;player.onGround=true}
+  else{if(_groundGraceTimer>0){_groundGraceTimer-=dt;player.onGround=true}else{player.onGround=false}}
   player.onCeiling=playerSensorCeiling._colliding>0;
   player.onWallLeft=playerSensorLeft._colliding>0;
   player.onWallRight=playerSensorRight._colliding>0;
@@ -4178,7 +4209,7 @@ function updateSaws(dt){sawTime+=dt;for(var i=0;i<sawSprites.length;i++){var saw
 // ═══ MOVING PLATFORMS ═══
 var movingPlatforms=[];
 function createMovingPlatform(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'movingPlatform',friction:0.05});
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'movingPlatform',friction:0.05,frictionStatic:0.001});
   MWorld.add(world,body);
   var spr=new PIXI.Graphics();var mpTheme=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];spr.rect(0,0,data.w,data.h);spr.fill(lerpColor(mpTheme.platColor,0x2a3a2a,0.5));spr.rect(0,0,data.w,2);spr.fill(lerpColor(mpTheme.platTop,0x3a5a3a,0.5));spr.x=data.x;spr.y=data.y;
   gameContainer.addChild(spr);
@@ -4196,7 +4227,7 @@ function updateMovingPlatforms(dt){
 // ═══ FALLING PLATFORMS ═══
 var fallingPlatforms=[];
 function createFallingPlatform(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'fallingPlatform',friction:0.05});
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'fallingPlatform',friction:0.05,frictionStatic:0.001});
   MWorld.add(world,body);
   var spr=new PIXI.Graphics();var fpTheme=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];spr.rect(0,0,data.w,data.h);spr.fill(lerpColor(fpTheme.platColor,0x1a0a0a,0.6));spr.rect(0,0,data.w,2);spr.fill(lerpColor(fpTheme.platTop,0x2a1a1a,0.5));spr.x=data.x;spr.y=data.y;
   gameContainer.addChild(spr);
@@ -4236,7 +4267,7 @@ function updateFallingPlatforms(dt){
 // ═══ DISAPPEARING PLATFORMS ═══
 var levelDisappearingPlatforms=[];
 function createDisappearingPlatform(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'disappearingPlatform',friction:0.05});
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'disappearingPlatform',friction:0.05,frictionStatic:0.001});
   MWorld.add(world,body);
   var fpTheme=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];
   var spr=new PIXI.Graphics();
@@ -4271,7 +4302,7 @@ function updateDisappearingPlatforms(dt){
       if(dp.timer>=dp.hiddenTime){
         // Reappear
         var fpTheme2=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];
-        dp.body=MBodies.rectangle(dp.x+dp.w/2,dp.y+dp.h/2,dp.w,dp.h,{isStatic:true,label:'disappearingPlatform',friction:0.05});
+        dp.body=MBodies.rectangle(dp.x+dp.w/2,dp.y+dp.h/2,dp.w,dp.h,{isStatic:true,label:'disappearingPlatform',friction:0.05,frictionStatic:0.001});
         MWorld.add(world,dp.body);
         dp.state='visible';dp.timer=0;dp.alpha=0.5;
         dp.sprite.visible=true;
@@ -4285,7 +4316,7 @@ function updateDisappearingPlatforms(dt){
 // ═══ TIMED SPIKE PLATFORMS ═══
 var levelTimedSpikePlatforms=[];
 function createTimedSpikePlatform(data){
-  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'platform',friction:0.05});
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'platform',friction:0.05,frictionStatic:0.001});
   MWorld.add(world,body);
   var fpTheme=ACT_THEMES[Math.floor(state.level/5)]||ACT_THEMES[0];
   var spr=new PIXI.Graphics();gameContainer.addChild(spr);
@@ -5056,7 +5087,7 @@ function loadLevel(n){
   // Bottom boundary removed — player falls through and dies via fallZone sensor + position check
   // Platforms (act-themed colors)
   var actTheme=getLevelTheme();
-  for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.05});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(actTheme.platColor);spr.rect(0,0,p.w,2);spr.fill(actTheme.platTop);spr.rect(0,p.h-1,p.w,1);spr.fill(actTheme.platBot);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
+  for(var i=0;i<lvl.platforms.length;i++){var p=lvl.platforms[i];var body=MBodies.rectangle(p.x+p.w/2,p.y+p.h/2,p.w,p.h,{isStatic:true,label:'platform',friction:0.05,frictionStatic:0.001});MWorld.add(world,body);var spr=new PIXI.Graphics();spr.rect(0,0,p.w,p.h);spr.fill(actTheme.platColor);spr.rect(0,0,p.w,2);spr.fill(actTheme.platTop);spr.rect(0,p.h-1,p.w,1);spr.fill(actTheme.platBot);spr.x=p.x;spr.y=p.y;gameContainer.addChild(spr);levelSprites.push(spr)}
   // Spikes (act-themed colors)
   if(lvl.spikes)for(var i=0;i<lvl.spikes.length;i++){var s=lvl.spikes[i];MWorld.add(world,MBodies.rectangle(s.x+s.w/2,s.y-10,s.w,20,{isStatic:true,isSensor:true,label:'deathZone'}));var spr=new PIXI.Graphics();var cnt=Math.floor(s.w/10);for(var j=0;j<cnt;j++){var tx=j*10;spr.moveTo(tx+5,s.y-12);spr.lineTo(tx,s.y+2);spr.lineTo(tx+10,s.y+2);spr.closePath();spr.fill(actTheme.spikeColor)}spr.x=s.x;gameContainer.addChild(spr);levelSprites.push(spr)}
   // Saws
@@ -7064,6 +7095,19 @@ function gameLoop(timestamp){
   }
   // Hit-stop: freeze all updates briefly for impact feel
   if(state.hitStop>0){state.hitStop-=rawDt;if(state.hitStop>0)return;state.hitStop=0}
+  // User change detection: verify Telegram user hasn't changed (prevent cache mixing)
+  if(!_userCheckTimer)_userCheckTimer=0;
+  _userCheckTimer-=rawDt;
+  if(_userCheckTimer<=0){
+    _userCheckTimer=3; // check every 3 seconds
+    var curId=getCurrentTgUserId();
+    if(curId&&progress._tgUserId&&curId!==progress._tgUserId){
+      console.warn('[VOID] User changed! Reloading progress. Old:',progress._tgUserId,'New:',curId);
+      progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false,_tgUserId:curId};
+      loadProgress();loadFromCloud();updateMenuStats();
+      if(state.screen==='playing'){clearLevel();stopMusic();showScreen('menu')}
+    }
+  }
   if(state.slowMoTimer>0){state.slowMoTimer-=rawDt;if(state.slowMoTimer<=0)state.slowMo=1}
   var dt=rawDt*state.slowMo;
   if(state.shakeTime>0){state.shakeTime-=rawDt;state.shakeAmount*=0.92;if(state.shakeTime<=0||state.shakeAmount<0.2){state.shakeAmount=0;state.shakeTime=0}}
