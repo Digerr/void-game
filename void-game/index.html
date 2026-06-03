@@ -44,15 +44,15 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .ls-act-card:hover{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08);transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
 .ls-act-card:active{transform:scale(.97);transition:transform .08s}
 .ls-act-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;opacity:.8}
-.ls-act-card0::before{background:#5a8aba}.ls-act-card1::before{background:#8a5aba}.ls-act-card2::before{background:#ba8a2a}.ls-act-card3::before{background:#ba3a6a}.ls-act-card4::before{background:#4ababa}.ls-act-card5::before{background:#da3a7a}
-.ls-act-card0 .ls-act-card-name{color:#5a8aba}.ls-act-card1 .ls-act-card-name{color:#8a5aba}.ls-act-card2 .ls-act-card-name{color:#ba8a2a}.ls-act-card3 .ls-act-card-name{color:#ba3a6a}.ls-act-card4 .ls-act-card-name{color:#4ababa}.ls-act-card5 .ls-act-card-name{color:#da3a7a}
+.ls-act-card0::before{background:#5a8aba}.ls-act-card1::before{background:#8a5aba}.ls-act-card2::before{background:#ba8a2a}.ls-act-card3::before{background:#ba3a6a}.ls-act-card4::before{background:#4ababa}.ls-act-card5::before{background:#da3a7a}.ls-act-card6::before{background:#7a6aba}.ls-act-card7::before{background:#6aba7a}.ls-act-card8::before{background:#9a7a4a}.ls-act-card9::before{background:#5a7aba}.ls-act-card10::before{background:#ba6a3a}.ls-act-card11::before{background:#ba4a4a}
+.ls-act-card0 .ls-act-card-name{color:#5a8aba}.ls-act-card1 .ls-act-card-name{color:#8a5aba}.ls-act-card2 .ls-act-card-name{color:#ba8a2a}.ls-act-card3 .ls-act-card-name{color:#ba3a6a}.ls-act-card4 .ls-act-card-name{color:#4ababa}.ls-act-card5 .ls-act-card-name{color:#da3a7a}.ls-act-card6 .ls-act-card-name{color:#7a6aba}.ls-act-card7 .ls-act-card-name{color:#6aba7a}.ls-act-card8 .ls-act-card-name{color:#9a7a4a}.ls-act-card9 .ls-act-card-name{color:#5a7aba}.ls-act-card10 .ls-act-card-name{color:#ba6a3a}.ls-act-card11 .ls-act-card-name{color:#ba4a4a}
 .ls-act-card-icon{font-size:1.4rem;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.03);flex-shrink:0}
 .ls-act-card-body{flex:1;min-width:0}
 .ls-act-card-name{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
 .ls-act-card-meta{display:flex;align-items:center;gap:8px;font-size:.42rem;color:#5a5a6a;letter-spacing:.06em}
 .ls-act-card-bar{height:2px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden;margin-top:6px;width:100%}
 .ls-act-card-bar-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1)}
-.ls-act-card0 .ls-act-card-bar-fill{background:#5a8aba}.ls-act-card1 .ls-act-card-bar-fill{background:#8a5aba}.ls-act-card2 .ls-act-card-bar-fill{background:#ba8a2a}.ls-act-card3 .ls-act-card-bar-fill{background:#ba3a6a}.ls-act-card4 .ls-act-card-bar-fill{background:#4ababa}.ls-act-card5 .ls-act-card-bar-fill{background:#da3a7a}
+.ls-act-card0 .ls-act-card-bar-fill{background:#5a8aba}.ls-act-card1 .ls-act-card-bar-fill{background:#8a5aba}.ls-act-card2 .ls-act-card-bar-fill{background:#ba8a2a}.ls-act-card3 .ls-act-card-bar-fill{background:#ba3a6a}.ls-act-card4 .ls-act-card-bar-fill{background:#4ababa}.ls-act-card5 .ls-act-card-bar-fill{background:#da3a7a}.ls-act-card6 .ls-act-card-bar-fill{background:#7a6aba}.ls-act-card7 .ls-act-card-bar-fill{background:#6aba7a}.ls-act-card8 .ls-act-card-bar-fill{background:#9a7a4a}.ls-act-card9 .ls-act-card-bar-fill{background:#5a7aba}.ls-act-card10 .ls-act-card-bar-fill{background:#ba6a3a}.ls-act-card11 .ls-act-card-bar-fill{background:#ba4a4a}
 .ls-act-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
 .ls-act-card-pct{font-size:.55rem;font-weight:900;color:#6a6a7a;font-variant-numeric:tabular-nums}
 .ls-act-card-stars{font-size:.45rem}
@@ -111,6 +111,42 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .ls-act5 .ls-act-bar-fill{background:linear-gradient(90deg,#4a1a3a,#da3a7a)}
 .ls-act5 .ls-act-icon{background:rgba(218,58,122,.08)}
 .ls-act5 .ls-act-progress{color:#da3a7a}
+.ls-act6::before{background:linear-gradient(90deg,transparent,#3a2a6a,#7a6aba,transparent)}
+.ls-act6::after{background:linear-gradient(180deg,#3a2a6a,transparent 40%)}
+.ls-act6 .ls-act-name{color:#7a6aba}
+.ls-act6 .ls-act-bar-fill{background:linear-gradient(90deg,#3a2a6a,#7a6aba)}
+.ls-act6 .ls-act-icon{background:rgba(122,106,186,.08)}
+.ls-act6 .ls-act-progress{color:#7a6aba}
+.ls-act7::before{background:linear-gradient(90deg,transparent,#2a5a3a,#6aba7a,transparent)}
+.ls-act7::after{background:linear-gradient(180deg,#2a5a3a,transparent 40%)}
+.ls-act7 .ls-act-name{color:#6aba7a}
+.ls-act7 .ls-act-bar-fill{background:linear-gradient(90deg,#2a5a3a,#6aba7a)}
+.ls-act7 .ls-act-icon{background:rgba(106,186,122,.08)}
+.ls-act7 .ls-act-progress{color:#6aba7a}
+.ls-act8::before{background:linear-gradient(90deg,transparent,#4a3a1a,#9a7a4a,transparent)}
+.ls-act8::after{background:linear-gradient(180deg,#4a3a1a,transparent 40%)}
+.ls-act8 .ls-act-name{color:#9a7a4a}
+.ls-act8 .ls-act-bar-fill{background:linear-gradient(90deg,#4a3a1a,#9a7a4a)}
+.ls-act8 .ls-act-icon{background:rgba(154,122,74,.08)}
+.ls-act8 .ls-act-progress{color:#9a7a4a}
+.ls-act9::before{background:linear-gradient(90deg,transparent,#1a3a5a,#5a7aba,transparent)}
+.ls-act9::after{background:linear-gradient(180deg,#1a3a5a,transparent 40%)}
+.ls-act9 .ls-act-name{color:#5a7aba}
+.ls-act9 .ls-act-bar-fill{background:linear-gradient(90deg,#1a3a5a,#5a7aba)}
+.ls-act9 .ls-act-icon{background:rgba(90,122,186,.08)}
+.ls-act9 .ls-act-progress{color:#5a7aba}
+.ls-act10::before{background:linear-gradient(90deg,transparent,#4a2a1a,#ba6a3a,transparent)}
+.ls-act10::after{background:linear-gradient(180deg,#4a2a1a,transparent 40%)}
+.ls-act10 .ls-act-name{color:#ba6a3a}
+.ls-act10 .ls-act-bar-fill{background:linear-gradient(90deg,#4a2a1a,#ba6a3a)}
+.ls-act10 .ls-act-icon{background:rgba(186,106,58,.08)}
+.ls-act10 .ls-act-progress{color:#ba6a3a}
+.ls-act11::before{background:linear-gradient(90deg,transparent,#4a1a1a,#ba4a4a,transparent)}
+.ls-act11::after{background:linear-gradient(180deg,#4a1a1a,transparent 40%)}
+.ls-act11 .ls-act-name{color:#ba4a4a}
+.ls-act11 .ls-act-bar-fill{background:linear-gradient(90deg,#4a1a1a,#ba4a4a)}
+.ls-act11 .ls-act-icon{background:rgba(186,74,74,.08)}
+.ls-act11 .ls-act-progress{color:#ba4a4a}
 .ls-act-inner{padding:6px 8px 6px;position:relative;z-index:1}
 .ls-act-header{display:flex;align-items:center;gap:6px;padding:0 0 5px;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:2px}
 .ls-act-icon{font-size:.75rem;opacity:.8;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:5px;background:rgba(255,255,255,.03);flex-shrink:0}
@@ -591,7 +627,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     <!-- Acts view (first screen) -->
     <div id="ls-acts-view" style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%">
       <div class="ls-title">главы</div>
-      <div class="ls-subtitle" id="ls-subtitle">30 уровней — 6 актов</div>
+      <div class="ls-subtitle" id="ls-subtitle">60 уровней — 12 актов</div>
       <div class="ls-stats" id="ls-stats"></div>
       <div class="ls-progress" style="height:3px;margin-bottom:6px"><div class="ls-progress-fill" id="ls-progress-fill"></div></div>
       <div style="flex:1;overflow-y:auto;width:100%;display:flex;justify-content:center;-webkit-overflow-scrolling:touch">
@@ -683,7 +719,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     <div style="max-width:320px;max-height:60vh;overflow-y:auto;padding:0 8px;margin-bottom:16px">
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">что это за игра?</div>
-        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">VOID — это платформер во тьме. Ты играешь за маленькое существо, которое очнулось в пустоте. Твоя задача — добраться до выхода через шипы, пилы, врагов и ловушки. 30 уровней, 6 актов, от простых до адских. Игра в бета-версии — возможны баги, прогресс может быть сброшен.</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">VOID — это платформер во тьме. Ты играешь за маленькое существо, которое очнулось в пустоте. Твоя задача — добраться до выхода через шипы, пилы, врагов и ловушки. 60 уровней, 12 актов, от простых до адских. Игра в бета-версии — возможны баги, прогресс может быть сброшен.</div>
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">управление</div>
@@ -1297,22 +1333,34 @@ var SKINS=[
   {name:'теневой',scarf:0xaa3a5a,scarf2:0x8a2a4a,aura:0xba4a6a,body:0x5a4a5a,head:0x5a4a5a,req:'act4'},
   {name:'возрождение',scarf:0x3a8a7a,scarf2:0x2a7a6a,aura:0x4a9a8a,body:0x4a6a6a,head:0x4a6a6a,req:'act5'},
   {name:'исход',scarf:0x9a4a6a,scarf2:0x8a3a5a,aura:0xaa5a7a,body:0x5a4a5a,head:0x5a4a5a,req:'act6'},
+  {name:'отражения',scarf:0x7a6aba,scarf2:0x6a5aaa,aura:0x8a7aca,body:0x5a4a7a,head:0x5a4a7a,req:'act7'},
+  {name:'эхо',scarf:0x6aba7a,scarf2:0x5aaa6a,aura:0x7aca8a,body:0x4a6a5a,head:0x4a6a5a,req:'act8'},
+  {name:'растворение',scarf:0x9a7a4a,scarf2:0x8a6a3a,aura:0xaa8a5a,body:0x6a5a4a,head:0x6a5a4a,req:'act9'},
+  {name:'архитектор',scarf:0x5a7aba,scarf2:0x4a6aaa,aura:0x6a8aca,body:0x4a5a7a,head:0x4a5a7a,req:'act10'},
+  {name:'возвращение',scarf:0xba6a3a,scarf2:0xaa5a2a,aura:0xca7a4a,body:0x6a5a4a,head:0x6a5a4a,req:'act11'},
+  {name:'выбор',scarf:0xba4a4a,scarf2:0xaa3a3a,aura:0xca5a5a,body:0x6a4a4a,head:0x6a4a4a,req:'act12'},
   {name:'призрак',scarf:0xccccdd,scarf2:0xaaaacc,aura:0xddddff,body:0x9a9aaa,head:0x9a9aaa,req:'all3star'}
 ];
 function getUnlockedSkins(){
   var unlocked=[0]; // default always unlocked
   // Check each act completed
-  var actComplete=[true,true,true,true,true,true];
-  for(var a=0;a<6;a++){for(var i=a*5;i<(a+1)*5;i++){if(getLevelStars(i)===0)actComplete[a]=false}}
+  var actComplete=[true,true,true,true,true,true,true,true,true,true,true,true];
+  for(var a=0;a<12;a++){for(var i=a*5;i<(a+1)*5;i++){if(i>=LEVELS.length||getLevelStars(i)===0)actComplete[a]=false}}
   if(actComplete[0])unlocked.push(1);
   if(actComplete[1])unlocked.push(2);
   if(actComplete[2])unlocked.push(3);
   if(actComplete[3])unlocked.push(4);
   if(actComplete[4])unlocked.push(5);
   if(actComplete[5])unlocked.push(6);
+  if(actComplete[6])unlocked.push(7);
+  if(actComplete[7])unlocked.push(8);
+  if(actComplete[8])unlocked.push(9);
+  if(actComplete[9])unlocked.push(10);
+  if(actComplete[10])unlocked.push(11);
+  if(actComplete[11])unlocked.push(12);
   // All 3 stars check
   var all3=true;for(var i=0;i<LEVELS.length;i++){if(getLevelStars(i)<3){all3=false;break}}
-  if(all3)unlocked.push(7);
+  if(all3)unlocked.push(13);
   return unlocked;
 }
 function getCurrentSkin(){return SKINS[progress.skin||0]||SKINS[0]}
@@ -1401,7 +1449,43 @@ var MEMORY_SHARDS=[
   {id:26,act:5,text:'Потеря. Ты потерял что-то ценное.',lore:'Она накатывает волной — не воспоминание, а сама потеря. Ощущение, что из тебя вынули что-то центральное. И на этом месте — пустота, которая болит.'},
   {id:27,act:5,text:'Ты решил забыть. Это был выбор.',lore:'Не случайность. Не ошибка. Ты сам выбрал — стереть, выбросить, похоронить. Потому что помнить было невыносимо. Ты добровольно ушёл в пустоту, чтобы не чувствовать.'},
   {id:28,act:5,text:'Но что-то осталось. Что-то не стёрлось.',lore:'Не всё можно забыть. Как ни старался — шарф остался тёплый. Голос не исчез до конца. Чувство не стёрлось. Что-то в тебе упрямо отказывалось исчезнуть.'},
-  {id:29,act:5,text:'Ты выбираешь вернуться.',lore:'Это не храбрость и не надежда. Это упрямство. Ты был здесь, ты стёр себя, ты почти исчез — и всё-таки вернулся. Не потому что хочешь. Потому что не можешь иначе. Воспоминание отказывается быть забытым.'}
+  {id:29,act:5,text:'Ты выбираешь вернуться.',lore:'Это не храбрость и не надежда. Это упрямство. Ты был здесь, ты стёр себя, ты почти исчез — и всё-таки вернулся. Не потому что хочешь. Потому что не можешь иначе. Воспоминание отказывается быть забытым.'},
+  // Act 6 — Отражения (levels 30-34)
+  {id:30,act:6,text:'Твой двойник стоит рядом. Он не враг.',lore:'Тень повторяет каждое движение с задержкой. Она — та часть, которая выбрала остаться. Не борись с ней. Используй.'},
+  {id:31,act:6,text:'Он знает твой следующий шаг.',lore:'Тень предвосхищает движение. Не потому что читает мысли — потому что она и есть твои мысли. Та их часть, которую ты не отпустил.'},
+  {id:32,act:6,text:'Давление — это воспоминание, которое помнит тебя.',lore:'Встань на плиту — и путь откроется. Слезешь — закроется. Так работает память: она держит только пока ты рядом.'},
+  {id:33,act:6,text:'Тень — это не тьма. Это свидетель.',lore:'Она видела всё. Каждое падение, каждый подъём. Она не судит — она повторяет. Потому что свидетельство — это тоже форма памяти.'},
+  {id:34,act:6,text:'Два стали одним.',lore:'Вместе — вы сильнее. Не потому что удвоились — потому что впервые не одиноки. Тень — это не бремя. Это доказательство что ты существуешь достаточно, чтобы отбросить тень.'},
+  // Act 7 — Эхо (levels 35-39)
+  {id:35,act:7,text:'Мир дышит. Ты чувствуешь пульс?',lore:'Пульс-платформы — это воспоминания, которые существуют только в движении. Остановись — и мир исчезнет. Двигайся — и он будет.'},
+  {id:36,act:7,text:'Резонанс — это отклик.',lore:'Кристаллы отвечают на присутствие. Ты здесь — они светятся. Уходишь — тьма. Так работает эхо: звук существует только пока отражается.'},
+  {id:37,act:7,text:'Ритм ускоряется. Не сбейся.',lore:'Платформы мерцают быстрее. Пульс учащается. Мир торопится — или это ты торопишься? Может быть, время само по себе — лишь ритм воспоминаний.'},
+  {id:38,act:7,text:'Эхо — это ты, секунду назад.',lore:'Платформы появляются там, где ты был. Мир запоминает и отзывается. Каждый шаг — причина. Каждый отголосок — следствие.'},
+  {id:39,act:7,text:'Ритм — это жизнь.',lore:'Финал эха. Всё пульсирует. Если перестанешь — исчезнешь. Не смерть — тишина. Ритм — единственное доказательство существования. Бой — это жизнь.'},
+  // Act 8 — Растворение (levels 40-44)
+  {id:40,act:8,text:'Платформы мерцают. Они ещё здесь?',lore:'То видны, то нет. Платформы теряют плотность. Но они существуют — пока кто-то верит. Пока ты стоишь на них.'},
+  {id:41,act:8,text:'Стабилизатор — чьё-то «я был здесь».',lore:'Кристаллы, которые держат мир. Каждый — чьё-то последнее воспоминание. Они тают. Выбирай — какую часть мира спасти.'},
+  {id:42,act:8,text:'Распад — это не смерть. Это забвение.',lore:'Мир рушится быстрее. Стабилизаторы тают. Беги — или растворись. Не умрёшь. Просто перестанешь быть.'},
+  {id:43,act:8,text:'Стены стали мечтами.',lore:'Стены — мечты. Пол — дым. Ничто не держит. Кроме памяти. Память — единственная твёрдость в мире, который теряет форму.'},
+  {id:44,act:8,text:'Мир — контур на песке.',lore:'Последний рубеж. Всё почти исчезло. Остались лишь контуры — как рисунок, который смывает волной. Но волна ещё не пришла.'},
+  // Act 9 — Архитектор (levels 45-49)
+  {id:45,act:9,text:'Всё по линейке. Всё по плану.',lore:'Архитектор не творит — организует. Каждая платформа — полка. Каждая ловушка — каталог. Порядок вместо хаоса. Но порядок — тоже форма пустоты.'},
+  {id:46,act:9,text:'Лезвие — граница раздела.',lore:'Тонкие красные линии. Мгновенная смерть. Но они пульсируют — и это значит, что даже Архитектор не всесилен. Даже его правила можно обойти.'},
+  {id:47,act:9,text:'Фрагменты — части одного целого.',lore:'Дверь не откроется одним рычагом. Нужны все. Так работает память: одно воспоминание — кусок. Все вместе — картина.'},
+  {id:48,act:9,text:'Один рычаг — три последствия.',lore:'Механизм взаимосвязан. Ничего не происходит изолированно. Каждое действие — цепная реакция. Архитектор знает это. Теперь знаешь и ты.'},
+  {id:49,act:9,text:'Архив помнит всё. Даже тебя.',lore:'Сердце архива. Архитектор следит за каждым шагом. Ты — аномалия в системе. Баг. Но баг — это не ошибка. Это возможность.'},
+  // Act 10 — Возвращение (levels 50-54)
+  {id:50,act:10,text:'Улица. Ты знал её.',lore:'Знакомые очертания. Улица. Но она длиннее, чем в воспоминании. Воспоминание сжало расстояния. Реальность — растянула.'},
+  {id:51,act:10,text:'Двери не туда. Окна не сюда.',lore:'Комната. Но всё не так. Двери ведут в пустоту. Окна смотрят в никуда. Воспоминание или желание? Разница стирается.'},
+  {id:52,act:10,text:'Мост из памяти и выдумки.',lore:'Мост над бездной. Сложен из всего, что помнишь — и того, что придумал. Уже не отличить. Может, и не нужно.'},
+  {id:53,act:10,text:'Каждый этаж — потеря.',lore:'Башня воспоминаний. Поднимаешься — и теряешь. Каждый этаж — кто-то или что-то. Но башня высока. Наверху — то, что осталось.'},
+  {id:54,act:10,text:'Порог — тонкий как нить.',lore:'Между Пустотой и реальностью — ничего. Тонкая плёнка. Хрупкая как стекло. Один неверный шаг — и ты по ту сторону. Навсегда.'},
+  // Act 11 — Выбор (levels 55-59)
+  {id:55,act:11,text:'Левый или правый? Забыть или помнить?',lore:'Впервые — выбор. Не obstacle, не ловушка — решение. Левый путь легче. Правый — настоящий. Но что важнее: лёгкость или правда?'},
+  {id:56,act:11,text:'Компромисс — это не слабость.',lore:'Не всё можно сохранить. Скорость или память? Лёгкость или правда? Компромисс — не поражение. Это осознанный выбор.'},
+  {id:57,act:11,text:'Цена выбора — часть тебя.',lore:'Забвение забирает понемногу. Память ранит каждого. Нет правильного ответа — есть только цена. И ты её платишь.'},
+  {id:58,act:11,text:'Последняя развилка.',lore:'Самый трудный выбор. То, от чего не увернёшься. Забыть — и стать кем-то другим. Помнить — и нести всё дальше.'},
+  {id:59,act:11,text:'Врата. Всё ведёт сюда.',lore:'Финал. Забвение дышит в спину. Все механики. Все ловушки. Все воспоминания. Два финала — пустой и целый. Выбор за тобой. Навсегда.'}
 ];
 var levelShards=[]; // {body, sprite, _gfx, x, y, shardId, collected}
 function isShardCollected(shardId){return progress.shards&&progress.shards.indexOf(shardId)>=0}
@@ -1959,7 +2043,10 @@ function renderLBLevel(){
   var acts=[
     {name:'Пробуждение',levels:[0,1,2,3,4]},{name:'Глубины',levels:[5,6,7,8,9]},
     {name:'Нити',levels:[10,11,12,13,14]},{name:'Пустота',levels:[15,16,17,18,19]},
-    {name:'Возрождение',levels:[20,21,22,23,24]},{name:'Исход',levels:[25,26,27,28,29]}
+    {name:'Возрождение',levels:[20,21,22,23,24]},{name:'Исход',levels:[25,26,27,28,29]},
+    {name:'Отражения',levels:[30,31,32,33,34]},{name:'Эхо',levels:[35,36,37,38,39]},
+    {name:'Растворение',levels:[40,41,42,43,44]},{name:'Архитектор',levels:[45,46,47,48,49]},
+    {name:'Возвращение',levels:[50,51,52,53,54]},{name:'Выбор',levels:[55,56,57,58,59]}
   ];
   for(var a=0;a<acts.length;a++){
     for(var li=0;li<acts[a].levels.length;li++){
@@ -3692,6 +3779,530 @@ var LEVELS=[
       {x:5400,y:430,w:80,h:16,spikeInterval:3,spikeDuration:1.5,phaseOffset:1},
     ],
     shards:[{x:5160,y:180,id:29}],
+  },
+  // ═══ Act VII — Отражения (levels 30-34) ═══
+  {
+    name:'Зеркало',story:'Он оглянулся — и увидел себя. Не отражение — именно себя. Того, кто остался.',
+    width:3600,height:900,spawn:{x:80,y:600},exit:{x:3400,y:430,w:40,h:80},
+    platforms:[
+      {x:0,y:750,w:600,h:40},{x:800,y:750,w:400,h:40},{x:1400,y:750,w:400,h:40},{x:2000,y:750,w:400,h:40},{x:2600,y:750,w:400,h:40},{x:3200,y:750,w:400,h:40},
+      {x:300,y:620,w:100,h:16},{x:600,y:520,w:100,h:16},{x:900,y:600,w:80,h:16},
+      {x:1200,y:500,w:100,h:16},{x:1500,y:580,w:80,h:16},
+      {x:1900,y:520,w:100,h:16},{x:2200,y:440,w:80,h:16},
+      {x:2800,y:560,w:80,h:16},{x:3100,y:480,w:80,h:16},
+      {x:3400,y:430,w:120,h:16},
+    ],
+    spikes:[{x:680,y:730,w:80},{x:1860,y:730,w:60}],
+    checkpoints:[{x:1500,y:560}],
+    shards:[{x:1540,y:540,id:30}],
+  },
+  {
+    name:'След',story:'Тень повторяет каждый шаг. Но на три секунды позже. Планируй за двоих.',
+    width:3800,height:950,spawn:{x:80,y:650},exit:{x:3600,y:400,w:40,h:80},
+    platforms:[
+      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},{x:1300,y:800,w:400,h:40},{x:1900,y:800,w:400,h:40},{x:2500,y:800,w:400,h:40},{x:3100,y:800,w:400,h:40},{x:3500,y:800,w:300,h:40},
+      {x:250,y:680,w:100,h:16},{x:500,y:580,w:80,h:16},{x:800,y:640,w:100,h:16},
+      {x:1100,y:540,w:100,h:16},{x:1400,y:620,w:80,h:16},
+      {x:1800,y:560,w:100,h:16},{x:2100,y:480,w:80,h:16},
+      {x:2700,y:600,w:80,h:16},{x:3000,y:520,w:80,h:16},
+      {x:3400,y:450,w:80,h:16},{x:3600,y:400,w:120,h:16},
+    ],
+    spikes:[{x:560,y:780,w:60},{x:1200,y:780,w:60},{x:2400,y:780,w:60}],
+    checkpoints:[{x:1900,y:540}],
+    shards:[{x:2140,y:440,id:31}],
+  },
+  {
+    name:'Давление',story:'Кристаллы на полу — не украшение. Встань на них — и путь откроется. Слезешь — закроется.',
+    width:4000,height:950,spawn:{x:80,y:650},exit:{x:3800,y:380,w:40,h:80},
+    platforms:[
+      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},{x:1300,y:800,w:500,h:40},{x:2000,y:800,w:400,h:40},{x:2600,y:800,w:400,h:40},{x:3200,y:800,w:400,h:40},{x:3700,y:800,w:300,h:40},
+      {x:300,y:680,w:100,h:16},{x:600,y:560,w:100,h:16},
+      {x:900,y:640,w:80,h:16},{x:1200,y:540,w:80,h:16},
+      {x:1600,y:600,w:100,h:16},{x:1900,y:500,w:80,h:16},
+      {x:2300,y:540,w:100,h:16},{x:2600,y:440,w:80,h:16},
+      {x:3000,y:500,w:80,h:16},{x:3400,y:420,w:80,h:16},
+      {x:3800,y:380,w:120,h:16},
+    ],
+    spikes:[{x:560,y:780,w:80},{x:1240,y:780,w:40},{x:2440,y:780,w:60},{x:3100,y:780,w:40}],
+    checkpoints:[{x:2000,y:480},{x:3000,y:480}],
+    shards:[{x:2640,y:400,id:32}],
+  },
+  {
+    name:'Тень',story:'Она идёт за тобой. Не догоняет — повторяет. Используй это.',
+    width:4200,height:1000,spawn:{x:80,y:700},exit:{x:4000,y:380,w:40,h:80},
+    platforms:[
+      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3100,y:850,w:400,h:40},{x:3700,y:850,w:500,h:40},
+      {x:250,y:720,w:100,h:16},{x:550,y:620,w:80,h:16},{x:800,y:700,w:100,h:16},
+      {x:1100,y:600,w:100,h:16},{x:1400,y:680,w:80,h:16},
+      {x:1700,y:580,w:100,h:16},{x:2000,y:500,w:80,h:16},
+      {x:2400,y:600,w:80,h:16},{x:2700,y:520,w:80,h:16},
+      {x:3300,y:560,w:80,h:16},{x:3600,y:460,w:80,h:16},
+      {x:3900,y:400,w:80,h:16},{x:4000,y:380,w:120,h:16},
+    ],
+    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3060,y:830,w:40}],
+    checkpoints:[{x:1900,y:490},{x:3300,y:540}],
+    shards:[{x:3640,y:420,id:33}],
+  },
+  {
+    name:'Слияние',story:'Два мира — один путь. Ты и тень должны работать вместе.',
+    width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:360,w:40,h:80},
+    platforms:[
+      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:500,h:40},{x:2600,y:850,w:400,h:40},{x:3200,y:850,w:400,h:40},{x:3800,y:850,w:400,h:40},{x:4200,y:850,w:300,h:40},
+      {x:300,y:720,w:100,h:16},{x:600,y:600,w:80,h:16},{x:850,y:700,w:100,h:16},
+      {x:1100,y:580,w:100,h:16},{x:1400,y:680,w:80,h:16},
+      {x:1800,y:560,w:100,h:16},{x:2100,y:460,w:80,h:16},
+      {x:2500,y:540,w:100,h:16},{x:2800,y:440,w:80,h:16},
+      {x:3200,y:520,w:80,h:16},{x:3500,y:420,w:80,h:16},
+      {x:3900,y:480,w:80,h:16},{x:4100,y:400,w:80,h:16},
+      {x:4300,y:360,w:120,h:16},
+    ],
+    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3070,y:830,w:60},{x:3760,y:830,w:40}],
+    checkpoints:[{x:1900,y:460},{x:3200,y:500}],
+    shards:[{x:2840,y:400,id:34}],
+  },
+  // ═══ Act VIII — Эхо (levels 35-39) ═══
+  {
+    name:'Пульс',story:'Мир пульсирует. Платформы появляются и исчезают в ритме. Двигайся в такт.',
+    width:4000,height:950,spawn:{x:80,y:650},exit:{x:3800,y:400,w:40,h:80},
+    platforms:[
+      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},{x:1300,y:800,w:400,h:40},{x:1900,y:800,w:400,h:40},{x:2500,y:800,w:400,h:40},{x:3100,y:800,w:400,h:40},{x:3600,y:800,w:400,h:40},
+      {x:300,y:680,w:100,h:16},{x:600,y:560,w:80,h:16},{x:900,y:640,w:100,h:16},
+      {x:1200,y:520,w:100,h:16},{x:1500,y:600,w:80,h:16},
+      {x:1800,y:500,w:100,h:16},{x:2100,y:420,w:80,h:16},
+      {x:2500,y:540,w:80,h:16},{x:2800,y:460,w:80,h:16},
+      {x:3200,y:500,w:80,h:16},{x:3500,y:440,w:80,h:16},
+      {x:3800,y:400,w:120,h:16},
+    ],
+    spikes:[{x:560,y:780,w:80},{x:1180,y:780,w:60},{x:2360,y:780,w:60},{x:3070,y:780,w:40}],
+    checkpoints:[{x:1900,y:480},{x:3100,y:480}],
+    shards:[{x:2140,y:380,id:35}],
+  },
+  {
+    name:'Резонанс',story:'Кристаллы откликаются на движение. Стоишь — мир гаснет. Двигаешься — светится.',
+    width:4200,height:1000,spawn:{x:80,y:700},exit:{x:4000,y:380,w:40,h:80},
+    platforms:[
+      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3100,y:850,w:400,h:40},{x:3700,y:850,w:500,h:40},
+      {x:250,y:720,w:100,h:16},{x:550,y:600,w:80,h:16},{x:800,y:700,w:100,h:16},
+      {x:1100,y:580,w:100,h:16},{x:1400,y:680,w:80,h:16},
+      {x:1700,y:560,w:100,h:16},{x:2000,y:480,w:80,h:16},
+      {x:2400,y:560,w:80,h:16},{x:2700,y:480,w:80,h:16},
+      {x:3100,y:540,w:80,h:16},{x:3400,y:440,w:80,h:16},
+      {x:3800,y:420,w:80,h:16},{x:4000,y:380,w:120,h:16},
+    ],
+    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3070,y:830,w:40}],
+    checkpoints:[{x:1900,y:470},{x:3100,y:520}],
+    shards:[{x:3440,y:400,id:36}],
+  },
+  {
+    name:'Такт',story:'Ритм ускоряется. Платформы мерцают быстрее. Не сбейся.',
+    width:4400,height:1000,spawn:{x:80,y:700},exit:{x:4200,y:360,w:40,h:80},
+    platforms:[
+      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3100,y:850,w:400,h:40},{x:3700,y:850,w:400,h:40},{x:4100,y:850,w:300,h:40},
+      {x:250,y:720,w:100,h:16},{x:500,y:600,w:80,h:16},{x:800,y:680,w:80,h:16},
+      {x:1050,y:560,w:80,h:16},{x:1300,y:640,w:80,h:16},
+      {x:1600,y:540,w:80,h:16},{x:1850,y:460,w:80,h:16},
+      {x:2200,y:520,w:80,h:16},{x:2500,y:440,w:80,h:16},
+      {x:2900,y:540,w:80,h:16},{x:3200,y:460,w:80,h:16},
+      {x:3600,y:480,w:80,h:16},{x:3900,y:400,w:80,h:16},
+      {x:4200,y:360,w:120,h:16},
+    ],
+    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3070,y:830,w:40},{x:3560,y:830,w:40}],
+    checkpoints:[{x:1900,y:450},{x:3100,y:440}],
+    shards:[{x:2540,y:400,id:37}],
+  },
+  {
+    name:'Отголоски',story:'Эхо прошлого — платформы появляются там, где ты был секунду назад.',
+    width:4600,height:1050,spawn:{x:80,y:750},exit:{x:4400,y:380,w:40,h:80},
+    platforms:[
+      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:300,h:40},
+      {x:250,y:770,w:100,h:16},{x:500,y:650,w:80,h:16},{x:800,y:730,w:80,h:16},
+      {x:1050,y:610,w:80,h:16},{x:1300,y:690,w:80,h:16},
+      {x:1600,y:580,w:80,h:16},{x:1850,y:500,w:80,h:16},
+      {x:2200,y:560,w:80,h:16},{x:2500,y:480,w:80,h:16},
+      {x:2900,y:580,w:80,h:16},{x:3200,y:500,w:80,h:16},
+      {x:3600,y:520,w:80,h:16},{x:3900,y:440,w:80,h:16},
+      {x:4200,y:420,w:80,h:16},{x:4400,y:380,w:120,h:16},
+    ],
+    spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40},{x:3560,y:880,w:40}],
+    checkpoints:[{x:1900,y:490},{x:3100,y:480}],
+    shards:[{x:3940,y:400,id:38}],
+  },
+  {
+    name:'Ритм',story:'Финал эха. Всё пульсирует. Всё движется. Только ритм спасёт.',
+    width:4800,height:1050,spawn:{x:80,y:750},exit:{x:4600,y:360,w:40,h:80},
+    platforms:[
+      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:500,h:40},
+      {x:250,y:770,w:100,h:16},{x:500,y:650,w:80,h:16},{x:800,y:730,w:80,h:16},
+      {x:1050,y:610,w:80,h:16},{x:1300,y:690,w:80,h:16},
+      {x:1600,y:560,w:80,h:16},{x:1850,y:460,w:80,h:16},
+      {x:2200,y:540,w:80,h:16},{x:2500,y:440,w:80,h:16},
+      {x:2900,y:560,w:80,h:16},{x:3200,y:460,w:80,h:16},
+      {x:3600,y:480,w:80,h:16},{x:3900,y:380,w:80,h:16},
+      {x:4300,y:420,w:80,h:16},{x:4500,y:380,w:80,h:16},
+      {x:4600,y:360,w:120,h:16},
+    ],
+    spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40},{x:3560,y:880,w:40},{x:4100,y:880,w:40}],
+    checkpoints:[{x:1900,y:450},{x:3100,y:440},{x:4300,y:400}],
+    shards:[{x:3940,y:340,id:39}],
+  },
+  // ═══ Act IX — Растворение (levels 40-44) ═══
+  {
+    name:'Мерцание',story:'Платформы теряют плотность. То видны, то нет. Но они всё ещё здесь. Наверное.',
+    width:4200,height:1000,spawn:{x:80,y:700},exit:{x:4000,y:380,w:40,h:80},
+    platforms:[
+      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3100,y:850,w:400,h:40},{x:3700,y:850,w:500,h:40},
+      {x:300,y:720,w:100,h:16},{x:550,y:600,w:80,h:16},{x:800,y:700,w:100,h:16},
+      {x:1100,y:580,w:100,h:16},{x:1400,y:680,w:80,h:16},
+      {x:1750,y:560,w:100,h:16},{x:2050,y:460,w:80,h:16},
+      {x:2500,y:540,w:80,h:16},{x:2800,y:440,w:80,h:16},
+      {x:3200,y:500,w:80,h:16},{x:3600,y:420,w:80,h:16},
+      {x:4000,y:380,w:120,h:16},
+    ],
+    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3070,y:830,w:40}],
+    checkpoints:[{x:1900,y:460},{x:3100,y:480}],
+    shards:[{x:2840,y:400,id:40}],
+  },
+  {
+    name:'Стабильность',story:'Кристаллы-стабилизаторы — чьи-то последние воспоминания. Они держат мир. Но их мало.',
+    width:4400,height:1050,spawn:{x:80,y:750},exit:{x:4200,y:360,w:40,h:80},
+    platforms:[
+      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4100,y:900,w:300,h:40},
+      {x:250,y:770,w:100,h:16},{x:500,y:650,w:80,h:16},{x:800,y:730,w:80,h:16},
+      {x:1050,y:610,w:80,h:16},{x:1350,y:700,w:80,h:16},
+      {x:1700,y:580,w:80,h:16},{x:2000,y:480,w:80,h:16},
+      {x:2400,y:560,w:80,h:16},{x:2700,y:460,w:80,h:16},
+      {x:3100,y:540,w:80,h:16},{x:3400,y:440,w:80,h:16},
+      {x:3800,y:460,w:80,h:16},{x:4050,y:400,w:80,h:16},
+      {x:4200,y:360,w:120,h:16},
+    ],
+    spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40},{x:3560,y:880,w:40}],
+    checkpoints:[{x:1900,y:470},{x:3100,y:520}],
+    shards:[{x:3440,y:400,id:41}],
+  },
+  {
+    name:'Распад',story:'Мир рушится быстрее. Стабилизаторы тают. Беги — или растворись.',
+    width:4600,height:1050,spawn:{x:80,y:750},exit:{x:4400,y:340,w:40,h:80},
+    platforms:[
+      {x:0,y:900,w:500,h:40},{x:700,y:900,w:300,h:40},{x:1200,y:900,w:300,h:40},{x:1700,y:900,w:300,h:40},{x:2200,y:900,w:300,h:40},{x:2700,y:900,w:300,h:40},{x:3200,y:900,w:300,h:40},{x:3700,y:900,w:300,h:40},{x:4200,y:900,w:400,h:40},
+      {x:250,y:770,w:80,h:16},{x:500,y:650,w:80,h:16},{x:750,y:730,w:80,h:16},
+      {x:1000,y:600,w:80,h:16},{x:1250,y:700,w:80,h:16},
+      {x:1500,y:560,w:80,h:16},{x:1750,y:460,w:80,h:16},
+      {x:2050,y:540,w:80,h:16},{x:2350,y:440,w:80,h:16},
+      {x:2650,y:520,w:80,h:16},{x:2950,y:420,w:80,h:16},
+      {x:3250,y:480,w:80,h:16},{x:3550,y:380,w:80,h:16},
+      {x:3900,y:420,w:80,h:16},{x:4200,y:360,w:80,h:16},
+      {x:4400,y:340,w:120,h:16},
+    ],
+    spikes:[{x:560,y:880,w:80},{x:1060,y:880,w:60},{x:1560,y:880,w:60},{x:2060,y:880,w:60},{x:2560,y:880,w:60},{x:3060,y:880,w:40}],
+    checkpoints:[{x:1700,y:450},{x:2950,y:400},{x:3900,y:400}],
+    shards:[{x:3590,y:340,id:42}],
+  },
+  {
+    name:'Прозрачность',story:'Стены стали мечтами. Пол стал дымом. Ничто не держит. Кроме памяти.',
+    width:4800,height:1100,spawn:{x:80,y:800},exit:{x:4600,y:340,w:40,h:80},
+    platforms:[
+      {x:0,y:950,w:500,h:40},{x:700,y:950,w:300,h:40},{x:1200,y:950,w:300,h:40},{x:1700,y:950,w:300,h:40},{x:2200,y:950,w:300,h:40},{x:2700,y:950,w:300,h:40},{x:3200,y:950,w:300,h:40},{x:3700,y:950,w:300,h:40},{x:4200,y:950,w:300,h:40},{x:4500,y:950,w:300,h:40},
+      {x:250,y:820,w:80,h:16},{x:500,y:700,w:80,h:16},{x:750,y:780,w:80,h:16},
+      {x:1000,y:650,w:80,h:16},{x:1250,y:740,w:80,h:16},
+      {x:1500,y:600,w:80,h:16},{x:1750,y:500,w:80,h:16},
+      {x:2050,y:580,w:80,h:16},{x:2350,y:480,w:80,h:16},
+      {x:2650,y:560,w:80,h:16},{x:2950,y:460,w:80,h:16},
+      {x:3300,y:520,w:80,h:16},{x:3600,y:420,w:80,h:16},
+      {x:4000,y:460,w:80,h:16},{x:4300,y:380,w:80,h:16},
+      {x:4600,y:340,w:120,h:16},
+    ],
+    spikes:[{x:560,y:930,w:80},{x:1060,y:930,w:60},{x:1560,y:930,w:60},{x:2060,y:930,w:60},{x:2560,y:930,w:60},{x:3060,y:930,w:40},{x:3560,y:930,w:40}],
+    checkpoints:[{x:1700,y:490},{x:3200,y:500},{x:4300,y:360}],
+    shards:[{x:2990,y:420,id:43}],
+  },
+  {
+    name:'Исчезновение',story:'Последний рубеж перед архитектурой. Мир почти исчез. Остались лишь контуры.',
+    width:5000,height:1100,spawn:{x:80,y:800},exit:{x:4800,y:320,w:40,h:80},
+    platforms:[
+      {x:0,y:950,w:400,h:40},{x:600,y:950,w:300,h:40},{x:1100,y:950,w:300,h:40},{x:1600,y:950,w:300,h:40},{x:2100,y:950,w:300,h:40},{x:2600,y:950,w:300,h:40},{x:3100,y:950,w:300,h:40},{x:3600,y:950,w:300,h:40},{x:4100,y:950,w:300,h:40},{x:4600,y:950,w:400,h:40},
+      {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:780,w:80,h:16},
+      {x:950,y:640,w:80,h:16},{x:1200,y:730,w:80,h:16},
+      {x:1450,y:580,w:80,h:16},{x:1700,y:480,w:80,h:16},
+      {x:2000,y:560,w:80,h:16},{x:2300,y:460,w:80,h:16},
+      {x:2600,y:540,w:80,h:16},{x:2900,y:440,w:80,h:16},
+      {x:3200,y:520,w:80,h:16},{x:3500,y:400,w:80,h:16},
+      {x:3850,y:440,w:80,h:16},{x:4150,y:360,w:80,h:16},
+      {x:4500,y:380,w:80,h:16},{x:4800,y:320,w:120,h:16},
+    ],
+    spikes:[{x:460,y:930,w:80},{x:960,y:930,w:60},{x:1460,y:930,w:60},{x:1960,y:930,w:60},{x:2460,y:930,w:60},{x:2960,y:930,w:40},{x:3460,y:930,w:40},{x:3960,y:930,w:40}],
+    checkpoints:[{x:1600,y:470},{x:2900,y:420},{x:4150,y:340}],
+    shards:[{x:3540,y:360,id:44}],
+  },
+  // ═══ Act X — Архитектор (levels 45-49) ═══
+  {
+    name:'Чертёж',story:'Здесь всё расчётливо. Платформы — по линейке. Ловушки — по расписанию.',
+    width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:380,w:40,h:80},
+    platforms:[
+      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3100,y:850,w:400,h:40},{x:3700,y:850,w:400,h:40},{x:4100,y:850,w:400,h:40},
+      {x:300,y:720,w:100,h:16},{x:550,y:600,w:80,h:16},{x:800,y:700,w:80,h:16},
+      {x:1100,y:580,w:80,h:16},{x:1400,y:680,w:80,h:16},
+      {x:1700,y:560,w:80,h:16},{x:2000,y:460,w:80,h:16},
+      {x:2400,y:540,w:80,h:16},{x:2700,y:440,w:80,h:16},
+      {x:3100,y:520,w:80,h:16},{x:3400,y:420,w:80,h:16},
+      {x:3800,y:460,w:80,h:16},{x:4100,y:400,w:80,h:16},
+      {x:4300,y:380,w:120,h:16},
+    ],
+    spikes:[{x:560,y:830,w:80},{x:1060,y:830,w:60},{x:1860,y:830,w:60},{x:2360,y:830,w:60},{x:3060,y:830,w:40}],
+    checkpoints:[{x:1900,y:450},{x:3100,y:500}],
+    shards:[{x:2740,y:400,id:45}],
+  },
+  {
+    name:'Лезвие',story:'Тонкие красные линии — мгновенная смерть. Но они пульсируют. Просчитай.',
+    width:4700,height:1050,spawn:{x:80,y:750},exit:{x:4500,y:360,w:40,h:80},
+    platforms:[
+      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:400,h:40},
+      {x:250,y:770,w:80,h:16},{x:500,y:650,w:80,h:16},{x:750,y:740,w:80,h:16},
+      {x:1000,y:600,w:80,h:16},{x:1300,y:700,w:80,h:16},
+      {x:1600,y:580,w:80,h:16},{x:1900,y:480,w:80,h:16},
+      {x:2200,y:560,w:80,h:16},{x:2500,y:460,w:80,h:16},
+      {x:2900,y:540,w:80,h:16},{x:3200,y:440,w:80,h:16},
+      {x:3600,y:500,w:80,h:16},{x:3900,y:400,w:80,h:16},
+      {x:4300,y:420,w:80,h:16},{x:4500,y:360,w:120,h:16},
+    ],
+    spikes:[{x:560,y:880,w:80},{x:1060,y:880,w:60},{x:1860,y:880,w:60},{x:2360,y:880,w:60},{x:3060,y:880,w:40},{x:3560,y:880,w:40}],
+    checkpoints:[{x:1900,y:470},{x:3100,y:520},{x:3900,y:380}],
+    shards:[{x:2540,y:420,id:46}],
+  },
+  {
+    name:'Фрагменты',story:'Дверь не откроется одним рычагом. Нужны все фрагменты. Собери.',
+    width:4900,height:1050,spawn:{x:80,y:750},exit:{x:4700,y:340,w:40,h:80},
+    platforms:[
+      {x:0,y:900,w:400,h:40},{x:600,y:900,w:400,h:40},{x:1200,y:900,w:400,h:40},{x:1800,y:900,w:400,h:40},{x:2400,y:900,w:400,h:40},{x:3000,y:900,w:400,h:40},{x:3600,y:900,w:400,h:40},{x:4200,y:900,w:400,h:40},{x:4600,y:900,w:300,h:40},
+      {x:200,y:770,w:80,h:16},{x:450,y:650,w:80,h:16},{x:700,y:740,w:80,h:16},
+      {x:950,y:600,w:80,h:16},{x:1200,y:700,w:80,h:16},
+      {x:1500,y:580,w:80,h:16},{x:1800,y:480,w:80,h:16},
+      {x:2100,y:560,w:80,h:16},{x:2400,y:460,w:80,h:16},
+      {x:2800,y:540,w:80,h:16},{x:3100,y:440,w:80,h:16},
+      {x:3500,y:500,w:80,h:16},{x:3800,y:400,w:80,h:16},
+      {x:4200,y:440,w:80,h:16},{x:4500,y:380,w:80,h:16},
+      {x:4700,y:340,w:120,h:16},
+    ],
+    spikes:[{x:460,y:880,w:80},{x:1060,y:880,w:60},{x:1660,y:880,w:60},{x:2260,y:880,w:60},{x:2860,y:880,w:60},{x:3460,y:880,w:40},{x:4060,y:880,w:40}],
+    checkpoints:[{x:1800,y:470},{x:3000,y:420},{x:4200,y:420}],
+    shards:[{x:3140,y:400,id:47}],
+  },
+  {
+    name:'Механизм',story:'Шестерёнки архитектора. Всё взаимосвязано. Один рычаг — три последствия.',
+    width:5100,height:1100,spawn:{x:80,y:800},exit:{x:4900,y:320,w:40,h:80},
+    platforms:[
+      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4800,y:950,w:300,h:40},
+      {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:790,w:80,h:16},
+      {x:950,y:650,w:80,h:16},{x:1200,y:740,w:80,h:16},
+      {x:1500,y:600,w:80,h:16},{x:1800,y:500,w:80,h:16},
+      {x:2100,y:580,w:80,h:16},{x:2400,y:460,w:80,h:16},
+      {x:2800,y:540,w:80,h:16},{x:3100,y:420,w:80,h:16},
+      {x:3500,y:480,w:80,h:16},{x:3800,y:380,w:80,h:16},
+      {x:4200,y:420,w:80,h:16},{x:4500,y:340,w:80,h:16},
+      {x:4900,y:320,w:120,h:16},
+    ],
+    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60},{x:1660,y:930,w:60},{x:2260,y:930,w:60},{x:2860,y:930,w:60},{x:3460,y:930,w:40},{x:4060,y:930,w:40}],
+    checkpoints:[{x:1800,y:490},{x:3000,y:400},{x:4200,y:400}],
+    shards:[{x:3840,y:340,id:48}],
+  },
+  {
+    name:'Архив',story:'Сердце архива. Архитектор следит за каждым шагом. Не нарушай порядок.',
+    width:5300,height:1100,spawn:{x:80,y:800},exit:{x:5100,y:300,w:40,h:80},
+    platforms:[
+      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4800,y:950,w:400,h:40},{x:5000,y:950,w:300,h:40},
+      {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:790,w:80,h:16},
+      {x:950,y:640,w:80,h:16},{x:1200,y:740,w:80,h:16},
+      {x:1500,y:580,w:80,h:16},{x:1800,y:480,w:80,h:16},
+      {x:2100,y:560,w:80,h:16},{x:2400,y:440,w:80,h:16},
+      {x:2800,y:520,w:80,h:16},{x:3100,y:400,w:80,h:16},
+      {x:3500,y:460,w:80,h:16},{x:3800,y:360,w:80,h:16},
+      {x:4200,y:400,w:80,h:16},{x:4500,y:320,w:80,h:16},
+      {x:4900,y:360,w:80,h:16},{x:5100,y:300,w:120,h:16},
+    ],
+    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60},{x:1660,y:930,w:60},{x:2260,y:930,w:60},{x:2860,y:930,w:60},{x:3460,y:930,w:40},{x:4060,y:930,w:40},{x:4660,y:930,w:40}],
+    checkpoints:[{x:1800,y:470},{x:3000,y:380},{x:4200,y:380},{x:4900,y:340}],
+    shards:[{x:4540,y:280,id:49}],
+  },
+  // ═══ Act XI — Возвращение (levels 50-54) ═══
+  {
+    name:'Улица',story:'Знакомые очертания. Улица. Но она длиннее, чем в воспоминании.',
+    width:4600,height:1050,spawn:{x:80,y:750},exit:{x:4400,y:360,w:40,h:80},
+    platforms:[
+      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:300,h:40},
+      {x:250,y:770,w:100,h:16},{x:500,y:650,w:80,h:16},{x:800,y:740,w:80,h:16},
+      {x:1050,y:600,w:80,h:16},{x:1300,y:700,w:80,h:16},
+      {x:1600,y:560,w:80,h:16},{x:1900,y:460,w:80,h:16},
+      {x:2300,y:540,w:80,h:16},{x:2600,y:440,w:80,h:16},
+      {x:3000,y:520,w:80,h:16},{x:3300,y:420,w:80,h:16},
+      {x:3700,y:460,w:80,h:16},{x:4100,y:400,w:80,h:16},
+      {x:4400,y:360,w:120,h:16},
+    ],
+    spikes:[{x:560,y:880,w:80},{x:1060,y:880,w:60},{x:1760,y:880,w:60},{x:2360,y:880,w:60},{x:2960,y:880,w:40},{x:3560,y:880,w:40}],
+    checkpoints:[{x:1900,y:450},{x:3100,y:500},{x:4100,y:380}],
+    shards:[{x:2640,y:400,id:50}],
+  },
+  {
+    name:'Комната',story:'Комната. Двери не туда. Окна не сюда. Воспоминание или желание?',
+    width:4800,height:1100,spawn:{x:80,y:800},exit:{x:4600,y:340,w:40,h:80},
+    platforms:[
+      {x:0,y:950,w:500,h:40},{x:700,y:950,w:400,h:40},{x:1300,y:950,w:400,h:40},{x:1900,y:950,w:400,h:40},{x:2500,y:950,w:400,h:40},{x:3100,y:950,w:400,h:40},{x:3700,y:950,w:400,h:40},{x:4300,y:950,w:500,h:40},
+      {x:250,y:820,w:80,h:16},{x:500,y:700,w:80,h:16},{x:800,y:790,w:80,h:16},
+      {x:1050,y:640,w:80,h:16},{x:1300,y:740,w:80,h:16},
+      {x:1600,y:600,w:80,h:16},{x:1900,y:500,w:80,h:16},
+      {x:2200,y:580,w:80,h:16},{x:2500,y:460,w:80,h:16},
+      {x:2900,y:540,w:80,h:16},{x:3200,y:420,w:80,h:16},
+      {x:3600,y:480,w:80,h:16},{x:3900,y:380,w:80,h:16},
+      {x:4300,y:400,w:80,h:16},{x:4600,y:340,w:120,h:16},
+    ],
+    spikes:[{x:560,y:930,w:80},{x:1060,y:930,w:60},{x:1760,y:930,w:60},{x:2360,y:930,w:60},{x:2960,y:930,w:40},{x:3560,y:930,w:40}],
+    checkpoints:[{x:1900,y:490},{x:3100,y:520},{x:4300,y:380}],
+    shards:[{x:3240,y:380,id:51}],
+  },
+  {
+    name:'Мост',story:'Мост над бездной. Но он сложен из всего, что ты помнишь. И того, что придумал.',
+    width:5000,height:1100,spawn:{x:80,y:800},exit:{x:4800,y:320,w:40,h:80},
+    platforms:[
+      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4600,y:950,w:400,h:40},
+      {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:790,w:80,h:16},
+      {x:950,y:640,w:80,h:16},{x:1200,y:740,w:80,h:16},
+      {x:1500,y:600,w:80,h:16},{x:1800,y:480,w:80,h:16},
+      {x:2100,y:560,w:80,h:16},{x:2400,y:440,w:80,h:16},
+      {x:2800,y:520,w:80,h:16},{x:3100,y:400,w:80,h:16},
+      {x:3500,y:460,w:80,h:16},{x:3800,y:360,w:80,h:16},
+      {x:4200,y:400,w:80,h:16},{x:4500,y:340,w:80,h:16},
+      {x:4800,y:320,w:120,h:16},
+    ],
+    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60},{x:1660,y:930,w:60},{x:2260,y:930,w:60},{x:2860,y:930,w:60},{x:3460,y:930,w:40},{x:4060,y:930,w:40}],
+    checkpoints:[{x:1800,y:470},{x:3000,y:380},{x:4200,y:380}],
+    shards:[{x:3840,y:320,id:52}],
+  },
+  {
+    name:'Башня',story:'Башня воспоминаний. Каждый этаж — потеря. Каждый прыжок — боль.',
+    width:5200,height:1150,spawn:{x:80,y:850},exit:{x:5000,y:300,w:40,h:80},
+    platforms:[
+      {x:0,y:1000,w:400,h:40},{x:600,y:1000,w:400,h:40},{x:1200,y:1000,w:400,h:40},{x:1800,y:1000,w:400,h:40},{x:2400,y:1000,w:400,h:40},{x:3000,y:1000,w:400,h:40},{x:3600,y:1000,w:400,h:40},{x:4200,y:1000,w:400,h:40},{x:4800,y:1000,w:400,h:40},
+      {x:200,y:870,w:80,h:16},{x:450,y:750,w:80,h:16},{x:700,y:840,w:80,h:16},
+      {x:950,y:690,w:80,h:16},{x:1200,y:790,w:80,h:16},
+      {x:1500,y:640,w:80,h:16},{x:1800,y:540,w:80,h:16},
+      {x:2100,y:620,w:80,h:16},{x:2400,y:500,w:80,h:16},
+      {x:2800,y:580,w:80,h:16},{x:3100,y:460,w:80,h:16},
+      {x:3500,y:520,w:80,h:16},{x:3800,y:400,w:80,h:16},
+      {x:4200,y:440,w:80,h:16},{x:4500,y:360,w:80,h:16},
+      {x:4900,y:380,w:80,h:16},{x:5000,y:300,w:120,h:16},
+    ],
+    spikes:[{x:460,y:980,w:80},{x:1060,y:980,w:60},{x:1660,y:980,w:60},{x:2260,y:980,w:60},{x:2860,y:980,w:60},{x:3460,y:980,w:40},{x:4060,y:980,w:40},{x:4660,y:980,w:40}],
+    checkpoints:[{x:1800,y:530},{x:3000,y:440},{x:4200,y:420},{x:4900,y:360}],
+    shards:[{x:3140,y:420,id:53}],
+  },
+  {
+    name:'Порог',story:'Порог между Пустотой и реальностью. Тонкий как нить. Хрупкий как стекло.',
+    width:5400,height:1150,spawn:{x:80,y:850},exit:{x:5200,y:280,w:40,h:80},
+    platforms:[
+      {x:0,y:1000,w:400,h:40},{x:600,y:1000,w:400,h:40},{x:1200,y:1000,w:400,h:40},{x:1800,y:1000,w:400,h:40},{x:2400,y:1000,w:400,h:40},{x:3000,y:1000,w:400,h:40},{x:3600,y:1000,w:400,h:40},{x:4200,y:1000,w:400,h:40},{x:4800,y:1000,w:400,h:40},{x:5200,y:1000,w:200,h:40},
+      {x:200,y:870,w:80,h:16},{x:450,y:750,w:80,h:16},{x:700,y:840,w:80,h:16},
+      {x:950,y:680,w:80,h:16},{x:1200,y:790,w:80,h:16},
+      {x:1500,y:620,w:80,h:16},{x:1800,y:500,w:80,h:16},
+      {x:2100,y:580,w:80,h:16},{x:2400,y:460,w:80,h:16},
+      {x:2800,y:540,w:80,h:16},{x:3100,y:420,w:80,h:16},
+      {x:3500,y:480,w:80,h:16},{x:3800,y:360,w:80,h:16},
+      {x:4200,y:400,w:80,h:16},{x:4500,y:320,w:80,h:16},
+      {x:4900,y:360,w:80,h:16},{x:5200,y:280,w:120,h:16},
+    ],
+    spikes:[{x:460,y:980,w:80},{x:1060,y:980,w:60},{x:1660,y:980,w:60},{x:2260,y:980,w:60},{x:2860,y:980,w:60},{x:3460,y:980,w:40},{x:4060,y:980,w:40},{x:4660,y:980,w:40}],
+    checkpoints:[{x:1800,y:490},{x:3000,y:400},{x:4200,y:380},{x:4900,y:340}],
+    shards:[{x:4540,y:280,id:54}],
+  },
+  // ═══ Act XII — Выбор (levels 55-59) ═══
+  {
+    name:'Развилка',story:'Впервые — выбор. Левый путь или правый. Забыть или помнить. Каждый шаг — решение.',
+    width:4800,height:1100,spawn:{x:80,y:800},exit:{x:4600,y:320,w:40,h:80},
+    platforms:[
+      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4600,y:950,w:200,h:40},
+      {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:790,w:80,h:16},
+      {x:950,y:640,w:80,h:16},{x:1200,y:740,w:80,h:16},
+      {x:1500,y:600,w:80,h:16},{x:1800,y:480,w:80,h:16},
+      {x:2100,y:560,w:80,h:16},{x:2400,y:440,w:80,h:16},
+      {x:2800,y:520,w:80,h:16},{x:3100,y:400,w:80,h:16},
+      {x:3500,y:460,w:80,h:16},{x:3800,y:360,w:80,h:16},
+      {x:4200,y:400,w:80,h:16},{x:4500,y:340,w:80,h:16},
+      {x:4600,y:320,w:120,h:16},
+    ],
+    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60},{x:1660,y:930,w:60},{x:2260,y:930,w:60},{x:2860,y:930,w:60},{x:3460,y:930,w:40},{x:4060,y:930,w:40}],
+    checkpoints:[{x:1800,y:470},{x:3000,y:380},{x:4200,y:380}],
+    shards:[{x:3840,y:320,id:55}],
+  },
+  {
+    name:'Компромисс',story:'Не всё можно сохранить. Что выберешь — скорость или память? Лёгкость или правду?',
+    width:5000,height:1150,spawn:{x:80,y:850},exit:{x:4800,y:300,w:40,h:80},
+    platforms:[
+      {x:0,y:1000,w:400,h:40},{x:600,y:1000,w:400,h:40},{x:1200,y:1000,w:400,h:40},{x:1800,y:1000,w:400,h:40},{x:2400,y:1000,w:400,h:40},{x:3000,y:1000,w:400,h:40},{x:3600,y:1000,w:400,h:40},{x:4200,y:1000,w:400,h:40},{x:4800,y:1000,w:200,h:40},
+      {x:200,y:870,w:80,h:16},{x:450,y:750,w:80,h:16},{x:700,y:840,w:80,h:16},
+      {x:950,y:680,w:80,h:16},{x:1200,y:790,w:80,h:16},
+      {x:1500,y:620,w:80,h:16},{x:1800,y:500,w:80,h:16},
+      {x:2100,y:580,w:80,h:16},{x:2400,y:460,w:80,h:16},
+      {x:2800,y:540,w:80,h:16},{x:3100,y:420,w:80,h:16},
+      {x:3500,y:480,w:80,h:16},{x:3800,y:360,w:80,h:16},
+      {x:4200,y:400,w:80,h:16},{x:4500,y:320,w:80,h:16},
+      {x:4800,y:300,w:120,h:16},
+    ],
+    spikes:[{x:460,y:980,w:80},{x:1060,y:980,w:60},{x:1660,y:980,w:60},{x:2260,y:980,w:60},{x:2860,y:980,w:60},{x:3460,y:980,w:40},{x:4060,y:980,w:40}],
+    checkpoints:[{x:1800,y:490},{x:3000,y:400},{x:4200,y:380}],
+    shards:[{x:3140,y:380,id:56}],
+  },
+  {
+    name:'Цена',story:'У каждого выбора — цена. Забвение забирает понемногу. Память ранит каждого.',
+    width:5200,height:1150,spawn:{x:80,y:850},exit:{x:5000,y:280,w:40,h:80},
+    platforms:[
+      {x:0,y:1000,w:400,h:40},{x:600,y:1000,w:300,h:40},{x:1100,y:1000,w:300,h:40},{x:1600,y:1000,w:300,h:40},{x:2100,y:1000,w:300,h:40},{x:2600,y:1000,w:300,h:40},{x:3100,y:1000,w:300,h:40},{x:3600,y:1000,w:300,h:40},{x:4100,y:1000,w:300,h:40},{x:4600,y:1000,w:300,h:40},{x:5000,y:1000,w:200,h:40},
+      {x:200,y:870,w:80,h:16},{x:450,y:750,w:80,h:16},{x:700,y:840,w:80,h:16},
+      {x:950,y:680,w:80,h:16},{x:1150,y:780,w:80,h:16},
+      {x:1400,y:600,w:80,h:16},{x:1700,y:500,w:80,h:16},
+      {x:2000,y:580,w:80,h:16},{x:2300,y:460,w:80,h:16},
+      {x:2650,y:540,w:80,h:16},{x:2950,y:420,w:80,h:16},
+      {x:3300,y:480,w:80,h:16},{x:3600,y:380,w:80,h:16},
+      {x:4000,y:420,w:80,h:16},{x:4300,y:340,w:80,h:16},
+      {x:4700,y:360,w:80,h:16},{x:5000,y:280,w:120,h:16},
+    ],
+    spikes:[{x:460,y:980,w:80},{x:960,y:980,w:60},{x:1460,y:980,w:60},{x:1960,y:980,w:60},{x:2460,y:980,w:60},{x:2960,y:980,w:40},{x:3460,y:980,w:40},{x:3960,y:980,w:40},{x:4460,y:980,w:40}],
+    checkpoints:[{x:1600,y:490},{x:2600,y:400},{x:4100,y:400},{x:4700,y:340}],
+    shards:[{x:3640,y:340,id:57}],
+  },
+  {
+    name:'Преддверие',story:'Последняя развилка. Самый трудный выбор. То, от чего не увернёшься.',
+    width:5400,height:1200,spawn:{x:80,y:900},exit:{x:5200,y:260,w:40,h:80},
+    platforms:[
+      {x:0,y:1050,w:400,h:40},{x:600,y:1050,w:300,h:40},{x:1100,y:1050,w:300,h:40},{x:1600,y:1050,w:300,h:40},{x:2100,y:1050,w:300,h:40},{x:2600,y:1050,w:300,h:40},{x:3100,y:1050,w:300,h:40},{x:3600,y:1050,w:300,h:40},{x:4100,y:1050,w:300,h:40},{x:4600,y:1050,w:300,h:40},{x:5000,y:1050,w:400,h:40},
+      {x:200,y:920,w:80,h:16},{x:450,y:800,w:80,h:16},{x:700,y:890,w:80,h:16},
+      {x:950,y:720,w:80,h:16},{x:1150,y:830,w:80,h:16},
+      {x:1400,y:650,w:80,h:16},{x:1700,y:540,w:80,h:16},
+      {x:2000,y:620,w:80,h:16},{x:2300,y:500,w:80,h:16},
+      {x:2650,y:580,w:80,h:16},{x:2950,y:460,w:80,h:16},
+      {x:3300,y:520,w:80,h:16},{x:3600,y:400,w:80,h:16},
+      {x:4000,y:440,w:80,h:16},{x:4300,y:340,w:80,h:16},
+      {x:4700,y:380,w:80,h:16},{x:5000,y:300,w:80,h:16},
+      {x:5200,y:260,w:120,h:16},
+    ],
+    spikes:[{x:460,y:1030,w:80},{x:960,y:1030,w:60},{x:1460,y:1030,w:60},{x:1960,y:1030,w:60},{x:2460,y:1030,w:60},{x:2960,y:1030,w:40},{x:3460,y:1030,w:40},{x:3960,y:1030,w:40},{x:4460,y:1030,w:40}],
+    checkpoints:[{x:1600,y:530},{x:2600,y:440},{x:4100,y:420},{x:4700,y:360}],
+    shards:[{x:4340,y:300,id:58}],
+  },
+  {
+    name:'Врата',story:'Финал. Всё что было — ведёт сюда. Забвение дышит в спину. Беги. Прыгай. Помни.',
+    width:5500,height:1200,spawn:{x:80,y:900},exit:{x:5300,y:240,w:40,h:80},
+    platforms:[
+      {x:0,y:1050,w:400,h:40},{x:600,y:1050,w:300,h:40},{x:1100,y:1050,w:300,h:40},{x:1600,y:1050,w:300,h:40},{x:2100,y:1050,w:300,h:40},{x:2600,y:1050,w:300,h:40},{x:3100,y:1050,w:300,h:40},{x:3600,y:1050,w:300,h:40},{x:4100,y:1050,w:300,h:40},{x:4600,y:1050,w:300,h:40},{x:5100,y:1050,w:400,h:40},
+      {x:200,y:920,w:80,h:16},{x:450,y:800,w:80,h:16},{x:700,y:890,w:80,h:16},
+      {x:950,y:700,w:80,h:16},{x:1150,y:830,w:80,h:16},
+      {x:1400,y:620,w:80,h:16},{x:1700,y:500,w:80,h:16},
+      {x:2000,y:580,w:80,h:16},{x:2300,y:460,w:80,h:16},
+      {x:2650,y:540,w:80,h:16},{x:2950,y:400,w:80,h:16},
+      {x:3300,y:480,w:80,h:16},{x:3600,y:360,w:80,h:16},
+      {x:4000,y:400,w:80,h:16},{x:4300,y:300,w:80,h:16},
+      {x:4700,y:340,w:80,h:16},{x:5000,y:280,w:80,h:16},
+      {x:5300,y:240,w:120,h:16},
+    ],
+    spikes:[{x:460,y:1030,w:80},{x:960,y:1030,w:60},{x:1460,y:1030,w:60},{x:1960,y:1030,w:60},{x:2460,y:1030,w:60},{x:2960,y:1030,w:40},{x:3460,y:1030,w:40},{x:3960,y:1030,w:40},{x:4460,y:1030,w:40},{x:4960,y:1030,w:40}],
+    checkpoints:[{x:1600,y:490},{x:2600,y:380},{x:4100,y:380},{x:4700,y:320}],
+    shards:[{x:3640,y:320,id:59}],
   }
 ];
 
@@ -6618,11 +7229,17 @@ function renderLoreScreen(){
     'Всё изменилось. Якоря — повсюду. Нить — его единственная опора. Каждый якорь — чьё-то «я помню тебя», и оно держит его в мире. Он раскачивается на нитях как на чужих руках — кто-то не даёт ему упасть. Но он начинает понимать: нити тянутся не только к нему. Они везде. Сотни нитей, тысячи — Пустота пронизана чужой памятью. Он не один здесь. Другие воспоминания тоже пытаются не раствориться. Нить — это попытка. Рычаги и двери — чужие воспоминания заперты потому что слишком болезненные. Рычаг — это разрешение. «Можно открыть. Можно вспомнить.»',
     'Он исчезает. Не умирает — именно исчезает. Тело теряет чёткость. Движения замедляются. Платформы едва держат — он проваливается сквозь них если стоит слишком долго. Пустота уже не вокруг него — она в нём. Порталы — это ловушки Пустоты. Они затягивают в себя и выбрасывают обратно в начало — стирают весь прогресс, игнорируют чекпоинты. Это не двери — это петли. Лёд — это воспоминания которые замёрзли от безразличия. Никто не помнит — и они застыли. Может быть — перестать существовать не так страшно?',
     'Он другой. Не сильнее — целее. Контуры снова чёткие. Глаза горят. Не от надежды — от упрямства. Он не знает зачем идёт. Но знает что не остановится. Ветер — это Пустота которая замечает его. Впервые — он не просто обломок. Он что-то что сопротивляется. И Пустота реагирует: пытается сдуть, оттолкнуть, не пустить. Враги здесь — другие. Они не отчаянные. Они злые. Потому что он — угроза. Воспоминание которое отказывается быть забытым — это аномалия. Другие воспоминания пытаются его остановить — не из ненависти, из самосохранения. Если он выживет — значит можно выжить. А они уже сдались.',
-    'Он вспомнил. Не всё — но достаточно. Пустота — не тюрьма. Не могила. Пустота — это черновик. Место где воспоминания ждут пока кто-нибудь вспомнит их достаточно чётко чтобы они стали реальностью. Каждый выход с уровня — это не побег. Это момент когда воспоминание становится достаточно ясным чтобы существовать. Тьма в акте VI — последняя. Она не преследует — она стоит стеной. Потому что по ту сторону — то что он почти вспомнил. Уровни — самые странные. Платформы складываются в знакомые формы. Коридоры, комнаты, лестницы — архитектура чьей-то жизни. Он помнит что кого-то любил. Помнит что потерял. Помнит что решил забыть — потому что помнить было невыносимо. Он сам выбрал Пустоту. Но сейчас — он выбирает вернуться.'
+    'Он вспомнил. Не всё — но достаточно. Пустота — не тюрьма. Не могила. Пустота — это черновик. Место где воспоминания ждут пока кто-нибудь вспомнит их достаточно чётко чтобы они стали реальностью. Каждый выход с уровня — это не побег. Это момент когда воспоминание становится достаточно ясным чтобы существовать. Тьма в акте VI — последняя. Она не преследует — она стоит стеной. Потому что по ту сторону — то что он почти вспомнил. Уровни — самые странные. Платформы складываются в знакомые формы. Коридоры, комнаты, лестницы — архитектура чьей-то жизни. Он помнит что кого-то любил. Помнит что потерял. Помнит что решил забыть — потому что помнить было невыносимо. Он сам выбрал Пустоту. Но сейчас — он выбирает вернуться.',
+    'Он оглянулся — и увидел себя. Не отражение — именно себя. Того, кто остался в Пустоте. Тень, которая решила не уходить. Она повторяет каждое его движение — но с задержкой, как эхо. Иногда она помогает: встаёт на давильную плиту, открывает дверь, держит путь. Иногда мешает: блокирует выход, занимает платформу, активирует ловушку. Она не враг. Она — он. Просто та часть, которая выбрала остаться. Давильные плиты — это воспоминания которые реагируют на присутствие. Встань — они откликаются. Уйди — закрываются. Как люди которые помнят только пока ты рядом.',
+    'Пустота запомнила его шаги. Каждое движение оставило след — и эти следы стали кристаллами. Они пульсируют в такт его сердцу. Он движется — они отвечают. Он останавливается — они забывают. Пульс-платформы — это воспоминания которые существуют только в движении. Остановись — и мир исчезнет. Резонаторы — это обещание: если не остановишься — путь будет. Кристаллы-резонаторы откликаются на присутствие, освещают скрытое. Но только пока ты рядом. Уходишь — тьма возвращается. Эхо — это не звук. Это память которая звучит.',
+    'Между Пустотой и реальностью — ничто. Тонкая плёнка, которая держится только потому что кто-то помнит. Но память слабеет. Платформы теряют плотность — то видны, то нет. Стены становятся мечтами. Он чувствует: если мир исчезнет пока он здесь — он исчезнет вместе с ним. Не умрёт. Просто перестанет быть. Осколки-стабилизаторы — это чьи-то последние воспоминания. Кристаллы «я был здесь». Они держат мир. Но их мало. И они тают. Каждый стабилизатор — выбор: какую часть мира спасти?',
+    'Он нашёл того, кто строил. Не бога — архитектора. Того, кто решил что воспоминания должны быть организованы. Упорядочены. Разложены по полкам. Пустота — его архив. Каждая платформа — полка. Каждая ловушка — система каталогизации. Лезвия — границы разделов. Тонкие красные линии, которые пульсируют по расписанию. Фрагменты двери — части одного воспоминания, разбитые на куски. Собери все — и воспоминание воссоединится. Архитектор не злой. Он аккуратный. А тот, кто двигается между воспоминаниями — нарушение порядка. Баг в системе.',
+    'Мир стал знакомым. Слишком знакомым. Улицы, комнаты, мосты — архитектура чьей-то жизни. Но всё искажено, как сон. Улица длиннее чем была. Двери ведут не туда. Окна смотрят в Пустоту. Воспоминания возвращаются, но они искажены. Как текст который перевели дважды. Смысл тот, но слова — другие. Каждый уровень — фрагмент реальности, пропущенный через Пустоту. Он вспоминает: здесь жил. Здесь любил. Здесь потерял. Но каждый шаг — вопрос: это память или желание? Это было — или он хочет чтобы было?',
+    'Финал. Два пути на каждом уровне — забыть и помнить. Левый путь легче, но теряешь часть себя. Правый труднее, но сохраняешь всё. Забвение — не смерть. Это стирание. Чистый лист. Свобода от груза. Но и от себя. Память — это шрамы. Боль. Потери. Но и доказательство что ты был. Что ты помнишь. Что ты выбираешь помнить. В конце — Врата. Забвение дышит в спину. Финальный побег через всё что было. Все механики. Все ловушки. Все воспоминания. Два финала — пустой и целый. Выбор за тобой.'
   ];
-  var actNames=['пробуждение','глубины','нити','пустота','возрождение','исход'];
-  var romanNums=['i','ii','iii','iv','v','vi'];
-  for(var a=0;a<6;a++){
+  var actNames=['пробуждение','глубины','нити','пустота','возрождение','исход','отражения','эхо','растворение','архитектор','возвращение','выбор'];
+  var romanNums=['i','ii','iii','iv','v','vi','vii','viii','ix','x','xi','xii'];
+  for(var a=0;a<12;a++){
     var ch=document.createElement('div');
     var shardCount=getActShardCount(a);
     var unlocked=isChapterUnlocked(a);
@@ -6849,7 +7466,13 @@ function showLevelSelect(){
     {name:'Нити',icon:'🔗',cls:'ls-act-card2',levels:[10,11,12,13,14],desc:'Мосты и верёвки'},
     {name:'Пустота',icon:'🕳',cls:'ls-act-card3',levels:[15,16,17,18,19],desc:'Тьма и трещины'},
     {name:'Возрождение',icon:'🔮',cls:'ls-act-card4',levels:[20,21,22,23,24],desc:'Осколки и зеркала'},
-    {name:'Исход',icon:'💀',cls:'ls-act-card5',levels:[25,26,27,28,29],desc:'Последний шаг'}
+    {name:'Исход',icon:'💀',cls:'ls-act-card5',levels:[25,26,27,28,29],desc:'Последний шаг'},
+    {name:'Отражения',icon:'🪞',cls:'ls-act-card6',levels:[30,31,32,33,34],desc:'Тени и двойники'},
+    {name:'Эхо',icon:'🔔',cls:'ls-act-card7',levels:[35,36,37,38,39],desc:'Ритм и пульсация'},
+    {name:'Растворение',icon:'💫',cls:'ls-act-card8',levels:[40,41,42,43,44],desc:'Мир теряет форму'},
+    {name:'Архитектор',icon:'🏛',cls:'ls-act-card9',levels:[45,46,47,48,49],desc:'Порядок и расчёт'},
+    {name:'Возвращение',icon:'🏠',cls:'ls-act-card10',levels:[50,51,52,53,54],desc:'Искажённая реальность'},
+    {name:'Выбор',icon:'⚖',cls:'ls-act-card11',levels:[55,56,57,58,59],desc:'Забыть или помнить'}
   ];
   var grid=document.getElementById('ls-acts-grid');grid.innerHTML='';
   for(var a=0;a<acts.length;a++){
@@ -6900,7 +7523,13 @@ function showActLevels(actIdx){
     {name:'Нити',icon:'🔗',cls:'ls-act-card2',levels:[10,11,12,13,14],desc:'Мосты и верёвки'},
     {name:'Пустота',icon:'🕳',cls:'ls-act-card3',levels:[15,16,17,18,19],desc:'Тьма и трещины'},
     {name:'Возрождение',icon:'🔮',cls:'ls-act-card4',levels:[20,21,22,23,24],desc:'Осколки и зеркала'},
-    {name:'Исход',icon:'💀',cls:'ls-act-card5',levels:[25,26,27,28,29],desc:'Последний шаг'}
+    {name:'Исход',icon:'💀',cls:'ls-act-card5',levels:[25,26,27,28,29],desc:'Последний шаг'},
+    {name:'Отражения',icon:'🪞',cls:'ls-act-card6',levels:[30,31,32,33,34],desc:'Тени и двойники'},
+    {name:'Эхо',icon:'🔔',cls:'ls-act-card7',levels:[35,36,37,38,39],desc:'Ритм и пульсация'},
+    {name:'Растворение',icon:'💫',cls:'ls-act-card8',levels:[40,41,42,43,44],desc:'Мир теряет форму'},
+    {name:'Архитектор',icon:'🏛',cls:'ls-act-card9',levels:[45,46,47,48,49],desc:'Порядок и расчёт'},
+    {name:'Возвращение',icon:'🏠',cls:'ls-act-card10',levels:[50,51,52,53,54],desc:'Искажённая реальность'},
+    {name:'Выбор',icon:'⚖',cls:'ls-act-card11',levels:[55,56,57,58,59],desc:'Забыть или помнить'}
   ];
   var act=acts[actIdx];
   document.getElementById('ls-acts-view').style.display='none';
@@ -7060,7 +7689,13 @@ function showRecords(){
     {name:'Нити',icon:'🔗',cls:'ls-act-card2',color:'#ba8a2a',levels:[10,11,12,13,14]},
     {name:'Пустота',icon:'🕳',cls:'ls-act-card3',color:'#8a3a5a',levels:[15,16,17,18,19]},
     {name:'Возрождение',icon:'🔮',cls:'ls-act-card4',color:'#4a8a7a',levels:[20,21,22,23,24]},
-    {name:'Исход',icon:'💀',cls:'ls-act-card5',color:'#9a3a6a',levels:[25,26,27,28,29]}
+    {name:'Исход',icon:'💀',cls:'ls-act-card5',color:'#9a3a6a',levels:[25,26,27,28,29]},
+    {name:'Отражения',icon:'🪞',cls:'ls-act-card6',color:'#7a6aba',levels:[30,31,32,33,34]},
+    {name:'Эхо',icon:'🔔',cls:'ls-act-card7',color:'#6aba7a',levels:[35,36,37,38,39]},
+    {name:'Растворение',icon:'💫',cls:'ls-act-card8',color:'#9a7a4a',levels:[40,41,42,43,44]},
+    {name:'Архитектор',icon:'🏛',cls:'ls-act-card9',color:'#5a7aba',levels:[45,46,47,48,49]},
+    {name:'Возвращение',icon:'🏠',cls:'ls-act-card10',color:'#ba6a3a',levels:[50,51,52,53,54]},
+    {name:'Выбор',icon:'⚖',cls:'ls-act-card11',color:'#ba4a4a',levels:[55,56,57,58,59]}
   ];
   for(var a=0;a<acts.length;a++){
     (function(actIdx){
@@ -7099,7 +7734,13 @@ function showRecActDetail(actIdx){
     {name:'Нити',icon:'🔗',cls:'ls-act-card2',color:'#ba8a2a',levels:[10,11,12,13,14]},
     {name:'Пустота',icon:'🕳',cls:'ls-act-card3',color:'#8a3a5a',levels:[15,16,17,18,19]},
     {name:'Возрождение',icon:'🔮',cls:'ls-act-card4',color:'#4a8a7a',levels:[20,21,22,23,24]},
-    {name:'Исход',icon:'💀',cls:'ls-act-card5',color:'#9a3a6a',levels:[25,26,27,28,29]}
+    {name:'Исход',icon:'💀',cls:'ls-act-card5',color:'#9a3a6a',levels:[25,26,27,28,29]},
+    {name:'Отражения',icon:'🪞',cls:'ls-act-card6',color:'#7a6aba',levels:[30,31,32,33,34]},
+    {name:'Эхо',icon:'🔔',cls:'ls-act-card7',color:'#6aba7a',levels:[35,36,37,38,39]},
+    {name:'Растворение',icon:'💫',cls:'ls-act-card8',color:'#9a7a4a',levels:[40,41,42,43,44]},
+    {name:'Архитектор',icon:'🏛',cls:'ls-act-card9',color:'#5a7aba',levels:[45,46,47,48,49]},
+    {name:'Возвращение',icon:'🏠',cls:'ls-act-card10',color:'#ba6a3a',levels:[50,51,52,53,54]},
+    {name:'Выбор',icon:'⚖',cls:'ls-act-card11',color:'#ba4a4a',levels:[55,56,57,58,59]}
   ];
   var act=acts[actIdx];
   document.getElementById('rec-overview').style.display='none';
