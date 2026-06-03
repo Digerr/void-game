@@ -761,6 +761,14 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">На некоторых уровнях появляется тень — полупрозрачная копия, которая повторяет все твои движения с задержкой в 3 секунды. Она может стоять на давильных плитах за тебя! Планируй маршрут: встань на плиту, иди дальше — тень придёт и удержит её.</div>
       </div>
       <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">пульс-платформы</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Зелёные платформы, которые появляются и исчезают в ритме. Перед появлением они мерцают — используй это как предупреждение. Двигайся в такт пульсации!</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">резонанс</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">На некоторых уровнях скрытые платформы появляются только когда ты рядом. Двигайся к ним — и они станут видимыми. Остановишься — исчезнут. Светящийся круг вокруг тебя показывает радиус резонанса.</div>
+      </div>
+      <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">звёзды</div>
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">3 звезды = 0 смертей, 2 звезды = 1-3 смерти, 1 звезда = 4+ смертей. Собирай звёзды, чтобы доказать своё мастерство!</div>
       </div>
@@ -3929,85 +3937,152 @@ var LEVELS=[
     name:'Пульс',story:'Мир пульсирует. Платформы появляются и исчезают в ритме. Двигайся в такт.',
     width:4000,height:950,spawn:{x:80,y:650},exit:{x:3800,y:400,w:40,h:80},
     platforms:[
-      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},{x:1300,y:800,w:400,h:40},{x:1900,y:800,w:400,h:40},{x:2500,y:800,w:400,h:40},{x:3100,y:800,w:400,h:40},{x:3600,y:800,w:400,h:40},
-      {x:300,y:680,w:100,h:16},{x:600,y:560,w:80,h:16},{x:900,y:640,w:100,h:16},
-      {x:1200,y:520,w:100,h:16},{x:1500,y:600,w:80,h:16},
-      {x:1800,y:500,w:100,h:16},{x:2100,y:420,w:80,h:16},
-      {x:2500,y:540,w:80,h:16},{x:2800,y:460,w:80,h:16},
-      {x:3200,y:500,w:80,h:16},{x:3500,y:440,w:80,h:16},
-      {x:3800,y:400,w:120,h:16},
+      {x:0,y:800,w:500,h:40},{x:1300,y:800,w:400,h:40},{x:2500,y:800,w:400,h:40},{x:3600,y:800,w:400,h:40},
+      {x:300,y:680,w:100,h:16},{x:900,y:640,w:100,h:16},
+      {x:1200,y:520,w:100,h:16},
+      {x:2500,y:540,w:80,h:16},{x:3200,y:500,w:80,h:16},
+      {x:3500,y:440,w:80,h:16},{x:3800,y:400,w:120,h:16},
     ],
-    spikes:[{x:560,y:780,w:80},{x:1180,y:780,w:60},{x:2360,y:780,w:60},{x:3070,y:780,w:40}],
-    checkpoints:[{x:1900,y:480},{x:3100,y:480}],
-    shards:[{x:2140,y:380,id:35}],
+    pulsePlatforms:[
+      // Group 0: bridge over the gap between first and second ground (x:500-1300)
+      {x:550,y:700,w:120,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0,group:0},
+      {x:720,y:650,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5,group:0},
+      {x:880,y:600,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0,group:0},
+      // Group 0: second gap (x:1700-2500)
+      {x:1750,y:680,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0,group:0},
+      {x:1900,y:600,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5,group:0},
+      {x:2100,y:560,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0,group:0},
+      // Group 0: third gap (x:2900-3600)
+      {x:2900,y:600,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0,group:0},
+      {x:3100,y:540,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5,group:0},
+    ],
+    spikes:[{x:560,y:780,w:80},{x:2360,y:780,w:60}],
+    checkpoints:[{x:1300,y:480},{x:2500,y:500}],
+    shards:[{x:1940,y:560,id:35}],
   },
   {
     name:'Резонанс',story:'Кристаллы откликаются на движение. Стоишь — мир гаснет. Двигаешься — светится.',
     width:4200,height:1000,spawn:{x:80,y:700},exit:{x:4000,y:380,w:40,h:80},
     platforms:[
-      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3100,y:850,w:400,h:40},{x:3700,y:850,w:500,h:40},
-      {x:250,y:720,w:100,h:16},{x:550,y:600,w:80,h:16},{x:800,y:700,w:100,h:16},
-      {x:1100,y:580,w:100,h:16},{x:1400,y:680,w:80,h:16},
-      {x:1700,y:560,w:100,h:16},{x:2000,y:480,w:80,h:16},
-      {x:2400,y:560,w:80,h:16},{x:2700,y:480,w:80,h:16},
-      {x:3100,y:540,w:80,h:16},{x:3400,y:440,w:80,h:16},
+      {x:0,y:850,w:500,h:40},{x:1800,y:850,w:400,h:40},{x:3700,y:850,w:500,h:40},
+      {x:250,y:720,w:100,h:16},
       {x:3800,y:420,w:80,h:16},{x:4000,y:380,w:120,h:16},
     ],
-    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3070,y:830,w:40}],
-    checkpoints:[{x:1900,y:470},{x:3100,y:520}],
-    shards:[{x:3440,y:400,id:36}],
+    resonanceRadius:160,
+    resonancePlatforms:[
+      // Path over first gap (x:500-1800) — hidden until you approach
+      {x:550,y:700,w:100,h:16},{x:720,y:640,w:100,h:16},{x:900,y:600,w:80,h:16},
+      {x:1080,y:560,w:100,h:16},{x:1260,y:600,w:80,h:16},{x:1420,y:640,w:100,h:16},
+      {x:1600,y:700,w:100,h:16},
+      // Path over second gap (x:2200-3700)
+      {x:2200,y:720,w:80,h:16},{x:2380,y:660,w:100,h:16},{x:2560,y:600,w:80,h:16},
+      {x:2740,y:560,w:100,h:16},{x:2920,y:520,w:80,h:16},{x:3100,y:500,w:100,h:16},
+      {x:3300,y:480,w:80,h:16},{x:3480,y:460,w:100,h:16},
+    ],
+    spikes:[{x:560,y:830,w:80},{x:2360,y:830,w:60}],
+    checkpoints:[{x:1800,y:470},{x:3700,y:830}],
+    shards:[{x:2780,y:520,id:36}],
   },
   {
     name:'Такт',story:'Ритм ускоряется. Платформы мерцают быстрее. Не сбейся.',
     width:4400,height:1000,spawn:{x:80,y:700},exit:{x:4200,y:360,w:40,h:80},
     platforms:[
-      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3100,y:850,w:400,h:40},{x:3700,y:850,w:400,h:40},{x:4100,y:850,w:300,h:40},
-      {x:250,y:720,w:100,h:16},{x:500,y:600,w:80,h:16},{x:800,y:680,w:80,h:16},
-      {x:1050,y:560,w:80,h:16},{x:1300,y:640,w:80,h:16},
-      {x:1600,y:540,w:80,h:16},{x:1850,y:460,w:80,h:16},
-      {x:2200,y:520,w:80,h:16},{x:2500,y:440,w:80,h:16},
-      {x:2900,y:540,w:80,h:16},{x:3200,y:460,w:80,h:16},
-      {x:3600,y:480,w:80,h:16},{x:3900,y:400,w:80,h:16},
-      {x:4200,y:360,w:120,h:16},
+      {x:0,y:850,w:500,h:40},{x:1300,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3700,y:850,w:400,h:40},{x:4100,y:850,w:300,h:40},
+      {x:250,y:720,w:100,h:16},{x:1300,y:640,w:80,h:16},
+      {x:2500,y:440,w:80,h:16},{x:3600,y:480,w:80,h:16},
+      {x:3900,y:400,w:80,h:16},{x:4200,y:360,w:120,h:16},
     ],
-    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3070,y:830,w:40},{x:3560,y:830,w:40}],
-    checkpoints:[{x:1900,y:450},{x:3100,y:440}],
-    shards:[{x:2540,y:400,id:37}],
+    pulsePlatforms:[
+      // Faster cycle: 2s visible, 2s hidden
+      {x:550,y:700,w:100,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0,group:0},
+      {x:720,y:640,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.7,group:0},
+      {x:880,y:600,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.4,group:0},
+      {x:1750,y:680,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0,group:1},
+      {x:1900,y:600,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.7,group:1},
+      {x:2100,y:560,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.4,group:1},
+    ],
+    resonanceRadius:150,
+    resonancePlatforms:[
+      // Alternate path — resonance platforms over the gaps
+      {x:1050,y:560,w:80,h:16},
+      {x:1600,y:540,w:80,h:16},
+      {x:2900,y:540,w:80,h:16},
+      {x:3100,y:460,w:80,h:16},
+    ],
+    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60}],
+    checkpoints:[{x:1300,y:440},{x:2500,y:400}],
+    shards:[{x:2140,y:520,id:37}],
   },
   {
     name:'Отголоски',story:'Эхо прошлого — платформы появляются там, где ты был секунду назад.',
     width:4600,height:1050,spawn:{x:80,y:750},exit:{x:4400,y:380,w:40,h:80},
     platforms:[
-      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:300,h:40},
-      {x:250,y:770,w:100,h:16},{x:500,y:650,w:80,h:16},{x:800,y:730,w:80,h:16},
-      {x:1050,y:610,w:80,h:16},{x:1300,y:690,w:80,h:16},
-      {x:1600,y:580,w:80,h:16},{x:1850,y:500,w:80,h:16},
-      {x:2200,y:560,w:80,h:16},{x:2500,y:480,w:80,h:16},
-      {x:2900,y:580,w:80,h:16},{x:3200,y:500,w:80,h:16},
-      {x:3600,y:520,w:80,h:16},{x:3900,y:440,w:80,h:16},
-      {x:4200,y:420,w:80,h:16},{x:4400,y:380,w:120,h:16},
+      {x:0,y:900,w:500,h:40},{x:1300,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:300,h:40},
+      {x:250,y:770,w:100,h:16},{x:1300,y:690,w:80,h:16},
+      {x:2500,y:480,w:80,h:16},{x:3600,y:520,w:80,h:16},
+      {x:3900,y:440,w:80,h:16},{x:4200,y:420,w:80,h:16},{x:4400,y:380,w:120,h:16},
     ],
-    spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40},{x:3560,y:880,w:40}],
-    checkpoints:[{x:1900,y:490},{x:3100,y:480}],
-    shards:[{x:3940,y:400,id:38}],
+    pulsePlatforms:[
+      // Staggered wave effect with phase offsets
+      {x:550,y:730,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0,group:0},
+      {x:700,y:680,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.4,group:0},
+      {x:850,y:640,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.8,group:0},
+      {x:1000,y:620,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.2,group:0},
+      {x:1750,y:700,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0,group:1},
+      {x:1900,y:640,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.4,group:1},
+      {x:2050,y:580,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.8,group:1},
+      {x:2200,y:540,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.2,group:1},
+      {x:2900,y:580,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0,group:2},
+      {x:3100,y:520,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.5,group:2},
+      {x:3300,y:480,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.0,group:2},
+    ],
+    resonanceRadius:150,
+    resonancePlatforms:[
+      {x:1600,y:580,w:80,h:16},
+      {x:2400,y:560,w:80,h:16},
+    ],
+    enemies:[{x:2500,y:860,w:100,dir:1,speed:1}],
+    spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40}],
+    checkpoints:[{x:1300,y:490},{x:2500,y:450}],
+    shards:[{x:3340,y:440,id:38}],
   },
   {
     name:'Ритм',story:'Финал эха. Всё пульсирует. Всё движется. Только ритм спасёт.',
     width:4800,height:1050,spawn:{x:80,y:750},exit:{x:4600,y:360,w:40,h:80},
     platforms:[
-      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:500,h:40},
-      {x:250,y:770,w:100,h:16},{x:500,y:650,w:80,h:16},{x:800,y:730,w:80,h:16},
-      {x:1050,y:610,w:80,h:16},{x:1300,y:690,w:80,h:16},
-      {x:1600,y:560,w:80,h:16},{x:1850,y:460,w:80,h:16},
-      {x:2200,y:540,w:80,h:16},{x:2500,y:440,w:80,h:16},
-      {x:2900,y:560,w:80,h:16},{x:3200,y:460,w:80,h:16},
-      {x:3600,y:480,w:80,h:16},{x:3900,y:380,w:80,h:16},
-      {x:4300,y:420,w:80,h:16},{x:4500,y:380,w:80,h:16},
-      {x:4600,y:360,w:120,h:16},
+      {x:0,y:900,w:500,h:40},{x:1300,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:500,h:40},
+      {x:250,y:770,w:100,h:16},
+      {x:2500,y:440,w:80,h:16},{x:4300,y:420,w:80,h:16},
+      {x:4500,y:380,w:80,h:16},{x:4600,y:360,w:120,h:16},
     ],
-    spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40},{x:3560,y:880,w:40},{x:4100,y:880,w:40}],
-    checkpoints:[{x:1900,y:450},{x:3100,y:440},{x:4300,y:400}],
-    shards:[{x:3940,y:340,id:39}],
+    flashlight:true,
+    resonanceRadius:120,
+    pulsePlatforms:[
+      // Fast cycle: 1.5s visible, 1.5s hidden
+      {x:550,y:730,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0,group:0},
+      {x:700,y:680,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.3,group:0},
+      {x:850,y:640,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.6,group:0},
+      {x:1000,y:610,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.9,group:0},
+      {x:1750,y:700,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0,group:1},
+      {x:1900,y:640,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.3,group:1},
+      {x:2050,y:580,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.6,group:1},
+      {x:2200,y:540,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.9,group:1},
+      {x:2900,y:560,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0,group:2},
+      {x:3100,y:500,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.3,group:2},
+      {x:3300,y:460,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.6,group:2},
+      {x:3500,y:440,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.9,group:2},
+      {x:3700,y:460,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0,group:3},
+      {x:3900,y:420,w:80,h:16,visibleTime:1.5,hiddenTime:1.5,phaseOffset:0.3,group:3},
+    ],
+    resonancePlatforms:[
+      {x:1200,y:580,w:80,h:16},
+      {x:1600,y:560,w:80,h:16},
+      {x:2400,y:520,w:80,h:16},
+    ],
+    darkness:[{x:-100,y:0,w:200,h:1200,speed:40}],
+    spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40},{x:3560,y:880,w:40}],
+    checkpoints:[{x:1300,y:450},{x:2500,y:420},{x:3700,y:400}],
+    shards:[{x:3940,y:380,id:39}],
   },
   // ═══ Act IX — Растворение (levels 40-44) ═══
   {
@@ -5042,6 +5117,157 @@ function updateDisappearingPlatforms(dt){
     }
     dp.sprite.alpha=dp.alpha;
   }
+}
+
+// ═══ PULSE PLATFORMS ═══
+var levelPulsePlatforms=[];
+function createPulsePlatform(data){
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'pulsePlatform',friction:0.05,frictionStatic:0.001});
+  MWorld.add(world,body);
+  var spr=new PIXI.Graphics();
+  // Teal/green glow for Act VIII theme
+  spr.rect(0,0,data.w,data.h);spr.fill(0x1a5a4a);
+  spr.rect(0,0,data.w,2);spr.fill(0x3aba8a);
+  spr.rect(0,data.h-1,data.w,1);spr.fill(0x0e4a3a);
+  // Glowing edges
+  spr.rect(0,0,2,data.h);spr.fill(0x2a9a6a);
+  spr.rect(data.w-2,0,2,data.h);spr.fill(0x2a9a6a);
+  spr.x=data.x;spr.y=data.y;gameContainer.addChild(spr);
+  var visibleTime=data.visibleTime||3;
+  var hiddenTime=data.hiddenTime||2;
+  var phaseOffset=data.phaseOffset||0;
+  var group=data.group||0;
+  levelPulsePlatforms.push({body:body,sprite:spr,_gfx:spr,x:data.x,y:data.y,w:data.w,h:data.h,visibleTime:visibleTime,hiddenTime:hiddenTime,phaseOffset:phaseOffset,group:group,timer:-phaseOffset,visible:true,alpha:1,targetAlpha:1,warnTimer:0});
+}
+function updatePulsePlatforms(dt){
+  for(var i=0;i<levelPulsePlatforms.length;i++){
+    var pp=levelPulsePlatforms[i];
+    pp.timer+=dt;
+    var cycle=pp.visibleTime+pp.hiddenTime;
+    if(cycle<=0)continue;
+    var pos=pp.timer%cycle;
+    if(pos<0)pos+=cycle;
+    var shouldBeVisible=pos<pp.visibleTime;
+    // 0.5s warning before becoming visible (ghostly outline)
+    var shouldWarn=false;
+    if(!shouldBeVisible){
+      var posInHidden=pos-pp.visibleTime;
+      if(posInHidden>=(pp.hiddenTime-0.5))shouldWarn=true;
+    }
+    if(shouldBeVisible&&!pp.visible){
+      // Transition to visible
+      pp.visible=true;
+      pp.body=MBodies.rectangle(pp.x+pp.w/2,pp.y+pp.h/2,pp.w,pp.h,{isStatic:true,label:'pulsePlatform',friction:0.05,frictionStatic:0.001});
+      MWorld.add(world,pp.body);
+      pp.sprite.visible=true;
+      pp.targetAlpha=1;
+      spawnParticles(pp.x+pp.w/2,pp.y+pp.h/2,4,0x3aba8a,{speed:0.8,life:0.3,size:1.5,gravity:0});
+    }else if(!shouldBeVisible&&pp.visible){
+      // Transition to hidden
+      pp.visible=false;
+      if(pp.body){MWorld.remove(world,pp.body);pp.body=null;}
+      pp.targetAlpha=0;
+      spawnParticles(pp.x+pp.w/2,pp.y+pp.h/2,4,0x2a7a5a,{speed:0.6,life:0.3,size:1.5,gravity:0});
+    }
+    // Fade animation
+    var fadeSpeed=3.5*dt;
+    if(pp.alpha<pp.targetAlpha)pp.alpha=Math.min(pp.alpha+fadeSpeed,pp.targetAlpha);
+    else if(pp.alpha>pp.targetAlpha)pp.alpha=Math.max(pp.alpha-fadeSpeed,pp.targetAlpha);
+    // Rebuild visual
+    var g=pp._gfx;g.clear();
+    if(shouldWarn&&!pp.visible){
+      // Ghostly outline warning
+      g.rect(0,0,pp.w,pp.h);g.fill({color:0x2a9a6a,alpha:0.1+Math.sin(pp.timer*8)*0.08});
+      g.rect(0,0,pp.w,2);g.fill({color:0x3aba8a,alpha:0.15+Math.sin(pp.timer*8)*0.1});
+      g.rect(0,0,2,pp.h);g.fill({color:0x2a9a6a,alpha:0.12});
+      g.rect(pp.w-2,0,2,pp.h);g.fill({color:0x2a9a6a,alpha:0.12});
+      pp.sprite.visible=true;
+      pp.sprite.alpha=0.3;
+    }else if(pp.visible){
+      // Solid visible platform with subtle pulse
+      var pulse=0.85+Math.sin(pp.timer*2)*0.15;
+      g.rect(0,0,pp.w,pp.h);g.fill({color:0x1a5a4a,alpha:pp.alpha*pulse});
+      g.rect(0,0,pp.w,2);g.fill({color:0x3aba8a,alpha:pp.alpha});
+      g.rect(0,pp.h-1,pp.w,1);g.fill({color:0x0e4a3a,alpha:pp.alpha*0.8});
+      g.rect(0,0,2,pp.h);g.fill({color:0x2a9a6a,alpha:pp.alpha*0.7});
+      g.rect(pp.w-2,0,2,pp.h);g.fill({color:0x2a9a6a,alpha:pp.alpha*0.7});
+      pp.sprite.alpha=pp.alpha;
+      pp.sprite.visible=true;
+    }else{
+      pp.sprite.visible=false;
+    }
+  }
+}
+
+// ═══ RESONANCE PLATFORMS ═══
+var levelResonancePlatforms=[];
+var resonanceGfx=null; // shared gfx for resonance ring
+function createResonancePlatform(data){
+  // Don't add body yet — it's added when player is nearby
+  var spr=new PIXI.Graphics();
+  spr.rect(0,0,data.w,data.h);spr.fill(0x1a6a5a);
+  spr.rect(0,0,data.w,2);spr.fill(0x4ada9a);
+  spr.rect(0,data.h-1,data.w,1);spr.fill(0x0e5a4a);
+  spr.rect(0,0,2,data.h);spr.fill(0x3aaa7a);
+  spr.rect(data.w-2,0,2,data.h);spr.fill(0x3aaa7a);
+  spr.x=data.x;spr.y=data.y;spr.visible=false;gameContainer.addChild(spr);
+  levelResonancePlatforms.push({body:null,sprite:spr,_gfx:spr,x:data.x,y:data.y,w:data.w,h:data.h,visible:false,alpha:0,targetAlpha:0,pulseTimer:0});
+}
+function updateResonancePlatforms(dt){
+  if(!player.body)return;
+  var lvl=LEVELS[state.level];
+  var radius=lvl.resonanceRadius||150;
+  var px=player.body.position.x;
+  var py=player.body.position.y;
+  for(var i=0;i<levelResonancePlatforms.length;i++){
+    var rp=levelResonancePlatforms[i];
+    rp.pulseTimer+=dt;
+    var cx=rp.x+rp.w/2;
+    var cy=rp.y+rp.h/2;
+    var dx=px-cx;
+    var dy=py-cy;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    var shouldBeVisible=dist<radius;
+    if(shouldBeVisible&&!rp.visible){
+      rp.visible=true;
+      rp.body=MBodies.rectangle(rp.x+rp.w/2,rp.y+rp.h/2,rp.w,rp.h,{isStatic:true,label:'platform',friction:0.05,frictionStatic:0.001});
+      MWorld.add(world,rp.body);
+      rp.sprite.visible=true;
+      rp.targetAlpha=1;
+      spawnParticles(cx,cy,3,0x4ada9a,{speed:0.6,life:0.3,size:1.5,gravity:0});
+    }else if(!shouldBeVisible&&rp.visible){
+      rp.visible=false;
+      if(rp.body){MWorld.remove(world,rp.body);rp.body=null;}
+      rp.targetAlpha=0;
+    }
+    // Fade animation
+    var fadeSpeed=4*dt;
+    if(rp.alpha<rp.targetAlpha)rp.alpha=Math.min(rp.alpha+fadeSpeed,rp.targetAlpha);
+    else if(rp.alpha>rp.targetAlpha)rp.alpha=Math.max(rp.alpha-fadeSpeed,rp.targetAlpha);
+    // Rebuild visual with shimmer
+    if(rp.alpha>0.01||rp.targetAlpha>0){
+      var g=rp._gfx;g.clear();
+      var pulse=0.8+Math.sin(rp.pulseTimer*3)*0.2;
+      g.rect(0,0,rp.w,rp.h);g.fill({color:0x1a6a5a,alpha:rp.alpha*pulse});
+      g.rect(0,0,rp.w,2);g.fill({color:0x4ada9a,alpha:rp.alpha});
+      g.rect(0,rp.h-1,rp.w,1);g.fill({color:0x0e5a4a,alpha:rp.alpha*0.8});
+      g.rect(0,0,2,rp.h);g.fill({color:0x3aaa7a,alpha:rp.alpha*0.7});
+      g.rect(rp.w-2,0,2,rp.h);g.fill({color:0x3aaa7a,alpha:rp.alpha*0.7});
+      rp.sprite.alpha=1;
+      rp.sprite.visible=true;
+    }else{
+      rp.sprite.visible=false;
+    }
+  }
+  // Draw resonance ring around player
+  if(lvl.resonanceRadius&&player.sprite){
+    if(!resonanceGfx){resonanceGfx=new PIXI.Graphics();gameContainer.addChild(resonanceGfx)}
+    resonanceGfx.clear();
+    resonanceGfx.circle(px,py,radius);
+    resonanceGfx.stroke({width:1,color:0x3aba8a,alpha:0.12});
+    resonanceGfx.circle(px,py,radius);
+    resonanceGfx.stroke({width:0.5,color:0x4ada9a,alpha:0.06});
+  }else if(resonanceGfx){resonanceGfx.clear()}
 }
 
 // ═══ TIMED SPIKE PLATFORMS ═══
@@ -6123,6 +6349,10 @@ function loadLevel(n){
   fallingPlatforms=[];if(lvl.fallingPlatforms)for(var i=0;i<lvl.fallingPlatforms.length;i++)createFallingPlatform(lvl.fallingPlatforms[i]);
   // Disappearing platforms
   levelDisappearingPlatforms=[];if(lvl.disappearingPlatforms)for(var i=0;i<lvl.disappearingPlatforms.length;i++)createDisappearingPlatform(lvl.disappearingPlatforms[i]);
+  // Pulse platforms
+  levelPulsePlatforms=[];if(lvl.pulsePlatforms)for(var i=0;i<lvl.pulsePlatforms.length;i++)createPulsePlatform(lvl.pulsePlatforms[i]);
+  // Resonance platforms
+  levelResonancePlatforms=[];resonanceGfx=null;if(lvl.resonancePlatforms)for(var i=0;i<lvl.resonancePlatforms.length;i++)createResonancePlatform(lvl.resonancePlatforms[i]);
   // Timed spike platforms
   levelTimedSpikePlatforms=[];if(lvl.timedSpikePlatforms)for(var i=0;i<lvl.timedSpikePlatforms.length;i++)createTimedSpikePlatform(lvl.timedSpikePlatforms[i]);
   // Levers & doors
@@ -6164,7 +6394,7 @@ function loadLevel(n){
   // Shadow Double
   if(lvl.shadowDouble)createShadowDouble(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelPulsePlatforms=[];levelResonancePlatforms=[];resonanceGfx=null;levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -6195,6 +6425,8 @@ var tutorial={
     {id:'gravity',level:5,trigger:'time',delay:3,text:'анти-гравитация! Входи в зону и беги по потолку'},
     {id:'pressure',level:32,trigger:'time',delay:2,text:'встань на кристалл — дверь откроется. Слезешь — закроется!'},
     {id:'shadow',level:33,trigger:'time',delay:4,text:'тень следует за тобой с задержкой. Она может стоять на плите за тебя!'},
+    {id:'pulse',level:35,trigger:'time',delay:2,text:'платформы пульсируют! Они появляются и исчезают в ритме. Двигайся в такт!'},
+    {id:'resonance',level:36,trigger:'time',delay:2,text:'двигайся — и скрытые платформы появятся рядом с тобой. Остановишься — исчезнут!'},
   ],
   timer:0,activeTip:null
 };
@@ -8189,7 +8421,7 @@ function gameLoop(timestamp){
   // Update positions of all setPosition-based bodies BEFORE MEngine.update
   // to prevent phantom collision detection with stale positions
   updateMovingPlatforms(dt);updateEnemies(dt);updatePendulums();
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateShadowDouble(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updatePulsePlatforms(dt);updateResonancePlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateShadowDouble(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite&&settings.quality!=='low'){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
