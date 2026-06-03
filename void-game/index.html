@@ -37,26 +37,27 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .ls-title{font-size:1.1rem;font-weight:900;color:#9a9aaa;letter-spacing:.25em;margin-bottom:2px}
 .ls-subtitle{font-size:.4rem;color:#5a5a6a;letter-spacing:.1em;margin-bottom:6px;text-transform:uppercase}
 .ls-grid{display:flex;flex-direction:column;gap:8px;max-width:400px;width:100%;padding:0 8px}
+.ls-acts-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:400px;width:100%;padding:0 8px}
 .ls-back-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.45);font-size:1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-family:inherit;flex-shrink:0}
 .ls-back-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.7)}
 .ls-back-btn:active{transform:scale(.92);transition:transform .08s}
-.ls-act-card{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;display:flex;align-items:center;gap:12px}
-.ls-act-card:hover{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08);transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.ls-act-card{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:10px 10px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.ls-act-card:hover{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.08);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
 .ls-act-card:active{transform:scale(.97);transition:transform .08s}
-.ls-act-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;opacity:.8}
+.ls-act-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;opacity:.8}
 .ls-act-card0::before{background:#5a8aba}.ls-act-card1::before{background:#8a5aba}.ls-act-card2::before{background:#ba8a2a}.ls-act-card3::before{background:#ba3a6a}.ls-act-card4::before{background:#4ababa}.ls-act-card5::before{background:#da3a7a}.ls-act-card6::before{background:#7a6aba}.ls-act-card7::before{background:#6aba7a}.ls-act-card8::before{background:#9a7a4a}.ls-act-card9::before{background:#5a7aba}.ls-act-card10::before{background:#ba6a3a}.ls-act-card11::before{background:#ba4a4a}
 .ls-act-card0 .ls-act-card-name{color:#5a8aba}.ls-act-card1 .ls-act-card-name{color:#8a5aba}.ls-act-card2 .ls-act-card-name{color:#ba8a2a}.ls-act-card3 .ls-act-card-name{color:#ba3a6a}.ls-act-card4 .ls-act-card-name{color:#4ababa}.ls-act-card5 .ls-act-card-name{color:#da3a7a}.ls-act-card6 .ls-act-card-name{color:#7a6aba}.ls-act-card7 .ls-act-card-name{color:#6aba7a}.ls-act-card8 .ls-act-card-name{color:#9a7a4a}.ls-act-card9 .ls-act-card-name{color:#5a7aba}.ls-act-card10 .ls-act-card-name{color:#ba6a3a}.ls-act-card11 .ls-act-card-name{color:#ba4a4a}
-.ls-act-card-icon{font-size:1.4rem;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.03);flex-shrink:0}
-.ls-act-card-body{flex:1;min-width:0}
-.ls-act-card-name{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
-.ls-act-card-meta{display:flex;align-items:center;gap:8px;font-size:.42rem;color:#5a5a6a;letter-spacing:.06em}
-.ls-act-card-bar{height:2px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden;margin-top:6px;width:100%}
+.ls-act-card-icon{font-size:1.2rem;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.03);flex-shrink:0}
+.ls-act-card-body{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;width:100%}
+.ls-act-card-name{font-size:.5rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ls-act-card-meta{display:flex;align-items:center;gap:4px;font-size:.36rem;color:#5a5a6a;letter-spacing:.04em;justify-content:center}
+.ls-act-card-bar{height:2px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden;margin-top:3px;width:100%}
 .ls-act-card-bar-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1)}
 .ls-act-card0 .ls-act-card-bar-fill{background:#5a8aba}.ls-act-card1 .ls-act-card-bar-fill{background:#8a5aba}.ls-act-card2 .ls-act-card-bar-fill{background:#ba8a2a}.ls-act-card3 .ls-act-card-bar-fill{background:#ba3a6a}.ls-act-card4 .ls-act-card-bar-fill{background:#4ababa}.ls-act-card5 .ls-act-card-bar-fill{background:#da3a7a}.ls-act-card6 .ls-act-card-bar-fill{background:#7a6aba}.ls-act-card7 .ls-act-card-bar-fill{background:#6aba7a}.ls-act-card8 .ls-act-card-bar-fill{background:#9a7a4a}.ls-act-card9 .ls-act-card-bar-fill{background:#5a7aba}.ls-act-card10 .ls-act-card-bar-fill{background:#ba6a3a}.ls-act-card11 .ls-act-card-bar-fill{background:#ba4a4a}
-.ls-act-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
-.ls-act-card-pct{font-size:.55rem;font-weight:900;color:#6a6a7a;font-variant-numeric:tabular-nums}
-.ls-act-card-stars{font-size:.45rem}
-.ls-cutscene-btn{width:28px;height:28px;border-radius:50%;background:rgba(100,120,200,.1);border:1px solid rgba(100,120,200,.25);color:#7a8ab8;font-size:.55rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:inherit;padding:0;margin-bottom:4px}
+.ls-act-card-right{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0}
+.ls-act-card-pct{font-size:.45rem;font-weight:900;color:#6a6a7a;font-variant-numeric:tabular-nums}
+.ls-act-card-stars{font-size:.38rem;display:flex;gap:1px}
+.ls-cutscene-btn{width:22px;height:22px;border-radius:50%;background:rgba(100,120,200,.1);border:1px solid rgba(100,120,200,.25);color:#7a8ab8;font-size:.42rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:inherit;padding:0}
 .ls-cutscene-btn:hover{background:rgba(100,120,200,.2);border-color:rgba(100,120,200,.4);color:#a0b0e0;transform:scale(1.1)}
 .ls-cutscene-btn:active{transform:scale(.9);transition:all .08s}
 .ls-act-card.stagger{opacity:0;animation:lsActStagger .35s ease-out forwards}
@@ -631,8 +632,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
       <div class="ls-subtitle" id="ls-subtitle">60 уровней — 12 актов</div>
       <div class="ls-stats" id="ls-stats"></div>
       <div class="ls-progress" style="height:3px;margin-bottom:6px"><div class="ls-progress-fill" id="ls-progress-fill"></div></div>
-      <div style="flex:1;overflow-y:auto;width:100%;display:flex;justify-content:center;-webkit-overflow-scrolling:touch">
-        <div class="ls-grid" id="ls-acts-grid"></div>
+      <div style="flex:1;overflow-y:auto;width:100%;display:flex;justify-content:center;-webkit-overflow-scrolling:touch;padding-bottom:8px">
+        <div class="ls-acts-grid" id="ls-acts-grid"></div>
       </div>
       <div style="padding:12px 0;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0">
         <button class="btn" id="btn-ls-back">назад</button>
@@ -647,7 +648,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
           <div class="ls-subtitle" id="ls-act-sub"></div>
         </div>
       </div>
-      <div style="flex:1;overflow-y:auto;width:100%;display:flex;justify-content:center;-webkit-overflow-scrolling:touch;padding-top:6px">
+      <div style="flex:1;overflow-y:auto;width:100%;display:flex;justify-content:center;-webkit-overflow-scrolling:touch;padding-top:6px;padding-bottom:8px">
         <div class="ls-grid" id="ls-levels-grid" style="gap:6px"></div>
       </div>
       <div style="padding:12px 0;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0">
@@ -839,8 +840,8 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     <div id="rec-overview" style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%">
       <div class="ls-title">рекорды</div>
       <div id="records-hero" class="rec-hero"></div>
-      <div style="flex:1;overflow-y:auto;width:100%;display:flex;justify-content:center;-webkit-overflow-scrolling:touch;padding-top:4px">
-        <div id="rec-acts-list" style="max-width:380px;width:100%;padding:0 8px;display:flex;flex-direction:column;gap:8px"></div>
+      <div style="flex:1;overflow-y:auto;width:100%;display:flex;justify-content:center;-webkit-overflow-scrolling:touch;padding-top:4px;padding-bottom:8px">
+        <div id="rec-acts-list" style="max-width:400px;width:100%;padding:0 8px;display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
       </div>
       <div style="padding:12px 0;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px">
         <button class="btn" id="btn-records-back">назад</button>
@@ -904,7 +905,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.18.4-beta';
+var VOID_VERSION='0.18.5-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
