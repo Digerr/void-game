@@ -202,7 +202,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .tb:active,.tb.pressed{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);transform:scale(.93)}
 .tb.jump{width:76px;height:76px;border-radius:50%}
 .tb.dash{width:52px;height:52px;border-radius:50%;font-size:12px;font-weight:700}
-.tb.interact{width:44px;height:44px;border-radius:50%;font-size:13px;font-weight:700}
+.tb.interact{width:48px;height:48px;border-radius:50%;font-size:13px;font-weight:700}
 .tb.thread-climb{width:44px;height:44px;border-radius:50%;font-size:14px;font-weight:700;transition:all .15s}
 .tb.thread-climb:active,.tb.thread-climb.pressed{background:rgba(80,100,180,.2);border-color:rgba(100,120,200,.35)}
 .hud-thread{position:absolute;top:26px;right:60px;font-size:.5rem;color:#2a2a4a;letter-spacing:.08em;text-transform:uppercase}
@@ -526,7 +526,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     <div class="hud-deaths" id="hud-deaths"></div>
     <div class="hud-timer" id="hud-timer">0:00</div>
     <div class="hud-dash" id="hud-dash">dash</div>
-    <div class="hud-thread" id="hud-thread">нить</div>
+    <div class="hud-thread" id="hud-thread">🪝 нить</div>
     <div class="hud-pause" id="hud-pause">❚❚</div>
     <div class="hud-sound" id="hud-sound" style="position:absolute;top:10px;right:52px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.3);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;transition:all .15s">♪</div>
     <div class="hud-interact" id="hud-interact">✋</div>
@@ -543,7 +543,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
       </div>
       <div class="right-grp">
         <div class="tb interact" id="btn-interact">✋</div>
-        <div class="tb interact" id="btn-thread" style="background:rgba(60,60,100,.06);border-color:rgba(60,60,100,.1);color:rgba(100,100,160,.35)">↗</div>
+        <div class="tb interact" id="btn-thread" style="background:rgba(60,60,100,.06);border-color:rgba(60,60,100,.1);color:rgba(100,100,160,.35)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C12 2 12 8 12 12C12 16 8 18 8 18"/><circle cx="8" cy="18" r="2.5"/><path d="M12 8C14 8 17 6 17 4"/></svg></div>
         <div class="tb thread-climb" id="btn-climb-up" style="display:none;background:rgba(60,80,140,.08);border-color:rgba(80,100,160,.2);color:rgba(120,140,200,.5);font-size:14px">↑</div>
         <div class="tb thread-climb" id="btn-climb-down" style="display:none;background:rgba(60,80,140,.08);border-color:rgba(80,100,160,.2);color:rgba(120,140,200,.5);font-size:14px">↓</div>
         <div class="tb dash" id="btn-dash">D</div>
@@ -4077,28 +4077,36 @@ function updatePlayer(dt){
     var dx=player.body.position.x-thread.anchorX;
     var dy=player.body.position.y-thread.anchorY;
     var dist=Math.sqrt(dx*dx+dy*dy)||1;
-    var pendAngle=Math.atan2(dx,Math.max(dy,1)); // angle from vertical
-    // Pendulum physics: apply force tangent to arc
-    // Tangent direction for a pendulum: perpendicular to the rope
-    var tangX=dy/dist; // tangent X component
-    var tangY=-dx/dist; // tangent Y component
-    // Swing force based on input — stronger to feel responsive
-    var swingMag=player.inputX*0.12;
-    // Apply force along the tangent (this creates natural pendulum swing)
-    MBody.applyForce(player.body,player.body.position,{x:swingMag*tangX,y:swingMag*tangY});
-    // Cap horizontal velocity to prevent insane speed
+    // Only apply swing force when player is BELOW anchor (natural pendulum)
+    // When above anchor, just let gravity pull them back down
+    if(dy>0){
+      var pendAngle=Math.atan2(dx,Math.max(dy,1)); // angle from vertical
+      // Reduce force at extreme angles (beyond ~80 degrees)
+      var angleFactor=Math.max(0,1-Math.abs(pendAngle)/(Math.PI*0.48));
+      // Horizontal push — simulates pumping a swing
+      var swingForce=player.inputX*0.06*angleFactor;
+      MBody.applyForce(player.body,player.body.position,{x:swingForce,y:0});
+    } else {
+      // Player above anchor: dampen rotation to prevent spinning
+      var angVel=player.body.angularVelocity||0;
+      if(Math.abs(angVel)>0.3){
+        MBody.setAngularVelocity(player.body,angVel*0.7);
+      }
+      // Gentle horizontal control even when above, but much weaker
+      var weakForce=player.inputX*0.015;
+      MBody.applyForce(player.body,player.body.position,{x:weakForce,y:0});
+    }
+    // Speed caps to prevent runaway velocity
     var vx=player.body.velocity.x;
-    var maxSwingSpeed=7;
-    if(Math.abs(vx)>maxSwingSpeed){
-      MBody.setVelocity(player.body,{x:Math.sign(vx)*maxSwingSpeed,y:player.body.velocity.y});
+    if(Math.abs(vx)>6){
+      MBody.setVelocity(player.body,{x:Math.sign(vx)*6,y:player.body.velocity.y});
     }
-    // Also dampen vertical velocity if too fast (prevents bouncing)
     var vy=player.body.velocity.y;
-    if(Math.abs(vy)>10){
-      MBody.setVelocity(player.body,{x:player.body.velocity.x,y:Math.sign(vy)*10});
+    if(Math.abs(vy)>9){
+      MBody.setVelocity(player.body,{x:player.body.velocity.x,y:Math.sign(vy)*9});
     }
-    // Reduce angular velocity damping so swing momentum builds up
-    MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.95);
+    // Moderate angular velocity damping
+    MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.92);
     player.velocityX=player.body.velocity.x;
   }
   else{
@@ -4216,6 +4224,23 @@ function updatePlayer(dt){
   var threadReady=!thread.active&&levelAnchors.length>0;var nearAnchor=false;
   if(threadReady&&player.body){for(var ai=0;ai<levelAnchors.length;ai++){var adx=player.body.position.x-levelAnchors[ai].x,ady=player.body.position.y-levelAnchors[ai].y;if(Math.sqrt(adx*adx+ady*ady)<thread.range){nearAnchor=true;break}}}
   document.getElementById('hud-thread').style.color=(thread.active||nearAnchor)?'#4a4a7a':'#1a2a2a';
+  // Thread button: glow when near anchor or active
+  var threadBtn=document.getElementById('btn-thread');
+  if(threadBtn){
+    if(thread.active){
+      threadBtn.style.background='rgba(80,80,160,.2)';
+      threadBtn.style.borderColor='rgba(100,100,200,.5)';
+      threadBtn.style.color='rgba(160,160,220,.9)';
+    }else if(nearAnchor){
+      threadBtn.style.background='rgba(60,60,120,.12)';
+      threadBtn.style.borderColor='rgba(80,80,160,.35)';
+      threadBtn.style.color='rgba(140,140,200,.7)';
+    }else{
+      threadBtn.style.background='rgba(60,60,100,.06)';
+      threadBtn.style.borderColor='rgba(60,60,100,.1)';
+      threadBtn.style.color='rgba(100,100,160,.35)';
+    }
+  }
 }
 
 function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.active)detachThread();state.deaths++;state.totalDeaths++;progress.totalDeaths=state.totalDeaths;var px=player.body.position.x,py=player.body.position.y;var dc=cause==='fall'?0x2a2a4a:cause==='spikes'?0x4a1a1a:cause==='saw'?0x3a1a2a:cause==='enemy'?0x2a1a3a:cause==='darkness'?0x1a0a2a:0x3e3e52;spawnParticles(px,py,30,dc,{speed:4,life:1.2,size:4,gravity:0.3});spawnParticles(px,py,12,0x6a6a9a,{speed:2.5,life:0.8,size:5,gravity:0});spawnParticles(px,py,5,0x99aacc,{speed:1.5,life:0.6,size:2.5,gravity:0});state.hitStop=0.03;state.shakeAmount=4;state.shakeTime=0.3;state.flashColor=0x2a1a1a;state.flashAlpha=0.25;state.flashTimer=0.3;state.slowMo=0.3;state.slowMoTimer=0.4;tgHaptic('heavy');sfxDeath(cause);if(player.sprite)player.sprite.visible=false;
@@ -5019,7 +5044,7 @@ function shootThread(){
   thread.constraint=MConstraint.create({
     pointA:{x:nearest.x,y:nearest.y},
     bodyB:player.body,pointB:{x:0,y:-PLAYER_H/4},
-    length:nearestDist,stiffness:0.92,damping:0.04
+    length:nearestDist,stiffness:0.6,damping:0.08
   });
   MWorld.add(world,thread.constraint);
   // If player is on ground, lift them off the platform immediately
@@ -5226,7 +5251,7 @@ var tutorial={
     {id:'lever',level:4,trigger:'lever',delay:0,text:'подойди к рычагу и нажми <span class="tip-key">✋</span> — он открывает дверь. Можно выключить!'},
     {id:'enemy',level:5,trigger:'time',delay:3,text:'тени патрулируют. Не попадайся им на пути'},
     {id:'enemy2',level:6,trigger:'time',delay:6,text:'тени слепы, но чувствуют движение'},
-    {id:'thread',level:10,trigger:'time',delay:2,text:'нажми <span class="tip-key">↗</span> чтобы привязать нить к якорю'},
+    {id:'thread',level:10,trigger:'time',delay:2,text:'нажми <span class="tip-key">🪝</span> чтобы привязать нить к якорю'},
     {id:'swing',level:10,trigger:'thread',delay:0,text:'раскачивайся <span class="tip-key">◀</span> <span class="tip-key">▶</span> и прыгай <span class="tip-key">▲</span>'},
     {id:'climb',level:10,trigger:'time',delay:8,text:'укорачивай нить — жми <span class="tip-key">▲</span> во время раскачки'},
     {id:'falling',level:12,trigger:'time',delay:3,text:'падающие платформы рушатся — не стой долго'},
