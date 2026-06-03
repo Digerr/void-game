@@ -378,6 +378,38 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .lb-loading{text-align:center;padding:40px 20px;color:#4a4a5a;font-size:.55rem;letter-spacing:.1em;animation:pulse 1.5s infinite}
 .lb-my-rank{width:100%;max-width:380px;padding:10px;text-align:center;font-size:.5rem;color:#5a6a8a;letter-spacing:.1em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.04);margin-top:4px;flex-shrink:0}
 .lb-sub{font-size:.35rem;color:#2a2a3a;letter-spacing:.06em;margin-top:2px}
+/* ─── Podium ─── */
+.lb-podium{width:100%;max-width:380px;display:flex;align-items:flex-end;justify-content:center;gap:4px;padding:0 10px;margin-bottom:8px;flex-shrink:0}
+.lb-podium-card{flex:1;max-width:120px;border-radius:6px;padding:8px 4px 6px;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);position:relative;transition:all .2s}
+.lb-podium-card.p1{border-color:rgba(218,165,32,.25);background:rgba(218,165,32,.06);box-shadow:0 0 16px rgba(218,165,32,.1);transform:scale(1.06);z-index:2;max-width:130px}
+.lb-podium-card.p2{border-color:rgba(138,138,154,.2);background:rgba(138,138,154,.04)}
+.lb-podium-card.p3{border-color:rgba(138,106,58,.2);background:rgba(138,106,58,.04)}
+.lb-podium-medal{font-size:.8rem;line-height:1;margin-bottom:2px}
+.lb-podium-rank{font-size:.65rem;font-weight:900;letter-spacing:.08em;margin-bottom:2px}
+.lb-podium-card.p1 .lb-podium-rank{color:#daa520}
+.lb-podium-card.p2 .lb-podium-rank{color:#8a8a9a}
+.lb-podium-card.p3 .lb-podium-rank{color:#8a6a3a}
+.lb-podium-name{font-size:.5rem;color:#b0b0c0;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+.lb-podium-score{font-size:.5rem;color:#7a7a8a;font-weight:700;font-variant-numeric:tabular-nums}
+.lb-podium-detail{font-size:.35rem;color:#5a5a6a;margin-top:1px;letter-spacing:.04em}
+.lb-podium-card.p1 .lb-podium-name{color:#daa520}
+/* ─── Your Row ─── */
+.lb-your-row{width:100%;max-width:380px;padding:0 10px;margin-bottom:6px;flex-shrink:0}
+.lb-your-row-inner{display:flex;align-items:center;padding:7px 10px;border-radius:4px;background:rgba(60,100,160,.06);border:1px solid rgba(100,140,200,.12);gap:6px}
+.lb-your-row-label{font-size:.35rem;color:#5a6a8a;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;text-align:center}
+.lb-your-row .lb-rank{color:#9ac0e0;font-weight:700}
+.lb-your-row .lb-name{color:#9ac0e0;font-weight:700}
+/* ─── Pagination ─── */
+.lb-loadmore{width:100%;max-width:380px;padding:6px 10px;flex-shrink:0;text-align:center}
+.lb-loadmore-btn{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:4px;color:#7a7a8a;font-size:.5rem;font-family:inherit;letter-spacing:.08em;padding:6px 16px;cursor:pointer;transition:all .15s;text-transform:uppercase}
+.lb-loadmore-btn:hover{background:rgba(255,255,255,.06);color:#b0b0c0}
+.lb-loadmore-btn:active{background:rgba(255,255,255,.08)}
+/* ─── Level selector enhanced ─── */
+.lb-level-sel{display:flex;justify-content:center;padding:8px 10px;flex-shrink:0;gap:6px;align-items:center;flex-wrap:wrap}
+.lb-level-nav{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:4px;color:#8a8aaa;font-size:.6rem;font-family:inherit;padding:5px 10px;cursor:pointer;transition:all .15s}
+.lb-level-nav:hover{background:rgba(255,255,255,.06);color:#b0b0c0}
+.lb-level-nav:active{background:rgba(255,255,255,.08)}
+.lb-level-name{font-size:.5rem;color:#7a7a8a;letter-spacing:.06em;text-transform:uppercase;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #level-select{overflow:hidden;justify-content:flex-start;padding-top:28px}
 .ls-summary{font-size:.4rem;color:#5a5a6a;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
 .ls-progress{width:300px;height:5px;background:rgba(255,255,255,.04);border-radius:3px;margin-bottom:12px;overflow:hidden;position:relative}
@@ -890,9 +922,12 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <span style="color:#6a5a3a">top3 = скин, top10 = бейдж</span>
       </div>
     </div>
+    <div class="lb-podium" id="lb-podium"></div>
+    <div class="lb-your-row" id="lb-your-row"></div>
     <div class="lb-list" id="lb-list">
       <div class="lb-loading">загрузка...</div>
     </div>
+    <div class="lb-loadmore" id="lb-loadmore" style="display:none"></div>
     <div class="lb-my-rank" id="lb-my-rank"></div>
     <div style="padding:12px 0;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px">
       <button class="btn" id="btn-lb-back">назад</button>
@@ -910,7 +945,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.18.9-beta';
+var VOID_VERSION='0.18.10-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -1869,6 +1904,7 @@ var lbSubscription=null;
 var lbCurrentTab='global';
 var lbMyRank=-1;
 var lbData=[];
+var lbPageOffset=0;
 var LB_SUPABASE_URL='https://jibtmyuxbeckanmkhuik.supabase.co';
 var LB_SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnRteXV4YmVja2FubWtodWlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjA0MTAsImV4cCI6MjA5NTg5NjQxMH0.x1oT9Lym80rZNj9dJA39nA-pBSWzKhAOJGHZisOoFok';
 var LB_API_URL='/api/leaderboard';
@@ -1965,6 +2001,10 @@ function loadLB(){
   var listEl=document.getElementById('lb-list');
   var rankEl=document.getElementById('lb-my-rank');
   if(listEl)listEl.innerHTML='<div class="lb-loading">загрузка...</div>';
+  // Clear podium, your-row, loadmore while loading
+  var podEl=document.getElementById('lb-podium');if(podEl)podEl.innerHTML='';
+  var yrEl=document.getElementById('lb-your-row');if(yrEl)yrEl.innerHTML='';
+  var lmEl=document.getElementById('lb-loadmore');if(lmEl){lmEl.style.display='none';lmEl.innerHTML=''}
   // Show/hide weekly header & timer
   var wHeader=document.getElementById('lb-weekly-header');
   if(wHeader)wHeader.style.display=lbCurrentTab==='weekly'?'block':'none';
@@ -2029,14 +2069,24 @@ function renderLBOffline(){
   if(!listEl)return;
   listEl.innerHTML='<div class="lb-empty">нет подключения<br><div class="lb-sub">играй через Telegram для доступа к лидерборду</div></div>';
   var rankEl=document.getElementById('lb-my-rank');if(rankEl)rankEl.textContent='';
+  var podEl=document.getElementById('lb-podium');if(podEl)podEl.innerHTML='';
+  var yrEl=document.getElementById('lb-your-row');if(yrEl)yrEl.innerHTML='';
+  var lmEl=document.getElementById('lb-loadmore');if(lmEl){lmEl.style.display='none';lmEl.innerHTML=''}
 }
 function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function renderLB(){
   var listEl=document.getElementById('lb-list');
   var rankEl=document.getElementById('lb-my-rank');
+  var podEl=document.getElementById('lb-podium');
+  var yrEl=document.getElementById('lb-your-row');
+  var lmEl=document.getElementById('lb-loadmore');
   if(!listEl)return;
   // Level tab has its own renderer
   if(lbCurrentTab==='level'){renderLBLevel();return}
+  // Clear podium, your-row, loadmore
+  if(podEl)podEl.innerHTML='';
+  if(yrEl)yrEl.innerHTML='';
+  if(lmEl){lmEl.style.display='none';lmEl.innerHTML=''}
   if(!lbData||lbData.length===0){
     listEl.innerHTML='<div class="lb-empty">пока никого нет<br><div class="lb-sub">стань первым во тьме</div></div>';
     if(rankEl)rankEl.textContent='';
@@ -2045,35 +2095,101 @@ function renderLB(){
   var myId=getMyLBId();
   var sorted=lbData.slice();
   sorted.sort(function(a,b){return b.score-a.score});
-  var top100=sorted.slice(0,100);
   var myIdx=-1;
   for(var i=0;i<sorted.length;i++){if(sorted[i].id===myId){myIdx=i;break}}
   lbMyRank=myIdx>=0?myIdx+1:-1;
+
+  // ─── Podium (top 3) ───
+  if(podEl&&sorted.length>=1){
+    var podiumOrder=[1,0,2]; // display order: 2nd, 1st, 3rd (center is tallest)
+    var medals=['🥇','🥈','🥉'];
+    var pClasses=['p1','p2','p3'];
+    var pH='';
+    for(var pi=0;pi<podiumOrder.length;pi++){
+      var idx=podiumOrder[pi];
+      if(idx>=sorted.length)continue;
+      var e=sorted[idx];
+      var scoreStr=e.score?e.score.toLocaleString():'0';
+      var detail=(e.total_stars||0)+'★';
+      if(e.completed)detail+=' · '+e.completed+'/'+LEVELS.length;
+      pH+='<div class="lb-podium-card '+pClasses[idx]+'">';
+      pH+='<div class="lb-podium-medal">'+medals[idx]+'</div>';
+      pH+='<div class="lb-podium-rank">#'+(idx+1)+'</div>';
+      pH+='<div class="lb-podium-name">'+escHtml(e.name||'???')+'</div>';
+      pH+='<div class="lb-podium-score">'+scoreStr+'</div>';
+      pH+='<div class="lb-podium-detail">'+detail+'</div>';
+      pH+='</div>';
+    }
+    podEl.innerHTML=pH;
+  }
+
+  // ─── Your Row ───
+  if(yrEl){
+    var myD=computeLBScore();
+    if(myD.completed>0){
+      var myScoreStr=myD.score.toLocaleString();
+      var myDetail=myD.totalStars+'★ · '+myD.completed+'/'+LEVELS.length;
+      if(lbMyRank>0){
+        yrEl.innerHTML='<div class="lb-your-row-inner">'+
+          '<div class="lb-rank">#'+lbMyRank+'</div>'+
+          '<div class="lb-name">ты</div>'+
+          '<div class="lb-score">'+myScoreStr+'</div>'+
+          '<div class="lb-stars">'+myDetail+'</div>'+
+          '</div>';
+      }else{
+        yrEl.innerHTML='<div class="lb-your-row-inner">'+
+          '<div class="lb-rank">—</div>'+
+          '<div class="lb-name">ты</div>'+
+          '<div class="lb-score">'+myScoreStr+'</div>'+
+          '<div class="lb-stars">'+myDetail+'</div>'+
+          '</div>';
+      }
+    }
+  }
+
+  // ─── List (rank 4+, paginated) ───
+  var pageSize=10;
+  var listStart=3+lbPageOffset*pageSize;
+  var listEnd=Math.min(listStart+pageSize,sorted.length);
   var html='';
-  for(var i=0;i<top100.length;i++){
-    var entry=top100[i];
-    var rank=i+1;
-    var isSelf=entry.id===myId;
-    var rowCls='lb-row';
-    if(isSelf)rowCls+=' self';
-    if(rank===1)rowCls+=' top1';
-    else if(rank===2)rowCls+=' top2';
-    else if(rank===3)rowCls+=' top3';
-    var rankStr=rank<=3?['I','II','III'][rank-1]:rank;
-    var timeStr=entry.total_time&&entry.total_time<99999?formatTime(entry.total_time*1000):'--:--';
-    var scoreStr=entry.score?entry.score.toLocaleString():'0';
-    html+='<div class="'+rowCls+'">'+
-      '<div class="lb-rank">'+rankStr+'</div>'+
-      '<div class="lb-name">'+escHtml(entry.name||'???')+'</div>'+
-      '<div class="lb-score">'+scoreStr+'</div>'+
-      '<div class="lb-stars">'+(entry.total_stars||0)+'★</div>'+
-      '</div>';
+  var hasMore=false;
+  if(listStart>=sorted.length){
+    html='<div class="lb-empty" style="padding:20px">все записи загружены</div>';
+  }else{
+    for(var i=listStart;i<listEnd;i++){
+      var entry=sorted[i];
+      var rank=i+1;
+      var isSelf=entry.id===myId;
+      var rowCls='lb-row';
+      if(isSelf)rowCls+=' self';
+      var scoreStr=entry.score?entry.score.toLocaleString():'0';
+      html+='<div class="'+rowCls+'">'+
+        '<div class="lb-rank">'+rank+'</div>'+
+        '<div class="lb-name">'+escHtml(entry.name||'???')+'</div>'+
+        '<div class="lb-score">'+scoreStr+'</div>'+
+        '<div class="lb-stars">'+(entry.total_stars||0)+'★</div>'+
+        '</div>';
+    }
+    if(listEnd<sorted.length)hasMore=true;
   }
   listEl.innerHTML=html;
+
+  // ─── Load More ───
+  if(lmEl){
+    if(hasMore){
+      lmEl.style.display='block';
+      lmEl.innerHTML='<button class="lb-loadmore-btn" id="lb-loadmore-btn">ещё ↓</button>';
+      var btn=document.getElementById('lb-loadmore-btn');
+      if(btn)btn.addEventListener('click',function(){lbPageOffset++;renderLB()});
+    }else{
+      lmEl.style.display='none';lmEl.innerHTML='';
+    }
+  }
+
+  // ─── Bottom rank info ───
   if(rankEl){
     if(lbMyRank>0){
-      var myD=computeLBScore();
-      rankEl.innerHTML='твой ранг: <b style="color:#9ac0e0">#'+lbMyRank+'</b> — '+myD.score.toLocaleString()+' очков | '+myD.completed+'/'+LEVELS.length+' | '+myD.totalStars+'★';
+      rankEl.innerHTML='твой ранг: <b style="color:#9ac0e0">#'+lbMyRank+'</b> — '+myD.score.toLocaleString()+' очков';
     }else if(computeLBScore().completed>0){
       rankEl.innerHTML='твой ранг: ещё не в таблице';
     }else{
@@ -2087,9 +2203,20 @@ function renderLB(){
 function renderLBLevel(){
   var listEl=document.getElementById('lb-list');
   var rankEl=document.getElementById('lb-my-rank');
+  var podEl=document.getElementById('lb-podium');
+  var yrEl=document.getElementById('lb-your-row');
+  var lmEl=document.getElementById('lb-loadmore');
   if(!listEl)return;
-  // Level selector
-  var selHtml='<div class="lb-level-sel"><select id="lb-level-select" style="background:#1a1a2a;color:#8a8aaa;border:1px solid #3a3a5a;border-radius:4px;padding:6px 10px;font-size:.55rem;font-family:inherit;width:100%;max-width:200px">';
+  // Clear podium, your-row, loadmore for level tab
+  if(podEl)podEl.innerHTML='';
+  if(yrEl)yrEl.innerHTML='';
+  if(lmEl){lmEl.style.display='none';lmEl.innerHTML=''}
+  var myId=getMyLBId();
+  // Level selector with prev/next nav
+  var lvlName=LEVELS[lbSelectedLevel]?LEVELS[lbSelectedLevel].name:'???';
+  var selHtml='<div class="lb-level-sel">';
+  selHtml+='<button class="lb-level-nav" id="lb-level-prev">◂</button>';
+  selHtml+='<select id="lb-level-select" style="background:#1a1a2a;color:#8a8aaa;border:1px solid #3a3a5a;border-radius:4px;padding:6px 10px;font-size:.55rem;font-family:inherit;max-width:180px">';
   var acts=[
     {name:'Пробуждение',levels:[0,1,2,3,4]},{name:'Глубины',levels:[5,6,7,8,9]},
     {name:'Нити',levels:[10,11,12,13,14]},{name:'Пустота',levels:[15,16,17,18,19]},
@@ -2106,28 +2233,60 @@ function renderLBLevel(){
       selHtml+='<option value="'+idx+'"'+sel+'>'+lvl.name+'</option>';
     }
   }
-  selHtml+='</select></div>';
+  selHtml+='</select>';
+  selHtml+='<button class="lb-level-nav" id="lb-level-next">▸</button>';
+  selHtml+='</div>';
   var myBestTime=getLevelBestTime(lbSelectedLevel);
   var myBestStr=myBestTime<Infinity?formatTime(myBestTime*1000):'--:--';
   var myStars=getLevelStars(lbSelectedLevel);
+
+  // ─── Your Row for level ───
+  if(yrEl&&myBestTime<Infinity){
+    yrEl.innerHTML='<div class="lb-your-row-inner">'+
+      '<div class="lb-rank" style="width:auto;min-width:24px">★</div>'+
+      '<div class="lb-name">ты</div>'+
+      '<div class="lb-time" style="min-width:56px;color:#9ac0e0;font-weight:700">'+myBestStr+'</div>'+
+      '<div class="lb-stars">'+myStars+'★</div>'+
+      '</div>';
+  }else if(yrEl){
+    yrEl.innerHTML='';
+  }
+
   if(!lbLevelData||lbLevelData.length===0){
     listEl.innerHTML=selHtml+'<div class="lb-empty">пока нет рекордов<br><div class="lb-sub">стань первым на этом уровне</div></div>';
   }else{
     var html=selHtml;
-    var myId=getMyLBId();
-    for(var i=0;i<lbLevelData.length;i++){
+    // Podium for level records (top 3)
+    if(podEl&&lbLevelData.length>=1){
+      var podiumOrder=[1,0,2];
+      var medals=['🥇','🥈','🥉'];
+      var pClasses=['p1','p2','p3'];
+      var pH='';
+      for(var pi=0;pi<podiumOrder.length;pi++){
+        var idx=podiumOrder[pi];
+        if(idx>=lbLevelData.length)continue;
+        var e=lbLevelData[idx];
+        var timeStr=e.best_time?formatTime(e.best_time*1000):'--:--';
+        pH+='<div class="lb-podium-card '+pClasses[idx]+'">';
+        pH+='<div class="lb-podium-medal">'+medals[idx]+'</div>';
+        pH+='<div class="lb-podium-rank">#'+(idx+1)+'</div>';
+        pH+='<div class="lb-podium-name">'+escHtml(e.name||'???')+'</div>';
+        pH+='<div class="lb-podium-score" style="font-variant-numeric:tabular-nums">'+timeStr+'</div>';
+        pH+='<div class="lb-podium-detail">'+(e.stars||0)+'★</div>';
+        pH+='</div>';
+      }
+      podEl.innerHTML=pH;
+    }
+    // List rank 4+
+    for(var i=3;i<lbLevelData.length;i++){
       var entry=lbLevelData[i];
       var rank=i+1;
       var isSelf=entry.user_id===myId;
       var rowCls='lb-row';
       if(isSelf)rowCls+=' self';
-      if(rank===1)rowCls+=' top1';
-      else if(rank===2)rowCls+=' top2';
-      else if(rank===3)rowCls+=' top3';
-      var rankStr=rank<=3?['I','II','III'][rank-1]:rank;
       var timeStr=entry.best_time?formatTime(entry.best_time*1000):'--:--';
       html+='<div class="'+rowCls+'">'+
-        '<div class="lb-rank">'+rankStr+'</div>'+
+        '<div class="lb-rank">'+rank+'</div>'+
         '<div class="lb-name">'+escHtml(entry.name||'???')+'</div>'+
         '<div class="lb-time" style="min-width:56px">'+timeStr+'</div>'+
         '<div class="lb-stars">'+(entry.stars||0)+'★</div>'+
@@ -2136,7 +2295,11 @@ function renderLBLevel(){
     listEl.innerHTML=html;
   }
   if(rankEl){
-    rankEl.innerHTML='твоё лучшее: <b style="color:#9ac0e0">'+myBestStr+'</b> — '+myStars+'★';
+    if(myBestTime<Infinity){
+      rankEl.innerHTML='твоё лучшее: <b style="color:#9ac0e0">'+myBestStr+'</b> — '+myStars+'★';
+    }else{
+      rankEl.textContent='пройди уровень для рекорда';
+    }
   }
   // Bind level selector
   var selEl=document.getElementById('lb-level-select');
@@ -2145,6 +2308,15 @@ function renderLBLevel(){
       lbSelectedLevel=parseInt(this.value)||0;loadLB();
     });
   }
+  // Bind prev/next
+  var prevBtn=document.getElementById('lb-level-prev');
+  var nextBtn=document.getElementById('lb-level-next');
+  if(prevBtn)prevBtn.addEventListener('click',function(){
+    if(lbSelectedLevel>0){lbSelectedLevel--;loadLB()}
+  });
+  if(nextBtn)nextBtn.addEventListener('click',function(){
+    if(lbSelectedLevel<LEVELS.length-1){lbSelectedLevel++;loadLB()}
+  });
   // Update tabs
   var tabs=document.querySelectorAll('.lb-tab');
   for(var i=0;i<tabs.length;i++){tabs[i].classList.toggle('active',tabs[i].getAttribute('data-tab')===lbCurrentTab)}
@@ -9914,8 +10086,8 @@ function bindUI(){
   document.getElementById('btn-profile-back').addEventListener('click',function(){showScreen('menu')});
   // LB tab clicks
   document.querySelectorAll('.lb-tab').forEach(function(tab){
-    tab.addEventListener('click',function(){lbCurrentTab=this.getAttribute('data-tab');loadLB()});
-    tab.addEventListener('touchstart',function(e){e.preventDefault();lbCurrentTab=this.getAttribute('data-tab');loadLB();tgHaptic('light')},{passive:false});
+    tab.addEventListener('click',function(){lbCurrentTab=this.getAttribute('data-tab');lbPageOffset=0;loadLB()});
+    tab.addEventListener('touchstart',function(e){e.preventDefault();lbCurrentTab=this.getAttribute('data-tab');lbPageOffset=0;loadLB();tgHaptic('light')},{passive:false});
   });
   document.getElementById('btn-sfx-toggle').addEventListener('click',function(){toggleSound();saveSettings();updateSettingsUI()});
   document.getElementById('btn-music-toggle').addEventListener('click',function(){toggleMusic();saveSettings();updateSettingsUI()});
