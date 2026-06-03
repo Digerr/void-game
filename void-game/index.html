@@ -347,6 +347,12 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .prof-achievements{width:100%;max-width:300px;margin-bottom:12px}
 .prof-ach-title{font-size:.42rem;color:#5a5a6a;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;text-align:center}
 .prof-ach-grid{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.prof-act-progress{width:100%;max-width:320px;margin:4px 0 8px}
+.prof-act-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.prof-act-name{font-size:.4rem;color:#5a6a5a;letter-spacing:.08em;min-width:20px;text-align:right;font-weight:700}
+.prof-act-bar-bg{flex:1;height:4px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
+.prof-act-bar-fill{height:100%;border-radius:2px;transition:width .3s ease}
+.prof-act-stars{font-size:.35rem;color:#4a5a4a;min-width:28px;letter-spacing:.04em}
 .prof-ach{width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:.9rem;opacity:.3}
 .prof-ach.unlocked{opacity:1;border-color:rgba(180,160,60,.2);background:rgba(180,160,60,.04)}
 .prof-days{font-size:.42rem;color:#3a3a4a;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
@@ -1475,7 +1481,21 @@ var ACHIEVEMENTS=[
   {id:'shard_hunter',name:'собиратель осколков',desc:'найди 30 осколков памяти',icon:'🔮'},
   {id:'persistent',name:'упорство',desc:'пройди уровень после 10+ смертей',icon:'🔥'},
   {id:'all_acts',name:'полный цикл',desc:'пройди все 12 актов',icon:'🌌'},
-  {id:'no_death_act',name:'чистый акт',desc:'пройди весь акт без смертей',icon:'💫'}
+  {id:'no_death_act',name:'чистый акт',desc:'пройди весь акт без смертей',icon:'💫'},
+  {id:'speed_demon',name:'демон скорости',desc:'пройди 5 уровней за <20с',icon:'🚀'},
+  {id:'death_100',name:'столетие потерь',desc:'умри 100 раз',icon:'💀'},
+  {id:'death_500',name:'привычка',desc:'умри 500 раз',icon:'⚰'},
+  {id:'marathon',name:'марафонец',desc:'играй 1 час',icon:'⏱'},
+  {id:'obsessed',name:'одержимость',desc:'играй 5 часов',icon:'⌛'},
+  {id:'perfectionist_all',name:'абсолют',desc:'получи ★★★ на всех уровнях',icon:'💠'},
+  {id:'choice_forget',name:'забвение',desc:'забыть — и обрести покой',icon:'🌫'},
+  {id:'choice_remember',name:'память',desc:'вспомнить — и жить с болью',icon:'🩹'},
+  {id:'streak_5',name:'серия',desc:'пройди 5 уровней подряд без смертей',icon:'🔗'},
+  {id:'combo_master',name:'комбо',desc:'используй дэш, wall jump и нить за один уровень',icon:'🎯'},
+  {id:'shard_50',name:'архивариус',desc:'найди 50 осколков памяти',icon:'📚'},
+  {id:'challenge_3',name:'испытанный',desc:'выполни 3 испытания',icon:'🏅'},
+  {id:'all_skins',name:'коллекционер',desc:'разблокируй все скины',icon:'🎭'},
+  {id:'veteran',name:'ветеран',desc:'пройди 30 уровней',icon:'🎖'}
 ];
 var achievementQueue=[];
 var achievementShowing=false;
@@ -1504,28 +1524,57 @@ function checkAchievements(){
   if(completed>=1)unlockAchievement('first_step');
   if(completed>=5)unlockAchievement('five_levels');
   if(completed>=10)unlockAchievement('halfway');
+  if(completed>=30)unlockAchievement('veteran');
   if(completed>=LEVELS.length)unlockAchievement('void_master');
   if(has3star)unlockAchievement('perfectionist');
   if(totalStars>=50)unlockAchievement('star_collector');
   if(perfectCount>=10)unlockAchievement('perfect_ten');
+  if(perfectCount>=LEVELS.length)unlockAchievement('perfectionist_all');
   // Act completion achievements
   var actIds=['deep_diver','rope_walker','abyss_gazer','reborn','exodus','shadow_bond','resonance','ghost_walker','architect_eye','homecoming','the_choice'];
   for(var a=1;a<=11;a++){var actComplete=true;for(var j=a*5;j<Math.min(a*5+5,LEVELS.length);j++){if(getLevelStars(j)===0){actComplete=false;break}}if(actComplete)unlockAchievement(actIds[a-1])}
   // All acts completed
   var allActs=true;for(var a=0;a<12;a++){for(var j=a*5;j<Math.min(a*5+5,LEVELS.length);j++){if(getLevelStars(j)===0){allActs=false;break}}if(!allActs)break}
   if(allActs)unlockAchievement('all_acts');
-  // Shard hunter
+  // Shard achievements
   if(progress.shards&&progress.shards.length>=30)unlockAchievement('shard_hunter');
+  if(progress.shards&&progress.shards.length>=50)unlockAchievement('shard_50');
   // Persistent — died 10+ times but still completed the level
   if(state.deaths>=10)unlockAchievement('persistent');
+  // Death milestones
+  if(state.totalDeaths>=100)unlockAchievement('death_100');
+  if(state.totalDeaths>=500)unlockAchievement('death_500');
+  // Play time
+  var playSecs=progress.stats.playTime||0;
+  if(playSecs>=3600)unlockAchievement('marathon');
+  if(playSecs>=18000)unlockAchievement('obsessed');
   // Clean act — check if current act was completed without deaths
   var currentAct=Math.floor(state.level/5);
   var actNoDeath=true;var actAllDone=true;
   for(var j=currentAct*5;j<Math.min(currentAct*5+5,LEVELS.length);j++){
     var ls=getLevelStars(j);if(ls===0)actAllDone=false;
-    if(progress.levels[j]&&progress.levels[j].deaths>0)actNoDeath=false;
+    if(progress.levels[j]&&progress.levels[j].bestDeaths>0)actNoDeath=false;
   }
   if(actAllDone&&actNoDeath)unlockAchievement('no_death_act');
+  // Speed demon — 5 levels completed in under 20s
+  var speedCount=0;for(var i=0;i<LEVELS.length;i++){var bt=getLevelBestTime(i);if(bt<20&&bt>0)speedCount++}
+  if(speedCount>=5)unlockAchievement('speed_demon');
+  // Choice achievements — check ending choices
+  var choices=state.choices||progress.choices||{forget:0,remember:0};
+  if((choices.forget||0)>(choices.remember||0))unlockAchievement('choice_forget');
+  if((choices.remember||0)>(choices.forget||0))unlockAchievement('choice_remember');
+  // Streak — 5 levels without deaths in a row
+  var streak=0;var maxStreak=0;
+  for(var i=0;i<LEVELS.length;i++){
+    var bd=(progress.levels[i]&&progress.levels[i].bestDeaths!==undefined)?progress.levels[i].bestDeaths:999;
+    if(getLevelStars(i)>0&&bd===0){streak++;if(streak>maxStreak)maxStreak=streak}else{streak=0}
+  }
+  if(maxStreak>=5)unlockAchievement('streak_5');
+  // Combo master — used dash, wall jump, and thread in one level
+  if(progress.stats.dashes>0&&progress.stats.wallJumps>0&&progress.stats.threadsUsed>0)unlockAchievement('combo_master');
+  // Challenge completions
+  var challengeWins=progress.challenges?Object.keys(progress.challenges).length:0;
+  if(challengeWins>=3)unlockAchievement('challenge_3');
 }
 
 // ═══ MEMORY SHARDS ═══
@@ -2429,7 +2478,7 @@ function renderProfile(d){
   var achHtml='';
   for(var i=0;i<achTotal;i++){
     var unlocked=(progress.achievements||[]).indexOf(ACHIEVEMENTS[i].id)>=0;
-    achHtml+='<div class="prof-ach'+(unlocked?' unlocked':'')+'">'+ACHIEVEMENTS[i].icon+'</div>';
+    achHtml+='<div class="prof-ach'+(unlocked?' unlocked':'')+'" title="'+escHtml(ACHIEVEMENTS[i].name)+'">'+ACHIEVEMENTS[i].icon+'</div>';
   }
   var notifEnabled=d.notifications_enabled!==false;
   // Weekly rank display
@@ -2443,6 +2492,17 @@ function renderProfile(d){
   var playMins=Math.floor(playSecs/60);
   var playHrs=Math.floor(playMins/60);
   var playStr=playHrs>0?playHrs+'ч '+(playMins%60)+'м':playMins+'м';
+  // Act progress bars
+  var actNames=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+  var actProgHtml='<div class="prof-act-progress">';
+  for(var a=0;a<12;a++){
+    var actStars=0;var actMax=15;
+    for(var j=a*5;j<Math.min(a*5+5,LEVELS.length);j++){actStars+=getLevelStars(j)}
+    var pct=Math.round(actStars/actMax*100);
+    var barColor=pct>=100?'#6aba6a':pct>=60?'#6a9a5a':pct>=30?'#6a7a5a':'#3a4a3a';
+    actProgHtml+='<div class="prof-act-row"><span class="prof-act-name">'+actNames[a]+'</span><div class="prof-act-bar-bg"><div class="prof-act-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div><span class="prof-act-stars">'+actStars+'/15</span></div>';
+  }
+  actProgHtml+='</div>';
   c.innerHTML=
     avatarHtml+
     '<div class="prof-name">'+escHtml(d.name||'???')+'</div>'+
@@ -2455,12 +2515,13 @@ function renderProfile(d){
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_stars||0)+'/'+(LEVELS.length*3)+'</div><div class="prof-stat-label">звёзды</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_shards||0)+'</div><div class="prof-stat-label">осколки</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.perfect_levels||0)+'</div><div class="prof-stat-label">идеальные</div></div>'+
-      '<div class="prof-stat"><div class="prof-stat-val">'+(d.achievements_count||0)+'/'+achTotal+'</div><div class="prof-stat-label">ачивки</div></div>'+
+      '<div class="prof-stat"><div class="prof-stat-val">'+achCount+'/'+achTotal+'</div><div class="prof-stat-label">ачивки</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(progress.totalDeaths||0)+'</div><div class="prof-stat-label">смерти</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+playStr+'</div><div class="prof-stat-label">время</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.score||0).toLocaleString()+'</div><div class="prof-stat-label">score</div></div>'+
       weeklyHtml+
     '</div>'+
+    actProgHtml+
     '<div class="prof-achievements">'+
       '<div class="prof-ach-title">достижения '+achCount+'/'+achTotal+'</div>'+
       '<div class="prof-ach-grid">'+achHtml+'</div>'+
