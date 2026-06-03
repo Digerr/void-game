@@ -4150,6 +4150,7 @@ var LEVELS=[
     levers:[{x:1400,y:620,doorX:2000,doorW:16,doorH:100,doorY:700,id:'lever1'}],
     enemies:[{x:2700,y:800,range:200,speed:0.8}],
     checkpoints:[{x:1300,y:500},{x:2700,y:540}],
+    shadowDouble:true,
     shards:[{x:2140,y:420,id:31}],
   },
   {
@@ -4658,13 +4659,11 @@ var LEVELS=[
       {x:3000,y:660,w:280,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0},
       {x:3500,y:800,w:4,h:150,axis:'y',onTime:1.5,offTime:2,phaseOffset:1},
     ],
-    levers:[
-      {x:4600,y:300,doorX:4800,doorW:200,doorH:400,doorY:550},
-    ],
     doorFragments:[
       {doorX:4800,doorY:550,doorW:200,doorH:400,fragments:[
         {x:1140,y:520},
         {x:3340,y:700},
+        {x:4540,y:300},
       ]},
     ],
     checkpoints:[{x:1800,y:490},{x:3000,y:400},{x:4200,y:400}],
@@ -4706,7 +4705,7 @@ var LEVELS=[
         {x:4540,y:200},
       ]},
     ],
-    darkness:[{x:-200,speed:55}],
+    darkness:[{startX:-200,speed:1.2,height:1200}],
     flashlight:true,
     checkpoints:[{x:1800,y:470},{x:3000,y:380},{x:4200,y:380},{x:4900,y:340}],
     shards:[{x:3840,y:320,id:49}],
@@ -4810,7 +4809,7 @@ var LEVELS=[
       {x:4200,y:600,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.0},
     ],
     stabilizers:[
-      {x:3000,y:550,w:30,h:30}, // Stabilizes ghost platforms nearby
+      {x:3000,y:550,radius:800,duration:10}, // Stabilizes ghost platforms nearby
     ],
     spikes:[{x:430,y:830,w:50}],
     checkpoints:[{x:1800,y:460},{x:3800,y:480}],
@@ -4979,7 +4978,7 @@ var LEVELS=[
       {x:2550,y:380,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.6},
     ],
     stabilizers:[
-      {x:2400,y:550,w:30,h:30},
+      {x:2400,y:550,radius:800,duration:10},
     ],
     lasers:[
       // Lower path lasers — must time them
