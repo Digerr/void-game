@@ -619,6 +619,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     <div class="win-stars" id="win-stars"></div>
     <div class="win-total-stats"><div class="win-total-stat">всего смертей: <span id="win-total-deaths">0</span></div></div>
     <div class="win-sub" id="win-sub">ты выбрался из пустоты</div>
+    <div id="win-ending" style="display:none;font-size:.65rem;color:#daa520;letter-spacing:.06em;line-height:1.7;max-width:340px;text-align:center;margin-bottom:12px"></div>
     <button class="btn primary" id="btn-next">далее</button>
     <button class="btn" id="btn-win-menu" style="border-color:#3a1a1a;color:#6a3535;margin-top:4px;font-size:.6rem">выйти в меню</button>
     <div class="win-share" id="btn-share">поделиться</div>
@@ -1340,10 +1341,10 @@ function toggleSound(){
 }
 
 // ═══ GAME STATE ═══
-var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0,lastCheckpoint:null,flashColor:0,flashAlpha:0,flashTimer:0,hitStop:0,dashTrails:[],runDustTimer:0,_flashGfx:null,_dashGfx:null,_lastHudTime:'',_lastHudDeaths:''};
+var state={screen:'menu',level:0,deaths:0,totalDeaths:0,levelStartTime:0,shakeAmount:0,shakeTime:0,slowMo:1,slowMoTimer:0,lastCheckpoint:null,flashColor:0,flashAlpha:0,flashTimer:0,hitStop:0,dashTrails:[],runDustTimer:0,_flashGfx:null,_dashGfx:null,_lastHudTime:'',_lastHudDeaths:'',choices:{forget:0,remember:0},_choiceMadeThisLevel:false};
 
 // ═══ PROGRESS / SAVE ═══
-var progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,firstLaunch:false};
+var progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,firstLaunch:false,choices:{forget:0,remember:0}};
 // Derive unlocked from completed levels — ensures sync even if progress.unlocked gets corrupted
 function syncProgressUnlocked(){
   var maxCompleted=-1;
@@ -1625,8 +1626,10 @@ function loadProgress(){
       progress=JSON.parse(s);
       // Stamp with current user ID
       if(currentTgId)progress._tgUserId=currentTgId;
-      if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};if(progress.totalDeaths===undefined)progress.totalDeaths=0;
+      if(!progress.levels)progress.levels={};if(!progress.shards)progress.shards=[];if(!progress.stats)progress.stats={jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0};if(progress.firstLaunch===undefined)progress.firstLaunch=false;if(!progress.unlocked)progress.unlocked=1;if(!progress.achievements)progress.achievements=[];if(!progress.challenges)progress.challenges={};if(progress.totalDeaths===undefined)progress.totalDeaths=0;if(!progress.choices)progress.choices={forget:0,remember:0};
       state.totalDeaths=progress.totalDeaths||0;
+      // Restore choices from progress
+      state.choices=progress.choices||{forget:0,remember:0};
       // Migration: convert bestTime from ms to seconds (pre-v2.9)
       if(!progress._v29_migrated){var migrated=false;for(var k in progress.levels){if(progress.levels.hasOwnProperty(k)){var lv=progress.levels[k];if(lv.bestTime&&lv.bestTime>100){lv.bestTime=lv.bestTime/1000;migrated=true}}}if(migrated){saveProgress();console.log('[VOID] Migrated bestTime ms→sec')}progress._v29_migrated=true;saveProgress()}
       syncProgressUnlocked();
@@ -1698,7 +1701,8 @@ function saveToCloud(){
       achievements:progress.achievements||[],
       challenges:progress.challenges||{},
       firstLaunch:progress.firstLaunch||false,
-      totalDeaths:progress.totalDeaths||state.totalDeaths||0
+      totalDeaths:progress.totalDeaths||state.totalDeaths||0,
+      choices:progress.choices||{forget:0,remember:0}
     };
     tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){if(err)console.warn('[VOID] Cloud save error:',err);else console.log('[VOID] Cloud saved')});
   }catch(e){console.warn('[VOID] CloudStorage error:',e)}
@@ -1822,6 +1826,13 @@ function mergeCloudData(cloud){
   }
   // Re-sync unlocked based on completed levels
   syncProgressUnlocked();
+  // Merge choices — take higher counts
+  if(cloud.choices){
+    if(!progress.choices)progress.choices={forget:0,remember:0};
+    if((cloud.choices.forget||0)>progress.choices.forget){progress.choices.forget=cloud.choices.forget;changed=true}
+    if((cloud.choices.remember||0)>progress.choices.remember){progress.choices.remember=cloud.choices.remember;changed=true}
+    state.choices=progress.choices;
+  }
   if(changed)saveProgress();
   console.log('[VOID] Cloud data merged, changed:',changed);
 }
@@ -1907,7 +1918,8 @@ function submitLB(){
     body:JSON.stringify({
       initData:initData,levelData:levelData,chatId:chatId,
       totalShards:data.totalShards,achievementsCount:data.achievementsCount,
-      perfectLevels:data.perfectLevels,challengeWins:data.challengeWins
+      perfectLevels:data.perfectLevels,challengeWins:data.challengeWins,
+      choices:progress.choices||{forget:0,remember:0}
     })
   }).then(function(r){return r.json()}).then(function(d){
     if(d.ok)console.log('[VOID] LB submitted, rank:',d.rank);
@@ -4418,184 +4430,439 @@ var LEVELS=[
   // ═══ Act XI — Возвращение (levels 50-54) ═══
   {
     name:'Улица',story:'Знакомые очертания. Улица. Но она длиннее, чем в воспоминании.',
-    width:4600,height:1050,spawn:{x:80,y:750},exit:{x:4400,y:360,w:40,h:80},
+    width:4200,height:950,spawn:{x:80,y:650},exit:{x:4000,y:340,w:40,h:80},
+    shadowDouble:true,
     platforms:[
-      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:300,h:40},
-      {x:250,y:770,w:100,h:16},{x:500,y:650,w:80,h:16},{x:800,y:740,w:80,h:16},
-      {x:1050,y:600,w:80,h:16},{x:1300,y:700,w:80,h:16},
-      {x:1600,y:560,w:80,h:16},{x:1900,y:460,w:80,h:16},
-      {x:2300,y:540,w:80,h:16},{x:2600,y:440,w:80,h:16},
-      {x:3000,y:520,w:80,h:16},{x:3300,y:420,w:80,h:16},
-      {x:3700,y:460,w:80,h:16},{x:4100,y:400,w:80,h:16},
-      {x:4400,y:360,w:120,h:16},
+      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},
+      // Pressure plate platform — plate1 + door1 blocking path
+      {x:1300,y:800,w:800,h:40},
+      {x:2300,y:800,w:400,h:40},{x:2900,y:800,w:400,h:40},{x:3500,y:800,w:700,h:40},
+      // Upper path platforms
+      {x:250,y:680,w:80,h:16},{x:500,y:560,w:80,h:16},{x:800,y:640,w:100,h:16},
+      {x:1100,y:560,w:80,h:16},
+      // After door — upper route
+      {x:2400,y:600,w:80,h:16},{x:2700,y:520,w:80,h:16},
+      {x:3000,y:580,w:80,h:16},{x:3300,y:480,w:80,h:16},
+      {x:3600,y:420,w:80,h:16},
+      // Exit platform
+      {x:3950,y:340,w:100,h:16},
     ],
-    spikes:[{x:560,y:880,w:80},{x:1060,y:880,w:60},{x:1760,y:880,w:60},{x:2360,y:880,w:60},{x:2960,y:880,w:40},{x:3560,y:880,w:40}],
-    checkpoints:[{x:1900,y:450},{x:3100,y:500},{x:4100,y:380}],
-    shards:[{x:2640,y:400,id:50}],
+    spikes:[{x:560,y:780,w:60},{x:1140,y:780,w:40},{x:2740,y:780,w:40}],
+    pressurePlates:[
+      {x:1500,y:790,w:60,h:10,door:{x:1900,y:700,w:16,h:100}},
+    ],
+    checkpoints:[{x:1300,y:520},{x:2900,y:500}],
+    shards:[{x:3340,y:440,id:50}],
   },
   {
     name:'Комната',story:'Комната. Двери не туда. Окна не сюда. Воспоминание или желание?',
-    width:4800,height:1100,spawn:{x:80,y:800},exit:{x:4600,y:340,w:40,h:80},
+    width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:300,w:40,h:80},
     platforms:[
-      {x:0,y:950,w:500,h:40},{x:700,y:950,w:400,h:40},{x:1300,y:950,w:400,h:40},{x:1900,y:950,w:400,h:40},{x:2500,y:950,w:400,h:40},{x:3100,y:950,w:400,h:40},{x:3700,y:950,w:400,h:40},{x:4300,y:950,w:500,h:40},
-      {x:250,y:820,w:80,h:16},{x:500,y:700,w:80,h:16},{x:800,y:790,w:80,h:16},
-      {x:1050,y:640,w:80,h:16},{x:1300,y:740,w:80,h:16},
-      {x:1600,y:600,w:80,h:16},{x:1900,y:500,w:80,h:16},
-      {x:2200,y:580,w:80,h:16},{x:2500,y:460,w:80,h:16},
-      {x:2900,y:540,w:80,h:16},{x:3200,y:420,w:80,h:16},
-      {x:3600,y:480,w:80,h:16},{x:3900,y:380,w:80,h:16},
-      {x:4300,y:400,w:80,h:16},{x:4600,y:340,w:120,h:16},
+      {x:0,y:850,w:400,h:40},{x:600,y:850,w:400,h:40},
+      // "Room" walls
+      {x:1100,y:400,w:20,h:450},{x:1300,y:400,w:20,h:450}, // Doorway walls
+      {x:1100,y:850,w:400,h:40}, // Room floor
+      {x:1500,y:850,w:400,h:40},
+      // Second room
+      {x:2100,y:350,w:20,h:500},{x:2300,y:350,w:20,h:500}, // Doorway walls
+      {x:2100,y:850,w:400,h:40}, // Room floor
+      {x:2600,y:850,w:400,h:40},{x:3200,y:850,w:400,h:40},{x:3800,y:850,w:700,h:40},
+      // Approach platforms
+      {x:200,y:720,w:80,h:16},{x:450,y:600,w:80,h:16},
+      // Inside rooms — upper shelves
+      {x:1150,y:700,w:100,h:16},{x:2150,y:700,w:100,h:16},
+      // After rooms — route to exit
+      {x:2700,y:600,w:80,h:16},{x:3000,y:500,w:80,h:16},
+      {x:3400,y:450,w:80,h:16},{x:3700,y:380,w:80,h:16},
+      {x:4000,y:340,w:80,h:16},
+      {x:4300,y:300,w:120,h:16},
     ],
-    spikes:[{x:560,y:930,w:80},{x:1060,y:930,w:60},{x:1760,y:930,w:60},{x:2360,y:930,w:60},{x:2960,y:930,w:40},{x:3560,y:930,w:40}],
-    checkpoints:[{x:1900,y:490},{x:3100,y:520},{x:4300,y:380}],
-    shards:[{x:3240,y:380,id:51}],
+    spikes:[{x:460,y:830,w:60},{x:1960,y:830,w:60},{x:2560,y:830,w:60}],
+    pressurePlates:[
+      {x:1150,y:840,w:60,h:10,door:{x:1200,y:400,w:16,h:100}}, // Door in first room wall
+      {x:2150,y:840,w:60,h:10,door:{x:2200,y:350,w:16,h:100}}, // Door in second room wall
+    ],
+    pulsePlatforms:[
+      {x:2700,y:550,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0,group:0},
+      {x:2900,y:480,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5,group:0},
+      {x:3200,y:420,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0,group:0},
+    ],
+    checkpoints:[{x:1500,y:580},{x:3200,y:420}],
+    shards:[{x:2190,y:660,id:51}],
   },
   {
     name:'Мост',story:'Мост над бездной. Но он сложен из всего, что ты помнишь. И того, что придумал.',
-    width:5000,height:1100,spawn:{x:80,y:800},exit:{x:4800,y:320,w:40,h:80},
+    width:5000,height:1000,spawn:{x:80,y:700},exit:{x:4800,y:300,w:40,h:80},
     platforms:[
-      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4600,y:950,w:400,h:40},
-      {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:790,w:80,h:16},
-      {x:950,y:640,w:80,h:16},{x:1200,y:740,w:80,h:16},
-      {x:1500,y:600,w:80,h:16},{x:1800,y:480,w:80,h:16},
-      {x:2100,y:560,w:80,h:16},{x:2400,y:440,w:80,h:16},
-      {x:2800,y:520,w:80,h:16},{x:3100,y:400,w:80,h:16},
-      {x:3500,y:460,w:80,h:16},{x:3800,y:360,w:80,h:16},
-      {x:4200,y:400,w:80,h:16},{x:4500,y:340,w:80,h:16},
-      {x:4800,y:320,w:120,h:16},
+      {x:0,y:850,w:400,h:40},
+      // "Bridge" — narrow ground with gaps (resonance + ghost fill the gaps)
+      {x:1800,y:850,w:400,h:40},
+      {x:4400,y:850,w:600,h:40},
+      // Approach
+      {x:150,y:720,w:80,h:16},
+      // Final climb
+      {x:4500,y:600,w:80,h:16},{x:4600,y:450,w:80,h:16},
+      {x:4800,y:300,w:120,h:16},
     ],
-    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60},{x:1660,y:930,w:60},{x:2260,y:930,w:60},{x:2860,y:930,w:60},{x:3460,y:930,w:40},{x:4060,y:930,w:40}],
-    checkpoints:[{x:1800,y:470},{x:3000,y:380},{x:4200,y:380}],
-    shards:[{x:3840,y:320,id:52}],
+    resonanceRadius:160,
+    resonancePlatforms:[
+      // Bridge section 1 (x:400-1800) — must keep moving
+      {x:500,y:750,w:100,h:16},{x:680,y:700,w:100,h:16},{x:860,y:660,w:80,h:16},
+      {x:1040,y:620,w:100,h:16},{x:1220,y:660,w:80,h:16},{x:1400,y:700,w:100,h:16},
+      {x:1580,y:750,w:100,h:16},
+    ],
+    ghostPlatforms:[
+      // Bridge section 2 (x:2200-4400) — timing-based ghost platforms
+      {x:2200,y:780,w:120,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0},
+      {x:2400,y:720,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.8},
+      {x:2600,y:660,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.6},
+      {x:2800,y:620,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.4},
+      {x:3000,y:580,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.2},
+      {x:3200,y:540,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:2.0},
+      {x:3400,y:500,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.6},
+      {x:3600,y:460,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.4},
+      {x:3800,y:500,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:2.2},
+      {x:4000,y:550,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.2},
+      {x:4200,y:600,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.0},
+    ],
+    stabilizers:[
+      {x:3000,y:550,w:30,h:30}, // Stabilizes ghost platforms nearby
+    ],
+    spikes:[{x:430,y:830,w:50}],
+    checkpoints:[{x:1800,y:460},{x:3800,y:480}],
+    shards:[{x:3440,y:460,id:52}],
   },
   {
     name:'Башня',story:'Башня воспоминаний. Каждый этаж — потеря. Каждый прыжок — боль.',
-    width:5200,height:1150,spawn:{x:80,y:850},exit:{x:5000,y:300,w:40,h:80},
+    width:4000,height:1400,spawn:{x:80,y:1150},exit:{x:3800,y:200,w:40,h:80},
     platforms:[
-      {x:0,y:1000,w:400,h:40},{x:600,y:1000,w:400,h:40},{x:1200,y:1000,w:400,h:40},{x:1800,y:1000,w:400,h:40},{x:2400,y:1000,w:400,h:40},{x:3000,y:1000,w:400,h:40},{x:3600,y:1000,w:400,h:40},{x:4200,y:1000,w:400,h:40},{x:4800,y:1000,w:400,h:40},
-      {x:200,y:870,w:80,h:16},{x:450,y:750,w:80,h:16},{x:700,y:840,w:80,h:16},
-      {x:950,y:690,w:80,h:16},{x:1200,y:790,w:80,h:16},
-      {x:1500,y:640,w:80,h:16},{x:1800,y:540,w:80,h:16},
-      {x:2100,y:620,w:80,h:16},{x:2400,y:500,w:80,h:16},
-      {x:2800,y:580,w:80,h:16},{x:3100,y:460,w:80,h:16},
-      {x:3500,y:520,w:80,h:16},{x:3800,y:400,w:80,h:16},
-      {x:4200,y:440,w:80,h:16},{x:4500,y:360,w:80,h:16},
-      {x:4900,y:380,w:80,h:16},{x:5000,y:300,w:120,h:16},
+      // Ground floor
+      {x:0,y:1300,w:400,h:40},{x:600,y:1300,w:400,h:40},
+      // "Floors" going up — tower structure
+      {x:200,y:1100,w:200,h:16},{x:600,y:950,w:200,h:16},
+      {x:1000,y:1100,w:200,h:16},{x:1400,y:950,w:200,h:16},
+      {x:1700,y:800,w:200,h:16},{x:2100,y:650,w:200,h:16},
+      {x:2500,y:500,w:200,h:16},{x:2900,y:350,w:200,h:16},
+      // Top
+      {x:3300,y:250,w:200,h:16},
+      {x:3700,y:200,w:160,h:16},
+      // Wall sections for climbing
+      {x:500,y:700,w:20,h:250},{x:650,y:700,w:20,h:250},
+      {x:1300,y:500,w:20,h:250},{x:1450,y:500,w:20,h:250},
+      {x:2200,y:300,w:20,h:250},{x:2350,y:300,w:20,h:250},
+      // Side shelves for fragments
+      {x:1050,y:850,w:80,h:16},{x:1550,y:700,w:80,h:16},
     ],
-    spikes:[{x:460,y:980,w:80},{x:1060,y:980,w:60},{x:1660,y:980,w:60},{x:2260,y:980,w:60},{x:2860,y:980,w:60},{x:3460,y:980,w:40},{x:4060,y:980,w:40},{x:4660,y:980,w:40}],
-    checkpoints:[{x:1800,y:530},{x:3000,y:440},{x:4200,y:420},{x:4900,y:360}],
-    shards:[{x:3140,y:420,id:53}],
+    ghostPlatforms:[
+      {x:900,y:1020,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:0},
+      {x:1200,y:870,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:0.8},
+      {x:1600,y:720,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:1.6},
+      {x:2000,y:570,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:0.4},
+      {x:2400,y:420,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:1.2},
+    ],
+    lasers:[
+      {x:800,y:1200,w:300,h:4,axis:'x',onTime:2,offTime:2.5,phaseOffset:0},
+      {x:1500,y:1050,w:280,h:4,axis:'x',onTime:2,offTime:2.5,phaseOffset:0.8},
+      {x:2200,y:750,w:250,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0.5},
+    ],
+    doorFragments:[
+      {doorX:3300,doorY:250,doorW:40,doorH:200,fragments:[
+        {x:1100,y:810},
+        {x:1590,y:660},
+      ]},
+    ],
+    levers:[
+      {x:2600,y:460,doorX:3300,doorW:100,doorH:200,doorY:250},
+    ],
+    spikes:[{x:430,y:1280,w:60},{x:1050,y:1080,w:40}],
+    checkpoints:[{x:1400,y:920},{x:2500,y:470}],
+    shards:[{x:2350,y:260,id:53}],
   },
   {
     name:'Порог',story:'Порог между Пустотой и реальностью. Тонкий как нить. Хрупкий как стекло.',
-    width:5400,height:1150,spawn:{x:80,y:850},exit:{x:5200,y:280,w:40,h:80},
+    width:5500,height:1200,spawn:{x:80,y:850},exit:{x:5300,y:240,w:40,h:80},
+    shadowDouble:true,
+    flashlight:true,
+    darkness:[{startX:-200,speed:1.0,height:1200}],
     platforms:[
-      {x:0,y:1000,w:400,h:40},{x:600,y:1000,w:400,h:40},{x:1200,y:1000,w:400,h:40},{x:1800,y:1000,w:400,h:40},{x:2400,y:1000,w:400,h:40},{x:3000,y:1000,w:400,h:40},{x:3600,y:1000,w:400,h:40},{x:4200,y:1000,w:400,h:40},{x:4800,y:1000,w:400,h:40},{x:5200,y:1000,w:200,h:40},
-      {x:200,y:870,w:80,h:16},{x:450,y:750,w:80,h:16},{x:700,y:840,w:80,h:16},
-      {x:950,y:680,w:80,h:16},{x:1200,y:790,w:80,h:16},
-      {x:1500,y:620,w:80,h:16},{x:1800,y:500,w:80,h:16},
-      {x:2100,y:580,w:80,h:16},{x:2400,y:460,w:80,h:16},
-      {x:2800,y:540,w:80,h:16},{x:3100,y:420,w:80,h:16},
-      {x:3500,y:480,w:80,h:16},{x:3800,y:360,w:80,h:16},
-      {x:4200,y:400,w:80,h:16},{x:4500,y:320,w:80,h:16},
-      {x:4900,y:360,w:80,h:16},{x:5200,y:280,w:120,h:16},
+      {x:0,y:1000,w:400,h:40},{x:600,y:1000,w:400,h:40},
+      // Shadow + pressure plate section
+      {x:1200,y:1000,w:800,h:40},
+      {x:2200,y:1000,w:400,h:40},
+      // Pulse + ghost section
+      {x:2800,y:1000,w:400,h:40},{x:3400,y:1000,w:400,h:40},
+      // Fragment + laser section
+      {x:4000,y:1000,w:400,h:40},{x:4600,y:1000,w:400,h:40},{x:5100,y:1000,w:400,h:40},
+      // Approach platforms
+      {x:200,y:870,w:80,h:16},{x:450,y:750,w:80,h:16},
+      // After pressure plate door
+      {x:2400,y:750,w:80,h:16},
+      // Upper route to exit
+      {x:3500,y:600,w:80,h:16},{x:3800,y:500,w:80,h:16},
+      {x:4100,y:420,w:80,h:16},{x:4500,y:350,w:80,h:16},
+      {x:4900,y:300,w:80,h:16},
+      {x:5300,y:240,w:120,h:16},
     ],
-    spikes:[{x:460,y:980,w:80},{x:1060,y:980,w:60},{x:1660,y:980,w:60},{x:2260,y:980,w:60},{x:2860,y:980,w:60},{x:3460,y:980,w:40},{x:4060,y:980,w:40},{x:4660,y:980,w:40}],
-    checkpoints:[{x:1800,y:490},{x:3000,y:400},{x:4200,y:380},{x:4900,y:340}],
-    shards:[{x:4540,y:280,id:54}],
+    spikes:[{x:460,y:980,w:80},{x:1060,y:980,w:60},{x:2660,y:980,w:60},{x:3260,y:980,w:40},{x:3860,y:980,w:40},{x:4460,y:980,w:40}],
+    pressurePlates:[
+      {x:1500,y:990,w:60,h:10,door:{x:2000,y:900,w:16,h:100}},
+      {x:1600,y:990,w:60,h:10,door:{x:2000,y:780,w:16,h:120}},
+    ],
+    pulsePlatforms:[
+      {x:2600,y:700,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0,group:0},
+      {x:2800,y:600,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5,group:0},
+      {x:3000,y:520,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0,group:0},
+    ],
+    ghostPlatforms:[
+      {x:3200,y:700,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:0},
+      {x:3400,y:600,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:0.6},
+      {x:3600,y:520,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:1.2},
+    ],
+    lasers:[
+      {x:4200,y:900,w:300,h:4,axis:'x',onTime:2,offTime:2.5,phaseOffset:0},
+    ],
+    doorFragments:[
+      {doorX:4600,doorY:500,doorW:40,doorH:500,fragments:[
+        {x:1140,y:950},
+        {x:3140,y:480},
+      ]},
+    ],
+    checkpoints:[{x:2200,y:740},{x:4000,y:400},{x:4900,y:280}],
+    shards:[{x:4540,y:310,id:54}],
   },
   // ═══ Act XII — Выбор (levels 55-59) ═══
   {
     name:'Развилка',story:'Впервые — выбор. Левый путь или правый. Забыть или помнить. Каждый шаг — решение.',
     width:4800,height:1100,spawn:{x:80,y:800},exit:{x:4600,y:320,w:40,h:80},
+    choicePoint:{x:1800,upperY:480,lowerY:880},
     platforms:[
-      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4600,y:950,w:200,h:40},
-      {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:790,w:80,h:16},
-      {x:950,y:640,w:80,h:16},{x:1200,y:740,w:80,h:16},
-      {x:1500,y:600,w:80,h:16},{x:1800,y:480,w:80,h:16},
-      {x:2100,y:560,w:80,h:16},{x:2400,y:440,w:80,h:16},
-      {x:2800,y:520,w:80,h:16},{x:3100,y:400,w:80,h:16},
-      {x:3500,y:460,w:80,h:16},{x:3800,y:360,w:80,h:16},
-      {x:4200,y:400,w:80,h:16},{x:4500,y:340,w:80,h:16},
+      // Start area
+      {x:0,y:950,w:500,h:40},{x:700,y:950,w:400,h:40},{x:1300,y:950,w:400,h:40},
+      // Fork point — common platform where paths split
+      {x:1800,y:950,w:200,h:40},
+      // UPPER PATH (remember — harder, higher)
+      {x:2000,y:700,w:80,h:16},{x:2200,y:580,w:80,h:16},{x:2400,y:500,w:80,h:16},
+      {x:2600,y:440,w:100,h:16},{x:2800,y:380,w:80,h:16},
+      // Lower bypass on upper path
+      {x:2100,y:650,w:80,h:16},
+      // LOWER PATH (forget — easier, lower)
+      {x:2000,y:880,w:400,h:40},{x:2600,y:880,w:400,h:40},
+      // Convergence zone
+      {x:3100,y:700,w:200,h:40},
+      // Post-convergence route to exit
+      {x:3400,y:600,w:80,h:16},{x:3700,y:500,w:80,h:16},
+      {x:4000,y:420,w:80,h:16},{x:4300,y:360,w:80,h:16},
       {x:4600,y:320,w:120,h:16},
     ],
-    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60},{x:1660,y:930,w:60},{x:2260,y:930,w:60},{x:2860,y:930,w:60},{x:3460,y:930,w:40},{x:4060,y:930,w:40}],
-    checkpoints:[{x:1800,y:470},{x:3000,y:380},{x:4200,y:380}],
-    shards:[{x:3840,y:320,id:55}],
+    spikes:[
+      {x:560,y:930,w:80},{x:1160,y:930,w:60},
+      // Upper path has more spikes
+      {x:2300,y:560,w:40},{x:2900,y:360,w:40},
+    ],
+    // Choice zone sensors — created by loadLevel when choicePoint is present
+    // "remember" sensor at upper path, "forget" sensor at lower path
+    checkpoints:[{x:3100,y:680},{x:4000,y:400}],
+    shards:[{x:2840,y:340,id:55}],
   },
   {
     name:'Компромисс',story:'Не всё можно сохранить. Что выберешь — скорость или память? Лёгкость или правду?',
-    width:5000,height:1150,spawn:{x:80,y:850},exit:{x:4800,y:300,w:40,h:80},
+    width:5000,height:1100,spawn:{x:80,y:800},exit:{x:4800,y:280,w:40,h:80},
+    choicePoint:{x:1600,upperY:450,lowerY:850},
     platforms:[
-      {x:0,y:1000,w:400,h:40},{x:600,y:1000,w:400,h:40},{x:1200,y:1000,w:400,h:40},{x:1800,y:1000,w:400,h:40},{x:2400,y:1000,w:400,h:40},{x:3000,y:1000,w:400,h:40},{x:3600,y:1000,w:400,h:40},{x:4200,y:1000,w:400,h:40},{x:4800,y:1000,w:200,h:40},
-      {x:200,y:870,w:80,h:16},{x:450,y:750,w:80,h:16},{x:700,y:840,w:80,h:16},
-      {x:950,y:680,w:80,h:16},{x:1200,y:790,w:80,h:16},
-      {x:1500,y:620,w:80,h:16},{x:1800,y:500,w:80,h:16},
-      {x:2100,y:580,w:80,h:16},{x:2400,y:460,w:80,h:16},
-      {x:2800,y:540,w:80,h:16},{x:3100,y:420,w:80,h:16},
-      {x:3500,y:480,w:80,h:16},{x:3800,y:360,w:80,h:16},
-      {x:4200,y:400,w:80,h:16},{x:4500,y:320,w:80,h:16},
-      {x:4800,y:300,w:120,h:16},
+      // Start
+      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1100,y:950,w:400,h:40},
+      // Fork point
+      {x:1600,y:950,w:200,h:40},
+      // UPPER PATH (remember — ghost + stabilizer, hard but reliable)
+      {x:1800,y:700,w:80,h:16},{x:2000,y:550,w:80,h:16},
+      {x:2300,y:600,w:80,h:16},{x:2600,y:520,w:80,h:16},
+      // LOWER PATH (forget — lasers, easier if timed but punishing)
+      {x:1800,y:880,w:400,h:40},{x:2400,y:880,w:400,h:40},
+      // Convergence
+      {x:2900,y:750,w:200,h:40},
+      // Post-convergence — pressure plate puzzle
+      {x:3200,y:750,w:800,h:40},
+      {x:4200,y:750,w:300,h:40},{x:4600,y:750,w:400,h:40},
+      // Upper route to exit
+      {x:4100,y:500,w:80,h:16},{x:4400,y:400,w:80,h:16},
+      {x:4700,y:340,w:80,h:16},
+      {x:4800,y:280,w:120,h:16},
     ],
-    spikes:[{x:460,y:980,w:80},{x:1060,y:980,w:60},{x:1660,y:980,w:60},{x:2260,y:980,w:60},{x:2860,y:980,w:60},{x:3460,y:980,w:40},{x:4060,y:980,w:40}],
-    checkpoints:[{x:1800,y:490},{x:3000,y:400},{x:4200,y:380}],
-    shards:[{x:3140,y:380,id:56}],
+    ghostPlatforms:[
+      // Upper path ghost platforms
+      {x:2100,y:480,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0},
+      {x:2350,y:420,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.8},
+      {x:2550,y:380,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.6},
+    ],
+    stabilizers:[
+      {x:2400,y:550,w:30,h:30},
+    ],
+    lasers:[
+      // Lower path lasers — must time them
+      {x:2000,y:860,w:300,h:4,axis:'x',onTime:2,offTime:2.5,phaseOffset:0},
+      {x:2400,y:860,w:300,h:4,axis:'x',onTime:2,offTime:2.5,phaseOffset:1},
+    ],
+    pressurePlates:[
+      // Post-convergence puzzle
+      {x:3500,y:740,w:60,h:10,door:{x:4200,y:550,w:16,h:200}},
+    ],
+    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60}],
+    checkpoints:[{x:2900,y:730},{x:4200,y:490}],
+    shards:[{x:2440,y:380,id:56}],
   },
   {
     name:'Цена',story:'У каждого выбора — цена. Забвение забирает понемногу. Память ранит каждого.',
-    width:5200,height:1150,spawn:{x:80,y:850},exit:{x:5000,y:280,w:40,h:80},
+    width:5200,height:1100,spawn:{x:80,y:800},exit:{x:5000,y:260,w:40,h:80},
+    shadowDouble:true,
+    choicePoint:{x:1600,upperY:450,lowerY:850},
     platforms:[
-      {x:0,y:1000,w:400,h:40},{x:600,y:1000,w:300,h:40},{x:1100,y:1000,w:300,h:40},{x:1600,y:1000,w:300,h:40},{x:2100,y:1000,w:300,h:40},{x:2600,y:1000,w:300,h:40},{x:3100,y:1000,w:300,h:40},{x:3600,y:1000,w:300,h:40},{x:4100,y:1000,w:300,h:40},{x:4600,y:1000,w:300,h:40},{x:5000,y:1000,w:200,h:40},
-      {x:200,y:870,w:80,h:16},{x:450,y:750,w:80,h:16},{x:700,y:840,w:80,h:16},
-      {x:950,y:680,w:80,h:16},{x:1150,y:780,w:80,h:16},
-      {x:1400,y:600,w:80,h:16},{x:1700,y:500,w:80,h:16},
-      {x:2000,y:580,w:80,h:16},{x:2300,y:460,w:80,h:16},
-      {x:2650,y:540,w:80,h:16},{x:2950,y:420,w:80,h:16},
-      {x:3300,y:480,w:80,h:16},{x:3600,y:380,w:80,h:16},
-      {x:4000,y:420,w:80,h:16},{x:4300,y:340,w:80,h:16},
-      {x:4700,y:360,w:80,h:16},{x:5000,y:280,w:120,h:16},
+      // Start
+      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1100,y:950,w:400,h:40},
+      // Fork
+      {x:1600,y:950,w:200,h:40},
+      // UPPER PATH (remember — shadow + pressure plates, need coordination)
+      {x:1800,y:680,w:80,h:16},{x:2000,y:560,w:80,h:16},
+      {x:2300,y:600,w:800,h:40}, // Long pressure plate platform
+      {x:3200,y:600,w:200,h:40},
+      // LOWER PATH (forget — no shadow, pulse platforms, timing-based)
+      {x:1800,y:880,w:400,h:40},{x:2400,y:880,w:400,h:40},
+      // Convergence
+      {x:3400,y:750,w:200,h:40},
+      // Final route
+      {x:3700,y:650,w:80,h:16},{x:4000,y:550,w:80,h:16},
+      {x:4300,y:450,w:80,h:16},{x:4600,y:360,w:80,h:16},
+      {x:5000,y:260,w:120,h:16},
     ],
-    spikes:[{x:460,y:980,w:80},{x:960,y:980,w:60},{x:1460,y:980,w:60},{x:1960,y:980,w:60},{x:2460,y:980,w:60},{x:2960,y:980,w:40},{x:3460,y:980,w:40},{x:3960,y:980,w:40},{x:4460,y:980,w:40}],
-    checkpoints:[{x:1600,y:490},{x:2600,y:400},{x:4100,y:400},{x:4700,y:340}],
-    shards:[{x:3640,y:340,id:57}],
+    pressurePlates:[
+      // Upper path — shadow must stay on plate while player advances
+      {x:2500,y:590,w:60,h:10,door:{x:3000,y:500,w:16,h:100}},
+    ],
+    pulsePlatforms:[
+      // Lower path — timing-based
+      {x:1900,y:800,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0,group:0},
+      {x:2100,y:750,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5,group:0},
+      {x:2300,y:700,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0,group:0},
+      {x:2500,y:680,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.3,group:0},
+      {x:2700,y:700,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.8,group:0},
+    ],
+    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60}],
+    checkpoints:[{x:3400,y:730},{x:4300,y:430}],
+    shards:[{x:4640,y:320,id:57}],
   },
   {
     name:'Преддверие',story:'Последняя развилка. Самый трудный выбор. То, от чего не увернёшься.',
-    width:5400,height:1200,spawn:{x:80,y:900},exit:{x:5200,y:260,w:40,h:80},
+    width:5400,height:1200,spawn:{x:80,y:900},exit:{x:5200,y:240,w:40,h:80},
+    choicePoint:{x:1800,upperY:450,lowerY:900},
     platforms:[
-      {x:0,y:1050,w:400,h:40},{x:600,y:1050,w:300,h:40},{x:1100,y:1050,w:300,h:40},{x:1600,y:1050,w:300,h:40},{x:2100,y:1050,w:300,h:40},{x:2600,y:1050,w:300,h:40},{x:3100,y:1050,w:300,h:40},{x:3600,y:1050,w:300,h:40},{x:4100,y:1050,w:300,h:40},{x:4600,y:1050,w:300,h:40},{x:5000,y:1050,w:400,h:40},
-      {x:200,y:920,w:80,h:16},{x:450,y:800,w:80,h:16},{x:700,y:890,w:80,h:16},
-      {x:950,y:720,w:80,h:16},{x:1150,y:830,w:80,h:16},
-      {x:1400,y:650,w:80,h:16},{x:1700,y:540,w:80,h:16},
-      {x:2000,y:620,w:80,h:16},{x:2300,y:500,w:80,h:16},
-      {x:2650,y:580,w:80,h:16},{x:2950,y:460,w:80,h:16},
-      {x:3300,y:520,w:80,h:16},{x:3600,y:400,w:80,h:16},
-      {x:4000,y:440,w:80,h:16},{x:4300,y:340,w:80,h:16},
-      {x:4700,y:380,w:80,h:16},{x:5000,y:300,w:80,h:16},
-      {x:5200,y:260,w:120,h:16},
+      // Start
+      {x:0,y:1050,w:400,h:40},{x:600,y:1050,w:400,h:40},{x:1100,y:1050,w:400,h:40},
+      // Fork
+      {x:1600,y:1050,w:400,h:40},
+      // UPPER PATH (remember — full gauntlet: lasers + ghost + fragments)
+      {x:2000,y:750,w:80,h:16},{x:2200,y:600,w:80,h:16},
+      {x:2500,y:650,w:80,h:16},{x:2800,y:550,w:80,h:16},
+      {x:3100,y:500,w:80,h:16},
+      // LOWER PATH (forget — simpler but longer with darkness)
+      {x:2000,y:980,w:400,h:40},{x:2600,y:980,w:400,h:40},
+      {x:3200,y:980,w:400,h:40},
+      // Convergence
+      {x:3600,y:800,w:200,h:40},
+      // Post-convergence gauntlet
+      {x:3900,y:700,w:80,h:16},{x:4200,y:600,w:80,h:16},
+      {x:4500,y:500,w:80,h:16},{x:4800,y:400,w:80,h:16},
+      {x:5100,y:320,w:80,h:16},
+      {x:5200,y:240,w:120,h:16},
     ],
-    spikes:[{x:460,y:1030,w:80},{x:960,y:1030,w:60},{x:1460,y:1030,w:60},{x:1960,y:1030,w:60},{x:2460,y:1030,w:60},{x:2960,y:1030,w:40},{x:3460,y:1030,w:40},{x:3960,y:1030,w:40},{x:4460,y:1030,w:40}],
-    checkpoints:[{x:1600,y:530},{x:2600,y:440},{x:4100,y:420},{x:4700,y:360}],
-    shards:[{x:4340,y:300,id:58}],
+    ghostPlatforms:[
+      // Upper path — ghost platforms
+      {x:2400,y:550,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:0},
+      {x:2650,y:480,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:0.7},
+      {x:2900,y:440,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:1.4},
+    ],
+    lasers:[
+      // Upper path lasers
+      {x:2300,y:700,w:250,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0},
+      {x:3000,y:600,w:250,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0.8},
+    ],
+    doorFragments:[
+      // Upper path — need to collect fragment
+      {doorX:3600,doorY:500,doorW:40,doorH:300,fragments:[
+        {x:2840,y:510},
+        {x:3340,y:460},
+      ]},
+    ],
+    darkness:[
+      // Lower path darkness chase (gentle)
+      {startX:2000,speed:0.6,height:1100},
+    ],
+    spikes:[{x:460,y:1030,w:80},{x:1060,y:1030,w:60}],
+    checkpoints:[{x:3600,y:780},{x:4800,y:380}],
+    shards:[{x:3340,y:420,id:58}],
   },
   {
     name:'Врата',story:'Финал. Всё что было — ведёт сюда. Забвение дышит в спину. Беги. Прыгай. Помни.',
-    width:5500,height:1200,spawn:{x:80,y:900},exit:{x:5300,y:240,w:40,h:80},
+    width:5500,height:1200,spawn:{x:80,y:900},exit:{x:5300,y:200,w:40,h:80},
+    shadowDouble:true,
+    flashlight:true,
+    darkness:[{startX:-100,speed:1.5,height:1200}],
     platforms:[
-      {x:0,y:1050,w:400,h:40},{x:600,y:1050,w:300,h:40},{x:1100,y:1050,w:300,h:40},{x:1600,y:1050,w:300,h:40},{x:2100,y:1050,w:300,h:40},{x:2600,y:1050,w:300,h:40},{x:3100,y:1050,w:300,h:40},{x:3600,y:1050,w:300,h:40},{x:4100,y:1050,w:300,h:40},{x:4600,y:1050,w:300,h:40},{x:5100,y:1050,w:400,h:40},
-      {x:200,y:920,w:80,h:16},{x:450,y:800,w:80,h:16},{x:700,y:890,w:80,h:16},
-      {x:950,y:700,w:80,h:16},{x:1150,y:830,w:80,h:16},
-      {x:1400,y:620,w:80,h:16},{x:1700,y:500,w:80,h:16},
-      {x:2000,y:580,w:80,h:16},{x:2300,y:460,w:80,h:16},
-      {x:2650,y:540,w:80,h:16},{x:2950,y:400,w:80,h:16},
-      {x:3300,y:480,w:80,h:16},{x:3600,y:360,w:80,h:16},
-      {x:4000,y:400,w:80,h:16},{x:4300,y:300,w:80,h:16},
-      {x:4700,y:340,w:80,h:16},{x:5000,y:280,w:80,h:16},
-      {x:5300,y:240,w:120,h:16},
+      // Ground sections with gaps
+      {x:0,y:1050,w:400,h:40},{x:600,y:1050,w:300,h:40},{x:1100,y:1050,w:300,h:40},
+      // Pressure plate section
+      {x:1600,y:1050,w:600,h:40},
+      // Pulse + ghost gap
+      {x:2600,y:1050,w:300,h:40},
+      // Laser + fragment section
+      {x:3200,y:1050,w:400,h:40},{x:3800,y:1050,w:400,h:40},
+      // Final climb
+      {x:4400,y:1050,w:400,h:40},{x:5000,y:1050,w:500,h:40},
+      // Approach
+      {x:200,y:920,w:80,h:16},{x:400,y:800,w:80,h:16},
+      // After pressure plate
+      {x:1700,y:800,w:80,h:16},{x:1950,y:700,w:80,h:16},
+      // Upper route — pulse platforms fill gaps
+      {x:2200,y:750,w:80,h:16},
+      // Ghost platforms section
+      {x:2700,y:680,w:80,h:16},{x:2950,y:580,w:80,h:16},
+      // Laser dodge section
+      {x:3300,y:600,w:80,h:16},{x:3600,y:500,w:80,h:16},
+      // Fragment collection path
+      {x:1200,y:850,w:80,h:16},{x:3900,y:420,w:80,h:16},
+      // Final ascent
+      {x:4200,y:500,w:80,h:16},{x:4500,y:420,w:80,h:16},
+      {x:4800,y:340,w:80,h:16},{x:5100,y:260,w:80,h:16},
+      {x:5300,y:200,w:120,h:16},
     ],
-    spikes:[{x:460,y:1030,w:80},{x:960,y:1030,w:60},{x:1460,y:1030,w:60},{x:1960,y:1030,w:60},{x:2460,y:1030,w:60},{x:2960,y:1030,w:40},{x:3460,y:1030,w:40},{x:3960,y:1030,w:40},{x:4460,y:1030,w:40},{x:4960,y:1030,w:40}],
-    checkpoints:[{x:1600,y:490},{x:2600,y:380},{x:4100,y:380},{x:4700,y:320}],
-    shards:[{x:3640,y:320,id:59}],
+    pressurePlates:[
+      {x:1800,y:1040,w:60,h:10,door:{x:2200,y:900,w:16,h:150}},
+      {x:1900,y:1040,w:60,h:10,door:{x:2200,y:700,w:16,h:200}},
+    ],
+    pulsePlatforms:[
+      {x:900,y:900,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0,group:0},
+      {x:1100,y:800,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5,group:0},
+      {x:1300,y:700,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0,group:0},
+      {x:2400,y:700,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0,group:1},
+      {x:2600,y:600,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5,group:1},
+    ],
+    ghostPlatforms:[
+      {x:2800,y:650,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:0},
+      {x:3050,y:550,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:0.7},
+      {x:3300,y:480,w:100,h:16,visibleTime:3.5,hiddenTime:2,phaseOffset:1.4},
+    ],
+    lasers:[
+      {x:3500,y:900,w:300,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0},
+      {x:3900,y:800,w:280,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0.8},
+      {x:4300,y:700,w:250,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0.5},
+    ],
+    doorFragments:[
+      {doorX:4400,doorY:500,doorW:40,doorH:550,fragments:[
+        {x:1240,y:660},
+        {x:3640,y:460},
+      ]},
+    ],
+    spikes:[{x:460,y:1030,w:80},{x:960,y:1030,w:60},{x:1460,y:1030,w:60}],
+    checkpoints:[{x:1600,y:790},{x:3200,y:580},{x:4400,y:400}],
+    shards:[{x:5140,y:220,id:59}],
   }
 ];
 
@@ -4848,7 +5115,7 @@ if(isWallSlide){
 var GROUND_GRACE=0.06;var _groundGraceTimer=0;function setupPlayerSensors(){playerSensorGround._collidingSet=new Set();playerSensorCeiling._collidingSet=new Set();playerSensorLeft._collidingSet=new Set();playerSensorRight._collidingSet=new Set();playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;_groundGraceTimer=0;MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,true);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,false)}}
-function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='pressurePlateZone'&&other.label!=='stabilizerZone'&&other.label!=='laserZone'&&other.label!=='fragmentZone'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
+function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='pressurePlateZone'&&other.label!=='stabilizerZone'&&other.label!=='laserZone'&&other.label!=='fragmentZone'&&other.label!=='choiceRemember'&&other.label!=='choiceForget'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
 function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;
   // Phantom collision guard: verify distance to moving death zones
   // Enemies and pendulums use setPosition() which can cause stale collision events
@@ -4877,6 +5144,29 @@ function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZ
   }
   // Laser death
   if((a.label==='laserZone'&&b.label==='player')||(b.label==='laserZone'&&a.label==='player')){killPlayer('laser')}
+  // Choice zones (Act XII — remember/forget tracking)
+  if(!state._choiceMadeThisLevel){
+    if((a.label==='choiceRemember'&&b.label==='player')||(b.label==='choiceRemember'&&a.label==='player')){
+      state._choiceMadeThisLevel=true;
+      state.choices.remember=(state.choices.remember||0)+1;
+      if(!progress.choices)progress.choices={forget:0,remember:0};
+      progress.choices.remember=state.choices.remember;
+      saveProgress();
+      state.flashColor=0xdaa520;state.flashAlpha=0.12;state.flashTimer=0.25;
+      showOverlayMsg('помнить','верхний путь — трудный, но настоящий');
+      tgHaptic('medium');
+    }
+    if((a.label==='choiceForget'&&b.label==='player')||(b.label==='choiceForget'&&a.label==='player')){
+      state._choiceMadeThisLevel=true;
+      state.choices.forget=(state.choices.forget||0)+1;
+      if(!progress.choices)progress.choices={forget:0,remember:0};
+      progress.choices.forget=state.choices.forget;
+      saveProgress();
+      state.flashColor=0x6a2a8a;state.flashAlpha=0.12;state.flashTimer=0.25;
+      showOverlayMsg('забыть','нижний путь — лёгкий, но пустой');
+      tgHaptic('medium');
+    }
+  }
   // Fragment collection
   if((a.label==='fragmentZone'&&b.label==='player')||(b.label==='fragmentZone'&&a.label==='player')){
     var frBody=(a.label==='fragmentZone')?a:b;
@@ -6978,6 +7268,27 @@ function loadLevel(n){
   createPlayer(lvl.spawn.x,lvl.spawn.y);
   // Shadow Double
   if(lvl.shadowDouble)createShadowDouble(lvl.spawn.x,lvl.spawn.y);
+  // Choice Point Sensors (Act XII — Выбор)
+  state._choiceMadeThisLevel=false;
+  if(lvl.choicePoint){
+    var cp=lvl.choicePoint;
+    // "Remember" sensor — upper path (higher = harder = remember)
+    var rememberBody=MBodies.rectangle(cp.x,cp.upperY,80,60,{isStatic:true,isSensor:true,label:'choiceRemember'});
+    MWorld.add(world,rememberBody);
+    var rememberSpr=new PIXI.Graphics();
+    rememberSpr.circle(40,30,8);rememberSpr.fill({color:0xdaa520,alpha:0.6});
+    rememberSpr.circle(40,30,14);rememberSpr.fill({color:0xdaa520,alpha:0.15});
+    rememberSpr.x=cp.x-40;rememberSpr.y=cp.upperY-30;
+    gameContainer.addChild(rememberSpr);levelSprites.push(rememberSpr);
+    // "Forget" sensor — lower path (lower = easier = forget)
+    var forgetBody=MBodies.rectangle(cp.x,cp.lowerY,80,60,{isStatic:true,isSensor:true,label:'choiceForget'});
+    MWorld.add(world,forgetBody);
+    var forgetSpr=new PIXI.Graphics();
+    forgetSpr.circle(40,30,8);forgetSpr.fill({color:0x6a2a8a,alpha:0.6});
+    forgetSpr.circle(40,30,14);forgetSpr.fill({color:0x6a2a8a,alpha:0.15});
+    forgetSpr.x=cp.x-40;forgetSpr.y=cp.lowerY-30;
+    gameContainer.addChild(forgetSpr);levelSprites.push(forgetSpr);
+  }
 }
 function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelPulsePlatforms=[];levelGhostPlatforms=[];levelStabilizers=[];levelResonancePlatforms=[];resonanceGfx=null;levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelLasers=[];levelDoorFragments=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
@@ -7016,6 +7327,7 @@ var tutorial={
     {id:'stabilizer',level:41,trigger:'time',delay:3,text:'активируй кристалл-стабилизатор — он зафиксирует призрачные платформы!'},
     {id:'laser',level:45,trigger:'time',delay:2,text:'красные лучи — смерть! Но они пульсируют. Жди когда выключатся и беги!'},
     {id:'fragments',level:47,trigger:'time',delay:2,text:'собери все фрагменты-кристаллы чтобы открыть дверь!'},
+    {id:'choice',level:55,trigger:'time',delay:3,text:'два пути: <span style="color:#daa520">помнить</span> (выше) или <span style="color:#6a2a8a">забыть</span> (ниже). Выбор за тобой.'},
   ],
   timer:0,activeTip:null
 };
@@ -8514,8 +8826,34 @@ function showWinScreen(elapsed){
   for(var i=0;i<3;i++){starsHtml+='<span class="win-star" id="win-star-'+i+'">★</span>'}
   document.getElementById('win-stars').innerHTML=starsHtml;
   document.getElementById('win-sub').textContent=stars===3?'безупречно':stars===2?'неплохо':'ты выбрался из пустоты';
+  // Conditional ending text for Level 60 (index 59 — final level)
+  var endingEl=document.getElementById('win-ending');
+  if(endingEl){
+    if(state.level===LEVELS.length-1){
+      endingEl.style.display='block';
+      var c=state.choices||progress.choices||{forget:0,remember:0};
+      var forget=c.forget||0;var remember=c.remember||0;
+      if(forget>remember){
+        endingEl.textContent='Он забыл. Не всё — но достаточно. Боль ушла. Но и он тоже. Свободный от груза. Но пустой.';
+        endingEl.style.color='#6a2a8a';
+      }else{
+        endingEl.textContent='Он вспомнил. Всё. Каждую потерю. Каждую боль. Вышел из Пустоты с шрамами. Но — целый.';
+        endingEl.style.color='#daa520';
+      }
+    }else{
+      endingEl.style.display='none';endingEl.textContent='';
+    }
+  }
   var isLast=state.level>=LEVELS.length-1;
   document.getElementById('btn-next').textContent=isLast?'меню':'далее';
+  // Change win title for the final level
+  var winTitleEl=document.querySelector('.win-title');
+  if(winTitleEl&&isLast){
+    var c=state.choices||progress.choices||{forget:0,remember:0};
+    winTitleEl.textContent=(c.forget||0)>(c.remember||0)?'ОСВОБОЖДЁН':'СПАСЁН';
+  }else if(winTitleEl){
+    winTitleEl.textContent='СПАСЁН';
+  }
   showScreen('win');
   for(var j=0;j<3;j++){
     (function(idx){
@@ -9135,7 +9473,7 @@ function bindUI(){
   // Volume sliders
   document.getElementById('sfx-vol-slider').addEventListener('input',function(){settings.sfxVolume=this.value/100;if(sfxGain&&!soundMuted)sfxGain.gain.value=settings.sfxVolume*0.7;document.getElementById('sfx-vol-label').textContent=this.value+'%';saveSettings()});
   document.getElementById('music-vol-slider').addEventListener('input',function(){settings.musicVolume=this.value/100;if(musicGain&&!musicMuted)musicGain.gain.value=settings.musicVolume*0.7;document.getElementById('music-vol-label').textContent=this.value+'%';saveSettings()});
-  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem(_progressKey());if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}var resetId=getCurrentTgUserId();progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false,_tgUserId:resetId};state.totalDeaths=0;saveProgress();updateMenuStats();showScreen('menu')}});
+  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem(_progressKey());if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}var resetId=getCurrentTgUserId();progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false,_tgUserId:resetId,choices:{forget:0,remember:0}};state.totalDeaths=0;state.choices={forget:0,remember:0};saveProgress();updateMenuStats();showScreen('menu')}});
   // Global menu click sound for all .btn and .menu-icon-btn elements
   var allBtns=document.querySelectorAll('.btn,.menu-icon-btn,.menu-challenge,.tb');
   for(var bi=0;bi<allBtns.length;bi++){(function(btn){btn.addEventListener('click',function(){sfxMenuClick()})})(allBtns[bi])}
