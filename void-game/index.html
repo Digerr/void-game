@@ -753,6 +753,10 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Подойди к рычагу и нажми кнопку взаимодействия (✋), чтобы открыть привязанную дверь. Рычаг можно переключать — повторное нажатие закроет дверь. Двери блокируют обязательный путь — без рычага не пройти! Подсказка: иногда нужно закрыть дверь за собой, чтобы пройти дальше.</div>
       </div>
       <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">давильные плиты</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Сиреневые кристаллы на полу — давильные плиты. Встань на плиту — привязанная дверь откроется. Слезешь — закроется! В отличие от рычагов, плиты работают только пока ты стоишь на них. Планируй маршрут: иногда нужно найти другой путь или пробежать быстро.</div>
+      </div>
+      <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">звёзды</div>
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">3 звезды = 0 смертей, 2 звезды = 1-3 смерти, 1 звезда = 4+ смертей. Собирай звёзды, чтобы доказать своё мастерство!</div>
       </div>
@@ -3783,82 +3787,130 @@ var LEVELS=[
   // ═══ Act VII — Отражения (levels 30-34) ═══
   {
     name:'Зеркало',story:'Он оглянулся — и увидел себя. Не отражение — именно себя. Того, кто остался.',
-    width:3600,height:900,spawn:{x:80,y:600},exit:{x:3400,y:430,w:40,h:80},
+    width:3600,height:900,spawn:{x:80,y:600},exit:{x:3400,y:420,w:40,h:80},
     platforms:[
-      {x:0,y:750,w:600,h:40},{x:800,y:750,w:400,h:40},{x:1400,y:750,w:400,h:40},{x:2000,y:750,w:400,h:40},{x:2600,y:750,w:400,h:40},{x:3200,y:750,w:400,h:40},
-      {x:300,y:620,w:100,h:16},{x:600,y:520,w:100,h:16},{x:900,y:600,w:80,h:16},
-      {x:1200,y:500,w:100,h:16},{x:1500,y:580,w:80,h:16},
-      {x:1900,y:520,w:100,h:16},{x:2200,y:440,w:80,h:16},
-      {x:2800,y:560,w:80,h:16},{x:3100,y:480,w:80,h:16},
-      {x:3400,y:430,w:120,h:16},
+      // Ground — symmetric layout around center
+      {x:0,y:750,w:400,h:40},{x:600,y:750,w:300,h:40},{x:1100,y:750,w:400,h:40},
+      {x:1700,y:750,w:200,h:40},// center gap
+      {x:2100,y:750,w:400,h:40},{x:2700,y:750,w:300,h:40},{x:3200,y:750,w:400,h:40},
+      // Symmetric floating platforms — left side
+      {x:150,y:620,w:80,h:16},{x:350,y:540,w:80,h:16},{x:550,y:460,w:80,h:16},
+      {x:800,y:580,w:100,h:16},{x:1050,y:500,w:80,h:16},
+      // Symmetric floating platforms — right side (mirrored)
+      {x:2800,y:620,w:80,h:16},{x:2600,y:540,w:80,h:16},{x:2400,y:460,w:80,h:16},
+      {x:2150,y:580,w:100,h:16},{x:1900,y:500,w:80,h:16},
+      // Center bridge
+      {x:1500,y:650,w:100,h:16},{x:2000,y:650,w:100,h:16},
+      // Exit platform
+      {x:3350,y:420,w:100,h:16},
     ],
-    spikes:[{x:680,y:730,w:80},{x:1860,y:730,w:60}],
-    checkpoints:[{x:1500,y:560}],
-    shards:[{x:1540,y:540,id:30}],
+    spikes:[{x:500,y:730,w:60},{x:1900,y:730,w:60},{x:2600,y:730,w:60}],
+    checkpoints:[{x:1100,y:480}],
+    shards:[{x:590,y:420,id:30}],
   },
   {
     name:'След',story:'Тень повторяет каждый шаг. Но на три секунды позже. Планируй за двоих.',
-    width:3800,height:950,spawn:{x:80,y:650},exit:{x:3600,y:400,w:40,h:80},
+    width:4000,height:950,spawn:{x:80,y:650},exit:{x:3800,y:380,w:40,h:80},
     platforms:[
-      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},{x:1300,y:800,w:400,h:40},{x:1900,y:800,w:400,h:40},{x:2500,y:800,w:400,h:40},{x:3100,y:800,w:400,h:40},{x:3500,y:800,w:300,h:40},
-      {x:250,y:680,w:100,h:16},{x:500,y:580,w:80,h:16},{x:800,y:640,w:100,h:16},
+      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},{x:1300,y:800,w:500,h:40},
+      {x:2000,y:800,w:400,h:40},{x:2600,y:800,w:400,h:40},{x:3200,y:800,w:400,h:40},{x:3700,y:800,w:300,h:40},
+      // Floating platforms
+      {x:250,y:680,w:80,h:16},{x:500,y:580,w:100,h:16},{x:800,y:640,w:80,h:16},
       {x:1100,y:540,w:100,h:16},{x:1400,y:620,w:80,h:16},
-      {x:1800,y:560,w:100,h:16},{x:2100,y:480,w:80,h:16},
-      {x:2700,y:600,w:80,h:16},{x:3000,y:520,w:80,h:16},
-      {x:3400,y:450,w:80,h:16},{x:3600,y:400,w:120,h:16},
+      {x:1750,y:540,w:100,h:16},{x:2100,y:460,w:80,h:16},
+      {x:2700,y:580,w:80,h:16},{x:3000,y:500,w:80,h:16},{x:3400,y:440,w:80,h:16},
+      // Exit platform
+      {x:3750,y:380,w:100,h:16},
     ],
-    spikes:[{x:560,y:780,w:60},{x:1200,y:780,w:60},{x:2400,y:780,w:60}],
-    checkpoints:[{x:1900,y:540}],
-    shards:[{x:2140,y:440,id:31}],
+    spikes:[{x:560,y:780,w:60},{x:1200,y:780,w:60},{x:2440,y:780,w:60}],
+    levers:[{x:1400,y:620,doorX:2000,doorW:16,doorH:100,doorY:700,id:'lever1'}],
+    enemies:[{x:2700,y:800,range:200,speed:0.8}],
+    checkpoints:[{x:1300,y:500},{x:2700,y:540}],
+    shards:[{x:2140,y:420,id:31}],
   },
   {
     name:'Давление',story:'Кристаллы на полу — не украшение. Встань на них — и путь откроется. Слезешь — закроется.',
-    width:4000,height:950,spawn:{x:80,y:650},exit:{x:3800,y:380,w:40,h:80},
+    width:4200,height:950,spawn:{x:80,y:650},exit:{x:4000,y:380,w:40,h:80},
     platforms:[
-      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},{x:1300,y:800,w:500,h:40},{x:2000,y:800,w:400,h:40},{x:2600,y:800,w:400,h:40},{x:3200,y:800,w:400,h:40},{x:3700,y:800,w:300,h:40},
-      {x:300,y:680,w:100,h:16},{x:600,y:560,w:100,h:16},
-      {x:900,y:640,w:80,h:16},{x:1200,y:540,w:80,h:16},
-      {x:1600,y:600,w:100,h:16},{x:1900,y:500,w:80,h:16},
-      {x:2300,y:540,w:100,h:16},{x:2600,y:440,w:80,h:16},
-      {x:3000,y:500,w:80,h:16},{x:3400,y:420,w:80,h:16},
-      {x:3800,y:380,w:120,h:16},
+      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},
+      // Long platform with plate + door — door blocks path ON the platform
+      {x:1300,y:800,w:700,h:40},
+      {x:2200,y:800,w:400,h:40},{x:2800,y:800,w:400,h:40},{x:3400,y:800,w:400,h:40},{x:3900,y:800,w:300,h:40},
+      // Floating platforms before the door
+      {x:250,y:680,w:80,h:16},{x:500,y:580,w:80,h:16},{x:800,y:640,w:100,h:16},
+      {x:1100,y:540,w:80,h:16},
+      // Floating platforms after the door
+      {x:2500,y:600,w:100,h:16},{x:2800,y:520,w:80,h:16},
+      {x:3100,y:580,w:80,h:16},{x:3400,y:480,w:80,h:16},
+      {x:3700,y:440,w:80,h:16},
+      // Exit platform
+      {x:3950,y:380,w:100,h:16},
     ],
-    spikes:[{x:560,y:780,w:80},{x:1240,y:780,w:40},{x:2440,y:780,w:60},{x:3100,y:780,w:40}],
-    checkpoints:[{x:2000,y:480},{x:3000,y:480}],
-    shards:[{x:2640,y:400,id:32}],
+    spikes:[{x:560,y:780,w:80},{x:1180,y:780,w:60},{x:2640,y:780,w:40}],
+    pressurePlates:[
+      // Plate before the door on same platform — door is a wall on the ground
+      {x:1500,y:790,w:60,h:10,door:{x:1800,y:700,w:16,h:100}},
+    ],
+    checkpoints:[{x:1300,y:500},{x:2800,y:540}],
+    shards:[{x:3440,y:440,id:32}],
   },
   {
     name:'Тень',story:'Она идёт за тобой. Не догоняет — повторяет. Используй это.',
-    width:4200,height:1000,spawn:{x:80,y:700},exit:{x:4000,y:380,w:40,h:80},
+    width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:360,w:40,h:80},
     platforms:[
-      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3100,y:850,w:400,h:40},{x:3700,y:850,w:500,h:40},
-      {x:250,y:720,w:100,h:16},{x:550,y:620,w:80,h:16},{x:800,y:700,w:100,h:16},
-      {x:1100,y:600,w:100,h:16},{x:1400,y:680,w:80,h:16},
-      {x:1700,y:580,w:100,h:16},{x:2000,y:500,w:80,h:16},
+      {x:0,y:850,w:400,h:40},{x:600,y:850,w:400,h:40},{x:1200,y:850,w:400,h:40},
+      // Long platform — plate at the left, door blocking path to the right
+      {x:1800,y:850,w:800,h:40},
+      // After the door section
+      {x:2800,y:850,w:300,h:40},{x:3300,y:850,w:400,h:40},{x:3900,y:850,w:600,h:40},
+      // Floating platforms
+      {x:200,y:720,w:80,h:16},{x:450,y:620,w:80,h:16},{x:700,y:700,w:100,h:16},
+      {x:1000,y:600,w:80,h:16},{x:1300,y:680,w:80,h:16},
+      // Upper route — bypass after the door
       {x:2400,y:600,w:80,h:16},{x:2700,y:520,w:80,h:16},
-      {x:3300,y:560,w:80,h:16},{x:3600,y:460,w:80,h:16},
-      {x:3900,y:400,w:80,h:16},{x:4000,y:380,w:120,h:16},
+      {x:3050,y:580,w:80,h:16},{x:3400,y:500,w:80,h:16},
+      {x:3700,y:460,w:80,h:16},
+      // Exit platform
+      {x:4250,y:360,w:100,h:16},
     ],
-    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3060,y:830,w:40}],
-    checkpoints:[{x:1900,y:490},{x:3300,y:540}],
-    shards:[{x:3640,y:420,id:33}],
+    spikes:[{x:460,y:830,w:60},{x:1060,y:830,w:60},{x:2800,y:830,w:60},{x:3200,y:830,w:40}],
+    pressurePlates:[
+      // Plate on the left, door further right on same platform — must dash through
+      {x:1900,y:840,w:60,h:10,door:{x:2400,y:750,w:16,h:100}},
+    ],
+    checkpoints:[{x:1200,y:580},{x:2800,y:500}],
+    shards:[{x:3740,y:420,id:33}],
   },
   {
     name:'Слияние',story:'Два мира — один путь. Ты и тень должны работать вместе.',
-    width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:360,w:40,h:80},
+    width:4800,height:1000,spawn:{x:80,y:700},exit:{x:4600,y:340,w:40,h:80},
     platforms:[
-      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:500,h:40},{x:2600,y:850,w:400,h:40},{x:3200,y:850,w:400,h:40},{x:3800,y:850,w:400,h:40},{x:4200,y:850,w:300,h:40},
-      {x:300,y:720,w:100,h:16},{x:600,y:600,w:80,h:16},{x:850,y:700,w:100,h:16},
-      {x:1100,y:580,w:100,h:16},{x:1400,y:680,w:80,h:16},
-      {x:1800,y:560,w:100,h:16},{x:2100,y:460,w:80,h:16},
-      {x:2500,y:540,w:100,h:16},{x:2800,y:440,w:80,h:16},
-      {x:3200,y:520,w:80,h:16},{x:3500,y:420,w:80,h:16},
-      {x:3900,y:480,w:80,h:16},{x:4100,y:400,w:80,h:16},
-      {x:4300,y:360,w:120,h:16},
+      {x:0,y:850,w:400,h:40},{x:600,y:850,w:400,h:40},
+      // Long platform with lever door blocking path
+      {x:1200,y:850,w:800,h:40},
+      // Pressure plate platform with plate door blocking path
+      {x:2200,y:850,w:800,h:40},
+      // After both doors
+      {x:3200,y:850,w:400,h:40},{x:3800,y:850,w:400,h:40},{x:4300,y:850,w:500,h:40},
+      // Floating platforms — first section
+      {x:200,y:720,w:80,h:16},{x:450,y:620,w:80,h:16},{x:700,y:700,w:100,h:16},
+      // Lever on upper platform
+      {x:1000,y:600,w:80,h:16},{x:1250,y:520,w:80,h:16},
+      // Upper platforms after lever
+      {x:1600,y:620,w:80,h:16},{x:1900,y:540,w:80,h:16},
+      // After doors — upper route
+      {x:3400,y:600,w:80,h:16},{x:3700,y:520,w:80,h:16},
+      {x:4000,y:460,w:80,h:16},{x:4300,y:400,w:80,h:16},
+      // Exit platform
+      {x:4550,y:340,w:100,h:16},
     ],
-    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3070,y:830,w:60},{x:3760,y:830,w:40}],
-    checkpoints:[{x:1900,y:460},{x:3200,y:500}],
-    shards:[{x:2840,y:400,id:34}],
+    spikes:[{x:460,y:830,w:60},{x:1060,y:830,w:60},{x:3100,y:830,w:40},{x:3660,y:830,w:40}],
+    levers:[{x:1250,y:520,doorX:1800,doorW:16,doorH:120,doorY:730,id:'lever1'}],
+    pressurePlates:[
+      {x:2500,y:840,w:60,h:10,door:{x:2800,y:730,w:16,h:120}},
+    ],
+    checkpoints:[{x:1200,y:500},{x:3200,y:560}],
+    shards:[{x:4040,y:420,id:34}],
   },
   // ═══ Act VIII — Эхо (levels 35-39) ═══
   {
@@ -4553,7 +4605,7 @@ if(isWallSlide){
 var GROUND_GRACE=0.06;var _groundGraceTimer=0;function setupPlayerSensors(){playerSensorGround._collidingSet=new Set();playerSensorCeiling._collidingSet=new Set();playerSensorLeft._collidingSet=new Set();playerSensorRight._collidingSet=new Set();playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;_groundGraceTimer=0;MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,true);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,false)}}
-function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
+function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='pressurePlateZone'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
 function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;
   // Phantom collision guard: verify distance to moving death zones
   // Enemies and pendulums use setPosition() which can cause stale collision events
@@ -5037,6 +5089,7 @@ function updateTimedSpikePlatforms(dt){
 // ═══ LEVERS & DOORS ═══
 var levelLevers=[];
 var levelDoors=[];
+var levelPressurePlates=[];
 var levelSprings=[];
 var levelIce=[];
 var levelPortals=[];
@@ -5106,6 +5159,110 @@ function activateLever(lv){
     spawnParticles(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,8,0x5a5a72,{speed:1.5,life:0.5,size:2,gravity:0.3});
     MWorld.remove(world,lv.doorBody);
     lv.doorSprite.visible=false;
+  }
+}
+
+// ═══ PRESSURE PLATES ═══
+function createPressurePlate(data){
+  // Plate body — a regular static platform so player can stand on it
+  var plateBody=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'platform',friction:0.05,frictionStatic:0.001});
+  MWorld.add(world,plateBody);
+  // Sensor on top to detect player standing on plate
+  var sensorBody=MBodies.rectangle(data.x+data.w/2,data.y-8,data.w,20,{isStatic:true,isSensor:true,label:'pressurePlateZone'});
+  MWorld.add(world,sensorBody);
+  // Visual: flat stone with glowing crystal
+  var spr=new PIXI.Container();gameContainer.addChild(spr);
+  var g=new PIXI.Graphics();spr.addChild(g);
+  // Create door for this plate
+  var doorData=data.door;
+  var doorBody=MBodies.rectangle(doorData.x+doorData.w/2,doorData.y+doorData.h/2,doorData.w,doorData.h,{isStatic:true,label:'door'});
+  MWorld.add(world,doorBody);
+  var doorSpr=new PIXI.Graphics();
+  doorSpr.rect(0,0,doorData.w,doorData.h);doorSpr.fill(0x2a2a3e);
+  doorSpr.rect(0,0,3,doorData.h);doorSpr.fill(0x3e3e52);
+  doorSpr.rect(doorData.w-3,0,3,doorData.h);doorSpr.fill(0x3e3e52);
+  if(doorData.w>40){var ribs=Math.floor(doorData.w/50);for(var ri=1;ri<=ribs;ri++){var rx=Math.floor(ri*doorData.w/(ribs+1));if(rx>3&&rx<doorData.w-3){doorSpr.rect(rx-1,0,2,doorData.h);doorSpr.fill(0x3a3a50)}}}
+  var bands=Math.floor(doorData.h/60);for(var bi=1;bi<=bands;bi++){var by=bi*60;if(by<doorData.h){doorSpr.rect(0,by-1,doorData.w,2);doorSpr.fill(0x3e3e52)}}
+  doorSpr.rect(0,0,doorData.w,3);doorSpr.fill(0x4e4e62);
+  doorSpr.x=doorData.x;doorSpr.y=doorData.y;gameContainer.addChild(doorSpr);
+  // Connection line from plate to door
+  var lineSpr=new PIXI.Graphics();gameContainer.addChild(lineSpr);
+  levelPressurePlates.push({
+    body:plateBody,sensor:sensorBody,sprite:spr,_gfx:g,_lineGfx:lineSpr,
+    x:data.x,y:data.y,w:data.w,h:data.h,
+    doorBody:doorBody,doorSprite:doorSpr,
+    doorX:doorData.x,doorY:doorData.y,doorW:doorData.w,doorH:doorData.h,
+    active:false,playerOn:false
+  });
+}
+function updatePressurePlates(dt){
+  for(var i=0;i<levelPressurePlates.length;i++){
+    var pp=levelPressurePlates[i];
+    if(!player.body){pp.playerOn=false}
+    else{
+      // Check if player is standing on the plate (within x range and close y)
+      var px=player.body.position.x;
+      var py=player.body.position.y;
+      var ppCx=pp.x+pp.w/2;
+      var ppCy=pp.y+pp.h/2;
+      var inX=px>pp.x-8&&px<pp.x+pp.w+8;
+      var inY=Math.abs(py+PLAYER_H/2-pp.y)<24;
+      pp.playerOn=inX&&inY&&player.onGround;
+    }
+    // Activate/deactivate
+    if(pp.playerOn&&!pp.active){
+      pp.active=true;
+      // Open door
+      MWorld.remove(world,pp.doorBody);
+      pp.doorSprite.visible=false;
+      spawnParticles(pp.doorX+pp.doorW/2,pp.doorY+pp.doorH/2,8,0x7a5aaa,{speed:1.5,life:0.5,size:2,gravity:0.3});
+      tgHaptic('light');sfxLever();
+    }else if(!pp.playerOn&&pp.active){
+      pp.active=false;
+      // Close door
+      pp.doorBody=MBodies.rectangle(pp.doorX+pp.doorW/2,pp.doorY+pp.doorH/2,pp.doorW,pp.doorH,{isStatic:true,label:'door'});
+      MWorld.add(world,pp.doorBody);
+      pp.doorSprite.visible=true;
+      spawnParticles(pp.doorX+pp.doorW/2,pp.doorY+pp.doorH/2,6,0x4a3a6a,{speed:1,life:0.4,size:2,gravity:0.3});
+    }
+    // Visual
+    var g=pp._gfx;g.clear();
+    var yOff=pp.active?2:0;
+    // Stone base (slightly darker than regular platforms)
+    g.rect(0,yOff,pp.w,pp.h);g.fill(0x2a2a42);
+    g.rect(0,yOff,pp.w,2);g.fill(0x3a3a52);
+    g.rect(0,yOff+pp.h-1,pp.w,1);g.fill(0x1a1a32);
+    // Glowing crystal in center
+    var cx=pp.w/2;var cy=yOff+pp.h/2-1;
+    var glowAlpha=pp.active?0.7:0.25+Math.sin(player.animTime*2)*0.1;
+    var glowR=pp.active?14:10;
+    g.circle(cx,cy,glowR);g.fill({color:0x8a6aba,alpha:glowAlpha*0.3});
+    g.circle(cx,cy,glowR*0.6);g.fill({color:0xa87ada,alpha:glowAlpha*0.5});
+    // Crystal shape (diamond)
+    g.moveTo(cx,cy-5);g.lineTo(cx+3,cy);g.lineTo(cx,cy+4);g.lineTo(cx-3,cy);g.closePath();
+    g.fill({color:pp.active?0xc0a0e8:0x8a6aba,alpha:pp.active?1:0.7});
+    // Crystal highlight
+    g.moveTo(cx-1,cy-3);g.lineTo(cx+1,cy-1);g.lineTo(cx,cy+1);g.closePath();
+    g.fill({color:0xd8c0f0,alpha:pp.active?0.6:0.3});
+    pp.sprite.x=pp.x;pp.sprite.y=pp.y;
+    // Connection line (dotted, subtle) from plate center to door center
+    var lg=pp._lineGfx;lg.clear();
+    var fromX=pp.x+pp.w/2;var fromY=pp.y;
+    var toX=pp.doorX+pp.doorW/2;var toY=pp.doorY+pp.doorH;
+    var dx=toX-fromX;var dy=toY-fromY;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist>0){
+      var lineAlpha=pp.active?0.2:0.08;
+      var segLen=12;var numSeg=Math.floor(dist/segLen);
+      for(var si=0;si<numSeg;si++){
+        if(si%2===0){
+          var t1=si/numSeg;var t2=Math.min((si+1)/numSeg,1);
+          lg.moveTo(fromX+dx*t1,fromY+dy*t1);
+          lg.lineTo(fromX+dx*t2,fromY+dy*t2);
+          lg.stroke({width:1,color:0x8a6aba,alpha:lineAlpha});
+        }
+      }
+    }
   }
 }
 
@@ -5811,6 +5968,8 @@ function loadLevel(n){
   levelTimedSpikePlatforms=[];if(lvl.timedSpikePlatforms)for(var i=0;i<lvl.timedSpikePlatforms.length;i++)createTimedSpikePlatform(lvl.timedSpikePlatforms[i]);
   // Levers & doors
   levelLevers=[];levelDoors=[];if(lvl.levers)for(var i=0;i<lvl.levers.length;i++)createLever(lvl.levers[i]);
+  // Pressure plates
+  levelPressurePlates=[];if(lvl.pressurePlates)for(var i=0;i<lvl.pressurePlates.length;i++)createPressurePlate(lvl.pressurePlates[i]);
   // Enemies
   levelEnemies=[];if(lvl.enemies)for(var i=0;i<lvl.enemies.length;i++)createEnemy(lvl.enemies[i]);
   // Pendulums
@@ -5844,7 +6003,7 @@ function loadLevel(n){
   MWorld.add(world,MBodies.rectangle(lvl.width/2,lvl.height+20,lvl.width+400,30,{isStatic:true,isSensor:true,label:'fallZone'}));
   createPlayer(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -5873,6 +6032,7 @@ var tutorial={
     {id:'darkness',level:15,trigger:'time',delay:2,text:'тьма наступает! Не останавливайся — беги!'},
     {id:'flashlight',level:15,trigger:'time',delay:0.5,text:'видимость ограничена — свети фонариком в направлении движения'},
     {id:'gravity',level:5,trigger:'time',delay:3,text:'анти-гравитация! Входи в зону и беги по потолку'},
+    {id:'pressure',level:32,trigger:'time',delay:2,text:'встань на кристалл — дверь откроется. Слезешь — закроется!'},
   ],
   timer:0,activeTip:null
 };
@@ -7867,7 +8027,7 @@ function gameLoop(timestamp){
   // Update positions of all setPosition-based bodies BEFORE MEngine.update
   // to prevent phantom collision detection with stale positions
   updateMovingPlatforms(dt);updateEnemies(dt);updatePendulums();
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite&&settings.quality!=='low'){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
