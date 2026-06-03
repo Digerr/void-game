@@ -584,6 +584,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <div class="made-by">made by SKUFI4</div>
       </div>
       <div style="display:flex;gap:8px">
+        <button class="menu-icon-btn" id="btn-invite" title="Пригласить друга">✉</button>
         <button class="menu-icon-btn" id="btn-lore" title="Лор">📜</button>
         <button class="menu-icon-btn" id="btn-faq" title="FAQ">?</button>
       </div>
@@ -9772,13 +9773,21 @@ function shareResult(){
   var starStr='';
   for(var i=0;i<3;i++)starStr+=i<stars?'★':'☆';
   var text='🌑 VOID — во тьму\n'+(state.level+1)+'. '+lvl.name+'\n'+starStr+'\nВремя: '+formatTime(performance.now()-state.levelStartTime)+' | Смерти: '+state.deaths+'\n\nСпустись во тьму → @voide_game_bot';
+  // Try Telegram shareMessage first (opens share dialog)
   if(tg){
-    try{tg.switchInlineQuery(text)}catch(e){}
-    try{navigator.clipboard.writeText(text)}catch(e2){}
-  }else{
-    try{navigator.clipboard.writeText(text)}catch(e){}
+    try{
+      // Use openTelegramLink with share url for better sharing experience
+      var shareUrl='https://t.me/share/url?url=https://void-game-ruddy.vercel.app/&text='+encodeURIComponent(text);
+      tg.openTelegramLink(shareUrl);
+      tgHaptic('light');
+      return;
+    }catch(e){}
+    try{tg.switchInlineQuery(text)}catch(e2){}
   }
-  tgHaptic('light');
+  // Fallback: copy to clipboard
+  try{navigator.clipboard.writeText(text);
+    showToast('скопировано!');tgHaptic('light');
+  }catch(e){}
 }
 function showRecords(){
   // Show overview, hide detail
