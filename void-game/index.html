@@ -4112,6 +4112,7 @@ var LEVELS=[
   {
     name:'Зеркало',story:'Он оглянулся — и увидел себя. Не отражение — именно себя. Того, кто остался.',
     width:3600,height:900,spawn:{x:80,y:600},exit:{x:3400,y:420,w:40,h:80},
+    shadowDouble:true,
     platforms:[
       // Ground — symmetric layout around center
       {x:0,y:750,w:400,h:40},{x:600,y:750,w:300,h:40},{x:1100,y:750,w:400,h:40},
@@ -4125,10 +4126,14 @@ var LEVELS=[
       {x:2150,y:580,w:100,h:16},{x:1900,y:500,w:80,h:16},
       // Center bridge
       {x:1500,y:650,w:100,h:16},{x:2000,y:650,w:100,h:16},
+      // Path to exit — bridging platforms
+      {x:3050,y:560,w:80,h:16},{x:3250,y:480,w:80,h:16},
       // Exit platform
       {x:3350,y:420,w:100,h:16},
     ],
-    spikes:[{x:500,y:730,w:60},{x:1900,y:730,w:60},{x:2600,y:730,w:60}],
+    spikes:[{x:500,y:730,w:60},{x:1500,y:730,w:60},{x:1900,y:730,w:60},{x:2600,y:730,w:60}],
+    enemies:[{x:1100,y:750,range:200,speed:0.8},{x:2700,y:750,range:150,speed:1.0}],
+    levers:[{x:1900,y:500,doorX:1700,doorW:16,doorH:100,doorY:650,id:'lever1'}],
     checkpoints:[{x:1100,y:480}],
     shards:[{x:590,y:420,id:30}],
   },
@@ -4155,6 +4160,7 @@ var LEVELS=[
   },
   {
     name:'Давление',story:'Кристаллы на полу — не украшение. Встань на них — и путь откроется. Слезешь — закроется.',
+    shadowDouble:true,
     width:4200,height:950,spawn:{x:80,y:650},exit:{x:4000,y:380,w:40,h:80},
     platforms:[
       {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},
@@ -4420,6 +4426,8 @@ var LEVELS=[
       {x:3000,y:480,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.4},
       {x:3200,y:440,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.2},
       {x:3450,y:420,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:2.0},
+      // Bridge to exit
+      {x:3700,y:400,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.6},
     ],
     checkpoints:[{x:1900,y:460}],
     shards:[{x:2840,y:480,id:40}],
@@ -4739,6 +4747,7 @@ var LEVELS=[
   },
   {
     name:'Комната',story:'Комната. Двери не туда. Окна не сюда. Воспоминание или желание?',
+    shadowDouble:true,
     width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:300,w:40,h:80},
     platforms:[
       {x:0,y:850,w:400,h:40},{x:600,y:850,w:400,h:40},
@@ -4949,6 +4958,7 @@ var LEVELS=[
   },
   {
     name:'Компромисс',story:'Не всё можно сохранить. Что выберешь — скорость или память? Лёгкость или правду?',
+    shadowDouble:true,
     width:5000,height:1100,spawn:{x:80,y:800},exit:{x:4800,y:280,w:40,h:80},
     choicePoint:{x:1600,upperY:450,lowerY:850},
     platforms:[
@@ -4966,6 +4976,8 @@ var LEVELS=[
       // Post-convergence — pressure plate puzzle
       {x:3200,y:750,w:800,h:40},
       {x:4200,y:750,w:300,h:40},{x:4600,y:750,w:400,h:40},
+      // Stepping stones from ground to upper route
+      {x:3850,y:640,w:80,h:16},{x:4000,y:520,w:80,h:16},
       // Upper route to exit
       {x:4100,y:500,w:80,h:16},{x:4400,y:400,w:80,h:16},
       {x:4700,y:340,w:80,h:16},
