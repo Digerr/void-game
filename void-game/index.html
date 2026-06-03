@@ -769,6 +769,14 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">На некоторых уровнях скрытые платформы появляются только когда ты рядом. Двигайся к ним — и они станут видимыми. Остановишься — исчезнут. Светящийся круг вокруг тебя показывает радиус резонанса.</div>
       </div>
       <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">призрачные платформы</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Янтарные платформы, которые мерцают и исчезают. Пока они видны — по ним можно пройти. Когда исчезают — провалишься. Перед исчезновением они начинают мерцать быстрее — это предупреждение!</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">стабилизаторы</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Золотые кристаллы, которые фиксируют призрачные платформы. Активируй стабилизатор — и все призрачные платформы рядом станут реальными на 10 секунд. Используй это время чтобы пробежать! Стабилизатор одноразовый.</div>
+      </div>
+      <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">звёзды</div>
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">3 звезды = 0 смертей, 2 звезды = 1-3 смерти, 1 звезда = 4+ смертей. Собирай звёзды, чтобы доказать своё мастерство!</div>
       </div>
@@ -887,7 +895,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.18.2-beta';
+var VOID_VERSION='0.18.4-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -4079,7 +4087,7 @@ var LEVELS=[
       {x:1600,y:560,w:80,h:16},
       {x:2400,y:520,w:80,h:16},
     ],
-    darkness:[{x:-100,y:0,w:200,h:1200,speed:40}],
+    darkness:[{startX:-100,speed:1.2,height:1200}],
     spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40},{x:3560,y:880,w:40}],
     checkpoints:[{x:1300,y:450},{x:2500,y:420},{x:3700,y:400}],
     shards:[{x:3940,y:380,id:39}],
@@ -4089,88 +4097,163 @@ var LEVELS=[
     name:'Мерцание',story:'Платформы теряют плотность. То видны, то нет. Но они всё ещё здесь. Наверное.',
     width:4200,height:1000,spawn:{x:80,y:700},exit:{x:4000,y:380,w:40,h:80},
     platforms:[
-      {x:0,y:850,w:500,h:40},{x:700,y:850,w:400,h:40},{x:1300,y:850,w:400,h:40},{x:1900,y:850,w:400,h:40},{x:2500,y:850,w:400,h:40},{x:3100,y:850,w:400,h:40},{x:3700,y:850,w:500,h:40},
-      {x:300,y:720,w:100,h:16},{x:550,y:600,w:80,h:16},{x:800,y:700,w:100,h:16},
-      {x:1100,y:580,w:100,h:16},{x:1400,y:680,w:80,h:16},
-      {x:1750,y:560,w:100,h:16},{x:2050,y:460,w:80,h:16},
-      {x:2500,y:540,w:80,h:16},{x:2800,y:440,w:80,h:16},
-      {x:3200,y:500,w:80,h:16},{x:3600,y:420,w:80,h:16},
+      {x:0,y:850,w:500,h:40},{x:1900,y:850,w:400,h:40},{x:3700,y:850,w:500,h:40},
       {x:4000,y:380,w:120,h:16},
     ],
-    spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60},{x:3070,y:830,w:40}],
-    checkpoints:[{x:1900,y:460},{x:3100,y:480}],
-    shards:[{x:2840,y:400,id:40}],
+    ghostPlatforms:[
+      // Bridge over first gap (x:500-1900) — slow forgiving cycle
+      {x:600,y:700,w:120,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0},
+      {x:800,y:640,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.8},
+      {x:1000,y:580,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.6},
+      {x:1200,y:620,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.4},
+      {x:1400,y:680,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.2},
+      {x:1600,y:720,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:2.0},
+      // Bridge over second gap (x:2300-3700)
+      {x:2400,y:680,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0},
+      {x:2600,y:600,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.8},
+      {x:2800,y:520,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.6},
+      {x:3000,y:480,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.4},
+      {x:3200,y:440,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:1.2},
+      {x:3450,y:420,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:2.0},
+    ],
+    checkpoints:[{x:1900,y:460}],
+    shards:[{x:2840,y:480,id:40}],
   },
   {
     name:'Стабильность',story:'Кристаллы-стабилизаторы — чьи-то последние воспоминания. Они держат мир. Но их мало.',
     width:4400,height:1050,spawn:{x:80,y:750},exit:{x:4200,y:360,w:40,h:80},
     platforms:[
-      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4100,y:900,w:300,h:40},
-      {x:250,y:770,w:100,h:16},{x:500,y:650,w:80,h:16},{x:800,y:730,w:80,h:16},
-      {x:1050,y:610,w:80,h:16},{x:1350,y:700,w:80,h:16},
-      {x:1700,y:580,w:80,h:16},{x:2000,y:480,w:80,h:16},
-      {x:2400,y:560,w:80,h:16},{x:2700,y:460,w:80,h:16},
-      {x:3100,y:540,w:80,h:16},{x:3400,y:440,w:80,h:16},
-      {x:3800,y:460,w:80,h:16},{x:4050,y:400,w:80,h:16},
+      {x:0,y:900,w:500,h:40},{x:1800,y:900,w:400,h:40},{x:4100,y:900,w:300,h:40},
       {x:4200,y:360,w:120,h:16},
     ],
-    spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40},{x:3560,y:880,w:40}],
-    checkpoints:[{x:1900,y:470},{x:3100,y:520}],
-    shards:[{x:3440,y:400,id:41}],
+    ghostPlatforms:[
+      // First section — must time these without stabilizer
+      {x:600,y:780,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:800,y:700,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.6},
+      {x:1000,y:640,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.2},
+      // Second section — stabilizer covers these (after x:1800)
+      {x:2100,y:760,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:2300,y:680,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5},
+      {x:2550,y:600,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0},
+      {x:2800,y:520,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.5},
+      {x:3100,y:460,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.3},
+      {x:3400,y:420,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.8},
+      {x:3700,y:400,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.3},
+    ],
+    stabilizers:[
+      {x:1900,y:860,radius:2200,duration:10},
+    ],
+    checkpoints:[{x:1800,y:470}],
+    shards:[{x:2840,y:480,id:41}],
   },
   {
     name:'Распад',story:'Мир рушится быстрее. Стабилизаторы тают. Беги — или растворись.',
     width:4600,height:1050,spawn:{x:80,y:750},exit:{x:4400,y:340,w:40,h:80},
     platforms:[
-      {x:0,y:900,w:500,h:40},{x:700,y:900,w:300,h:40},{x:1200,y:900,w:300,h:40},{x:1700,y:900,w:300,h:40},{x:2200,y:900,w:300,h:40},{x:2700,y:900,w:300,h:40},{x:3200,y:900,w:300,h:40},{x:3700,y:900,w:300,h:40},{x:4200,y:900,w:400,h:40},
-      {x:250,y:770,w:80,h:16},{x:500,y:650,w:80,h:16},{x:750,y:730,w:80,h:16},
-      {x:1000,y:600,w:80,h:16},{x:1250,y:700,w:80,h:16},
-      {x:1500,y:560,w:80,h:16},{x:1750,y:460,w:80,h:16},
-      {x:2050,y:540,w:80,h:16},{x:2350,y:440,w:80,h:16},
-      {x:2650,y:520,w:80,h:16},{x:2950,y:420,w:80,h:16},
-      {x:3250,y:480,w:80,h:16},{x:3550,y:380,w:80,h:16},
-      {x:3900,y:420,w:80,h:16},{x:4200,y:360,w:80,h:16},
+      {x:0,y:900,w:500,h:40},{x:1200,y:900,w:300,h:40},{x:2700,y:900,w:300,h:40},{x:4200,y:900,w:400,h:40},
       {x:4400,y:340,w:120,h:16},
     ],
-    spikes:[{x:560,y:880,w:80},{x:1060,y:880,w:60},{x:1560,y:880,w:60},{x:2060,y:880,w:60},{x:2560,y:880,w:60},{x:3060,y:880,w:40}],
-    checkpoints:[{x:1700,y:450},{x:2950,y:400},{x:3900,y:400}],
-    shards:[{x:3590,y:340,id:42}],
+    ghostPlatforms:[
+      // Section 1: no stabilizer — must time (x:500-1200)
+      {x:600,y:760,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:800,y:680,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.7},
+      {x:1000,y:620,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.4},
+      // Section 2: stabilizer covers (x:1500-2700)
+      {x:1500,y:740,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:1700,y:640,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5},
+      {x:1900,y:560,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0},
+      {x:2100,y:500,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.5},
+      {x:2350,y:460,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.3},
+      // Section 3: must time — no stabilizer covers these (x:3000-4200)
+      {x:3000,y:640,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:3200,y:560,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.7},
+      // Section 4: second stabilizer covers (x:3500-4400)
+      {x:3500,y:480,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:3750,y:420,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5},
+      {x:4000,y:380,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0},
+    ],
+    stabilizers:[
+      {x:1300,y:860,radius:1200,duration:10},
+      {x:2750,y:860,radius:1200,duration:10},
+    ],
+    checkpoints:[{x:1200,y:450},{x:2700,y:400}],
+    shards:[{x:2140,y:460,id:42}],
   },
   {
     name:'Прозрачность',story:'Стены стали мечтами. Пол стал дымом. Ничто не держит. Кроме памяти.',
     width:4800,height:1100,spawn:{x:80,y:800},exit:{x:4600,y:340,w:40,h:80},
     platforms:[
-      {x:0,y:950,w:500,h:40},{x:700,y:950,w:300,h:40},{x:1200,y:950,w:300,h:40},{x:1700,y:950,w:300,h:40},{x:2200,y:950,w:300,h:40},{x:2700,y:950,w:300,h:40},{x:3200,y:950,w:300,h:40},{x:3700,y:950,w:300,h:40},{x:4200,y:950,w:300,h:40},{x:4500,y:950,w:300,h:40},
-      {x:250,y:820,w:80,h:16},{x:500,y:700,w:80,h:16},{x:750,y:780,w:80,h:16},
-      {x:1000,y:650,w:80,h:16},{x:1250,y:740,w:80,h:16},
-      {x:1500,y:600,w:80,h:16},{x:1750,y:500,w:80,h:16},
-      {x:2050,y:580,w:80,h:16},{x:2350,y:480,w:80,h:16},
-      {x:2650,y:560,w:80,h:16},{x:2950,y:460,w:80,h:16},
-      {x:3300,y:520,w:80,h:16},{x:3600,y:420,w:80,h:16},
-      {x:4000,y:460,w:80,h:16},{x:4300,y:380,w:80,h:16},
+      {x:0,y:950,w:500,h:40},{x:1700,y:950,w:300,h:40},{x:3200,y:950,w:300,h:40},{x:4500,y:950,w:300,h:40},
       {x:4600,y:340,w:120,h:16},
     ],
-    spikes:[{x:560,y:930,w:80},{x:1060,y:930,w:60},{x:1560,y:930,w:60},{x:2060,y:930,w:60},{x:2560,y:930,w:60},{x:3060,y:930,w:40},{x:3560,y:930,w:40}],
-    checkpoints:[{x:1700,y:490},{x:3200,y:500},{x:4300,y:360}],
-    shards:[{x:2990,y:420,id:43}],
+    ghostPlatforms:[
+      // Section 1: timed (x:500-1700)
+      {x:600,y:800,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:820,y:720,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.6},
+      {x:1020,y:660,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.2},
+      {x:1250,y:620,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.3},
+      // Section 2: stabilizer 1 covers (x:2000-3200)
+      {x:2000,y:780,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:2200,y:680,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5},
+      {x:2400,y:580,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0},
+      {x:2650,y:500,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.5},
+      {x:2900,y:460,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.3},
+      // Section 3: mixed — some timed, some under stabilizer 2 (x:3500-4500)
+      {x:3500,y:700,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:3750,y:600,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.7},
+      {x:4000,y:500,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
+      {x:4250,y:420,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0.5},
+    ],
+    stabilizers:[
+      {x:1750,y:910,radius:1500,duration:10},
+      {x:3250,y:910,radius:1300,duration:10},
+    ],
+    enemies:[
+      {x:2400,y:940,range:200,speed:1.0},
+    ],
+    spikes:[{x:1560,y:930,w:60},{x:3060,y:930,w:40}],
+    checkpoints:[{x:1700,y:490},{x:3200,y:500}],
+    shards:[{x:2690,y:460,id:43}],
   },
   {
     name:'Исчезновение',story:'Последний рубеж перед архитектурой. Мир почти исчез. Остались лишь контуры.',
     width:5000,height:1100,spawn:{x:80,y:800},exit:{x:4800,y:320,w:40,h:80},
     platforms:[
-      {x:0,y:950,w:400,h:40},{x:600,y:950,w:300,h:40},{x:1100,y:950,w:300,h:40},{x:1600,y:950,w:300,h:40},{x:2100,y:950,w:300,h:40},{x:2600,y:950,w:300,h:40},{x:3100,y:950,w:300,h:40},{x:3600,y:950,w:300,h:40},{x:4100,y:950,w:300,h:40},{x:4600,y:950,w:400,h:40},
-      {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:780,w:80,h:16},
-      {x:950,y:640,w:80,h:16},{x:1200,y:730,w:80,h:16},
-      {x:1450,y:580,w:80,h:16},{x:1700,y:480,w:80,h:16},
-      {x:2000,y:560,w:80,h:16},{x:2300,y:460,w:80,h:16},
-      {x:2600,y:540,w:80,h:16},{x:2900,y:440,w:80,h:16},
-      {x:3200,y:520,w:80,h:16},{x:3500,y:400,w:80,h:16},
-      {x:3850,y:440,w:80,h:16},{x:4150,y:360,w:80,h:16},
-      {x:4500,y:380,w:80,h:16},{x:4800,y:320,w:120,h:16},
+      {x:0,y:950,w:400,h:40},{x:1600,y:950,w:300,h:40},{x:4600,y:950,w:400,h:40},
+      {x:4800,y:320,w:120,h:16},
     ],
-    spikes:[{x:460,y:930,w:80},{x:960,y:930,w:60},{x:1460,y:930,w:60},{x:1960,y:930,w:60},{x:2460,y:930,w:60},{x:2960,y:930,w:40},{x:3460,y:930,w:40},{x:3960,y:930,w:40}],
-    checkpoints:[{x:1600,y:470},{x:2900,y:420},{x:4150,y:340}],
-    shards:[{x:3540,y:360,id:44}],
+    ghostPlatforms:[
+      // Section 1: fast cycle — timed (x:400-1600)
+      {x:500,y:800,w:100,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0},
+      {x:700,y:720,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.5},
+      {x:900,y:640,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.0},
+      {x:1100,y:580,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.5},
+      {x:1350,y:540,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.3},
+      // Section 2: stabilizer covers main path (x:1900-3500)
+      {x:1900,y:780,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0},
+      {x:2100,y:680,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.4},
+      {x:2350,y:580,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.8},
+      {x:2600,y:500,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.2},
+      {x:2850,y:440,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.6},
+      {x:3100,y:400,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.2},
+      {x:3400,y:380,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.6},
+      // Section 3: timed again — no stabilizer (x:3800-4600)
+      {x:3800,y:500,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0},
+      {x:4050,y:420,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.7},
+      {x:4300,y:380,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:1.4},
+      {x:4550,y:360,w:80,h:16,visibleTime:2,hiddenTime:2,phaseOffset:0.3},
+    ],
+    stabilizers:[
+      {x:1650,y:910,radius:1800,duration:10},
+    ],
+    darkness:[{startX:-100,speed:1.5,height:1200}],
+    flashlight:true,
+    enemies:[
+      {x:2600,y:940,range:150,speed:1.2},
+    ],
+    spikes:[{x:460,y:930,w:80},{x:1460,y:930,w:60}],
+    checkpoints:[{x:1600,y:470},{x:3400,y:360}],
+    shards:[{x:2890,y:400,id:44}],
   },
   // ═══ Act X — Архитектор (levels 45-49) ═══
   {
@@ -4694,7 +4777,7 @@ if(isWallSlide){
 var GROUND_GRACE=0.06;var _groundGraceTimer=0;function setupPlayerSensors(){playerSensorGround._collidingSet=new Set();playerSensorCeiling._collidingSet=new Set();playerSensorLeft._collidingSet=new Set();playerSensorRight._collidingSet=new Set();playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;_groundGraceTimer=0;MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,true);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,false)}}
-function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='pressurePlateZone'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
+function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='pressurePlateZone'&&other.label!=='stabilizerZone'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
 function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;
   // Phantom collision guard: verify distance to moving death zones
   // Enemies and pendulums use setPosition() which can cause stale collision events
@@ -5268,6 +5351,212 @@ function updateResonancePlatforms(dt){
     resonanceGfx.circle(px,py,radius);
     resonanceGfx.stroke({width:0.5,color:0x4ada9a,alpha:0.06});
   }else if(resonanceGfx){resonanceGfx.clear()}
+}
+
+// ═══ GHOST PLATFORMS ═══
+var levelGhostPlatforms=[];
+function createGhostPlatform(data){
+  var body=MBodies.rectangle(data.x+data.w/2,data.y+data.h/2,data.w,data.h,{isStatic:true,label:'ghostPlatform',friction:0.05,frictionStatic:0.001});
+  MWorld.add(world,body);
+  var spr=new PIXI.Graphics();
+  spr.x=data.x;spr.y=data.y;gameContainer.addChild(spr);
+  var visibleTime=data.visibleTime||3;
+  var hiddenTime=data.hiddenTime||2;
+  var phaseOffset=data.phaseOffset||0;
+  levelGhostPlatforms.push({body:body,sprite:spr,_gfx:spr,x:data.x,y:data.y,w:data.w,h:data.h,visibleTime:visibleTime,hiddenTime:hiddenTime,phaseOffset:phaseOffset,timer:-phaseOffset,visible:true,alpha:1,targetAlpha:1,warnTimer:0,stabilized:false,stabilizeTimer:0});
+}
+function updateGhostPlatforms(dt){
+  for(var i=0;i<levelGhostPlatforms.length;i++){
+    var gp=levelGhostPlatforms[i];
+    // If stabilized, keep visible and count down
+    if(gp.stabilized){
+      gp.stabilizeTimer-=dt;
+      if(gp.stabilizeTimer<=0){
+        gp.stabilized=false;
+        gp.stabilizeTimer=0;
+      }else{
+        // Keep visible while stabilized
+        if(!gp.visible){
+          gp.visible=true;
+          gp.body=MBodies.rectangle(gp.x+gp.w/2,gp.y+gp.h/2,gp.w,gp.h,{isStatic:true,label:'ghostPlatform',friction:0.05,frictionStatic:0.001});
+          MWorld.add(world,gp.body);
+          gp.sprite.visible=true;
+          gp.targetAlpha=1;
+        }
+        gp.alpha=1;gp.targetAlpha=1;
+        // Draw stabilized (golden border highlight)
+        var g=gp._gfx;g.clear();
+        var pulse=0.9+Math.sin(gp.timer*2)*0.1;
+        // Amber base
+        g.rect(0,0,gp.w,gp.h);g.fill({color:0x6a4a1a,alpha:gp.alpha*pulse});
+        g.rect(0,0,gp.w,2);g.fill({color:0xba8a3a,alpha:gp.alpha});
+        g.rect(0,gp.h-1,gp.w,1);g.fill({color:0x4a3a1a,alpha:gp.alpha*0.8});
+        g.rect(0,0,2,gp.h);g.fill({color:0x9a7a3a,alpha:gp.alpha*0.7});
+        g.rect(gp.w-2,0,2,gp.h);g.fill({color:0x9a7a3a,alpha:gp.alpha*0.7});
+        // Golden stabilization border
+        g.rect(0,0,gp.w,gp.h);g.stroke({width:2,color:0xdaba4a,alpha:0.6+Math.sin(gp.timer*4)*0.2});
+        gp.sprite.alpha=gp.alpha;
+        gp.sprite.visible=true;
+        gp.timer+=dt;
+        continue;
+      }
+    }
+    gp.timer+=dt;
+    var cycle=gp.visibleTime+gp.hiddenTime;
+    if(cycle<=0)continue;
+    var pos=gp.timer%cycle;
+    if(pos<0)pos+=cycle;
+    var shouldBeVisible=pos<gp.visibleTime;
+    // 0.7s warning before becoming invisible
+    var shouldWarn=false;
+    if(shouldBeVisible){
+      var posInVisible=pos;
+      if(posInVisible>=(gp.visibleTime-0.7))shouldWarn=true;
+    }
+    if(shouldBeVisible&&!gp.visible){
+      gp.visible=true;
+      gp.body=MBodies.rectangle(gp.x+gp.w/2,gp.y+gp.h/2,gp.w,gp.h,{isStatic:true,label:'ghostPlatform',friction:0.05,frictionStatic:0.001});
+      MWorld.add(world,gp.body);
+      gp.sprite.visible=true;
+      gp.targetAlpha=1;
+      spawnParticles(gp.x+gp.w/2,gp.y+gp.h/2,4,0xba8a3a,{speed:0.6,life:0.4,size:2,gravity:0});
+    }else if(!shouldBeVisible&&gp.visible){
+      gp.visible=false;
+      if(gp.body){MWorld.remove(world,gp.body);gp.body=null;}
+      gp.targetAlpha=0;
+      spawnParticles(gp.x+gp.w/2,gp.y+gp.h/2,4,0x6a4a1a,{speed:0.5,life:0.4,size:2,gravity:0});
+    }
+    // Fade animation (slower than pulse platforms — more dramatic)
+    var fadeSpeed=2.5*dt;
+    if(gp.alpha<gp.targetAlpha)gp.alpha=Math.min(gp.alpha+fadeSpeed,gp.targetAlpha);
+    else if(gp.alpha>gp.targetAlpha)gp.alpha=Math.max(gp.alpha-fadeSpeed,gp.targetAlpha);
+    // Rebuild visual
+    var g=gp._gfx;g.clear();
+    if(shouldWarn&&gp.visible){
+      // Warning flicker — rapid alpha changes before disappearing
+      var flicker=Math.sin(gp.timer*12)>0?0.5:0.9;
+      g.rect(0,0,gp.w,gp.h);g.fill({color:0x6a4a1a,alpha:gp.alpha*flicker});
+      g.rect(0,0,gp.w,2);g.fill({color:0xba8a3a,alpha:gp.alpha*flicker});
+      g.rect(0,gp.h-1,gp.w,1);g.fill({color:0x4a3a1a,alpha:gp.alpha*flicker*0.8});
+      g.rect(0,0,2,gp.h);g.fill({color:0x9a7a3a,alpha:gp.alpha*flicker*0.7});
+      g.rect(gp.w-2,0,2,gp.h);g.fill({color:0x9a7a3a,alpha:gp.alpha*flicker*0.7});
+      gp.sprite.alpha=gp.alpha*flicker;
+      gp.sprite.visible=true;
+    }else if(gp.visible){
+      // Solid visible amber platform with subtle pulse
+      var pulse=0.85+Math.sin(gp.timer*1.5)*0.15;
+      g.rect(0,0,gp.w,gp.h);g.fill({color:0x6a4a1a,alpha:gp.alpha*pulse});
+      g.rect(0,0,gp.w,2);g.fill({color:0xba8a3a,alpha:gp.alpha});
+      g.rect(0,gp.h-1,gp.w,1);g.fill({color:0x4a3a1a,alpha:gp.alpha*0.8});
+      g.rect(0,0,2,gp.h);g.fill({color:0x9a7a3a,alpha:gp.alpha*0.7});
+      g.rect(gp.w-2,0,2,gp.h);g.fill({color:0x9a7a3a,alpha:gp.alpha*0.7});
+      gp.sprite.alpha=gp.alpha;
+      gp.sprite.visible=true;
+    }else{
+      // Invisible — show faint ghostly outline briefly while fading
+      if(gp.alpha>0.02){
+        g.rect(0,0,gp.w,gp.h);g.fill({color:0x6a4a1a,alpha:gp.alpha*0.3});
+        g.rect(0,0,gp.w,1);g.fill({color:0xba8a3a,alpha:gp.alpha*0.15});
+        gp.sprite.alpha=gp.alpha*0.3;
+        gp.sprite.visible=true;
+      }else{
+        gp.sprite.visible=false;
+      }
+    }
+  }
+}
+
+// ═══ STABILIZERS ═══
+var levelStabilizers=[];
+function createStabilizer(data){
+  var body=MBodies.circle(data.x,data.y-16,28,{isStatic:true,isSensor:true,label:'stabilizerZone'});
+  MWorld.add(world,body);
+  var spr=new PIXI.Container();gameContainer.addChild(spr);
+  var g=new PIXI.Graphics();spr.addChild(g);
+  var glowG=new PIXI.Graphics();spr.addChild(glowG);
+  var radius=data.radius||300;
+  var duration=data.duration||10;
+  levelStabilizers.push({body:body,sprite:spr,_gfx:g,_glowGfx:glowG,x:data.x,y:data.y,radius:radius,duration:duration,activated:false,depleted:false,activateTime:0,waveProgress:-1});
+}
+function updateStabilizers(dt){
+  for(var i=0;i<levelStabilizers.length;i++){
+    var st=levelStabilizers[i];
+    var g=st._gfx;g.clear();
+    var glowG=st._glowGfx;glowG.clear();
+    if(st.depleted){
+      // Dim depleted crystal
+      g.moveTo(0,-18);g.lineTo(7,-6);g.lineTo(0,6);g.lineTo(-7,-6);g.closePath();g.fill({color:0x3a3a2a,alpha:0.3});
+      g.moveTo(0,-14);g.lineTo(4,-6);g.lineTo(0,2);g.lineTo(-4,-6);g.closePath();g.fill({color:0x4a4a3a,alpha:0.15});
+      st.sprite.x=st.x;st.sprite.y=st.y;
+      continue;
+    }
+    if(st.activated){
+      var elapsed=st.activateTime;
+      st.activateTime+=dt;
+      // Bright golden glow
+      var pulse=0.9+Math.sin(elapsed*4)*0.1;
+      // Outer glow
+      glowG.circle(0,-10,20);glowG.fill({color:0xdaba4a,alpha:0.1*pulse});
+      glowG.circle(0,-10,12);glowG.fill({color:0xeaca6a,alpha:0.15*pulse});
+      // Crystal body — bright golden
+      g.moveTo(0,-22);g.lineTo(9,-8);g.lineTo(0,8);g.lineTo(-9,-8);g.closePath();g.fill({color:0xdaba4a,alpha:0.8*pulse});
+      g.moveTo(0,-18);g.lineTo(5,-8);g.lineTo(0,4);g.lineTo(-5,-8);g.closePath();g.fill({color:0xeaca6a,alpha:0.5});
+      // Wave animation — expanding circle
+      if(st.waveProgress>=0&&st.waveProgress<1){
+        st.waveProgress+=dt*0.8;
+        if(st.waveProgress>1)st.waveProgress=1;
+        var waveR=st.radius*st.waveProgress;
+        glowG.circle(0,-10,waveR);glowG.stroke({width:3,color:0xdaba4a,alpha:0.4*(1-st.waveProgress)});
+        glowG.circle(0,-10,waveR*0.8);glowG.stroke({width:1,color:0xeaca6a,alpha:0.2*(1-st.waveProgress)});
+      }
+      // After wave completes, mark depleted
+      if(st.waveProgress>=1){
+        st.depleted=true;
+      }
+      st.sprite.x=st.x;st.sprite.y=st.y;
+      continue;
+    }
+    // Not yet activated — check player collision
+    if(player.body){
+      var dx=player.body.position.x-st.x;
+      var dy=player.body.position.y-(st.y-10);
+      var dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<35){
+        st.activated=true;
+        st.activateTime=0;
+        st.waveProgress=0;
+        // Stabilize ghost platforms within radius
+        for(var j=0;j<levelGhostPlatforms.length;j++){
+          var gp=levelGhostPlatforms[j];
+          var gpCx=gp.x+gp.w/2;
+          var gpCy=gp.y+gp.h/2;
+          var gdx=gpCx-st.x;
+          var gdy=gpCy-st.y;
+          var gDist=Math.sqrt(gdx*gdx+gdy*gdy);
+          if(gDist<st.radius){
+            gp.stabilized=true;
+            gp.stabilizeTimer=Math.max(gp.stabilizeTimer,st.duration);
+          }
+        }
+        // Particle wave effect
+        spawnParticles(st.x,st.y-10,20,0xdaba4a,{speed:3,life:0.6,size:3,gravity:0});
+        spawnParticles(st.x,st.y-10,10,0xeaca6a,{speed:2,life:0.4,size:2,gravity:0});
+        tgHaptic('heavy');
+        // Sound effect — stabilizer activation
+        playTone(400,0.2,'sine',0.2,800);playTone(600,0.25,'triangle',0.15,1000);playTone(800,0.3,'sine',0.1,1200);
+      }
+    }
+    // Idle amber crystal with pulsing glow
+    var t=performance.now()/1000;
+    var pulse=0.8+Math.sin(t*2+i*1.5)*0.2;
+    // Outer glow
+    glowG.circle(0,-10,18);glowG.fill({color:0xba8a3a,alpha:0.06*pulse});
+    glowG.circle(0,-10,10);glowG.fill({color:0xba8a3a,alpha:0.1*pulse});
+    // Crystal shape (diamond)
+    g.moveTo(0,-20);g.lineTo(8,-7);g.lineTo(0,7);g.lineTo(-8,-7);g.closePath();g.fill({color:0x9a7a3a,alpha:0.7*pulse});
+    g.moveTo(0,-16);g.lineTo(4,-7);g.lineTo(0,3);g.lineTo(-4,-7);g.closePath();g.fill({color:0xba9a5a,alpha:0.4});
+    st.sprite.x=st.x;st.sprite.y=st.y;
+  }
 }
 
 // ═══ TIMED SPIKE PLATFORMS ═══
@@ -6351,6 +6640,10 @@ function loadLevel(n){
   levelDisappearingPlatforms=[];if(lvl.disappearingPlatforms)for(var i=0;i<lvl.disappearingPlatforms.length;i++)createDisappearingPlatform(lvl.disappearingPlatforms[i]);
   // Pulse platforms
   levelPulsePlatforms=[];if(lvl.pulsePlatforms)for(var i=0;i<lvl.pulsePlatforms.length;i++)createPulsePlatform(lvl.pulsePlatforms[i]);
+  // Ghost platforms
+  levelGhostPlatforms=[];if(lvl.ghostPlatforms)for(var i=0;i<lvl.ghostPlatforms.length;i++)createGhostPlatform(lvl.ghostPlatforms[i]);
+  // Stabilizers
+  levelStabilizers=[];if(lvl.stabilizers)for(var i=0;i<lvl.stabilizers.length;i++)createStabilizer(lvl.stabilizers[i]);
   // Resonance platforms
   levelResonancePlatforms=[];resonanceGfx=null;if(lvl.resonancePlatforms)for(var i=0;i<lvl.resonancePlatforms.length;i++)createResonancePlatform(lvl.resonancePlatforms[i]);
   // Timed spike platforms
@@ -6394,7 +6687,7 @@ function loadLevel(n){
   // Shadow Double
   if(lvl.shadowDouble)createShadowDouble(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelPulsePlatforms=[];levelResonancePlatforms=[];resonanceGfx=null;levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelPulsePlatforms=[];levelGhostPlatforms=[];levelStabilizers=[];levelResonancePlatforms=[];resonanceGfx=null;levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -6427,6 +6720,8 @@ var tutorial={
     {id:'shadow',level:33,trigger:'time',delay:4,text:'тень следует за тобой с задержкой. Она может стоять на плите за тебя!'},
     {id:'pulse',level:35,trigger:'time',delay:2,text:'платформы пульсируют! Они появляются и исчезают в ритме. Двигайся в такт!'},
     {id:'resonance',level:36,trigger:'time',delay:2,text:'двигайся — и скрытые платформы появятся рядом с тобой. Остановишься — исчезнут!'},
+    {id:'ghost',level:40,trigger:'time',delay:2,text:'призрачные платформы мерцают и исчезают! Переходи пока они видны'},
+    {id:'stabilizer',level:41,trigger:'time',delay:3,text:'активируй кристалл-стабилизатор — он зафиксирует призрачные платформы!'},
   ],
   timer:0,activeTip:null
 };
@@ -8421,7 +8716,7 @@ function gameLoop(timestamp){
   // Update positions of all setPosition-based bodies BEFORE MEngine.update
   // to prevent phantom collision detection with stale positions
   updateMovingPlatforms(dt);updateEnemies(dt);updatePendulums();
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updatePulsePlatforms(dt);updateResonancePlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateShadowDouble(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updatePulsePlatforms(dt);updateGhostPlatforms(dt);updateStabilizers(dt);updateResonancePlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateShadowDouble(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite&&settings.quality!=='low'){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
