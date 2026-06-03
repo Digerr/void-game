@@ -9892,7 +9892,9 @@ function shareResult(){
   var stars=calculateStars(state.deaths,(performance.now()-state.levelStartTime)/1000);
   var starStr='';
   for(var i=0;i<3;i++)starStr+=i<stars?'★':'☆';
-  var text='🌑 VOID — во тьму\n'+(state.level+1)+'. '+lvl.name+'\n'+starStr+'\nВремя: '+formatTime(performance.now()-state.levelStartTime)+' | Смерти: '+state.deaths+'\n\nСпустись во тьму → @voide_game_bot';
+  var completed=0;var totalStars=0;
+  for(var li=0;li<LEVELS.length;li++){if(progress.levels[li]&&progress.levels[li].stars>0){completed++;totalStars+=progress.levels[li].stars}}
+  var text='🌑 VOID — во тьму\n'+(state.level+1)+'. '+lvl.name+'\n'+starStr+'\nВремя: '+formatTime(performance.now()-state.levelStartTime)+' | Смерти: '+state.deaths+'\nПрогресс: '+completed+'/'+LEVELS.length+' | '+totalStars+'★\n\nСпустись во тьму → @voide_game_bot';
   // Try Telegram shareMessage first (opens share dialog)
   if(tg){
     try{
@@ -10236,6 +10238,14 @@ function bindUI(){
   document.getElementById('btn-settings').addEventListener('click',function(){showScreen('settings')});
   document.getElementById('btn-faq').addEventListener('click',function(){showScreen('faq')});
   document.getElementById('btn-lore').addEventListener('click',function(){renderLoreScreen();showScreen('lore')});
+  document.getElementById('btn-invite').addEventListener('click',function(){
+    var inviteText='🌑 VOID — во тьму\n60 уровней. 12 актов. Бесконечная тьма.\n\nСпустись во тьму → @voide_game_bot';
+    if(tg){
+      try{var url='https://t.me/share/url?url=https://void-game-ruddy.vercel.app/&text='+encodeURIComponent(inviteText);tg.openTelegramLink(url);tgHaptic('light');return}catch(e){}
+      try{tg.switchInlineQuery(inviteText);return}catch(e2){}
+    }
+    try{navigator.clipboard.writeText(inviteText);showToast('приглашение скопировано!')}catch(e3){}
+  });
   document.getElementById('btn-settings-back').addEventListener('click',function(){if(state.screen==='settings'&&state._prevScreen==='paused'){showScreen('paused')}else{showScreen('menu')}});
   document.getElementById('btn-faq-back').addEventListener('click',function(){showScreen('menu')});
   document.getElementById('btn-lore-back').addEventListener('click',function(){showScreen('menu')});
