@@ -340,21 +340,29 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 .prof-rank{font-size:2rem;font-weight:900;letter-spacing:.03em;line-height:1;margin-bottom:2px;text-shadow:0 0 20px currentColor}
 .prof-rank-label{font-size:.3rem;color:#4a4a5a;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
 .prof-best-rank{font-size:.4rem;color:#3a4a5a;letter-spacing:.08em;margin-bottom:12px}
-.prof-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;max-width:320px;margin-bottom:12px}
-.prof-stat{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:6px;padding:8px;text-align:center}
-.prof-stat-val{font-size:.85rem;font-weight:700;color:#7a8a9a;font-variant-numeric:tabular-nums}
-.prof-stat-label{font-size:.3rem;color:#4a4a5a;letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
-.prof-achievements{width:100%;max-width:300px;margin-bottom:12px}
+.prof-section-toggle{width:100%;max-width:320px;display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:6px;cursor:pointer;color:#7a8a9a;font-family:inherit;font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transition:all .2s}
+.prof-section-toggle:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08)}
+.prof-section-toggle .toggle-arrow{transition:transform .2s;font-size:.6rem}
+.prof-section-toggle.collapsed .toggle-arrow{transform:rotate(-90deg)}
+.prof-section-content{width:100%;max-width:320px;overflow:hidden;transition:max-height .3s ease,opacity .2s ease;max-height:600px;opacity:1}
+.prof-section-content.collapsed{max-height:0;opacity:0;margin:0!important;padding:0!important}
+.prof-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;width:100%;max-width:320px;margin-bottom:8px}
+.prof-stat{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:4px;padding:6px 4px;text-align:center}
+.prof-stat-val{font-size:.75rem;font-weight:700;color:#7a8a9a;font-variant-numeric:tabular-nums}
+.prof-stat-label{font-size:.25rem;color:#4a4a5a;letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+.prof-achievements{width:100%;max-width:320px;margin-bottom:8px}
 .prof-ach-title{font-size:.42rem;color:#5a5a6a;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;text-align:center}
-.prof-ach-grid{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.prof-ach-grid{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
 .prof-act-progress{width:100%;max-width:320px;margin:4px 0 8px}
 .prof-act-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 .prof-act-name{font-size:.4rem;color:#5a6a5a;letter-spacing:.08em;min-width:20px;text-align:right;font-weight:700}
 .prof-act-bar-bg{flex:1;height:4px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
 .prof-act-bar-fill{height:100%;border-radius:2px;transition:width .3s ease}
 .prof-act-stars{font-size:.35rem;color:#4a5a4a;min-width:28px;letter-spacing:.04em}
-.prof-ach{width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:.9rem;opacity:.3}
+.prof-ach{width:28px;height:28px;border-radius:4px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:.7rem;opacity:.3;cursor:pointer;position:relative}
 .prof-ach.unlocked{opacity:1;border-color:rgba(180,160,60,.2);background:rgba(180,160,60,.04)}
+.prof-ach-tip{display:none;position:absolute;bottom:110%;left:50%;transform:translateX(-50%);background:#1a1a2a;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:4px 8px;font-size:.4rem;color:#8a8aaa;white-space:nowrap;z-index:10;pointer-events:none}
+.prof-ach:hover .prof-ach-tip{display:block}
 .prof-days{font-size:.42rem;color:#3a3a4a;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
 .prof-notif{width:100%;max-width:300px;display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:8px}
 .prof-notif-label{font-size:.55rem;color:#6a6a7a;letter-spacing:.08em;text-transform:uppercase}
@@ -2478,7 +2486,7 @@ function renderProfile(d){
   var achHtml='';
   for(var i=0;i<achTotal;i++){
     var unlocked=(progress.achievements||[]).indexOf(ACHIEVEMENTS[i].id)>=0;
-    achHtml+='<div class="prof-ach'+(unlocked?' unlocked':'')+'" title="'+escHtml(ACHIEVEMENTS[i].name)+'">'+ACHIEVEMENTS[i].icon+'</div>';
+    achHtml+='<div class="prof-ach'+(unlocked?' unlocked':'')+'" title="'+escHtml(ACHIEVEMENTS[i].name)+'">'+ACHIEVEMENTS[i].icon+'<div class="prof-ach-tip">'+escHtml(ACHIEVEMENTS[i].name)+'</div></div>';
   }
   var notifEnabled=d.notifications_enabled!==false;
   // Weekly rank display
@@ -2510,21 +2518,31 @@ function renderProfile(d){
     '<div class="prof-rank-label">ранг в лидерборде</div>'+
     (bestRankStr?'<div class="prof-best-rank">'+bestRankStr+'</div>':'')+
     (daysStr?'<div class="prof-days">'+daysStr+'</div>':'')+
-    '<div class="prof-stats">'+
+    // Quick stats (always visible) — 4 key stats compact
+    '<div class="prof-stats" style="grid-template-columns:1fr 1fr 1fr 1fr">'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.completed||0)+'/'+LEVELS.length+'</div><div class="prof-stat-label">уровни</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_stars||0)+'/'+(LEVELS.length*3)+'</div><div class="prof-stat-label">звёзды</div></div>'+
-      '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_shards||0)+'</div><div class="prof-stat-label">осколки</div></div>'+
-      '<div class="prof-stat"><div class="prof-stat-val">'+(d.perfect_levels||0)+'</div><div class="prof-stat-label">идеальные</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+achCount+'/'+achTotal+'</div><div class="prof-stat-label">ачивки</div></div>'+
-      '<div class="prof-stat"><div class="prof-stat-val">'+(progress.totalDeaths||0)+'</div><div class="prof-stat-label">смерти</div></div>'+
-      '<div class="prof-stat"><div class="prof-stat-val">'+playStr+'</div><div class="prof-stat-label">время</div></div>'+
       '<div class="prof-stat"><div class="prof-stat-val">'+(d.score||0).toLocaleString()+'</div><div class="prof-stat-label">score</div></div>'+
+    '</div>'+
+    // Collapsible: detailed stats
+    '<button class="prof-section-toggle" data-target="prof-details"><span>статистика</span><span class="toggle-arrow">▼</span></button>'+
+    '<div class="prof-section-content collapsed" id="prof-details">'+
+      '<div class="prof-stats">'+
+        '<div class="prof-stat"><div class="prof-stat-val">'+(d.total_shards||0)+'</div><div class="prof-stat-label">осколки</div></div>'+
+        '<div class="prof-stat"><div class="prof-stat-val">'+(d.perfect_levels||0)+'</div><div class="prof-stat-label">идеальные</div></div>'+
+        '<div class="prof-stat"><div class="prof-stat-val">'+(progress.totalDeaths||0)+'</div><div class="prof-stat-label">смерти</div></div>'+
+        '<div class="prof-stat"><div class="prof-stat-val">'+playStr+'</div><div class="prof-stat-label">время</div></div>'+
+      '</div>'+
+      actProgHtml+
       weeklyHtml+
     '</div>'+
-    actProgHtml+
-    '<div class="prof-achievements">'+
-      '<div class="prof-ach-title">достижения '+achCount+'/'+achTotal+'</div>'+
-      '<div class="prof-ach-grid">'+achHtml+'</div>'+
+    // Collapsible: achievements
+    '<button class="prof-section-toggle" data-target="prof-ach-section"><span>достижения '+achCount+'/'+achTotal+'</span><span class="toggle-arrow">▼</span></button>'+
+    '<div class="prof-section-content collapsed" id="prof-ach-section">'+
+      '<div class="prof-achievements">'+
+        '<div class="prof-ach-grid">'+achHtml+'</div>'+
+      '</div>'+
     '</div>'+
     '<div class="prof-notif">'+
       '<span class="prof-notif-label">уведомления</span>'+
@@ -2538,6 +2556,18 @@ function renderProfile(d){
       '<button class="btn" id="btn-prof-records" style="flex:1;max-width:160px;padding:10px 12px;font-size:.58rem;border-color:#3a3a5a;color:#8a8aaa">рекорды</button>'+
       '<button class="btn" id="btn-prof-leaderboard" style="flex:1;max-width:160px;padding:10px 12px;font-size:.58rem;border-color:#2a3a5a;color:#6a9aba">лидерборд</button>'+
     '</div>';
+  // Toggle collapsible sections
+  var toggles=c.querySelectorAll('.prof-section-toggle');
+  for(var t=0;t<toggles.length;t++){
+    toggles[t].addEventListener('click',function(){
+      var targetId=this.getAttribute('data-target');
+      var target=document.getElementById(targetId);
+      if(target){
+        this.classList.toggle('collapsed');
+        target.classList.toggle('collapsed');
+      }
+    });
+  }
   document.getElementById('btn-notif-toggle').addEventListener('click',function(){toggleNotifications()});
   document.getElementById('btn-cloud-save').addEventListener('click',function(){manualCloudSave()});
   document.getElementById('btn-prof-records').addEventListener('click',function(){showScreen('records')});
@@ -4135,7 +4165,7 @@ var LEVELS=[
     enemies:[{x:1100,y:750,range:200,speed:0.8},{x:2700,y:750,range:150,speed:1.0}],
     levers:[{x:1900,y:500,doorX:1700,doorW:16,doorH:100,doorY:650,id:'lever1'}],
     anchors:[{x:550,y:320},{x:1500,y:450},{x:2600,y:300},{x:3250,y:280}],
-    checkpoints:[{x:1100,y:480},{x:2400,y:420}],
+    checkpoints:[{x:1100,y:480},{x:2400,y:443}],
     shards:[{x:590,y:420,id:30}],
   },
   {
@@ -4156,7 +4186,7 @@ var LEVELS=[
     levers:[{x:1400,y:620,doorX:2000,doorW:16,doorH:100,doorY:700,id:'lever1'}],
     enemies:[{x:2700,y:800,range:200,speed:0.8}],
     anchors:[{x:500,y:380},{x:1100,y:300},{x:2100,y:280},{x:3000,y:250}],
-    checkpoints:[{x:1300,y:500},{x:2700,y:540}],
+    checkpoints:[{x:1140,y:523},{x:2700,y:563}],
     shadowDouble:true,
     shards:[{x:2140,y:420,id:31}],
   },
@@ -4185,7 +4215,7 @@ var LEVELS=[
       {x:1500,y:790,w:60,h:10,door:{x:1800,y:700,w:16,h:100}},
     ],
     anchors:[{x:800,y:380},{x:1500,y:320},{x:2800,y:280},{x:3500,y:200}],
-    checkpoints:[{x:1300,y:500},{x:2800,y:540}],
+    checkpoints:[{x:1140,y:523},{x:2800,y:503}],
     shards:[{x:3440,y:440,id:32}],
   },
   {
@@ -4215,7 +4245,7 @@ var LEVELS=[
       {x:1500,y:790,w:60,h:10,door:{x:1900,y:700,w:16,h:100}},
     ],
     anchors:[{x:600,y:350},{x:1300,y:300},{x:2200,y:280},{x:3500,y:200}],
-    checkpoints:[{x:1300,y:520},{x:2900,y:500}],
+    checkpoints:[{x:1140,y:543},{x:2740,y:503}],
     shards:[{x:3540,y:440,id:33}],
   },
   {
@@ -4238,6 +4268,8 @@ var LEVELS=[
       {x:1000,y:600,w:80,h:16},{x:1250,y:520,w:80,h:16},
       // After lever, descend back to ground level
       {x:1750,y:620,w:80,h:16},{x:2000,y:720,w:80,h:16},
+      // Stepping stones from ground to upper route after door 2
+      {x:3100,y:720,w:80,h:16},
       // After doors — upper route to exit
       {x:3400,y:600,w:80,h:16},{x:3700,y:520,w:80,h:16},
       {x:4000,y:460,w:80,h:16},{x:4300,y:400,w:80,h:16},
@@ -4245,15 +4277,15 @@ var LEVELS=[
       {x:4550,y:340,w:100,h:16},
     ],
     spikes:[{x:460,y:830,w:60},{x:1060,y:830,w:60},{x:3100,y:830,w:40},{x:3660,y:830,w:40}],
-    levers:[{x:1250,y:520,doorX:1800,doorW:16,doorH:120,doorY:730,id:'lever1'}],
+    levers:[{x:1250,y:520,doorX:3100,doorW:16,doorH:120,doorY:730,id:'lever1'}],
     pressurePlates:[
-      // Plate 1: player stands here, shadow takes over 3s later → door1 stays open
+      // Plate 1: shadow holds → door1 stays open
       {x:1400,y:840,w:60,h:10,door:{x:1800,y:730,w:16,h:120}},
-      // Plate 2: further along, same mechanic — shadow helps keep it open
+      // Plate 2: shadow holds → door2 stays open
       {x:2500,y:840,w:60,h:10,door:{x:2900,y:730,w:16,h:120}},
     ],
     anchors:[{x:700,y:380},{x:1500,y:300},{x:2600,y:280},{x:4000,y:180}],
-    checkpoints:[{x:1200,y:500},{x:3200,y:560}],
+    checkpoints:[{x:1250,y:503},{x:3200,y:833}],
     shards:[{x:4040,y:420,id:34}],
   },
   // ═══ Act VIII — Эхо (levels 35-39) ═══
@@ -4282,7 +4314,7 @@ var LEVELS=[
     ],
     spikes:[{x:560,y:780,w:80},{x:2360,y:780,w:60}],
     anchors:[{x:600,y:400},{x:1300,y:320},{x:2500,y:280},{x:3300,y:200}],
-    checkpoints:[{x:1300,y:480},{x:2500,y:500}],
+    checkpoints:[{x:1250,y:503},{x:2500,y:523}],
     shards:[{x:1940,y:560,id:35}],
   },
   {
@@ -4306,7 +4338,7 @@ var LEVELS=[
     ],
     spikes:[{x:560,y:830,w:80},{x:2360,y:830,w:60}],
     anchors:[{x:500,y:400},{x:1100,y:320},{x:2200,y:350},{x:3100,y:280},{x:3800,y:200}],
-    checkpoints:[{x:1800,y:470},{x:3700,y:500}],
+    checkpoints:[{x:1800,y:833},{x:3820,y:403}],
     shards:[{x:2780,y:520,id:36}],
   },
   {
@@ -4337,7 +4369,7 @@ var LEVELS=[
     ],
     spikes:[{x:560,y:830,w:80},{x:1180,y:830,w:60},{x:2360,y:830,w:60}],
     anchors:[{x:600,y:380},{x:1500,y:300},{x:2600,y:280},{x:3800,y:180}],
-    checkpoints:[{x:1300,y:440},{x:2500,y:400}],
+    checkpoints:[{x:1300,y:623},{x:2500,y:423}],
     shards:[{x:2140,y:520,id:37}],
   },
   {
@@ -4371,7 +4403,7 @@ var LEVELS=[
     enemies:[{x:2500,y:860,w:100,dir:1,speed:1}],
     spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40}],
     anchors:[{x:600,y:400},{x:1500,y:320},{x:2600,y:300},{x:3500,y:200},{x:4200,y:150}],
-    checkpoints:[{x:1300,y:490},{x:2500,y:450}],
+    checkpoints:[{x:1300,y:673},{x:2500,y:450}],
     shards:[{x:3340,y:440,id:38}],
   },
   {
@@ -4410,7 +4442,7 @@ var LEVELS=[
     darkness:[{startX:-100,speed:1.2,height:1200}],
     spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40},{x:3560,y:880,w:40}],
     anchors:[{x:600,y:420},{x:1500,y:340},{x:2600,y:300},{x:3600,y:220},{x:4400,y:140}],
-    checkpoints:[{x:1300,y:450},{x:2500,y:420},{x:3700,y:400}],
+    checkpoints:[{x:1300,y:883},{x:2500,y:420},{x:4300,y:403}],
     shards:[{x:3940,y:380,id:39}],
   },
   // ═══ Act IX — Растворение (levels 40-44) ═══
@@ -4440,7 +4472,7 @@ var LEVELS=[
       {x:3700,y:400,w:100,h:16,visibleTime:4,hiddenTime:2,phaseOffset:0.6},
     ],
     anchors:[{x:600,y:480},{x:1200,y:400},{x:2400,y:380},{x:3500,y:250}],
-    checkpoints:[{x:1900,y:460},{x:3200,y:420}],
+    checkpoints:[{x:1900,y:833},{x:3700,y:833}],
     shards:[{x:2840,y:480,id:40}],
   },
   {
@@ -4468,7 +4500,7 @@ var LEVELS=[
       {x:1900,y:860,radius:2200,duration:10},
     ],
     anchors:[{x:600,y:480},{x:1300,y:400},{x:2400,y:350},{x:3500,y:200}],
-    checkpoints:[{x:1800,y:470},{x:3500,y:420}],
+    checkpoints:[{x:1800,y:883},{x:4100,y:883}],
     shards:[{x:2840,y:480,id:41}],
   },
   {
@@ -4502,7 +4534,7 @@ var LEVELS=[
       {x:2750,y:860,radius:1200,duration:10},
     ],
     anchors:[{x:600,y:450},{x:1400,y:380},{x:2500,y:320},{x:3800,y:180}],
-    checkpoints:[{x:1200,y:450},{x:2700,y:400}],
+    checkpoints:[{x:1200,y:883},{x:2700,y:883}],
     shards:[{x:2140,y:460,id:42}],
   },
   {
@@ -4539,7 +4571,7 @@ var LEVELS=[
     ],
     spikes:[{x:1560,y:930,w:60},{x:3060,y:930,w:40}],
     anchors:[{x:600,y:500},{x:1500,y:420},{x:2700,y:350},{x:3800,y:200}],
-    checkpoints:[{x:1700,y:490},{x:3200,y:500}],
+    checkpoints:[{x:1700,y:933},{x:3200,y:933}],
     shards:[{x:2690,y:460,id:43}],
   },
   {
@@ -4580,7 +4612,7 @@ var LEVELS=[
     ],
     spikes:[{x:460,y:930,w:80},{x:1460,y:930,w:60}],
     anchors:[{x:600,y:500},{x:1400,y:420},{x:2600,y:350},{x:3600,y:280},{x:4500,y:150}],
-    checkpoints:[{x:1600,y:470},{x:3400,y:360}],
+    checkpoints:[{x:1600,y:933},{x:4600,y:933}],
     shards:[{x:2890,y:400,id:44}],
   },
   // ═══ Act X — Архитектор (levels 45-49) ═══
@@ -4604,7 +4636,7 @@ var LEVELS=[
       {x:2500,y:680,w:280,h:4,axis:'x',onTime:2,offTime:2.5,phaseOffset:0.5},
     ],
     anchors:[{x:600,y:450},{x:1500,y:350},{x:2600,y:300},{x:3800,y:180}],
-    checkpoints:[{x:1900,y:450},{x:3100,y:500}],
+    checkpoints:[{x:2020,y:443},{x:3100,y:500}],
     shards:[{x:2740,y:400,id:45}],
   },
   {
@@ -4630,7 +4662,7 @@ var LEVELS=[
       {x:3400,y:700,w:4,h:200,axis:'y',onTime:1.5,offTime:2,phaseOffset:1},
     ],
     anchors:[{x:600,y:480},{x:1500,y:380},{x:2700,y:320},{x:3900,y:200}],
-    checkpoints:[{x:1900,y:470},{x:3100,y:520},{x:3900,y:380}],
+    checkpoints:[{x:1900,y:470},{x:2940,y:523},{x:3900,y:380}],
     shards:[{x:3240,y:400,id:46}],
   },
   {
@@ -4659,7 +4691,7 @@ var LEVELS=[
       ]},
     ],
     anchors:[{x:600,y:480},{x:1500,y:400},{x:2800,y:320},{x:4000,y:200}],
-    checkpoints:[{x:1800,y:470},{x:3000,y:420},{x:4200,y:420}],
+    checkpoints:[{x:1800,y:470},{x:3120,y:423},{x:4200,y:420}],
     shards:[{x:3840,y:360,id:47}],
   },
   {
@@ -4693,7 +4725,7 @@ var LEVELS=[
       ]},
     ],
     anchors:[{x:600,y:500},{x:1500,y:420},{x:2800,y:350},{x:4000,y:220},{x:4800,y:120}],
-    checkpoints:[{x:1800,y:490},{x:3000,y:400},{x:4200,y:400}],
+    checkpoints:[{x:1800,y:490},{x:3120,y:403},{x:4200,y:400}],
     shards:[{x:3840,y:340,id:48}],
   },
   {
@@ -4735,7 +4767,7 @@ var LEVELS=[
     darkness:[{startX:-200,speed:1.2,height:1200}],
     flashlight:true,
     anchors:[{x:600,y:500},{x:1500,y:420},{x:2800,y:350},{x:4000,y:250},{x:5000,y:120}],
-    checkpoints:[{x:1800,y:470},{x:3000,y:380},{x:4200,y:380},{x:4900,y:340}],
+    checkpoints:[{x:1800,y:470},{x:3120,y:383},{x:4200,y:380},{x:4900,y:340}],
     shards:[{x:3840,y:320,id:49}],
   },
   // ═══ Act XI — Возвращение (levels 50-54) ═══
@@ -4763,7 +4795,7 @@ var LEVELS=[
       {x:1500,y:790,w:60,h:10,door:{x:1900,y:700,w:16,h:100}},
     ],
     anchors:[{x:500,y:380},{x:1300,y:300},{x:2400,y:280},{x:3400,y:180}],
-    checkpoints:[{x:1300,y:520},{x:2900,y:500}],
+    checkpoints:[{x:1140,y:543},{x:2740,y:503}],
     shards:[{x:3340,y:440,id:50}],
   },
   {
@@ -4801,7 +4833,7 @@ var LEVELS=[
       {x:3200,y:420,w:100,h:16,visibleTime:3,hiddenTime:2,phaseOffset:1.0,group:0},
     ],
     anchors:[{x:500,y:400},{x:1200,y:320},{x:2500,y:280},{x:3800,y:150}],
-    checkpoints:[{x:1500,y:580},{x:3200,y:420}],
+    checkpoints:[{x:1500,y:833},{x:3200,y:833}],
     shards:[{x:2190,y:660,id:51}],
   },
   {
@@ -4844,7 +4876,7 @@ var LEVELS=[
     ],
     spikes:[{x:430,y:830,w:50}],
     anchors:[{x:500,y:450},{x:1300,y:380},{x:2500,y:320},{x:3700,y:200},{x:4500,y:100}],
-    checkpoints:[{x:1800,y:460},{x:3800,y:480}],
+    checkpoints:[{x:1800,y:833},{x:4400,y:833}],
     shards:[{x:3440,y:460,id:52}],
   },
   {
@@ -4944,7 +4976,7 @@ var LEVELS=[
       ]},
     ],
     anchors:[{x:500,y:500},{x:1300,y:400},{x:2600,y:350},{x:4000,y:250},{x:5000,y:120}],
-    checkpoints:[{x:2200,y:740},{x:4000,y:400},{x:4900,y:280}],
+    checkpoints:[{x:2420,y:733},{x:4120,y:403},{x:4900,y:280}],
     shards:[{x:4540,y:310,id:54}],
   },
   // ═══ Act XII — Выбор (levels 55-59) ═══
@@ -5029,7 +5061,7 @@ var LEVELS=[
     ],
     spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60}],
     anchors:[{x:500,y:500},{x:1200,y:400},{x:2000,y:300},{x:3200,y:250},{x:4400,y:150}],
-    checkpoints:[{x:2900,y:730},{x:4200,y:490}],
+    checkpoints:[{x:2900,y:730},{x:4120,y:483}],
     shards:[{x:2440,y:380,id:56}],
   },
   {
@@ -5186,7 +5218,7 @@ var LEVELS=[
     ],
     spikes:[{x:460,y:1030,w:80},{x:960,y:1030,w:60},{x:1460,y:1030,w:60}],
     anchors:[{x:500,y:550},{x:1200,y:450},{x:2000,y:380},{x:3200,y:300},{x:4400,y:200},{x:5300,y:80}],
-    checkpoints:[{x:1600,y:790},{x:3200,y:580},{x:4400,y:400}],
+    checkpoints:[{x:1720,y:783},{x:3320,y:583},{x:4520,y:403}],
     shards:[{x:5140,y:220,id:59}],
   }
 ];
