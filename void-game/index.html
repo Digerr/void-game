@@ -956,7 +956,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.18.11-beta';
+var VOID_VERSION='0.19.0';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();

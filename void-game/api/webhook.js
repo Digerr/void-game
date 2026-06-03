@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 const GAME_URL = 'https://void-game-ruddy.vercel.app/';
 const CHANNEL_ID = '@void_game_official';
 const SUPPORT_CHANNEL_ID = process.env.SUPPORT_CHANNEL_ID || '-1003857849729'; // VOID - SUPPORT (private)
-const VERSION = '0.18.11-beta';
+const VERSION = '0.19.0';
 
 // Reply Keyboard — постоянное меню кнопок
 const REPLY_KEYBOARD = {
@@ -575,12 +575,13 @@ export default async function handler(req, res) {
     const newsText =
       `📰 <b>Обновления VOID</b>\n\n` +
       `🔶 <b>v${VERSION}</b> — текущая\n` +
-      '• Катсцены с персонажем-котиком\n' +
-      '• Сцена пробуждения «но шарф ещё тёплый»\n' +
-      '• Лидерборд: глобальный, недельный, по уровням\n' +
-      '• Магнитный шарф вместо нити-верёвки\n' +
-      '• Облачные сохранения ☁\n' +
-      '• Система достижений и испытаний\n\n' +
+      '• 6 новых погодных эффектов (акты 7-12)\n' +
+      '• 16 новых достижений (46 всего)\n' +
+      '• Расширенная статистика победы\n' +
+      '• Прогресс актов в профиле\n' +
+      '• Рекорд смертей и попыток на уровень\n' +
+      '• Пригласить друга\n' +
+      '• Фиксы 4 багов в уровнях\n\n' +
       '🔹 <b>v0.13.0-beta</b>\n' +
       '• Фикс физики шарфа (маятник)\n' +
       '• Настройка параметров swing/constraint\n\n' +
