@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 const GAME_URL = 'https://void-game-ruddy.vercel.app/';
 const CHANNEL_ID = '@void_game_official';
 const SUPPORT_CHANNEL_ID = process.env.SUPPORT_CHANNEL_ID || '-1003857849729'; // VOID - SUPPORT (private)
-const VERSION = '0.17.0-beta';
+const VERSION = '0.17.1-beta';
 
 // Reply Keyboard — постоянное меню кнопок
 const REPLY_KEYBOARD = {
