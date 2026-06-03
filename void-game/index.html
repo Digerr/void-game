@@ -4077,36 +4077,34 @@ function updatePlayer(dt){
     var dx=player.body.position.x-thread.anchorX;
     var dy=player.body.position.y-thread.anchorY;
     var dist=Math.sqrt(dx*dx+dy*dy)||1;
-    // Only apply swing force when player is BELOW anchor (natural pendulum)
-    // When above anchor, just let gravity pull them back down
+    var pendAngle=Math.atan2(dx,Math.max(dy,1)); // angle from vertical
     if(dy>0){
-      var pendAngle=Math.atan2(dx,Math.max(dy,1)); // angle from vertical
-      // Reduce force at extreme angles (beyond ~80 degrees)
-      var angleFactor=Math.max(0,1-Math.abs(pendAngle)/(Math.PI*0.48));
+      // Player is BELOW anchor — normal pendulum swing zone
+      // Reduce force at extreme angles (beyond ~65 degrees) — prevents going over the top
+      var angleFactor=Math.max(0,1-Math.abs(pendAngle)/(Math.PI*0.36));
       // Horizontal push — simulates pumping a swing
       var swingForce=player.inputX*0.06*angleFactor;
       MBody.applyForce(player.body,player.body.position,{x:swingForce,y:0});
     } else {
-      // Player above anchor: dampen rotation to prevent spinning
-      var angVel=player.body.angularVelocity||0;
-      if(Math.abs(angVel)>0.3){
-        MBody.setAngularVelocity(player.body,angVel*0.7);
-      }
-      // Gentle horizontal control even when above, but much weaker
-      var weakForce=player.inputX*0.015;
-      MBody.applyForce(player.body,player.body.position,{x:weakForce,y:0});
+      // Player is AT or ABOVE anchor — kill momentum, let gravity pull back down
+      // Strong dampening of both horizontal and vertical velocity
+      var vx=player.body.velocity.x;
+      var vy=player.body.velocity.y;
+      MBody.setVelocity(player.body,{x:vx*0.85,y:Math.min(vy,2)});
+      // Dampen angular velocity aggressively
+      MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.5);
     }
     // Speed caps to prevent runaway velocity
     var vx=player.body.velocity.x;
-    if(Math.abs(vx)>6){
-      MBody.setVelocity(player.body,{x:Math.sign(vx)*6,y:player.body.velocity.y});
+    if(Math.abs(vx)>5.5){
+      MBody.setVelocity(player.body,{x:Math.sign(vx)*5.5,y:player.body.velocity.y});
     }
     var vy=player.body.velocity.y;
-    if(Math.abs(vy)>9){
-      MBody.setVelocity(player.body,{x:player.body.velocity.x,y:Math.sign(vy)*9});
+    if(Math.abs(vy)>8){
+      MBody.setVelocity(player.body,{x:player.body.velocity.x,y:Math.sign(vy)*8});
     }
-    // Moderate angular velocity damping
-    MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.92);
+    // Angular velocity damping
+    MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.9);
     player.velocityX=player.body.velocity.x;
   }
   else{
