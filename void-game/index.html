@@ -714,7 +714,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">рычаги и двери</div>
-        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Подойди к рычагу и нажми кнопку взаимодействия (✋), чтобы открыть привязанную дверь. Некоторые уровни требуют активировать несколько рычагов в правильном порядке.</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Подойди к рычагу и нажми кнопку взаимодействия (✋), чтобы открыть привязанную дверь. Рычаг можно переключать — повторное нажатие закроет дверь. Двери блокируют обязательный путь — без рычага не пройти!</div>
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">звёзды</div>
@@ -730,7 +730,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">порталы</div>
-        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Парные порталы телепортируют тебя между двумя точками. Шагни в один — выйдешь из другого.</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Порталы — ловушки Пустоты. Шагни в него — и окажешься в начале уровня, даже если был на чекпоинте. Обходи по краю платформы!</div>
       </div>
       <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">лёд</div>
@@ -835,7 +835,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.15.0-beta';
+var VOID_VERSION='0.17.0-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -2282,8 +2282,8 @@ var LEVELS=[
     saws:[{x:2700,y:680,r:28},{x:3350,y:680,r:30}],
     checkpoints:[{x:1320,y:450},{x:2800,y:470}],
     levers:[
-      {x:600,y:504,doorX:760,doorY:630,doorW:20,doorH:100,id:'door1'},
-      {x:1650,y:534,doorX:1860,doorY:630,doorW:20,doorH:100,id:'door2'},
+      {x:600,y:504,doorX:600,doorY:300,doorW:200,doorH:450,id:'door1'},
+      {x:1650,y:534,doorX:1700,doorY:300,doorW:200,doorH:450,id:'door2'},
     ],
     movingPlatforms:[
       {x:2100,y:600,w:100,h:16,axis:'x',range:300,speed:1.2},
@@ -2387,7 +2387,7 @@ var LEVELS=[
     ],
     shards:[{x:4510,y:210,id:6}],
     checkpoints:[{x:2000,y:410},{x:2800,y:390},{x:3500,y:430}],
-    portals:[{x1:940,y1:540,x2:1300,y2:510,r:18}],
+    portals:[{x1:940,y1:540,x2:1300,y2:510,r:10}],
   },
   {
     name:'Качели',story:'Тьма учит новому: если раскачаться посильнее, можно долететь туда, куда не добраться пешком. Нить — не только путь, но и разбег. Главное — вовремя отпустить.',
@@ -2490,7 +2490,7 @@ var LEVELS=[
       {x:1100,y:734,w:300,h:16,spikeInterval:4,spikeDuration:1.5,phaseOffset:0},
       {x:2700,y:734,w:300,h:16,spikeInterval:3.5,spikeDuration:1.5,phaseOffset:2},
     ],
-    levers:[{x:2600,y:410}],
+    levers:[{x:2600,y:410,doorX:3000,doorY:300,doorW:200,doorH:450,id:'cross1'}],
     shards:[{x:2060,y:210,id:8}],
     checkpoints:[{x:1400,y:530},{x:2400,y:480},{x:3050,y:420}],
     wind:[{x:2400,y:300,w:200,h:300,forceX:0,forceY:-3}],
@@ -2535,7 +2535,7 @@ var LEVELS=[
       {x:1600,y:734,w:300,h:16,spikeInterval:4,spikeDuration:1.5,phaseOffset:0},
       {x:3200,y:734,w:300,h:16,spikeInterval:3.5,spikeDuration:1.5,phaseOffset:2},
     ],
-    levers:[{x:2900,y:480}],
+    levers:[{x:2900,y:480,doorX:3000,doorY:300,doorW:200,doorH:450,id:'flow1'}],
     shards:[{x:2460,y:210,id:9}],
     checkpoints:[{x:1200,y:480},{x:2000,y:380},{x:3100,y:410}],
     ice:[{x:500,y:496,w:80,h:16},{x:2900,y:496,w:80,h:16},{x:3600,y:416,w:80,h:16}],
@@ -2576,7 +2576,7 @@ var LEVELS=[
     anchors:[{x:600,y:350},{x:1100,y:280},{x:1600,y:200},{x:2300,y:150},{x:2900,y:120},{x:3500,y:180}],
     saws:[{x:2500,y:730,r:25}],
     checkpoints:[{x:1900,y:400},{x:2700,y:530},{x:3900,y:360}],
-    portals:[{x1:440,y1:500,x2:1700,y2:460,r:18}],
+    portals:[{x1:440,y1:500,x2:1700,y2:460,r:10}],
     disappearingPlatforms:[
       {x:1200,y:480,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
       {x:2900,y:450,w:80,h:16,visibleTime:4,hiddenTime:2.5,phaseOffset:1},
@@ -2627,8 +2627,8 @@ var LEVELS=[
       {x:3100,y:550,w:80,h:16,axis:'x',range:200,speed:1.0},
     ],
     levers:[
-      {x:1350,y:614,doorX:2050,doorY:650,doorW:20,doorH:100,id:'laby1'},
-      {x:2250,y:264,doorX:2480,doorY:650,doorW:20,doorH:100,id:'laby2'},
+      {x:1350,y:614,doorX:2050,doorY:350,doorW:50,doorH:450,id:'laby1'},
+      {x:2250,y:264,doorX:2400,doorY:350,doorW:100,doorH:450,id:'laby2'},
     ],
     disappearingPlatforms:[
       {x:320,y:450,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
@@ -2763,11 +2763,11 @@ var LEVELS=[
     anchors:[{x:500,y:350},{x:900,y:280},{x:1300,y:200},{x:2500,y:150},{x:3100,y:120}],
     saws:[{x:2000,y:680,r:28}],
     checkpoints:[{x:1900,y:480},{x:2600,y:430},{x:3500,y:460}],
-    portals:[{x1:255,y1:560,x2:2400,y2:460,r:18}],
+    portals:[{x1:265,y1:560,x2:2400,y2:460,r:10}],
     darkness:[{startX:-300,speed:0.7,height:1000}],
     levers:[
-      {x:550,y:514,doorX:2280,doorY:650,doorW:20,doorH:100,id:'razl1'},
-      {x:2900,y:464,doorX:3280,doorY:650,doorW:20,doorH:100,id:'razl2'},
+      {x:550,y:514,doorX:2000,doorY:300,doorW:300,doorH:450,id:'razl1'},
+      {x:2900,y:464,doorX:3100,doorY:300,doorW:200,doorH:450,id:'razl2'},
     ],
     disappearingPlatforms:[
       {x:1100,y:500,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
@@ -2958,9 +2958,9 @@ var LEVELS=[
     anchors:[{x:600,y:350},{x:1100,y:250},{x:1600,y:180},{x:2200,y:150},{x:3000,y:120},{x:3800,y:130}],
     checkpoints:[{x:1700,y:480},{x:3400,y:460}],
     springs:[{x:700,y:560,w:40,h:16,force:-24}],
-    portals:[{x1:3100,y1:460,x2:4100,y2:390,r:18}],
+    portals:[{x1:3110,y1:460,x2:4100,y2:390,r:10}],
     levers:[
-      {x:1960,y:404,doorX:2100,doorY:700,doorW:20,doorH:100,id:'vortex18'},
+      {x:1960,y:404,doorX:2200,doorY:300,doorW:200,doorH:500,id:'vortex18'},
     ],
     disappearingPlatforms:[
       {x:3600,y:420,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
@@ -3007,9 +3007,9 @@ var LEVELS=[
     spikes:[{x:440,y:730,w:60},{x:960,y:730,w:60},{x:2050,y:730,w:60},{x:2750,y:730,w:60}],
     saws:[{x:1700,y:680,r:25},{x:2900,y:680,r:28},{x:4700,y:680,r:25}],
     levers:[
-      {x:600,y:384,doorX:680,doorY:650,doorW:20,doorH:100,id:'gate1'},
-      {x:1700,y:414,doorX:1800,doorY:650,doorW:20,doorH:100,id:'gate2'},
-      {x:2280,y:384,doorX:2440,doorY:650,doorW:20,doorH:100,id:'gate3'},
+      {x:600,y:384,doorX:900,doorY:300,doorW:200,doorH:450,id:'gate1'},
+      {x:1700,y:414,doorX:1900,doorY:300,doorW:200,doorH:450,id:'gate2'},
+      {x:2280,y:384,doorX:2400,doorY:300,doorW:200,doorH:450,id:'gate3'},
     ],
     anchors:[{x:1200,y:250},{x:2000,y:180},{x:3100,y:150}],
     enemies:[
@@ -3116,14 +3116,14 @@ var LEVELS=[
     spikes:[{x:440,y:780,w:60},{x:960,y:780,w:60},{x:2050,y:780,w:80}],
     saws:[{x:1700,y:730,r:25},{x:2900,y:730,r:28},{x:4100,y:730,r:25}],
     anchors:[{x:800,y:300},{x:1600,y:200},{x:2200,y:150},{x:3000,y:120},{x:3800,y:100}],
-    portals:[{x1:450,y1:510,x2:1700,y2:460,r:18}],
+    portals:[{x1:440,y1:510,x2:1700,y2:460,r:10}],
     checkpoints:[{x:1200,y:460},{x:2400,y:430},{x:3320,y:430},{x:4250,y:430}],
     enemies:[
       {x:1600,y:760,range:180,speed:2.0},
       {x:3600,y:760,range:200,speed:2.2},
     ],
     levers:[
-      {x:2060,y:384,doorX:2300,doorY:700,doorW:20,doorH:100,id:'mirror1'},
+      {x:2060,y:384,doorX:2400,doorY:300,doorW:200,doorH:500,id:'mirror1'},
     ],
     disappearingPlatforms:[
       {x:950,y:500,w:80,h:16,visibleTime:3,hiddenTime:2,phaseOffset:0},
@@ -3288,8 +3288,8 @@ var LEVELS=[
     spikes:[{x:430,y:830,w:40},{x:830,y:830,w:40},{x:1730,y:830,w:60},{x:2850,y:830,w:40},{x:3750,y:830,w:40}],
     saws:[{x:700,y:780,r:25},{x:1700,y:780,r:28},{x:2600,y:780,r:25},{x:3700,y:780,r:28},{x:5100,y:780,r:25}],
     levers:[
-      {x:980,y:464,doorX:1080,doorY:750,doorW:20,doorH:100,id:'knot1'},
-      {x:3250,y:404,doorX:3400,doorY:750,doorW:20,doorH:100,id:'knot2'},
+      {x:980,y:464,doorX:1200,doorY:350,doorW:200,doorH:500,id:'knot1'},
+      {x:3250,y:404,doorX:3600,doorY:350,doorW:200,doorH:500,id:'knot2'},
     ],
     fallingPlatforms:[
       {x:1150,y:700,w:80,h:16},{x:1350,y:640,w:80,h:16},
@@ -3309,7 +3309,7 @@ var LEVELS=[
     ],
     wind:[{x:3000,y:300,w:200,h:250,forceX:0,forceY:-3}],
     ice:[{x:3850,y:476,w:80,h:16},{x:4050,y:426,w:80,h:16}],
-    portals:[{x1:750,y1:510,x2:1550,y2:440,r:18}],
+    portals:[{x1:760,y1:510,x2:1550,y2:440,r:10}],
     springs:[{x:500,y:580,w:40,h:16,force:-24},{x:4350,y:430,w:40,h:16,force:-20}],
     checkpoints:[{x:1150,y:480},{x:2370,y:410},{x:3500,y:470},{x:4550,y:380}],
     darkness:[{startX:-200,speed:1.0,height:1100}],
@@ -3372,7 +3372,7 @@ var LEVELS=[
       {x:3700,y:200,r:30,length:250,speed:2.2},
     ],
     ice:[{x:3100,y:476,w:60,h:16},{x:3300,y:416,w:60,h:16}],
-    portals:[{x1:280,y1:660,x2:2800,y2:460,r:18}],
+    portals:[{x1:270,y1:660,x2:2800,y2:460,r:10}],
     springs:[{x:900,y:550,w:40,h:16,force:-24},{x:4100,y:460,w:40,h:16,force:-20}],
     checkpoints:[{x:1600,y:480},{x:2800,y:480},{x:3600,y:470},{x:5100,y:450}],
     darkness:[{startX:-300,speed:1.0,height:1100}],
@@ -3430,8 +3430,8 @@ var LEVELS=[
     spikes:[{x:440,y:830,w:60},{x:830,y:830,w:40},{x:1240,y:830,w:60},{x:2140,y:830,w:60},{x:3130,y:830,w:60}],
     saws:[{x:1600,y:780,r:28},{x:2400,y:780,r:25},{x:3700,y:780,r:28},{x:5300,y:780,r:25}],
     levers:[
-      {x:3780,y:384,doorX:3900,doorY:750,doorW:20,doorH:100,id:'vortex1'},
-      {x:1480,y:404,doorX:1600,doorY:750,doorW:20,doorH:100,id:'vortex2'},
+      {x:3780,y:384,doorX:3900,doorY:350,doorW:200,doorH:500,id:'vortex1'},
+      {x:1480,y:404,doorX:1700,doorY:350,doorW:200,doorH:500,id:'vortex2'},
     ],
     anchors:[{x:500,y:400},{x:1100,y:300},{x:1800,y:200},{x:2500,y:150},{x:3200,y:120},{x:3900,y:100},{x:4600,y:80},{x:5300,y:60}],
     enemies:[
@@ -3447,7 +3447,7 @@ var LEVELS=[
       {x:4500,y:500,w:80,h:16,axis:'y',range:120,speed:0.9},
     ],
     wind:[{x:2000,y:350,w:200,h:200,forceX:0,forceY:-4}],
-    portals:[{x1:460,y1:560,x2:1700,y2:440,r:18}],
+    portals:[{x1:460,y1:560,x2:1700,y2:440,r:10}],
     springs:[{x:1200,y:480,w:40,h:16,force:-24}],
     checkpoints:[{x:1420,y:400},{x:2120,y:480},{x:3000,y:450},{x:4950,y:410}],
     disappearingPlatforms:[
@@ -3517,7 +3517,7 @@ var LEVELS=[
       {x:2600,y:550,w:80,h:16,axis:'x',range:200,speed:1.3},
     ],
     springs:[{x:2900,y:480,w:40,h:16,force:-26}],
-    portals:[{x1:260,y1:610,x2:2600,y2:440,r:18}],
+    portals:[{x1:260,y1:610,x2:2600,y2:440,r:10}],
     checkpoints:[{x:1050,y:480},{x:2610,y:460},{x:3650,y:450},{x:4650,y:410}],
     darkness:[{startX:-300,speed:0.9,height:1000}],
     flashlight:true,
@@ -3576,9 +3576,9 @@ var LEVELS=[
     spikes:[{x:440,y:780,w:60},{x:960,y:780,w:60},{x:2050,y:780,w:60},{x:2750,y:780,w:60},{x:3550,y:780,w:60},{x:4250,y:780,w:60}],
     saws:[{x:1300,y:730,r:25},{x:2200,y:730,r:28},{x:3400,y:730,r:25},{x:5100,y:730,r:28}],
     levers:[
-      {x:630,y:434,doorX:760,doorY:700,doorW:20,doorH:100,id:'trial1'},
-      {x:1490,y:314,doorX:1650,doorY:700,doorW:20,doorH:100,id:'trial2'},
-      {x:2380,y:484,doorX:2550,doorY:700,doorW:20,doorH:100,id:'trial3'},
+      {x:630,y:434,doorX:900,doorY:300,doorW:200,doorH:500,id:'trial1'},
+      {x:1490,y:314,doorX:1900,doorY:300,doorW:200,doorH:500,id:'trial2'},
+      {x:2380,y:484,doorX:2400,doorY:300,doorW:200,doorH:500,id:'trial3'},
     ],
     pendulums:[
       {x:3200,y:180,r:30,length:250,speed:2.2},
@@ -3661,8 +3661,8 @@ var LEVELS=[
       {x:4400,y:200,r:35,length:280,speed:2.0},
     ],
     levers:[
-      {x:3080,y:464,doorX:3200,doorY:800,doorW:20,doorH:100,id:'exodus1'},
-      {x:1860,y:404,doorX:2000,doorY:800,doorW:20,doorH:100,id:'exodus2'},
+      {x:3080,y:464,doorX:3300,doorY:350,doorW:200,doorH:550,id:'exodus1'},
+      {x:1860,y:404,doorX:2000,doorY:350,doorW:200,doorH:550,id:'exodus2'},
     ],
     anchors:[{x:500,y:400},{x:1000,y:300},{x:1600,y:200},{x:2200,y:150},{x:2800,y:120},{x:3400,y:100},{x:4000,y:80},{x:4700,y:60},{x:5300,y:60},{x:5900,y:50}],
     enemies:[
@@ -3677,7 +3677,7 @@ var LEVELS=[
     ],
     wind:[{x:4000,y:350,w:200,h:200,forceX:0,forceY:-4}],
     ice:[{x:3350,y:476,w:60,h:16},{x:3550,y:416,w:60,h:16}],
-    portals:[{x1:460,y1:610,x2:2100,y2:440,r:18}],
+    portals:[{x1:460,y1:610,x2:2100,y2:440,r:10}],
     springs:[{x:1350,y:400,w:40,h:16,force:-26},{x:5000,y:430,w:40,h:16,force:-22}],
     checkpoints:[{x:1600,y:480},{x:2600,y:480},{x:3350,y:450},{x:5000,y:420}],
     darkness:[{startX:-300,speed:1.2,height:1200}],
@@ -3994,22 +3994,21 @@ function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZ
       }
     }
   }
-  // Portal teleport
+  // Portal teleport — trap! Sends player to level start, ignoring checkpoints
   if((a.label==='portalZone'&&b.label==='player')||(b.label==='portalZone'&&a.label==='player')){
-    var ptBody=(a.label==='portalZone')?a:b;
     for(var pti=0;pti<levelPortals.length;pti++){
       var pt=levelPortals[pti];
       if(pt.cooldown<=0){
-        var otherX,otherY;
-        if(pt.body1===ptBody){otherX=pt.x2;otherY=pt.y2}
-        else if(pt.body2===ptBody){otherX=pt.x1;otherY=pt.y1}
-        else continue;
-        MBody.setPosition(player.body,{x:otherX,y:otherY});
-        pt.cooldown=0.5;
-        spawnParticles(pt.x1,pt.y1,10,0x5a7acc,{speed:2,life:0.5,size:2.5,gravity:0});
-        spawnParticles(pt.x2,pt.y2,10,0x5a7acc,{speed:2,life:0.5,size:2.5,gravity:0});
-        tgHaptic('medium');sfxPortal();
-        state.flashColor=0x3a4a9a;state.flashAlpha=0.12;state.flashTimer=0.15;
+        // Teleport to level start (ignores checkpoints!)
+        var lvl=LEVELS[state.level];
+        MBody.setPosition(player.body,{x:lvl.spawn.x,y:lvl.spawn.y});
+        MBody.setVelocity(player.body,{x:0,y:0});
+        // Clear checkpoint so death also returns to start
+        state.lastCheckpoint=null;
+        pt.cooldown=1.0;
+        spawnParticles(player.body.position.x,player.body.position.y,12,0x8a2a2a,{speed:2.5,life:0.6,size:3,gravity:0});
+        tgHaptic('heavy');sfxPortal();
+        state.flashColor=0x8a2a2a;state.flashAlpha=0.25;state.flashTimer=0.3;
         break;
       }
     }
@@ -4057,9 +4056,9 @@ function updatePlayer(dt){
   if(player.inputInteractPressed&&player.nearLever){activateLever(player.nearLever);player.inputInteractPressed=false}else player.inputInteractPressed=false;
   // Thread (T key) - attach/detach
   if(player.inputThreadPressed){player.inputThreadPressed=false;if(thread.active){detachThread()}else{shootThread()}}
-  // Check nearby levers
+  // Check nearby levers (allow interaction with all — they toggle)
   player.nearLever=null;
-  for(var i=0;i<levelLevers.length;i++){var lv=levelLevers[i];if(!lv.activated){var dx=player.body.position.x-(lv.x+8);var dy=player.body.position.y-(lv.y+8);if(Math.sqrt(dx*dx+dy*dy)<50){player.nearLever=lv;break}}}
+  for(var i=0;i<levelLevers.length;i++){var lv=levelLevers[i];if(lv.doorW){var dx=player.body.position.x-(lv.x+8);var dy=player.body.position.y-(lv.y+8);if(Math.sqrt(dx*dx+dy*dy)<50){player.nearLever=lv;break}}}
   document.getElementById('hud-interact').style.display=player.nearLever?'block':'none';
 
   // Dash
@@ -4414,7 +4413,32 @@ function createLever(data){
   // Door
   var doorBody=MBodies.rectangle(data.doorX+data.doorW/2,data.doorY+data.doorH/2,data.doorW,data.doorH,{isStatic:true,label:'door'});
   MWorld.add(world,doorBody);
-  var doorSpr=new PIXI.Graphics();doorSpr.rect(0,0,data.doorW,data.doorH);doorSpr.fill(0x2a2a3e);doorSpr.rect(0,0,2,data.doorH);doorSpr.fill(0x3e3e52);doorSpr.rect(data.doorW-2,0,2,data.doorH);doorSpr.fill(0x3e3e52);doorSpr.x=data.doorX;doorSpr.y=data.doorY;gameContainer.addChild(doorSpr);
+  var doorSpr=new PIXI.Graphics();
+  doorSpr.rect(0,0,data.doorW,data.doorH);doorSpr.fill(0x2a2a3e);
+  // Side edges
+  doorSpr.rect(0,0,3,data.doorH);doorSpr.fill(0x3e3e52);
+  doorSpr.rect(data.doorW-3,0,3,data.doorH);doorSpr.fill(0x3e3e52);
+  // Vertical ribs for wide doors
+  if(data.doorW>40){
+    var ribs=Math.floor(data.doorW/50);
+    for(var ri=1;ri<=ribs;ri++){
+      var rx=Math.floor(ri*data.doorW/(ribs+1));
+      if(rx>3&&rx<data.doorW-3){
+        doorSpr.rect(rx-1,0,2,data.doorH);doorSpr.fill(0x3a3a50);
+      }
+    }
+  }
+  // Horizontal bands
+  var bands=Math.floor(data.doorH/60);
+  for(var bi=1;bi<=bands;bi++){
+    var by=bi*60;
+    if(by<data.doorH){
+      doorSpr.rect(0,by-1,data.doorW,2);doorSpr.fill(0x3e3e52);
+    }
+  }
+  // Top cap
+  doorSpr.rect(0,0,data.doorW,3);doorSpr.fill(0x4e4e62);
+  doorSpr.x=data.doorX;doorSpr.y=data.doorY;gameContainer.addChild(doorSpr);
   levelLevers.push({body:body,sprite:spr,_gfx:g,x:data.x,y:data.y,doorBody:doorBody,doorSprite:doorSpr,doorX:data.doorX,doorY:data.doorY,doorW:data.doorW,doorH:data.doorH,activated:false,id:data.id});
 }
 function updateLevers(){
@@ -4423,19 +4447,30 @@ function updateLevers(){
     // Base
     g.rect(2,10,12,6);g.fill(0x6a6a82);
     // Handle
-    if(lv.activated){g.moveTo(8,10);g.lineTo(4,0);g.stroke({width:3,color:0x3a5a3a})}
-    else{g.moveTo(8,10);g.lineTo(12,0);g.stroke({width:3,color:0x5a3a2a})}
-    // Glow hint if nearby
-    if(!lv.activated&&player.nearLever===lv){g.circle(8,-2,3);g.fill({color:0x8a7a4a,alpha:0.3+Math.sin(player.animTime*4)*0.15})}
+    if(lv.activated){g.moveTo(8,10);g.lineTo(4,0);g.stroke({width:3,color:0x4a8a4a})}
+    else{g.moveTo(8,10);g.lineTo(12,0);g.stroke({width:3,color:0x8a5a2a})}
+    // Glow hint if nearby (always show — levers are toggleable)
+    if(player.nearLever===lv){g.circle(8,-2,3);g.fill({color:lv.activated?0x4a8a4a:0x8a7a4a,alpha:0.3+Math.sin(player.animTime*4)*0.15})}
     lv.sprite.x=lv.x;lv.sprite.y=lv.y;
   }
 }
 function activateLever(lv){
-  if(lv.activated)return;lv.activated=true;tgHaptic('medium');sfxLever();
-  // Open door - animate it rising
-  spawnParticles(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,8,0x5a5a72,{speed:1.5,life:0.5,size:2,gravity:0.3});
-  MWorld.remove(world,lv.doorBody);
-  lv.doorSprite.visible=false;
+  if(!lv.doorW)return; // lever with no door — nothing to toggle
+  if(lv.activated){
+    // Toggle OFF — close door
+    lv.activated=false;tgHaptic('medium');sfxLever();
+    // Re-create door body at original position
+    lv.doorBody=MBodies.rectangle(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,lv.doorW,lv.doorH,{isStatic:true,label:'door'});
+    MWorld.add(world,lv.doorBody);
+    lv.doorSprite.visible=true;
+    spawnParticles(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,8,0x8a4a4a,{speed:1.5,life:0.5,size:2,gravity:0.3});
+  }else{
+    // Toggle ON — open door
+    lv.activated=true;tgHaptic('medium');sfxLever();
+    spawnParticles(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,8,0x5a5a72,{speed:1.5,life:0.5,size:2,gravity:0.3});
+    MWorld.remove(world,lv.doorBody);
+    lv.doorSprite.visible=false;
+  }
 }
 
 // ═══ ENEMIES (SHADOWS) ═══
@@ -4701,51 +4736,41 @@ function updateIce(dt){
   }
 }
 
-// ═══ PORTALS ═══
+// ═══ PORTALS (Traps) ═══
 function createPortalPair(data){
-  var r=data.r||20;
+  var r=data.r||10;
+  // Portals are now traps — single entry point that sends player to level start
   var body1=MBodies.circle(data.x1,data.y1,r,{isStatic:true,isSensor:true,label:'portalZone'});
-  var body2=MBodies.circle(data.x2,data.y2,r,{isStatic:true,isSensor:true,label:'portalZone'});
-  MWorld.add(world,body1);MWorld.add(world,body2);
+  MWorld.add(world,body1);
   var spr1=new PIXI.Container();gameContainer.addChild(spr1);
   var g1=new PIXI.Graphics();spr1.addChild(g1);
-  var spr2=new PIXI.Container();gameContainer.addChild(spr2);
-  var g2=new PIXI.Graphics();spr2.addChild(g2);
-  levelPortals.push({body1:body1,body2:body2,sprite1:spr1,sprite2:spr2,_gfx1:g1,_gfx2:g2,x1:data.x1,y1:data.y1,x2:data.x2,y2:data.y2,r:r,cooldown:0,link:data});
+  levelPortals.push({body1:body1,body2:null,sprite1:spr1,sprite2:null,_gfx1:g1,_gfx2:null,x1:data.x1,y1:data.y1,x2:data.x2||data.x1,y2:data.y2||data.y1,r:r,cooldown:0,link:data});
 }
 function updatePortals(dt){
   for(var i=0;i<levelPortals.length;i++){
     var pt=levelPortals[i];
     var t=sawTime;
-    // Draw portal 1
+    // Draw portal (trap — dangerous red/dark appearance)
     var g1=pt._gfx1;g1.clear();
-    // Outer ring
-    g1.circle(0,0,pt.r);g1.stroke({width:2,color:0x3a4a9a});
-    // Inner swirl
+    // Outer ring — pulsing red
+    var pulse=0.7+Math.sin(t*3)*0.3;
+    g1.circle(0,0,pt.r);g1.stroke({width:2,color:0x9a2a2a});
+    // Inner swirl — red/dark energy
     for(var j=0;j<3;j++){
       var a=(t*2+j*Math.PI*2/3);
-      var sx=Math.cos(a)*(pt.r*0.5);var sy=Math.sin(a)*(pt.r*0.5);
-      g1.circle(sx,sy,3);g1.fill({color:0x5a7acc,alpha:0.6});
+      var sx=Math.cos(a)*(pt.r*0.4);var sy=Math.sin(a)*(pt.r*0.4);
+      g1.circle(sx,sy,2);g1.fill({color:0xcc4a4a,alpha:0.7});
     }
-    // Center glow
-    g1.circle(0,0,pt.r*0.4);g1.fill({color:0x7a9aee,alpha:0.15+Math.sin(t*3)*0.05});
+    // Center glow — ominous dark red
+    g1.circle(0,0,pt.r*0.35);g1.fill({color:0xaa3a3a,alpha:0.2*pulse+0.1});
+    // Danger indicator ring
+    g1.circle(0,0,pt.r+3);g1.stroke({width:1,color:0x6a2a2a,alpha:pulse*0.4});
     pt.sprite1.x=pt.x1;pt.sprite1.y=pt.y1;
-    // Draw portal 2 (same pattern)
-    var g2=pt._gfx2;g2.clear();
-    g2.circle(0,0,pt.r);g2.stroke({width:2,color:0x3a4a9a});
-    for(var j=0;j<3;j++){
-      var a=(-t*2+j*Math.PI*2/3);
-      var sx=Math.cos(a)*(pt.r*0.5);var sy=Math.sin(a)*(pt.r*0.5);
-      g2.circle(sx,sy,3);g2.fill({color:0x5a7acc,alpha:0.6});
-    }
-    g2.circle(0,0,pt.r*0.4);g2.fill({color:0x7a9aee,alpha:0.15+Math.sin(t*3)*0.05});
-    pt.sprite2.x=pt.x2;pt.sprite2.y=pt.y2;
     // Cooldown
     if(pt.cooldown>0)pt.cooldown-=dt;
-    // Occasional sparkle particles
+    // Occasional dark sparkle particles
     if(Math.random()<0.03){
-      spawnParticles(pt.x1,pt.y1,1,0x5a7acc,{speed:0.5,life:0.4,size:1.5,gravity:0});
-      spawnParticles(pt.x2,pt.y2,1,0x5a7acc,{speed:0.5,life:0.4,size:1.5,gravity:0});
+      spawnParticles(pt.x1,pt.y1,1,0x8a3a3a,{speed:0.5,life:0.4,size:1.5,gravity:0});
     }
   }
 }
@@ -5176,7 +5201,7 @@ var tutorial={
     {id:'wall',level:1,trigger:'wall',delay:0,text:'прижмись к стене — <span class="tip-key">◀</span> или <span class="tip-key">▶</span> — и прыгни <span class="tip-key">▲</span>'},
     {id:'saw',level:2,trigger:'time',delay:2,text:'опасайся пил — они не прощают'},
     {id:'gap',level:3,trigger:'time',delay:4,text:'бездна — тоже смерть. Не падай'},
-    {id:'lever',level:4,trigger:'lever',delay:0,text:'подойди к рычагу и нажми <span class="tip-key">✋</span>'},
+    {id:'lever',level:4,trigger:'lever',delay:0,text:'подойди к рычагу и нажми <span class="tip-key">✋</span> — он открывает дверь. Можно выключить!'},
     {id:'enemy',level:5,trigger:'time',delay:3,text:'тени патрулируют. Не попадайся им на пути'},
     {id:'enemy2',level:6,trigger:'time',delay:6,text:'тени слепы, но чувствуют движение'},
     {id:'thread',level:10,trigger:'time',delay:2,text:'нажми <span class="tip-key">↗</span> чтобы привязать нить к якорю'},
@@ -5185,7 +5210,7 @@ var tutorial={
     {id:'falling',level:12,trigger:'time',delay:3,text:'падающие платформы рушатся — не стой долго'},
     {id:'pendulum',level:15,trigger:'time',delay:3,text:'маятники качаются ритмично — просчитай тайминг'},
     {id:'multi_lever',level:19,trigger:'time',delay:2,text:'три рычага — три двери. Ищи все'},
-    {id:'portal',level:7,trigger:'time',delay:3,text:'порталы переносят тебя — шагни в один, выйдешь из другого'},
+    {id:'portal',level:6,trigger:'time',delay:3,text:'порталы — ловушки! Они возвращают в начало уровня. Обходи их по краю!'},
     {id:'spring',level:8,trigger:'time',delay:2,text:'пружины подбрасывают — используй для прыжка выше'},
     {id:'ice',level:9,trigger:'time',delay:2,text:'лёд скользкий — трудно остановиться. Планируй заранее'},
     {id:'wind',level:11,trigger:'time',delay:2,text:'ветер толкает — используй его или борись'},
@@ -6546,7 +6571,7 @@ function renderLoreScreen(){
     'Он очнулся. Не проснулся — именно очнулся. Как очнулся от удара. Не помнит что было до, не понимает где находится. Под ногами — обломки чьей-то памяти. Они держат, но едва. Повсюду шипы — это боль, которая ещё не забылась. Пилы — это страх, который ещё крутится. Он не знает зачем идёт. Он идёт потому что стоять страшнее. Тьмы ещё нет — она не нужна, он и так едва помнит себя. Выходы — это не двери. Это места где обломки памяти ещё достаточно плотные чтобы протиснуться дальше.',
     'Он провалился глубже. Платформы неустойчивые, двигающиеся, падающие — воспоминания которые уже рушатся. Всё давит. Цвета темнее. Враги появились — это чужие воспоминания которые стали агрессивными оттого что их никто не помнит. Они не злые. Они отчаянные. Пружины — это моменты когда чужая память случайно помогла. Не из доброты — просто совпадение. Он начинает замечать: Пустота не случайна. Здесь есть структура. Кто-то или что-то создавало это.',
     'Всё изменилось. Якоря — повсюду. Нить — его единственная опора. Каждый якорь — чьё-то «я помню тебя», и оно держит его в мире. Он раскачивается на нитях как на чужих руках — кто-то не даёт ему упасть. Но он начинает понимать: нити тянутся не только к нему. Они везде. Сотни нитей, тысячи — Пустота пронизана чужой памятью. Он не один здесь. Другие воспоминания тоже пытаются не раствориться. Нить — это попытка. Рычаги и двери — чужие воспоминания заперты потому что слишком болезненные. Рычаг — это разрешение. «Можно открыть. Можно вспомнить.»',
-    'Он исчезает. Не умирает — именно исчезает. Тело теряет чёткость. Движения замедляются. Платформы едва держат — он проваливается сквозь них если стоит слишком долго. Пустота уже не вокруг него — она в нём. Порталы — это чужие воспоминания настолько сильные что пробили Пустоту насквозь. Шагнуть в портал — значит на секунду оказаться в чужом воспоминании полностью. Лёд — это воспоминания которые замёрзли от безразличия. Никто не помнит — и они застыли. Может быть — перестать существовать не так страшно?',
+    'Он исчезает. Не умирает — именно исчезает. Тело теряет чёткость. Движения замедляются. Платформы едва держат — он проваливается сквозь них если стоит слишком долго. Пустота уже не вокруг него — она в нём. Порталы — это ловушки Пустоты. Они затягивают в себя и выбрасывают обратно в начало — стирают весь прогресс, игнорируют чекпоинты. Это не двери — это петли. Лёд — это воспоминания которые замёрзли от безразличия. Никто не помнит — и они застыли. Может быть — перестать существовать не так страшно?',
     'Он другой. Не сильнее — целее. Контуры снова чёткие. Глаза горят. Не от надежды — от упрямства. Он не знает зачем идёт. Но знает что не остановится. Ветер — это Пустота которая замечает его. Впервые — он не просто обломок. Он что-то что сопротивляется. И Пустота реагирует: пытается сдуть, оттолкнуть, не пустить. Враги здесь — другие. Они не отчаянные. Они злые. Потому что он — угроза. Воспоминание которое отказывается быть забытым — это аномалия. Другие воспоминания пытаются его остановить — не из ненависти, из самосохранения. Если он выживет — значит можно выжить. А они уже сдались.',
     'Он вспомнил. Не всё — но достаточно. Пустота — не тюрьма. Не могила. Пустота — это черновик. Место где воспоминания ждут пока кто-нибудь вспомнит их достаточно чётко чтобы они стали реальностью. Каждый выход с уровня — это не побег. Это момент когда воспоминание становится достаточно ясным чтобы существовать. Тьма в акте VI — последняя. Она не преследует — она стоит стеной. Потому что по ту сторону — то что он почти вспомнил. Уровни — самые странные. Платформы складываются в знакомые формы. Коридоры, комнаты, лестницы — архитектура чьей-то жизни. Он помнит что кого-то любил. Помнит что потерял. Помнит что решил забыть — потому что помнить было невыносимо. Он сам выбрал Пустоту. Но сейчас — он выбирает вернуться.'
   ];
