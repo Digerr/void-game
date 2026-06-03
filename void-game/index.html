@@ -757,6 +757,10 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Сиреневые кристаллы на полу — давильные плиты. Встань на плиту — привязанная дверь откроется. Слезешь — закроется! В отличие от рычагов, плиты работают только пока ты стоишь на них. Планируй маршрут: иногда нужно найти другой путь или пробежать быстро.</div>
       </div>
       <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">тень-двойник</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">На некоторых уровнях появляется тень — полупрозрачная копия, которая повторяет все твои движения с задержкой в 3 секунды. Она может стоять на давильных плитах за тебя! Планируй маршрут: встань на плиту, иди дальше — тень придёт и удержит её.</div>
+      </div>
+      <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">звёзды</div>
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">3 звезды = 0 смертей, 2 звезды = 1-3 смерти, 1 звезда = 4+ смертей. Собирай звёзды, чтобы доказать своё мастерство!</div>
       </div>
@@ -875,7 +879,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.17.1-beta';
+var VOID_VERSION='0.18.2-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -3856,49 +3860,54 @@ var LEVELS=[
   },
   {
     name:'Тень',story:'Она идёт за тобой. Не догоняет — повторяет. Используй это.',
-    width:4500,height:1000,spawn:{x:80,y:700},exit:{x:4300,y:360,w:40,h:80},
+    shadowDouble:true,
+    width:4200,height:950,spawn:{x:80,y:650},exit:{x:4000,y:350,w:40,h:80},
     platforms:[
-      {x:0,y:850,w:400,h:40},{x:600,y:850,w:400,h:40},{x:1200,y:850,w:400,h:40},
-      // Long platform — plate at the left, door blocking path to the right
-      {x:1800,y:850,w:800,h:40},
-      // After the door section
-      {x:2800,y:850,w:300,h:40},{x:3300,y:850,w:400,h:40},{x:3900,y:850,w:600,h:40},
-      // Floating platforms
-      {x:200,y:720,w:80,h:16},{x:450,y:620,w:80,h:16},{x:700,y:700,w:100,h:16},
-      {x:1000,y:600,w:80,h:16},{x:1300,y:680,w:80,h:16},
-      // Upper route — bypass after the door
-      {x:2400,y:600,w:80,h:16},{x:2700,y:520,w:80,h:16},
-      {x:3050,y:580,w:80,h:16},{x:3400,y:500,w:80,h:16},
-      {x:3700,y:460,w:80,h:16},
+      {x:0,y:800,w:500,h:40},{x:700,y:800,w:400,h:40},
+      // Long platform with pressure plate — plate on the left side, door blocking the path right
+      {x:1300,y:800,w:800,h:40},
+      // After the door — continue forward
+      {x:2300,y:800,w:400,h:40},{x:2900,y:800,w:400,h:40},{x:3500,y:800,w:500,h:40},
+      // Floating platforms — first section
+      {x:250,y:680,w:80,h:16},{x:500,y:580,w:80,h:16},{x:800,y:640,w:100,h:16},
+      {x:1100,y:560,w:80,h:16},
+      // After the door — upper route
+      {x:2600,y:600,w:80,h:16},{x:2900,y:520,w:80,h:16},
+      {x:3200,y:580,w:80,h:16},{x:3500,y:480,w:80,h:16},
+      {x:3800,y:420,w:80,h:16},
       // Exit platform
-      {x:4250,y:360,w:100,h:16},
+      {x:3950,y:350,w:100,h:16},
     ],
-    spikes:[{x:460,y:830,w:60},{x:1060,y:830,w:60},{x:2800,y:830,w:60},{x:3200,y:830,w:40}],
+    spikes:[{x:560,y:780,w:60},{x:1140,y:780,w:40},{x:2740,y:780,w:40}],
     pressurePlates:[
-      // Plate on the left, door further right on same platform — must dash through
-      {x:1900,y:840,w:60,h:10,door:{x:2400,y:750,w:16,h:100}},
+      // Player stands on plate → door opens. Player walks off → door closes.
+      // But 3s later, shadow arrives on plate → door stays open!
+      {x:1500,y:790,w:60,h:10,door:{x:1900,y:700,w:16,h:100}},
     ],
-    checkpoints:[{x:1200,y:580},{x:2800,y:500}],
-    shards:[{x:3740,y:420,id:33}],
+    checkpoints:[{x:1300,y:520},{x:2900,y:500}],
+    shards:[{x:3540,y:440,id:33}],
   },
   {
     name:'Слияние',story:'Два мира — один путь. Ты и тень должны работать вместе.',
+    shadowDouble:true,
     width:4800,height:1000,spawn:{x:80,y:700},exit:{x:4600,y:340,w:40,h:80},
     platforms:[
       {x:0,y:850,w:400,h:40},{x:600,y:850,w:400,h:40},
-      // Long platform with lever door blocking path
+      // First pressure plate platform — plate1 + door1 blocking path
       {x:1200,y:850,w:800,h:40},
-      // Pressure plate platform with plate door blocking path
+      // Second pressure plate platform — plate2 + door2 blocking path
       {x:2200,y:850,w:800,h:40},
-      // After both doors
+      // Lever platform (upper) — lever opens door3 permanently
+      {x:1500,y:650,w:100,h:16},
+      // After all doors
       {x:3200,y:850,w:400,h:40},{x:3800,y:850,w:400,h:40},{x:4300,y:850,w:500,h:40},
-      // Floating platforms — first section
+      // Floating platforms — first section approach
       {x:200,y:720,w:80,h:16},{x:450,y:620,w:80,h:16},{x:700,y:700,w:100,h:16},
-      // Lever on upper platform
+      // Route to lever (upper path from plate1 area)
       {x:1000,y:600,w:80,h:16},{x:1250,y:520,w:80,h:16},
-      // Upper platforms after lever
-      {x:1600,y:620,w:80,h:16},{x:1900,y:540,w:80,h:16},
-      // After doors — upper route
+      // After lever, descend back to ground level
+      {x:1750,y:620,w:80,h:16},{x:2000,y:720,w:80,h:16},
+      // After doors — upper route to exit
       {x:3400,y:600,w:80,h:16},{x:3700,y:520,w:80,h:16},
       {x:4000,y:460,w:80,h:16},{x:4300,y:400,w:80,h:16},
       // Exit platform
@@ -3907,7 +3916,10 @@ var LEVELS=[
     spikes:[{x:460,y:830,w:60},{x:1060,y:830,w:60},{x:3100,y:830,w:40},{x:3660,y:830,w:40}],
     levers:[{x:1250,y:520,doorX:1800,doorW:16,doorH:120,doorY:730,id:'lever1'}],
     pressurePlates:[
-      {x:2500,y:840,w:60,h:10,door:{x:2800,y:730,w:16,h:120}},
+      // Plate 1: player stands here, shadow takes over 3s later → door1 stays open
+      {x:1400,y:840,w:60,h:10,door:{x:1800,y:730,w:16,h:120}},
+      // Plate 2: further along, same mechanic — shadow helps keep it open
+      {x:2500,y:840,w:60,h:10,door:{x:2900,y:730,w:16,h:120}},
     ],
     checkpoints:[{x:1200,y:500},{x:3200,y:560}],
     shards:[{x:4040,y:420,id:34}],
@@ -4408,6 +4420,8 @@ function clearParticles(){for(var i=0;i<particles.length;i++){if(particles[i].sp
 var player={body:null,sprite:null,speed:6.5,accelGround:80,accelAir:55,decelGround:70,decelAir:30,jumpForce:-13.5,wallJumpForceX:10,wallJumpForceY:-12.5,dashSpeed:18,dashDuration:0.13,dashCooldown:0.4,gravityUp:1.1,gravityDown:2.0,apexThreshold:2.5,apexGravityMult:0.5,airControlBonus:0.85,terminalVelocity:16,onGround:false,wasOnGround:false,onCeiling:false,onWallLeft:false,onWallRight:false,wallSliding:false,facing:1,alive:true,coyoteTime:0,jumpBuffer:0,inputX:0,inputJump:false,inputJumpPressed:false,inputDashPressed:false,inputInteractPressed:false,inputThreadPressed:false,dashing:false,dashTimer:0,dashCooldownTimer:0,dashDir:1,animTime:0,runCycle:0,lastGroundY:0,justLanded:false,nearLever:null,velocityX:0,squashX:1,squashY:1,squashTimer:0,squashDur:0.15,squashFromX:1,squashFromY:1,landSquashTimer:0,visualFacing:1,visualFacingTimer:0};
 var playerSensorGround=null,playerSensorCeiling=null,playerSensorLeft=null,playerSensorRight=null;
 var COYOTE_DURATION=0.12,JUMP_BUFFER_DURATION=0.12,WALL_SLIDE_SPEED=2.0,PLAYER_W=18,PLAYER_H=34,TERMINAL_VELOCITY=16,JUMP_CUT_MULTIPLIER=0.55;
+// Shadow Double — semi-transparent copy that follows player with 3s delay
+var shadowDouble={active:false,body:null,sprite:null,_gfx:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]};
 
 function createPlayer(x,y){
   player.body=MBodies.rectangle(x,y,PLAYER_W,PLAYER_H,{label:'player',friction:0.001,frictionStatic:0.001,restitution:0,density:0.002,inertia:Infinity,inverseInertia:0});
@@ -4914,7 +4928,9 @@ function killPlayer(cause){if(!player.alive)return;player.alive=false;if(thread.
   setTimeout(function(){state.slowMo=1;state.slowMoTimer=0;showDeathScreen(cause)},700)}
 
 function respawnPlayer(){if(player.sprite){player.sprite.destroy();player.sprite=null;player._gfx=null}if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorCeiling'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);/* timer NOT reset here — keeps total level time accurate */// Reset pursuing darkness position to behind the respawn point
-for(var di=0;di<levelDarkness.length;di++){var dk=levelDarkness[di];dk.x=Math.min(dk.x,sp.x-400);dk.warningShown=false}}
+for(var di=0;di<levelDarkness.length;di++){var dk=levelDarkness[di];dk.x=Math.min(dk.x,sp.x-400);dk.warningShown=false}
+// Reset shadow double recording on death
+if(shadowDouble.active){shadowDouble.recording=[];shadowDouble.elapsed=0;shadowDouble.replayTime=0;if(shadowDouble.body){MBody.setPosition(shadowDouble.body,{x:sp.x,y:sp.y});MBody.setVelocity(shadowDouble.body,{x:0,y:0})}}}
 
 // ═══ SAW BLADES ═══
 var sawBodies=[],sawSprites=[],sawTime=0;
@@ -5192,7 +5208,7 @@ function createPressurePlate(data){
     x:data.x,y:data.y,w:data.w,h:data.h,
     doorBody:doorBody,doorSprite:doorSpr,
     doorX:doorData.x,doorY:doorData.y,doorW:doorData.w,doorH:doorData.h,
-    active:false,playerOn:false
+    active:false,playerOn:false,shadowOn:false
   });
 }
 function updatePressurePlates(dt){
@@ -5209,15 +5225,26 @@ function updatePressurePlates(dt){
       var inY=Math.abs(py+PLAYER_H/2-pp.y)<24;
       pp.playerOn=inX&&inY&&player.onGround;
     }
+    // Check if shadow double is standing on the plate
+    pp.shadowOn=false;
+    if(shadowDouble.active&&shadowDouble.body&&shadowDouble.elapsed>=shadowDouble.delay){
+      var sx=shadowDouble.body.position.x;
+      var sy=shadowDouble.body.position.y;
+      var sinX=sx>pp.x-8&&sx<pp.x+pp.w+8;
+      var sinY=Math.abs(sy+(PLAYER_H-2)/2-pp.y)<24;
+      pp.shadowOn=sinX&&sinY;
+    }
+    // Either player or shadow can activate the plate
+    var shouldActive=pp.playerOn||pp.shadowOn;
     // Activate/deactivate
-    if(pp.playerOn&&!pp.active){
+    if(shouldActive&&!pp.active){
       pp.active=true;
       // Open door
       MWorld.remove(world,pp.doorBody);
       pp.doorSprite.visible=false;
       spawnParticles(pp.doorX+pp.doorW/2,pp.doorY+pp.doorH/2,8,0x7a5aaa,{speed:1.5,life:0.5,size:2,gravity:0.3});
       tgHaptic('light');sfxLever();
-    }else if(!pp.playerOn&&pp.active){
+    }else if(!shouldActive&&pp.active){
       pp.active=false;
       // Close door
       pp.doorBody=MBodies.rectangle(pp.doorX+pp.doorW/2,pp.doorY+pp.doorH/2,pp.doorW,pp.doorH,{isStatic:true,label:'door'});
@@ -5264,6 +5291,138 @@ function updatePressurePlates(dt){
       }
     }
   }
+}
+
+// ═══ SHADOW DOUBLE ═══
+function createShadowDouble(x,y){
+  // Shadow is a sensor body — doesn't physically block the player
+  shadowDouble.body=MBodies.rectangle(x,y,PLAYER_W-2,PLAYER_H-2,{label:'shadowDouble',isSensor:true,isStatic:false,density:0.001});
+  MWorld.add(world,shadowDouble.body);
+  // Visual container
+  shadowDouble.sprite=new PIXI.Container();gameContainer.addChild(shadowDouble.sprite);
+  shadowDouble._gfx=new PIXI.Graphics();shadowDouble.sprite.addChild(shadowDouble._gfx);
+  // Glow layer (behind shadow)
+  shadowDouble._glowGfx=new PIXI.Graphics();shadowDouble.sprite.addChildAt(shadowDouble._glowGfx,0);
+  shadowDouble.active=true;
+  shadowDouble.recording=[];
+  shadowDouble.replayTime=0;
+  shadowDouble.elapsed=0;
+  shadowDouble.trailParticles=[];
+  shadowDouble.sprite.alpha=0;
+}
+function drawShadowDouble(t){
+  if(!shadowDouble.active||!shadowDouble.sprite||!shadowDouble._gfx)return;
+  var g=shadowDouble._gfx;g.clear();
+  var glow=shadowDouble._glowGfx;glow.clear();
+  // Fade in during delay period
+  var fadeProgress=Math.min(1,shadowDouble.elapsed/1.5);
+  var shadowVisible=shadowDouble.elapsed>=shadowDouble.delay;
+  if(!shadowVisible){
+    // During delay: show ghostly hint at spawn with low opacity
+    shadowDouble.sprite.alpha=fadeProgress*0.15;
+    // Faint pulsing outline
+    var pa=0.1+Math.sin(t*3)*0.05;
+    g.circle(0,-8,12);g.fill({color:0x6a4a8a,alpha:pa});
+    g.rect(-7,-1,14,18);g.fill({color:0x6a4a8a,alpha:pa*0.7});
+    return;
+  }
+  shadowDouble.sprite.alpha=fadeProgress*0.55;
+  // Pulse effect
+  var pulse=0.5+Math.sin(t*2.5)*0.08;
+  // Glow aura
+  glow.circle(0,-4,22);glow.fill({color:0x7a5aaa,alpha:pulse*0.12});
+  glow.circle(0,-4,14);glow.fill({color:0x8a6aba,alpha:pulse*0.18});
+  // Body — dark lavender/purple version of player
+  var bodyBob=Math.sin(t*2)*0.5;
+  // Scarf
+  var scarfEndX=Math.sin(t*1.5)*4;
+  var scarfEndY=-PLAYER_H/2-2+bodyBob*0.3+Math.sin(t*1.8)*1.2;
+  g.moveTo(-1,-PLAYER_H/2+3+bodyBob*0.3);g.quadraticCurveTo(scarfEndX,scarfEndY+3,scarfEndX-2.5,scarfEndY+9);g.stroke({width:2.5,color:0x8a6aaa,alpha:pulse});
+  g.moveTo(0,-PLAYER_H/2+4+bodyBob*0.3);g.quadraticCurveTo(scarfEndX+1.5,scarfEndY+5,scarfEndX-1,scarfEndY+11);g.stroke({width:2,color:0x7a5a9a,alpha:pulse*0.8});
+  // Body
+  var torsoY=-PLAYER_H/2+6+bodyBob;
+  g.ellipse(0,torsoY+3,7,9);g.fill({color:0x6a4a8a,alpha:pulse});
+  // Head
+  var headY=-PLAYER_H/2-9+bodyBob*0.5;
+  g.circle(0,headY,9);g.fill({color:0x6a4a8a,alpha:pulse});
+  // Ears
+  g.moveTo(-6,headY-5);g.lineTo(-10,headY-16);g.lineTo(-2,headY-8);g.closePath();g.fill({color:0x6a4a8a,alpha:pulse});
+  g.moveTo(6,headY-5);g.lineTo(10,headY-16);g.lineTo(2,headY-8);g.closePath();g.fill({color:0x6a4a8a,alpha:pulse});
+  // Eyes — glowing purple instead of dark
+  g.ellipse(-4,headY,3,3);g.fill({color:0xa87ada,alpha:pulse*0.9});
+  g.ellipse(4,headY,3,3);g.fill({color:0xa87ada,alpha:pulse*0.9});
+  // Eye glow
+  g.circle(-3,headY-1,1.5);g.fill({color:0xc8a0f0,alpha:pulse*0.6});
+  g.circle(5,headY-1,1.5);g.fill({color:0xc8a0f0,alpha:pulse*0.6});
+  // Connection line to pressure plate if shadow is on one (reuse persistent Graphics)
+  if(!shadowDouble._connLine){shadowDouble._connLine=new PIXI.Graphics();gameContainer.addChild(shadowDouble._connLine)}
+  var clg=shadowDouble._connLine;clg.clear();
+  for(var pi=0;pi<levelPressurePlates.length;pi++){
+    var pp=levelPressurePlates[pi];
+    if(pp.shadowOn){
+      var fromX=shadowDouble.body.position.x;var fromY=shadowDouble.body.position.y+PLAYER_H/2;
+      var toX=pp.x+pp.w/2;var toY=pp.y;
+      clg.moveTo(fromX,fromY);clg.lineTo(toX,toY);clg.stroke({width:1,color:0x8a6aba,alpha:0.15});
+      break;
+    }
+  }
+}
+function updateShadowDouble(dt){
+  if(!shadowDouble.active)return;
+  shadowDouble.elapsed+=dt;
+  // Record player position every frame
+  if(player.alive&&player.body){
+    shadowDouble.recording.push({
+      x:player.body.position.x,
+      y:player.body.position.y,
+      t:shadowDouble.elapsed
+    });
+  }
+  // Remove connection line from previous frame (managed in drawShadowDouble)
+  if(shadowDouble._connLine){shadowDouble._connLine.clear()}
+  // After delay, replay positions
+  if(shadowDouble.elapsed>=shadowDouble.delay&&shadowDouble.body){
+    var targetTime=shadowDouble.elapsed-shadowDouble.delay;
+    // Find the recording entry closest to targetTime using binary search
+    var rec=shadowDouble.recording;
+    if(rec.length>0){
+      var lo=0,hi=rec.length-1;
+      while(lo<hi){
+        var mid=(lo+hi)>>1;
+        if(rec[mid].t<targetTime)lo=mid+1;else hi=mid;
+      }
+      // Interpolate between lo-1 and lo for smoother movement
+      var entry=rec[lo];
+      if(lo>0){
+        var prev=rec[lo-1];
+        var frac=(targetTime-prev.t)/(entry.t-prev.t);
+        if(frac>=0&&frac<=1){
+          var ix=prev.x+(entry.x-prev.x)*frac;
+          var iy=prev.y+(entry.y-prev.y)*frac;
+          MBody.setPosition(shadowDouble.body,{x:ix,y:iy});
+          MBody.setVelocity(shadowDouble.body,{x:(entry.x-prev.x)/Math.max(0.001,entry.t-prev.t),y:(entry.y-prev.y)/Math.max(0.001,entry.t-prev.t)});
+        }else{
+          MBody.setPosition(shadowDouble.body,{x:entry.x,y:entry.y});
+        }
+      }else{
+        MBody.setPosition(shadowDouble.body,{x:entry.x,y:entry.y});
+      }
+      shadowDouble.sprite.x=shadowDouble.body.position.x;
+      shadowDouble.sprite.y=shadowDouble.body.position.y;
+      // Trail particles (subtle)
+      if(shadowDouble.elapsed-shadowDouble.delay>0.5&&Math.random()<0.15){
+        spawnParticles(shadowDouble.body.position.x,shadowDouble.body.position.y+PLAYER_H/2-4,1,0x7a5aaa,{speed:0.3,life:0.3,size:1.5,gravity:-0.2});
+      }
+      // Trim old recording data to save memory (keep 10s buffer)
+      var cutoffTime=targetTime-7;
+      while(rec.length>2&&rec[0].t<cutoffTime)rec.shift();
+    }
+  }else if(shadowDouble.body){
+    // During delay, keep shadow at spawn position
+    MBody.setPosition(shadowDouble.body,{x:shadowDouble.body.position.x,y:shadowDouble.body.position.y});
+  }
+  // Draw shadow visuals
+  drawShadowDouble(player.animTime);
 }
 
 // ═══ ENEMIES (SHADOWS) ═══
@@ -6002,8 +6161,10 @@ function loadLevel(n){
   // Death floor — invisible kill zone below the level (fallZone → killPlayer('fall'))
   MWorld.add(world,MBodies.rectangle(lvl.width/2,lvl.height+20,lvl.width+400,30,{isStatic:true,isSensor:true,label:'fallZone'}));
   createPlayer(lvl.spawn.x,lvl.spawn.y);
+  // Shadow Double
+  if(lvl.shadowDouble)createShadowDouble(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -6033,6 +6194,7 @@ var tutorial={
     {id:'flashlight',level:15,trigger:'time',delay:0.5,text:'видимость ограничена — свети фонариком в направлении движения'},
     {id:'gravity',level:5,trigger:'time',delay:3,text:'анти-гравитация! Входи в зону и беги по потолку'},
     {id:'pressure',level:32,trigger:'time',delay:2,text:'встань на кристалл — дверь откроется. Слезешь — закроется!'},
+    {id:'shadow',level:33,trigger:'time',delay:4,text:'тень следует за тобой с задержкой. Она может стоять на плите за тебя!'},
   ],
   timer:0,activeTip:null
 };
@@ -8027,7 +8189,7 @@ function gameLoop(timestamp){
   // Update positions of all setPosition-based bodies BEFORE MEngine.update
   // to prevent phantom collision detection with stale positions
   updateMovingPlatforms(dt);updateEnemies(dt);updatePendulums();
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateShadowDouble(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite&&settings.quality!=='low'){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
