@@ -945,7 +945,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.18.10-beta';
+var VOID_VERSION='0.18.11-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -1453,7 +1453,24 @@ var ACHIEVEMENTS=[
   {id:'perfectionist',name:'перфекционист',desc:'получи ★★★ на любом уровне',icon:'💎'},
   {id:'dark_escape',name:'бегство',desc:'убеги от настигающей тьмы',icon:'🌑'},
   {id:'light_bearer',name:'носитель света',desc:'пройди уровень с фонариком',icon:'🔦'},
-  {id:'gravity_master',name:'невесомость',desc:'пройди уровень с анти-гравитацией',icon:'⇅'}
+  {id:'gravity_master',name:'невесомость',desc:'пройди уровень с анти-гравитацией',icon:'⇅'},
+  {id:'deep_diver',name:'ныряльщик',desc:'пройди акт II полностью',icon:'🕳'},
+  {id:'rope_walker',name:'канатоходец',desc:'пройди акт III полностью',icon:'🎭'},
+  {id:'abyss_gazer',name:'зияющая бездна',desc:'пройди акт IV полностью',icon:'👁'},
+  {id:'reborn',name:'возрождённый',desc:'пройди акт V полностью',icon:'🌱'},
+  {id:'exodus',name:'исход',desc:'пройди акт VI полностью',icon:'🌅'},
+  {id:'shadow_bond',name:'теневая связь',desc:'пройди акт VII: отражения',icon:'🪞'},
+  {id:'resonance',name:'резонанс',desc:'пройди акт VIII: эхо',icon:'📡'},
+  {id:'ghost_walker',name:'призрачный шаг',desc:'пройди акт IX: растворение',icon:'👻'},
+  {id:'architect_eye',name:'взгляд архитектора',desc:'пройди акт X: архитектор',icon:'🏗'},
+  {id:'homecoming',name:'возвращение',desc:'пройди акт XI: возвращение',icon:'🔄'},
+  {id:'the_choice',name:'выбор',desc:'пройди акт XII: выбор',icon:'⚖'},
+  {id:'star_collector',name:'звездочёт',desc:'собери 50 звёзд',icon:'⭐'},
+  {id:'perfect_ten',name:'десять идеальных',desc:'получи ★★★ на 10 уровнях',icon:'🏆'},
+  {id:'shard_hunter',name:'собиратель осколков',desc:'найди 30 осколков памяти',icon:'🔮'},
+  {id:'persistent',name:'упорство',desc:'пройди уровень после 10+ смертей',icon:'🔥'},
+  {id:'all_acts',name:'полный цикл',desc:'пройди все 12 актов',icon:'🌌'},
+  {id:'no_death_act',name:'чистый акт',desc:'пройди весь акт без смертей',icon:'💫'}
 ];
 var achievementQueue=[];
 var achievementShowing=false;
@@ -1477,13 +1494,33 @@ function showNextAchievement(){
 }
 function checkAchievements(){
   // Completed levels count
-  var completed=0,has3star=false;
-  for(var i=0;i<LEVELS.length;i++){var s=getLevelStars(i);if(s>0)completed++;if(s===3)has3star=true}
+  var completed=0,has3star=false,perfectCount=0,totalStars=0;
+  for(var i=0;i<LEVELS.length;i++){var s=getLevelStars(i);if(s>0)completed++;if(s===3){has3star=true;perfectCount++}totalStars+=s}
   if(completed>=1)unlockAchievement('first_step');
   if(completed>=5)unlockAchievement('five_levels');
   if(completed>=10)unlockAchievement('halfway');
   if(completed>=LEVELS.length)unlockAchievement('void_master');
   if(has3star)unlockAchievement('perfectionist');
+  if(totalStars>=50)unlockAchievement('star_collector');
+  if(perfectCount>=10)unlockAchievement('perfect_ten');
+  // Act completion achievements
+  var actIds=['deep_diver','rope_walker','abyss_gazer','reborn','exodus','shadow_bond','resonance','ghost_walker','architect_eye','homecoming','the_choice'];
+  for(var a=1;a<=11;a++){var actComplete=true;for(var j=a*5;j<Math.min(a*5+5,LEVELS.length);j++){if(getLevelStars(j)===0){actComplete=false;break}}if(actComplete)unlockAchievement(actIds[a-1])}
+  // All acts completed
+  var allActs=true;for(var a=0;a<12;a++){for(var j=a*5;j<Math.min(a*5+5,LEVELS.length);j++){if(getLevelStars(j)===0){allActs=false;break}}if(!allActs)break}
+  if(allActs)unlockAchievement('all_acts');
+  // Shard hunter
+  if(progress.shards&&progress.shards.length>=30)unlockAchievement('shard_hunter');
+  // Persistent — died 10+ times but still completed the level
+  if(state.deaths>=10)unlockAchievement('persistent');
+  // Clean act — check if current act was completed without deaths
+  var currentAct=Math.floor(state.level/5);
+  var actNoDeath=true;var actAllDone=true;
+  for(var j=currentAct*5;j<Math.min(currentAct*5+5,LEVELS.length);j++){
+    var ls=getLevelStars(j);if(ls===0)actAllDone=false;
+    if(progress.levels[j]&&progress.levels[j].deaths>0)actNoDeath=false;
+  }
+  if(actAllDone&&actNoDeath)unlockAchievement('no_death_act');
 }
 
 // ═══ MEMORY SHARDS ═══
