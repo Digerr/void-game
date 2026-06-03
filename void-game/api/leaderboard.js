@@ -1,23 +1,55 @@
 import { createClient } from '@supabase/supabase-js';
+import { createHmac } from 'crypto';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://jibtmyuxbeckanmkhuik.supabase.co';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppYnRteXV4YmVja2FubWtodWlrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDMyMDQxMCwiZXhwIjoyMDk1ODk2NDEwfQ.BS61LXJPTKvE4KsZmKu0e7pPkR8VnMBXxRIJqUMX8VM';
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8858889318:AAGramLmQGRhpJAyRWcJC8lPwkyrbDBiHcw';
 
 function getSupabase() {
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 }
 
-// Validate Telegram initData
+// Validate Telegram initData with HMAC-SHA256 signature verification
 function validateInitData(initData) {
   if (!initData) return null;
   try {
     const params = new URLSearchParams(initData);
+    const hash = params.get('hash');
+    if (!hash) return null;
+
+    // Reconstruct check string: sort all key=value pairs (excluding hash) alphabetically, join with \n
+    const pairs = [];
+    for (const [key, value] of params.entries()) {
+      if (key !== 'hash') pairs.push(key + '=' + value);
+    }
+    pairs.sort();
+    const checkString = pairs.join('\n');
+
+    // Compute HMAC-SHA256: secret_key = HMAC-SHA256(bot_token, "WebAppData"), then hash = HMAC-SHA256(secret_key, checkString)
+    const secretKey = createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
+    const computedHash = createHmac('sha256', secretKey).update(checkString).digest('hex');
+
+    // Compare hashes (constant-time comparison)
+    if (computedHash !== hash) {
+      console.error('[VOID] HMAC validation failed');
+      return null;
+    }
+
+    // Check auth_date freshness (reject if older than 1 hour)
+    const authDate = parseInt(params.get('auth_date') || '0', 10) * 1000;
+    if (Date.now() - authDate > 3600000) {
+      console.error('[VOID] initData expired');
+      return null;
+    }
+
     const userId = params.get('user');
     if (userId) {
       const userData = JSON.parse(userId);
       return { id: userData.id, name: userData.first_name + (userData.last_name ? ' ' + userData.last_name : '') };
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error('[VOID] validateInitData error:', e.message);
+  }
   return null;
 }
 
@@ -126,6 +158,28 @@ export default async function handler(req, res) {
       challengeWins * 250 -
       Math.round(totalTime * 0.5)
     );
+
+    // Anti-cheat: verify submitted score matches server-computed score
+    const expectedScore = Math.max(0,
+      completed * 5000 +
+      (totalStars) * 200 +
+      (totalShards) * 150 +
+      (achievementsCount) * 300 +
+      (perfectLevels) * 500 +
+      (challengeWins) * 250 -
+      Math.round(totalTime * 0.5)
+    );
+    const submittedScore = body.score || 0;
+    if (Math.abs(submittedScore - expectedScore) > 100) {
+      console.error('[VOID] Score mismatch:', { submitted: submittedScore, expected: expectedScore, player: playerId });
+      // Use server-computed score, ignore client value
+    }
+
+    // Sanity checks: cap unrealistic values
+    if (completed > 60 || totalStars > 180 || perfectLevels > 60 || totalShards > 300 || achievementsCount > 50) {
+      console.error('[VOID] Unrealistic stats:', { completed, totalStars, perfectLevels, totalShards, achievementsCount, player: playerId });
+      return res.status(200).json({ ok: false, error: 'invalid data' });
+    }
 
     // Only update leaderboard if new score is higher than existing (protect after reset)
     const { data: existing } = await sb.from('leaderboard').select('score').eq('id', playerId).single();
