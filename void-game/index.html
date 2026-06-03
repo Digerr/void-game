@@ -777,6 +777,14 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Золотые кристаллы, которые фиксируют призрачные платформы. Активируй стабилизатор — и все призрачные платформы рядом станут реальными на 10 секунд. Используй это время чтобы пробежать! Стабилизатор одноразовый.</div>
       </div>
       <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">лазерные лучи</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Тонкие красные линии — мгновенная смерть при касании. Но они пульсируют: включаются и выключаются по таймеру. Перед включением луч мерцает — это предупреждение. Просчитай тайминг и проскользни!</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">фрагменты двери</div>
+        <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">Стальные кристаллы, разбросанные по уровню. Собери все — и дверь откроется. Каждый фрагмент подсвечивается, когда ты рядом. Рядом с дверью показывается сколько фрагментов собрано.</div>
+      </div>
+      <div style="margin-bottom:14px">
         <div style="font-size:.7rem;color:#9aa0b8;font-weight:700;letter-spacing:.08em;margin-bottom:4px">звёзды</div>
         <div style="font-size:.6rem;color:#6a6a8a;line-height:1.6">3 звезды = 0 смертей, 2 звезды = 1-3 смерти, 1 звезда = 4+ смертей. Собирай звёзды, чтобы доказать своё мастерство!</div>
       </div>
@@ -4269,32 +4277,45 @@ var LEVELS=[
       {x:3800,y:460,w:80,h:16},{x:4100,y:400,w:80,h:16},
       {x:4300,y:380,w:120,h:16},
     ],
-    spikes:[{x:560,y:830,w:80},{x:1060,y:830,w:60},{x:1860,y:830,w:60},{x:2360,y:830,w:60},{x:3060,y:830,w:40}],
+    spikes:[{x:560,y:830,w:80},{x:1860,y:830,w:60},{x:3060,y:830,w:40}],
+    lasers:[
+      {x:700,y:780,w:350,h:4,axis:'x',onTime:2,offTime:2.5,phaseOffset:0},
+      {x:1300,y:720,w:300,h:4,axis:'x',onTime:2,offTime:2.5,phaseOffset:1},
+      {x:2500,y:680,w:280,h:4,axis:'x',onTime:2,offTime:2.5,phaseOffset:0.5},
+    ],
     checkpoints:[{x:1900,y:450},{x:3100,y:500}],
     shards:[{x:2740,y:400,id:45}],
   },
   {
     name:'Лезвие',story:'Тонкие красные линии — мгновенная смерть. Но они пульсируют. Просчитай.',
-    width:4700,height:1050,spawn:{x:80,y:750},exit:{x:4500,y:360,w:40,h:80},
+    width:4800,height:1050,spawn:{x:80,y:750},exit:{x:4600,y:350,w:40,h:80},
     platforms:[
-      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4300,y:900,w:400,h:40},
+      {x:0,y:900,w:500,h:40},{x:700,y:900,w:400,h:40},{x:1300,y:900,w:400,h:40},{x:1900,y:900,w:400,h:40},{x:2500,y:900,w:400,h:40},{x:3100,y:900,w:400,h:40},{x:3700,y:900,w:400,h:40},{x:4400,y:900,w:400,h:40},
       {x:250,y:770,w:80,h:16},{x:500,y:650,w:80,h:16},{x:750,y:740,w:80,h:16},
       {x:1000,y:600,w:80,h:16},{x:1300,y:700,w:80,h:16},
       {x:1600,y:580,w:80,h:16},{x:1900,y:480,w:80,h:16},
       {x:2200,y:560,w:80,h:16},{x:2500,y:460,w:80,h:16},
       {x:2900,y:540,w:80,h:16},{x:3200,y:440,w:80,h:16},
       {x:3600,y:500,w:80,h:16},{x:3900,y:400,w:80,h:16},
-      {x:4300,y:420,w:80,h:16},{x:4500,y:360,w:120,h:16},
+      {x:4400,y:420,w:80,h:16},{x:4600,y:350,w:120,h:16},
     ],
-    spikes:[{x:560,y:880,w:80},{x:1060,y:880,w:60},{x:1860,y:880,w:60},{x:2360,y:880,w:60},{x:3060,y:880,w:40},{x:3560,y:880,w:40}],
+    spikes:[{x:560,y:880,w:80},{x:1860,y:880,w:60},{x:3060,y:880,w:40}],
+    lasers:[
+      {x:700,y:780,w:350,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0},
+      {x:1300,y:740,w:300,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0.8},
+      {x:1900,y:680,w:280,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:1.5},
+      {x:1400,y:600,w:4,h:250,axis:'y',onTime:1.5,offTime:2,phaseOffset:0.5},
+      {x:2700,y:560,w:300,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0},
+      {x:3400,y:700,w:4,h:200,axis:'y',onTime:1.5,offTime:2,phaseOffset:1},
+    ],
     checkpoints:[{x:1900,y:470},{x:3100,y:520},{x:3900,y:380}],
-    shards:[{x:2540,y:420,id:46}],
+    shards:[{x:3240,y:400,id:46}],
   },
   {
     name:'Фрагменты',story:'Дверь не откроется одним рычагом. Нужны все фрагменты. Собери.',
-    width:4900,height:1050,spawn:{x:80,y:750},exit:{x:4700,y:340,w:40,h:80},
+    width:5000,height:1050,spawn:{x:80,y:750},exit:{x:4800,y:340,w:40,h:80},
     platforms:[
-      {x:0,y:900,w:400,h:40},{x:600,y:900,w:400,h:40},{x:1200,y:900,w:400,h:40},{x:1800,y:900,w:400,h:40},{x:2400,y:900,w:400,h:40},{x:3000,y:900,w:400,h:40},{x:3600,y:900,w:400,h:40},{x:4200,y:900,w:400,h:40},{x:4600,y:900,w:300,h:40},
+      {x:0,y:900,w:400,h:40},{x:600,y:900,w:400,h:40},{x:1200,y:900,w:400,h:40},{x:1800,y:900,w:400,h:40},{x:2400,y:900,w:400,h:40},{x:3000,y:900,w:400,h:40},{x:3600,y:900,w:400,h:40},{x:4200,y:900,w:400,h:40},{x:4700,y:900,w:300,h:40},
       {x:200,y:770,w:80,h:16},{x:450,y:650,w:80,h:16},{x:700,y:740,w:80,h:16},
       {x:950,y:600,w:80,h:16},{x:1200,y:700,w:80,h:16},
       {x:1500,y:580,w:80,h:16},{x:1800,y:480,w:80,h:16},
@@ -4302,17 +4323,27 @@ var LEVELS=[
       {x:2800,y:540,w:80,h:16},{x:3100,y:440,w:80,h:16},
       {x:3500,y:500,w:80,h:16},{x:3800,y:400,w:80,h:16},
       {x:4200,y:440,w:80,h:16},{x:4500,y:380,w:80,h:16},
-      {x:4700,y:340,w:120,h:16},
+      // Upper path for fragment 1
+      {x:900,y:460,w:80,h:16},
+      // Lower alcove for fragment 3
+      {x:3200,y:800,w:80,h:16},
     ],
-    spikes:[{x:460,y:880,w:80},{x:1060,y:880,w:60},{x:1660,y:880,w:60},{x:2260,y:880,w:60},{x:2860,y:880,w:60},{x:3460,y:880,w:40},{x:4060,y:880,w:40}],
+    spikes:[{x:460,y:880,w:80},{x:1660,y:880,w:60},{x:2860,y:880,w:60},{x:4060,y:880,w:40}],
+    doorFragments:[
+      {doorX:4400,doorY:460,doorW:40,doorH:440,fragments:[
+        {x:940,y:460},
+        {x:2440,y:420},
+        {x:3240,y:800},
+      ]},
+    ],
     checkpoints:[{x:1800,y:470},{x:3000,y:420},{x:4200,y:420}],
-    shards:[{x:3140,y:400,id:47}],
+    shards:[{x:3840,y:360,id:47}],
   },
   {
     name:'Механизм',story:'Шестерёнки архитектора. Всё взаимосвязано. Один рычаг — три последствия.',
-    width:5100,height:1100,spawn:{x:80,y:800},exit:{x:4900,y:320,w:40,h:80},
+    width:5200,height:1100,spawn:{x:80,y:800},exit:{x:5000,y:300,w:40,h:80},
     platforms:[
-      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4800,y:950,w:300,h:40},
+      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4800,y:950,w:400,h:40},
       {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:790,w:80,h:16},
       {x:950,y:650,w:80,h:16},{x:1200,y:740,w:80,h:16},
       {x:1500,y:600,w:80,h:16},{x:1800,y:500,w:80,h:16},
@@ -4320,17 +4351,34 @@ var LEVELS=[
       {x:2800,y:540,w:80,h:16},{x:3100,y:420,w:80,h:16},
       {x:3500,y:480,w:80,h:16},{x:3800,y:380,w:80,h:16},
       {x:4200,y:420,w:80,h:16},{x:4500,y:340,w:80,h:16},
-      {x:4900,y:320,w:120,h:16},
+      // Fragment paths
+      {x:1100,y:520,w:80,h:16},
+      {x:3300,y:700,w:80,h:16},
     ],
-    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60},{x:1660,y:930,w:60},{x:2260,y:930,w:60},{x:2860,y:930,w:60},{x:3460,y:930,w:40},{x:4060,y:930,w:40}],
+    spikes:[{x:460,y:930,w:80},{x:1660,y:930,w:60},{x:2860,y:930,w:60}],
+    lasers:[
+      {x:800,y:740,w:300,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0},
+      {x:1600,y:680,w:250,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0.8},
+      {x:3000,y:660,w:280,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0},
+      {x:3500,y:800,w:4,h:150,axis:'y',onTime:1.5,offTime:2,phaseOffset:1},
+    ],
+    levers:[
+      {x:4600,y:300,doorX:4800,doorW:200,doorH:400,doorY:550},
+    ],
+    doorFragments:[
+      {doorX:4800,doorY:550,doorW:200,doorH:400,fragments:[
+        {x:1140,y:520},
+        {x:3340,y:700},
+      ]},
+    ],
     checkpoints:[{x:1800,y:490},{x:3000,y:400},{x:4200,y:400}],
     shards:[{x:3840,y:340,id:48}],
   },
   {
     name:'Архив',story:'Сердце архива. Архитектор следит за каждым шагом. Не нарушай порядок.',
-    width:5300,height:1100,spawn:{x:80,y:800},exit:{x:5100,y:300,w:40,h:80},
+    width:5500,height:1100,spawn:{x:80,y:800},exit:{x:5300,y:280,w:40,h:80},
     platforms:[
-      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4800,y:950,w:400,h:40},{x:5000,y:950,w:300,h:40},
+      {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1200,y:950,w:400,h:40},{x:1800,y:950,w:400,h:40},{x:2400,y:950,w:400,h:40},{x:3000,y:950,w:400,h:40},{x:3600,y:950,w:400,h:40},{x:4200,y:950,w:400,h:40},{x:4800,y:950,w:400,h:40},{x:5200,y:950,w:300,h:40},
       {x:200,y:820,w:80,h:16},{x:450,y:700,w:80,h:16},{x:700,y:790,w:80,h:16},
       {x:950,y:640,w:80,h:16},{x:1200,y:740,w:80,h:16},
       {x:1500,y:580,w:80,h:16},{x:1800,y:480,w:80,h:16},
@@ -4338,11 +4386,34 @@ var LEVELS=[
       {x:2800,y:520,w:80,h:16},{x:3100,y:400,w:80,h:16},
       {x:3500,y:460,w:80,h:16},{x:3800,y:360,w:80,h:16},
       {x:4200,y:400,w:80,h:16},{x:4500,y:320,w:80,h:16},
-      {x:4900,y:360,w:80,h:16},{x:5100,y:300,w:120,h:16},
+      {x:4900,y:360,w:80,h:16},{x:5300,y:280,w:120,h:16},
+      // Fragment paths
+      {x:1100,y:510,w:80,h:16},
+      {x:2900,y:820,w:80,h:16},
+      {x:4500,y:200,w:80,h:16},
     ],
-    spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60},{x:1660,y:930,w:60},{x:2260,y:930,w:60},{x:2860,y:930,w:60},{x:3460,y:930,w:40},{x:4060,y:930,w:40},{x:4660,y:930,w:40}],
+    spikes:[{x:460,y:930,w:80},{x:1660,y:930,w:60},{x:2860,y:930,w:60}],
+    lasers:[
+      {x:700,y:780,w:300,h:4,axis:'x',onTime:1.2,offTime:1.8,phaseOffset:0},
+      {x:1400,y:720,w:280,h:4,axis:'x',onTime:1.2,offTime:1.8,phaseOffset:0.6},
+      {x:2100,y:680,w:250,h:4,axis:'x',onTime:1.2,offTime:1.8,phaseOffset:1.2},
+      {x:1300,y:640,w:4,h:200,axis:'y',onTime:1.2,offTime:1.8,phaseOffset:0.3},
+      {x:3000,y:640,w:300,h:4,axis:'x',onTime:1.2,offTime:1.8,phaseOffset:0},
+      {x:3600,y:800,w:4,h:150,axis:'y',onTime:1.2,offTime:1.8,phaseOffset:0.9},
+      {x:4200,y:640,w:280,h:4,axis:'x',onTime:1.2,offTime:1.8,phaseOffset:0.5},
+      {x:5000,y:560,w:300,h:4,axis:'x',onTime:1.2,offTime:1.8,phaseOffset:1.5},
+    ],
+    doorFragments:[
+      {doorX:5100,doorY:460,doorW:40,doorH:490,fragments:[
+        {x:1140,y:510},
+        {x:2940,y:820},
+        {x:4540,y:200},
+      ]},
+    ],
+    darkness:[{x:-200,speed:55}],
+    flashlight:true,
     checkpoints:[{x:1800,y:470},{x:3000,y:380},{x:4200,y:380},{x:4900,y:340}],
-    shards:[{x:4540,y:280,id:49}],
+    shards:[{x:3840,y:320,id:49}],
   },
   // ═══ Act XI — Возвращение (levels 50-54) ═══
   {
@@ -4777,7 +4848,7 @@ if(isWallSlide){
 var GROUND_GRACE=0.06;var _groundGraceTimer=0;function setupPlayerSensors(){playerSensorGround._collidingSet=new Set();playerSensorCeiling._collidingSet=new Set();playerSensorLeft._collidingSet=new Set();playerSensorRight._collidingSet=new Set();playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;_groundGraceTimer=0;MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,true);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,false)}}
-function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='pressurePlateZone'&&other.label!=='stabilizerZone'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
+function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='pressurePlateZone'&&other.label!=='stabilizerZone'&&other.label!=='laserZone'&&other.label!=='fragmentZone'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
 function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;
   // Phantom collision guard: verify distance to moving death zones
   // Enemies and pendulums use setPosition() which can cause stale collision events
@@ -4803,6 +4874,27 @@ function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZ
       if(Math.abs(enBody.position.x-levelEnemies[ei].currentX)>30){isPhantom=true}
       break}}
     if(!isPhantom)killPlayer('enemy');
+  }
+  // Laser death
+  if((a.label==='laserZone'&&b.label==='player')||(b.label==='laserZone'&&a.label==='player')){killPlayer('laser')}
+  // Fragment collection
+  if((a.label==='fragmentZone'&&b.label==='player')||(b.label==='fragmentZone'&&a.label==='player')){
+    var frBody=(a.label==='fragmentZone')?a:b;
+    for(var fdi=0;fdi<levelDoorFragments.length;fdi++){
+      var df=levelDoorFragments[fdi];
+      for(var ffi=0;ffi<df.fragments.length;ffi++){
+        if(df.fragments[ffi].body===frBody&&!df.fragments[ffi].collected){
+          df.fragments[ffi].collected=true;
+          df.collectedCount++;
+          // Remove sensor body
+          try{MWorld.remove(world,frBody);}catch(e){}
+          spawnParticles(df.fragments[ffi].x,df.fragments[ffi].y-10,10,0x5a8aba,{speed:2,life:0.5,size:2.5,gravity:0});
+          state.flashColor=0x2a4a7a;state.flashAlpha=0.08;state.flashTimer=0.12;
+          tgHaptic('medium');
+          break;
+        }
+      }
+    }
   }
   // Checkpoint activation
   if((a.label==='checkpointZone'&&b.label==='player')||(b.label==='checkpointZone'&&a.label==='player')){
@@ -5625,6 +5717,8 @@ var levelSprings=[];
 var levelIce=[];
 var levelPortals=[];
 var levelWind=[];
+var levelLasers=[];
+var levelDoorFragments=[];
 function createLever(data){
   var body=MBodies.rectangle(data.x+8,data.y+8,20,20,{isStatic:true,isSensor:true,label:'leverZone'});
   MWorld.add(world,body);
@@ -5690,6 +5784,200 @@ function activateLever(lv){
     spawnParticles(lv.doorX+lv.doorW/2,lv.doorY+lv.doorH/2,8,0x5a5a72,{speed:1.5,life:0.5,size:2,gravity:0.3});
     MWorld.remove(world,lv.doorBody);
     lv.doorSprite.visible=false;
+  }
+}
+
+// ═══ LASER BEAMS ═══
+var laserAnimTime=0;
+function createLaser(data){
+  var bw=data.w||200,bh=data.h||4;
+  var bx=data.x+bw/2,by=data.y+bh/2;
+  // Sensor body (initially off — will be added/removed dynamically)
+  var sensorBody=MBodies.rectangle(bx,by,bw,bh,{isStatic:true,isSensor:true,label:'laserZone'});
+  // Don't add to world yet — laser starts cycling
+  var spr=new PIXI.Container();gameContainer.addChild(spr);
+  var g=new PIXI.Graphics();spr.addChild(g);
+  // Glow layer
+  var glow=new PIXI.Graphics();spr.addChild(glow);
+  levelLasers.push({
+    data:data,body:sensorBody,sprite:spr,_gfx:g,_glow:glow,
+    x:data.x,y:data.y,w:bw,h:bh,
+    axis:data.axis||'x',onTime:data.onTime||2,offTime:data.offTime||2.5,
+    phaseOffset:data.phaseOffset||0,
+    timer:-data.phaseOffset, // negative start = phase offset
+    isOn:false,warning:false,warningTimer:0
+  });
+}
+function updateLasers(dt){
+  laserAnimTime+=dt;
+  for(var i=0;i<levelLasers.length;i++){
+    var las=levelLasers[i];
+    las.timer+=dt;
+    var cycle=las.onTime+las.offTime;
+    var t=las.timer%cycle;
+    if(las.timer<0){t=las.timer;} // still in phase offset
+    var wasOn=las.isOn;
+    var shouldOn=t>=las.offTime;
+    var shouldOff=t<las.offTime;
+    // Warning: 0.3s before turning on
+    var warningWindow=(t>=las.offTime-0.3&&t<las.offTime);
+    if(las.timer<0){shouldOn=false;shouldOff=true;warningWindow=false;}
+    // State transitions
+    if(shouldOn&&!wasOn){
+      // Turning on
+      las.isOn=true;las.warning=false;
+      MWorld.add(world,las.body);
+    }else if(shouldOff&&wasOn){
+      // Turning off
+      las.isOn=false;las.warning=false;
+      try{MWorld.remove(world,las.body);}catch(e){}
+    }
+    // Warning state
+    if(warningWindow&&!las.isOn){
+      las.warning=true;las.warningTimer=0.3-(las.offTime-t);
+    }else if(!warningWindow){
+      las.warning=false;
+    }
+    // Visual update
+    var g=las._gfx;g.clear();
+    var gl=las._glow;gl.clear();
+    if(las.isOn){
+      // Bright red beam
+      var pulse=0.85+Math.sin(laserAnimTime*8)*0.15;
+      // Glow
+      if(las.axis==='x'){
+        gl.rect(las.x,las.y-6,las.w,12);gl.fill({color:0xff2020,alpha:0.12*pulse});
+        gl.rect(las.x,las.y-3,las.w,6);gl.fill({color:0xff3030,alpha:0.2*pulse});
+      }else{
+        gl.rect(las.x-6,las.y,12,las.h);gl.fill({color:0xff2020,alpha:0.12*pulse});
+        gl.rect(las.x-3,las.y,6,las.h);gl.fill({color:0xff3030,alpha:0.2*pulse});
+      }
+      // Main beam
+      if(las.axis==='x'){
+        g.rect(las.x,las.y-1.5,las.w,3);g.fill({color:0xff4040,alpha:0.9*pulse});
+        g.rect(las.x,las.y-0.5,las.w,1);g.fill({color:0xff8080,alpha:0.7});
+      }else{
+        g.rect(las.x-1.5,las.y,3,las.h);g.fill({color:0xff4040,alpha:0.9*pulse});
+        g.rect(las.x-0.5,las.y,1,las.h);g.fill({color:0xff8080,alpha:0.7});
+      }
+      // Particles along beam (sparse)
+      if(Math.random()<0.15){
+        var px,py;
+        if(las.axis==='x'){px=las.x+Math.random()*las.w;py=las.y;}
+        else{px=las.x;py=las.y+Math.random()*las.h;}
+        spawnParticles(px,py,1,0xff4040,{speed:0.5,life:0.2,size:1.5,gravity:0});
+      }
+    }else if(las.warning){
+      // Flicker warning before turning on
+      var flickAlpha=0.2+Math.sin(laserAnimTime*20)*0.25;
+      if(las.axis==='x'){
+        g.rect(las.x,las.y-1,las.w,2);g.fill({color:0xff2020,alpha:Math.max(0,flickAlpha)});
+      }else{
+        g.rect(las.x-1,las.y,2,las.h);g.fill({color:0xff2020,alpha:Math.max(0,flickAlpha)});
+      }
+    }else{
+      // Faint trace (off state)
+      if(las.axis==='x'){
+        g.rect(las.x,las.y-0.5,las.w,1);g.fill({color:0xff2020,alpha:0.06});
+      }else{
+        g.rect(las.x-0.5,las.y,1,las.h);g.fill({color:0xff2020,alpha:0.06});
+      }
+    }
+  }
+}
+
+// ═══ DOOR FRAGMENTS ═══
+var fragmentAnimTime=0;
+function createDoorFragments(data){
+  var doorX=data.doorX,doorY=data.doorY,doorW=data.doorW,doorH=data.doorH;
+  // Create door body (same style as lever doors)
+  var doorBody=MBodies.rectangle(doorX+doorW/2,doorY+doorH/2,doorW,doorH,{isStatic:true,label:'door'});
+  MWorld.add(world,doorBody);
+  var doorSpr=new PIXI.Graphics();
+  doorSpr.rect(0,0,doorW,doorH);doorSpr.fill(0x2a2a3e);
+  doorSpr.rect(0,0,3,doorH);doorSpr.fill(0x3e3e52);
+  doorSpr.rect(doorW-3,0,3,doorH);doorSpr.fill(0x3e3e52);
+  if(doorW>40){var ribs=Math.floor(doorW/50);for(var ri=1;ri<=ribs;ri++){var rx=Math.floor(ri*doorW/(ribs+1));if(rx>3&&rx<doorW-3){doorSpr.rect(rx-1,0,2,doorH);doorSpr.fill(0x3a3a50)}}}
+  var bands=Math.floor(doorH/60);for(var bi=1;bi<=bands;bi++){var by=bi*60;if(by<doorH){doorSpr.rect(0,by-1,doorW,2);doorSpr.fill(0x3e3e52)}}
+  doorSpr.rect(0,0,doorW,3);doorSpr.fill(0x4e4e62);
+  // Progress indicator on door
+  var totalFragments=data.fragments.length;
+  var progressGfx=new PIXI.Graphics();doorSpr.addChild(progressGfx);
+  doorSpr.x=doorX;doorSpr.y=doorY;gameContainer.addChild(doorSpr);
+  // Create fragment sensors and visuals
+  var fragEntries=[];
+  for(var fi=0;fi<data.fragments.length;fi++){
+    var fd=data.fragments[fi];
+    var fragBody=MBodies.circle(fd.x,fd.y-10,14,{isStatic:true,isSensor:true,label:'fragmentZone'});
+    MWorld.add(world,fragBody);
+    var fragSpr=new PIXI.Container();gameContainer.addChild(fragSpr);
+    var fragGfx=new PIXI.Graphics();fragSpr.addChild(fragGfx);
+    fragEntries.push({body:fragBody,sprite:fragSpr,_gfx:fragGfx,x:fd.x,y:fd.y,collected:false});
+  }
+  levelDoorFragments.push({
+    doorBody:doorBody,doorSprite:doorSpr,_doorProgressGfx:progressGfx,
+    doorX:doorX,doorY:doorY,doorW:doorW,doorH:doorH,
+    fragments:fragEntries,totalFragments:totalFragments,
+    collectedCount:0,doorOpened:false
+  });
+}
+function updateDoorFragments(dt){
+  fragmentAnimTime+=dt;
+  for(var di=0;di<levelDoorFragments.length;di++){
+    var df=levelDoorFragments[di];
+    if(df.doorOpened)continue;
+    // Update fragment visuals
+    for(var fi=0;fi<df.fragments.length;fi++){
+      var frag=df.fragments[fi];
+      var g=frag._gfx;g.clear();
+      if(frag.collected){
+        // Dim collected fragment
+        g.circle(0,-10,4);g.fill({color:0x3a5a7a,alpha:0.15});
+        g.moveTo(0,-14);g.lineTo(2,-10);g.lineTo(0,-6);g.lineTo(-2,-10);g.closePath();g.fill({color:0x3a5a7a,alpha:0.1});
+        frag.sprite.x=frag.x;frag.sprite.y=frag.y;
+        continue;
+      }
+      // Active fragment — steel blue crystal
+      var bob=Math.sin(fragmentAnimTime*2.5+fi*1.8)*3;
+      var glow=Math.sin(fragmentAnimTime*3+fi)*0.15+0.85;
+      // Proximity glow — brighter when player is near
+      var proxGlow=0;
+      if(player.body){
+        var ddx=player.body.position.x-frag.x,ddy=player.body.position.y-frag.y;
+        var dist=Math.sqrt(ddx*ddx+ddy*ddy);
+        if(dist<120)proxGlow=Math.max(0,(1-dist/120))*0.3;
+      }
+      // Outer glow
+      g.circle(0,bob-10,14);g.fill({color:0x3a6a9a,alpha:(0.06+proxGlow)*glow});
+      g.circle(0,bob-10,9);g.fill({color:0x4a7aba,alpha:(0.12+proxGlow)*glow});
+      // Crystal shape
+      g.moveTo(0,bob-20);g.lineTo(6,bob-10);g.lineTo(0,bob);g.lineTo(-6,bob-10);g.closePath();g.fill({color:0x5a8aba,alpha:0.8*glow});
+      g.moveTo(0,bob-17);g.lineTo(3,bob-10);g.lineTo(0,bob-3);g.lineTo(-3,bob-10);g.closePath();g.fill({color:0x7aaaee,alpha:0.5});
+      // Sparkle
+      if(Math.random()<0.03){
+        spawnParticles(frag.x,frag.y-10,1,0x5a8aba,{angle:-Math.PI/2,spread:2,speed:0.6,life:0.3,size:1.5,gravity:0});
+      }
+      frag.sprite.x=frag.x;frag.sprite.y=frag.y;
+    }
+    // Update door progress indicator
+    var pg=df._doorProgressGfx;pg.clear();
+    if(df.doorW>20&&df.doorH>20){
+      // Show fraction on door
+      var pct=df.collectedCount/df.totalFragments;
+      // Fill bar at bottom of door
+      pg.rect(3,df.doorH-8,df.doorW-6,5);pg.fill({color:0x1a2a3a,alpha:0.5});
+      pg.rect(3,df.doorH-8,(df.doorW-6)*pct,5);pg.fill({color:0x4a7aba,alpha:0.7});
+    }
+    // Check if all fragments collected → open door
+    if(df.collectedCount>=df.totalFragments&&!df.doorOpened){
+      df.doorOpened=true;
+      try{MWorld.remove(world,df.doorBody);}catch(e){}
+      df.doorSprite.visible=false;
+      // Celebration particles
+      spawnParticles(df.doorX+df.doorW/2,df.doorY+df.doorH/2,16,0x4a7aba,{speed:2.5,life:0.6,size:3,gravity:0.3});
+      spawnParticles(df.doorX+df.doorW/2,df.doorY+df.doorH/2,8,0x7aaaee,{speed:1.5,life:0.4,size:2,gravity:0.2});
+      state.flashColor=0x2a4a7a;state.flashAlpha=0.08;state.flashTimer=0.15;
+    }
   }
 }
 
@@ -6666,6 +6954,10 @@ function loadLevel(n){
   levelPortals=[];if(lvl.portals)for(var i=0;i<lvl.portals.length;i++)createPortalPair(lvl.portals[i]);
   // Wind
   levelWind=[];if(lvl.wind)for(var i=0;i<lvl.wind.length;i++)createWind(lvl.wind[i]);
+  // Lasers
+  levelLasers=[];if(lvl.lasers)for(var i=0;i<lvl.lasers.length;i++)createLaser(lvl.lasers[i]);
+  // Door fragments
+  levelDoorFragments=[];if(lvl.doorFragments)for(var i=0;i<lvl.doorFragments.length;i++)createDoorFragments(lvl.doorFragments[i]);
   // Gravity zones
   levelGravityZones=[];
   // Pursuing Darkness
@@ -6687,7 +6979,7 @@ function loadLevel(n){
   // Shadow Double
   if(lvl.shadowDouble)createShadowDouble(lvl.spawn.x,lvl.spawn.y);
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelPulsePlatforms=[];levelGhostPlatforms=[];levelStabilizers=[];levelResonancePlatforms=[];resonanceGfx=null;levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelPulsePlatforms=[];levelGhostPlatforms=[];levelStabilizers=[];levelResonancePlatforms=[];resonanceGfx=null;levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelLasers=[];levelDoorFragments=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -6722,6 +7014,8 @@ var tutorial={
     {id:'resonance',level:36,trigger:'time',delay:2,text:'двигайся — и скрытые платформы появятся рядом с тобой. Остановишься — исчезнут!'},
     {id:'ghost',level:40,trigger:'time',delay:2,text:'призрачные платформы мерцают и исчезают! Переходи пока они видны'},
     {id:'stabilizer',level:41,trigger:'time',delay:3,text:'активируй кристалл-стабилизатор — он зафиксирует призрачные платформы!'},
+    {id:'laser',level:45,trigger:'time',delay:2,text:'красные лучи — смерть! Но они пульсируют. Жди когда выключатся и беги!'},
+    {id:'fragments',level:47,trigger:'time',delay:2,text:'собери все фрагменты-кристаллы чтобы открыть дверь!'},
   ],
   timer:0,activeTip:null
 };
@@ -8716,7 +9010,7 @@ function gameLoop(timestamp){
   // Update positions of all setPosition-based bodies BEFORE MEngine.update
   // to prevent phantom collision detection with stale positions
   updateMovingPlatforms(dt);updateEnemies(dt);updatePendulums();
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updatePulsePlatforms(dt);updateGhostPlatforms(dt);updateStabilizers(dt);updateResonancePlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateShadowDouble(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updatePulsePlatforms(dt);updateGhostPlatforms(dt);updateStabilizers(dt);updateResonancePlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateLasers(dt);updateDoorFragments(dt);updateShadowDouble(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
   // Dash trail: leave afterimages while dashing
   if(player.alive&&player.dashing&&player.sprite&&settings.quality!=='low'){state.dashTrails.push({x:player.body.position.x,y:player.body.position.y,alpha:0.4,life:0.2})}
   // Run dust: small particles while running on ground
