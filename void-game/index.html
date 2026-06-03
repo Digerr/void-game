@@ -618,7 +618,12 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
       <div class="win-stat"><div class="win-stat-val" id="win-best"></div><div class="win-stat-label">рекорд</div></div>
     </div>
     <div class="win-stars" id="win-stars"></div>
-    <div class="win-total-stats"><div class="win-total-stat">всего смертей: <span id="win-total-deaths">0</span></div></div>
+    <div id="win-improvement" style="display:none;font-size:.55rem;letter-spacing:.08em;margin:2px 0 4px;text-align:center"></div>
+    <div class="win-total-stats">
+      <div class="win-total-stat">всего смертей: <span id="win-total-deaths">0</span></div>
+      <div class="win-total-stat">пройдено: <span id="win-total-completed">0</span>/<span id="win-total-levels">60</span></div>
+      <div class="win-total-stat">звёзды: <span id="win-total-stars">0</span></div>
+    </div>
     <div class="win-sub" id="win-sub">ты выбрался из пустоты</div>
     <div id="win-ending" style="display:none;font-size:.65rem;color:#daa520;letter-spacing:.06em;line-height:1.7;max-width:340px;text-align:center;margin-bottom:12px"></div>
     <button class="btn primary" id="btn-next">далее</button>
@@ -905,7 +910,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.18.8-beta';
+var VOID_VERSION='0.18.9-beta';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -9251,6 +9256,29 @@ function showWinScreen(elapsed){
   document.getElementById('win-best').textContent=isNewBest?'новый!':formatTime(bestTime*1000);
   document.getElementById('win-best').style.color=isNewBest?'#6a9a5a':'#3a5a3a';
   document.getElementById('win-total-deaths').textContent=state.totalDeaths;
+  // Progress summary
+  var totalCompleted=0;var totalStars=0;
+  for(var li=0;li<LEVELS.length;li++){if(progress.levels[li]&&progress.levels[li].stars>0){totalCompleted++;totalStars+=progress.levels[li].stars}}
+  document.getElementById('win-total-completed').textContent=totalCompleted;
+  document.getElementById('win-total-levels').textContent=LEVELS.length;
+  document.getElementById('win-total-stars').textContent=totalStars;
+  // Improvement indicator
+  var impEl=document.getElementById('win-improvement');
+  if(impEl){
+    if(isNewBest&&bestTime<Infinity){
+      var diff=bestTime-elapsed/1000;
+      impEl.style.display='block';
+      impEl.style.color='#6a9a5a';
+      impEl.textContent='улучшение на '+diff.toFixed(1)+'с';
+    }else if(!isNewBest&&bestTime<Infinity){
+      var diff2=elapsed/1000-bestTime;
+      impEl.style.display='block';
+      impEl.style.color='#5a5a6a';
+      impEl.textContent='рекорд: '+formatTime(bestTime*1000);
+    }else{
+      impEl.style.display='none';
+    }
+  }
   var starsHtml='';
   for(var i=0;i<3;i++){starsHtml+='<span class="win-star" id="win-star-'+i+'">★</span>'}
   document.getElementById('win-stars').innerHTML=starsHtml;
@@ -9300,7 +9328,13 @@ var actIntros=[
   {num:'акт III',name:'Нити',text:'Из темноты появляется мерцающая нить — тонкая, почти невидимая. Но если потянуть за неё, она выдержит. Она станет мостом через пропасть, верёвкой для спуска, путём наверх.'},
   {num:'акт IV',name:'Пустота',text:'Последний рубеж. Тьма здесь — не отсутствие света. Она — сущность. И она знает, что ты идёшь. Каждое движение — выбор между падением и спасением.'},
   {num:'акт V',name:'Возрождение',text:'Из осколков разрушенного мира рождается нечто новое. Зеркала отражают то, что было. Гравитация меняется. Нити связывают осколки реальности. Ты — тот, кто собирает мир заново.'},
-  {num:'акт VI',name:'Исход',text:'Это конец пути. Всё, что ты знал, — пепел. Но даже в пепле тлеет искра. Даже в хрупком стекле — свет. Сделай последний шаг. Докажи, что достоин выйти из пустоты навсегда.'}
+  {num:'акт VI',name:'Исход',text:'Это конец пути. Всё, что ты знал, — пепел. Но даже в пепле тлеет искра. Даже в хрупком стекле — свет. Сделай последний шаг. Докажи, что достоин выйти из пустоты навсегда.'},
+  {num:'акт VII',name:'Отражения',text:'Тьма обретает твоё лицо. Тень идёт за тобой — шаг в шаг. Она знает твой путь до того, как ты его пройдёшь. Но там, где ты сомневаешься — она уверена. Нажми на плиту. Дай ей стоять.'},
+  {num:'акт VIII',name:'Эхо',text:'Пространство пульсирует. Платформы рождаются и умирают в ритме, который ты чувствуешь, но не слышишь. Резонанс — не звук. Это знание. Кристаллы покажут то, что скрыто. Доверься эху.'},
+  {num:'акт IX',name:'Растворение',text:'Мир теряет плотность. Платформы исчезают, реальность расплывается. Стабилизаторы — последние якоря. Держись за них, пока всё не растворилось. Призраки дорог — только если веришь.'},
+  {num:'акт X',name:'Архитектор',text:'Кто-то строил этот мир. Кто-то ломал. Лазеры — его инструменты, двери — его замки. Фрагменты разбросаны по всей Пустоте. Собери их — и поймёшь, кто ты.'},
+  {num:'акт XI',name:'Возвращение',text:'Знакомые стены. Но что-то не так. Всё немного смещено. Трещины — не там. Свет — не тот. Голоса в голове шепчут: это не тот мир. Или это не та память?'},
+  {num:'акт XII',name:'Выбор',text:'Все пути сходятся здесь. Каждое решение, каждая смерть, каждое спасение — всё вело к этому моменту. Забыть — и обрести покой. Вспомнить — и жить с болью. Пустота ждёт твоего ответа.'}
 ];
 function showActIntro(actIdx,callback){
   var intro=actIntros[actIdx%actIntros.length];
@@ -9314,7 +9348,7 @@ function showActIntro(actIdx,callback){
   var bgCtx=null;
   var bgParts=[];
   var bgAnim=null;
-  var actColors=[[0x5a8aba,0x2a4a6a],[0x8a5aba,0x4a2a6a],[0xba8a2a,0x6a4a1a],[0xba3a6a,0x4a1a3a],[0x4ababa,0x2a6a6a],[0xda3a7a,0x6a1a5a]];
+  var actColors=[[0x5a8aba,0x2a4a6a],[0x8a5aba,0x4a2a6a],[0xba8a2a,0x6a4a1a],[0xba3a6a,0x4a1a3a],[0x4ababa,0x2a6a6a],[0xda3a7a,0x6a1a5a],[0x7a6aba,0x3a2a6a],[0x4aba6a,0x1a6a3a],[0x5a8a8a,0x2a4a4a],[0xba4a2a,0x6a1a0a],[0x5a7aba,0x2a3a6a],[0xba4a5a,0x6a1a2a]];
   if(bgCanvas){
     bgCanvas.width=window.innerWidth;bgCanvas.height=window.innerHeight;
     bgCtx=bgCanvas.getContext('2d');
