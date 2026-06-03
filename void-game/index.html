@@ -262,6 +262,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
 #win-screen{position:absolute;inset:0;display:none;background:rgba(6,6,14,.94);flex-direction:column;align-items:center;justify-content:center}
 #win-screen.active{display:flex}
 .win-title{font-size:1.8rem;font-weight:900;color:#6aaa6a;letter-spacing:.2em;margin-bottom:4px}
+.win-act-badge{font-size:.45rem;color:#5a7a6a;letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px;padding:2px 10px;border:1px solid #2a3a2a;border-radius:3px;background:rgba(42,58,42,.15)}
 .win-level-name{color:#6a9a7a;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;font-weight:600}
 .win-stats{display:flex;gap:24px;margin-bottom:8px}
 .win-stat{text-align:center}
@@ -643,12 +644,14 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     <button class="btn" id="btn-death-menu" style="display:none;border-color:#3a1a1a;color:#6a3535;margin-top:4px;font-size:.6rem">выйти в меню</button>
   </div>
   <div id="win-screen">
+    <div class="win-act-badge" id="win-act-badge"></div>
     <div class="win-title">СПАСЁН</div>
     <div class="win-level-name" id="win-level-name"></div>
     <div class="win-stats">
       <div class="win-stat"><div class="win-stat-val" id="win-time"></div><div class="win-stat-label">время</div></div>
       <div class="win-stat"><div class="win-stat-val" id="win-deaths"></div><div class="win-stat-label">смерти</div></div>
       <div class="win-stat"><div class="win-stat-val" id="win-best"></div><div class="win-stat-label">рекорд</div></div>
+      <div class="win-stat"><div class="win-stat-val" id="win-best-deaths"></div><div class="win-stat-label">мин. смертей</div></div>
     </div>
     <div class="win-stars" id="win-stars"></div>
     <div id="win-improvement" style="display:none;font-size:.55rem;letter-spacing:.08em;margin:2px 0 4px;text-align:center"></div>
@@ -656,6 +659,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
       <div class="win-total-stat">всего смертей: <span id="win-total-deaths">0</span></div>
       <div class="win-total-stat">пройдено: <span id="win-total-completed">0</span>/<span id="win-total-levels">60</span></div>
       <div class="win-total-stat">звёзды: <span id="win-total-stars">0</span></div>
+      <div class="win-total-stat">попыток: <span id="win-attempts">1</span></div>
     </div>
     <div class="win-sub" id="win-sub">ты выбрался из пустоты</div>
     <div id="win-ending" style="display:none;font-size:.65rem;color:#daa520;letter-spacing:.06em;line-height:1.7;max-width:340px;text-align:center;margin-bottom:12px"></div>
@@ -1735,10 +1739,13 @@ function recordLevelComplete(n,deaths,time){
   var stars=calculateStars(deaths,timeSec);
   var prevStars=progress.levels[n]?progress.levels[n].stars:0;
   if(!progress.levels[n]){
-    progress.levels[n]={stars:stars,bestTime:timeSec};
+    progress.levels[n]={stars:stars,bestTime:timeSec,bestDeaths:deaths,attempts:1,completions:1};
   }else{
     if(stars>progress.levels[n].stars)progress.levels[n].stars=stars;
     if(timeSec<progress.levels[n].bestTime)progress.levels[n].bestTime=timeSec;
+    if(deaths<(progress.levels[n].bestDeaths!==undefined?progress.levels[n].bestDeaths:Infinity))progress.levels[n].bestDeaths=deaths;
+    progress.levels[n].attempts=(progress.levels[n].attempts||0)+1;
+    progress.levels[n].completions=(progress.levels[n].completions||0)+1;
   }
   if(stars===3&&prevStars<3)progress.stats.perfectLevels=(progress.stats.perfectLevels||0)+1;
   if(n+1>=progress.unlocked&&n+1<LEVELS.length)progress.unlocked=n+2;
@@ -9473,7 +9480,7 @@ function showScreen(name){
   if(name==='profile')loadProfile();
 }
 function showStoryScreen(n){if(n<0||n>=LEVELS.length)return;var lvl=LEVELS[n];document.getElementById('story-level').textContent=(n+1)+'. '+lvl.name;document.getElementById('story-text').textContent=lvl.story;showScreen('story');setTimeout(function(){if(state.screen==='story')startPlaying()},7000)}
-function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';if(state.level<0||state.level>=LEVELS.length)return;document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name;var flEl=document.getElementById('hud-flashlight');if(flEl)flEl.style.display=(LEVELS[state.level].flashlight)?'block':'none'}
+function startPlaying(){showScreen('playing');state.levelStartTime=performance.now();tutorial.timer=0;document.getElementById('tutorial-tip').style.display='none';if(state.level<0||state.level>=LEVELS.length)return;document.getElementById('hud-level').textContent=(state.level+1)+'. '+LEVELS[state.level].name;var flEl=document.getElementById('hud-flashlight');if(flEl)flEl.style.display=(LEVELS[state.level].flashlight)?'block':'none';if(!progress.levels[state.level])progress.levels[state.level]={stars:0,bestTime:Infinity,bestDeaths:Infinity,attempts:0,completions:0};progress.levels[state.level].attempts=(progress.levels[state.level].attempts||0)+1;saveProgress()}
 function showDeathScreen(cause){var causes={fall:'пустота поглотила тебя',spikes:'пронзён шипами',saw:'разорван на части',enemy:'поглощён тенью',pendulum:'раздавлен маятником',darkness:'тьма настигла тебя'};document.getElementById('death-cause').textContent=causes[cause]||cause;document.getElementById('death-stats').textContent='смерти: '+state.deaths+' | всего: '+state.totalDeaths;document.getElementById('death-cp-hint').textContent=state.lastCheckpoint?'чекпоинт активирован':'с начала уровня';var cpBtn=document.getElementById('btn-checkpoint');if(cpBtn)cpBtn.style.display=state.lastCheckpoint?'block':'none';var dmBtn=document.getElementById('btn-death-menu');if(dmBtn)dmBtn.style.display='block';showScreen('dead')}
 function winLevel(){player.alive=false;var lvl=LEVELS[state.level];spawnParticles(player.body.position.x,player.body.position.y,20,0x6a5aaa,{speed:2.5,life:1,size:3.5,gravity:0.3});spawnParticles(player.body.position.x,player.body.position.y,12,0x8a7aca,{speed:3.5,life:1.2,size:2.5,gravity:0.1});spawnParticles(player.body.position.x,player.body.position.y,6,0xaaaaff,{speed:1.5,life:0.8,size:1.5,gravity:0});tgHaptic('success');sfxLevelComplete();var elapsed=performance.now()-state.levelStartTime;var elapsedSec=elapsed/1000;
   // Challenge: check completion and speed conditions
@@ -9492,11 +9499,29 @@ function showWinScreen(elapsed){
   var stars=calculateStars(state.deaths,elapsed/1000);
   var bestTime=getLevelBestTime(state.level);
   var isNewBest=elapsed/1000<bestTime;
+  var actIdx=Math.floor(state.level/5);
+  // Act badge
+  var actBadge=document.getElementById('win-act-badge');
+  var actNames=['I Пробуждение','II Глубины','III Нити','IV Пустота','V Возрождение','VI Исход','VII Отражения','VIII Эхо','IX Растворение','X Архитектор','XI Возвращение','XII Выбор'];
+  if(actBadge){actBadge.textContent=actNames[actIdx]||'Акт '+(actIdx+1)}
   document.getElementById('win-level-name').textContent=(state.level+1)+'. '+lvl.name;
   document.getElementById('win-time').textContent=formatTime(elapsed);
   document.getElementById('win-deaths').textContent=state.deaths;
   document.getElementById('win-best').textContent=isNewBest?'новый!':formatTime(bestTime*1000);
   document.getElementById('win-best').style.color=isNewBest?'#6a9a5a':'#3a5a3a';
+  // Best deaths record
+  var lvlProg=progress.levels[state.level]||{};
+  var bestDeaths=lvlProg.bestDeaths;
+  var bdEl=document.getElementById('win-best-deaths');
+  if(bdEl){
+    if(bestDeaths!==undefined&&bestDeaths<Infinity){
+      bdEl.textContent=bestDeaths;
+      bdEl.style.color=bestDeaths===0?'#6aba6a':state.deaths<=bestDeaths?'#6a9a5a':'#5a7a5a';
+    }else{
+      bdEl.textContent=state.deaths;
+      bdEl.style.color='#5a7a5a';
+    }
+  }
   document.getElementById('win-total-deaths').textContent=state.totalDeaths;
   // Progress summary
   var totalCompleted=0;var totalStars=0;
@@ -9504,6 +9529,9 @@ function showWinScreen(elapsed){
   document.getElementById('win-total-completed').textContent=totalCompleted;
   document.getElementById('win-total-levels').textContent=LEVELS.length;
   document.getElementById('win-total-stars').textContent=totalStars;
+  // Attempts count
+  var attEl=document.getElementById('win-attempts');
+  if(attEl){attEl.textContent=lvlProg.attempts||1}
   // Improvement indicator
   var impEl=document.getElementById('win-improvement');
   if(impEl){
