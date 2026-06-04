@@ -4164,6 +4164,7 @@ var LEVELS=[
     spikes:[{x:500,y:730,w:60},{x:1500,y:730,w:60},{x:1900,y:730,w:60},{x:2600,y:730,w:60}],
     enemies:[{x:1100,y:750,range:200,speed:0.8},{x:2700,y:750,range:150,speed:1.0}],
     levers:[{x:1900,y:500,doorX:1700,doorW:16,doorH:100,doorY:650,id:'lever1'}],
+    pressurePlates:[{x:1400,y:734,doorX:1500,doorY:600,doorW:100,doorH:16,id:'pp1'}],
     anchors:[{x:550,y:320},{x:1500,y:450},{x:2600,y:300},{x:3250,y:280}],
     checkpoints:[{x:1100,y:480},{x:2400,y:443}],
     shards:[{x:590,y:420,id:30}],
@@ -4270,6 +4271,7 @@ var LEVELS=[
       {x:1750,y:620,w:80,h:16},{x:2000,y:720,w:80,h:16},
       // Stepping stones from ground to upper route after door 2
       {x:3100,y:720,w:80,h:16},
+      {x:3250,y:720,w:80,h:16}, // Extra stepping stone from CP2 ground
       // After doors — upper route to exit
       {x:3400,y:600,w:80,h:16},{x:3700,y:520,w:80,h:16},
       {x:4000,y:460,w:80,h:16},{x:4300,y:400,w:80,h:16},
@@ -4456,6 +4458,8 @@ var LEVELS=[
     platforms:[
       {x:0,y:850,w:500,h:40},{x:1900,y:850,w:400,h:40},{x:3700,y:850,w:500,h:40},
       {x:4000,y:380,w:120,h:16},
+      // Stepping stones from CP2 ground up toward exit
+      {x:3750,y:720,w:80,h:16},{x:3850,y:580,w:80,h:16},{x:3950,y:460,w:80,h:16},
     ],
     ghostPlatforms:[
       // Bridge over first gap (x:500-1900) — slow forgiving cycle
@@ -4488,6 +4492,8 @@ var LEVELS=[
     platforms:[
       {x:0,y:900,w:500,h:40},{x:1800,y:900,w:400,h:40},{x:4100,y:900,w:300,h:40},
       {x:4200,y:360,w:120,h:16},
+      // Stepping stones from CP2 ground up toward exit
+      {x:4150,y:760,w:80,h:16},{x:4250,y:620,w:80,h:16},{x:4150,y:480,w:80,h:16},
     ],
     ghostPlatforms:[
       // First section — must time these without stabilizer
@@ -4516,6 +4522,8 @@ var LEVELS=[
     platforms:[
       {x:0,y:900,w:500,h:40},{x:1200,y:900,w:300,h:40},{x:2700,y:900,w:300,h:40},{x:4200,y:900,w:400,h:40},
       {x:4400,y:340,w:120,h:16},
+      // Stepping stones from CP2 ground up toward exit
+      {x:2750,y:760,w:80,h:16},{x:2900,y:620,w:80,h:16},{x:3100,y:500,w:80,h:16},
     ],
     ghostPlatforms:[
       // Section 1: no stabilizer — must time (x:500-1200)
@@ -4550,6 +4558,8 @@ var LEVELS=[
     platforms:[
       {x:0,y:950,w:500,h:40},{x:1700,y:950,w:300,h:40},{x:3200,y:950,w:300,h:40},{x:4500,y:950,w:300,h:40},
       {x:4600,y:340,w:120,h:16},
+      // Stepping stones from CP2 ground up toward exit
+      {x:3250,y:800,w:80,h:16},{x:3450,y:650,w:80,h:16},{x:3650,y:520,w:80,h:16},
     ],
     ghostPlatforms:[
       // Section 1: timed (x:500-1700)
@@ -4587,6 +4597,8 @@ var LEVELS=[
     platforms:[
       {x:0,y:950,w:400,h:40},{x:1600,y:950,w:300,h:40},{x:4600,y:950,w:400,h:40},
       {x:4800,y:320,w:120,h:16},
+      // Stepping stones from CP2 ground up toward exit (so player can climb even without ghost platforms)
+      {x:4650,y:800,w:80,h:16},{x:4750,y:680,w:80,h:16},{x:4600,y:560,w:80,h:16},
     ],
     ghostPlatforms:[
       // Section 1: fast cycle — timed (x:400-1600)
@@ -4595,7 +4607,7 @@ var LEVELS=[
       {x:900,y:640,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:1.0},
       {x:1100,y:580,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:1.5},
       {x:1350,y:540,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:0.3},
-      // Section 2: stabilizer covers main path (x:1900-3500)
+      // Section 2: stabilizer 1 covers main path (x:1900-3500)
       {x:1900,y:780,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:0},
       {x:2100,y:680,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:0.4},
       {x:2350,y:580,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:0.8},
@@ -4603,7 +4615,7 @@ var LEVELS=[
       {x:2850,y:440,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:1.6},
       {x:3100,y:400,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:0.2},
       {x:3400,y:380,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:0.6},
-      // Section 3: timed again — no stabilizer (x:3800-4600)
+      // Section 3: stabilizer 2 covers (x:3800-4600)
       {x:3800,y:500,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:0},
       {x:4050,y:420,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:0.7},
       {x:4300,y:380,w:80,h:16,visibleTime:4,hiddenTime:3,phaseOffset:1.4},
@@ -4611,6 +4623,7 @@ var LEVELS=[
     ],
     stabilizers:[
       {x:1650,y:910,radius:1800,duration:10},
+      {x:3750,y:910,radius:900,duration:10},
     ],
     darkness:[{startX:-100,speed:1.5,height:1200}],
     flashlight:true,
@@ -4851,7 +4864,7 @@ var LEVELS=[
       {x:3200,y:420,w:100,h:16,visibleTime:5,hiddenTime:3,phaseOffset:1.0,group:0},
     ],
     anchors:[{x:500,y:400},{x:1200,y:320},{x:2500,y:280},{x:3800,y:150}],
-    checkpoints:[{x:1500,y:833},{x:3200,y:833}],
+    checkpoints:[{x:2650,y:833},{x:3200,y:833}],
     shards:[{x:2190,y:660,id:51}],
   },
   {
@@ -4865,6 +4878,7 @@ var LEVELS=[
       // Approach
       {x:150,y:720,w:80,h:16},
       // Final climb
+      {x:4450,y:730,w:80,h:16}, // Stepping stone from ground to existing platforms
       {x:4500,y:600,w:80,h:16},{x:4600,y:450,w:80,h:16},
       {x:4800,y:300,w:120,h:16},
     ],
@@ -5936,7 +5950,18 @@ function killPlayer(cause){if(!player.alive)return;if(_deathGraceTimer>0)return;
 function respawnPlayer(){_deathGraceTimer=0.15;_lastDeathFrame=-1;if(player.sprite){player.sprite.destroy();player.sprite=null;player._gfx=null}if(player.body){var ab=MComposite.allBodies(world);var tr=[];for(var i=0;i<ab.length;i++){if(ab[i].label==='player'||ab[i].label==='sensorGround'||ab[i].label==='sensorCeiling'||ab[i].label==='sensorLeft'||ab[i].label==='sensorRight')tr.push(ab[i])}for(var i=0;i<tr.length;i++)MWorld.remove(world,tr[i])}var lvl=LEVELS[state.level];var sp=state.lastCheckpoint||lvl.spawn;createPlayer(sp.x,sp.y);/* timer NOT reset here — keeps total level time accurate */// Reset pursuing darkness position to behind the respawn point
 for(var di=0;di<levelDarkness.length;di++){var dk=levelDarkness[di];dk.x=Math.min(dk.x,sp.x-400);dk.warningShown=false}
 // Reset shadow double recording on death
-if(shadowDouble.active){shadowDouble.recording=[];shadowDouble.elapsed=0;shadowDouble.replayTime=0;if(shadowDouble.body){MBody.setPosition(shadowDouble.body,{x:sp.x,y:sp.y});MBody.setVelocity(shadowDouble.body,{x:0,y:0})}}}
+if(shadowDouble.active){shadowDouble.recording=[];shadowDouble.elapsed=0;shadowDouble.replayTime=0;if(shadowDouble.body){MBody.setPosition(shadowDouble.body,{x:sp.x,y:sp.y});MBody.setVelocity(shadowDouble.body,{x:0,y:0})}}
+// Reset stabilizers on death — allow reactivation (3s cooldown)
+for(var si=0;si<levelStabilizers.length;si++){var stb=levelStabilizers[si];stb.activated=false;stb.depleted=false;stb.reactivateCooldown=3;stb.activateTime=0;stb.waveProgress=-1}
+// Reset ghost platform stabilization on death — but restore bodies for any invisible platforms
+for(var gi=0;gi<levelGhostPlatforms.length;gi++){var gpp=levelGhostPlatforms[gi];gpp.stabilized=false;gpp.stabilizeTimer=0;if(!gpp.visible&&gpp.body===null){/* body will be created by normal cycle or next stabilizer activation */}}
+// Reset falling platforms on death — restore them to idle
+for(var fi=0;fi<fallingPlatforms.length;fi++){var fp=fallingPlatforms[fi];if(fp.state==='fallen'){fp.state='idle';fp.timer=0;fp.shakeTime=0;fp.body=MBodies.rectangle(fp.x+fp.w/2,fp.y+fp.h/2,fp.w,fp.h,{isStatic:true,label:'fallingPlatform',friction:0.05,frictionStatic:0.001});MWorld.add(world,fp.body);fp.sprite.x=fp.x;fp.sprite.y=fp.y;fp.sprite.visible=true}}
+// Reset levers/doors on death — close all doors, reset levers
+for(var li=0;li<levelLevers.length;li++){var lv=levelLevers[li];if(lv.on){lv.on=false;if(lv.doorBody){MWorld.add(world,lv.doorBody);lv.doorSprite.visible=true}}}
+// Reset pressure plates on death — close their doors
+for(var pi=0;pi<levelPressurePlates.length;pi++){var pp=levelPressurePlates[pi];pp.pressed=false;if(pp.doorBody&&!pp.doorInWorld){MWorld.add(world,pp.doorBody);pp.doorSprite.visible=true}}}
+
 
 // ═══ SAW BLADES ═══
 var sawBodies=[],sawSprites=[],sawTime=0;
@@ -6326,19 +6351,30 @@ function createStabilizer(data){
   var glowG=new PIXI.Graphics();spr.addChild(glowG);
   var radius=data.radius||300;
   var duration=data.duration||10;
-  levelStabilizers.push({body:body,sprite:spr,_gfx:g,_glowGfx:glowG,x:data.x,y:data.y,radius:radius,duration:duration,activated:false,depleted:false,activateTime:0,waveProgress:-1});
+  levelStabilizers.push({body:body,sprite:spr,_gfx:g,_glowGfx:glowG,x:data.x,y:data.y,radius:radius,duration:duration,activated:false,depleted:false,reactivateCooldown:0,activateTime:0,waveProgress:-1});
 }
 function updateStabilizers(dt){
   for(var i=0;i<levelStabilizers.length;i++){
     var st=levelStabilizers[i];
     var g=st._gfx;g.clear();
     var glowG=st._glowGfx;glowG.clear();
-    if(st.depleted){
-      // Dim depleted crystal
-      g.moveTo(0,-18);g.lineTo(7,-6);g.lineTo(0,6);g.lineTo(-7,-6);g.closePath();g.fill({color:0x3a3a2a,alpha:0.3});
-      g.moveTo(0,-14);g.lineTo(4,-6);g.lineTo(0,2);g.lineTo(-4,-6);g.closePath();g.fill({color:0x4a4a3a,alpha:0.15});
+    // Cooldown before reactivation
+    if(st.reactivateCooldown>0){
+      st.reactivateCooldown-=dt;
+      // Dim recharging crystal
+      var cdPulse=0.3+Math.sin(performance.now()/1000*3)*0.15;
+      g.moveTo(0,-18);g.lineTo(7,-6);g.lineTo(0,6);g.lineTo(-7,-6);g.closePath();g.fill({color:0x5a5a3a,alpha:cdPulse});
+      g.moveTo(0,-14);g.lineTo(4,-6);g.lineTo(0,2);g.lineTo(-4,-6);g.closePath();g.fill({color:0x6a6a4a,alpha:cdPulse*0.5});
       st.sprite.x=st.x;st.sprite.y=st.y;
       continue;
+    }
+    if(st.depleted){
+      // Recharging: after depletion, become available again after cooldown
+      st.depleted=false;
+      st.activated=false;
+      st.waveProgress=-1;
+      st.activateTime=0;
+      // falls through to idle state below
     }
     if(st.activated){
       var elapsed=st.activateTime;
@@ -6359,9 +6395,10 @@ function updateStabilizers(dt){
         glowG.circle(0,-10,waveR);glowG.stroke({width:3,color:0xdaba4a,alpha:0.4*(1-st.waveProgress)});
         glowG.circle(0,-10,waveR*0.8);glowG.stroke({width:1,color:0xeaca6a,alpha:0.2*(1-st.waveProgress)});
       }
-      // After wave completes, mark depleted
+      // After wave completes, start cooldown then become reusable
       if(st.waveProgress>=1){
         st.depleted=true;
+        st.reactivateCooldown=3; // 3s cooldown before can be activated again
       }
       st.sprite.x=st.x;st.sprite.y=st.y;
       continue;
@@ -7770,29 +7807,31 @@ var tutorial={
     {id:'dash',level:1,trigger:'time',delay:2,text:'нажми <span class="tip-key">D</span> для рывка'},
     {id:'wall',level:1,trigger:'wall',delay:0,text:'прижмись к стене — <span class="tip-key">◀</span> или <span class="tip-key">▶</span> — и прыгни <span class="tip-key">▲</span>'},
     {id:'saw',level:2,trigger:'time',delay:2,text:'опасайся пил — они не прощают'},
-    {id:'gap',level:3,trigger:'time',delay:4,text:'бездна — тоже смерть. Не падай'},
+    {id:'timedSpike',level:2,trigger:'time',delay:6,text:'шипованные платформы пульсируют — подожди когда шипы спрячутся!'},
+    {id:'gap',level:3,trigger:'time',delay:2,text:'бездна — тоже смерть. Не падай'},
+    {id:'disappearing',level:3,trigger:'time',delay:5,text:'исчезающие платформы тают! Переходи быстро и не стой'},
+    {id:'spring',level:3,trigger:'time',delay:8,text:'пружины подбрасывают — используй для прыжка выше'},
+    {id:'moving',level:4,trigger:'time',delay:3,text:'движущиеся платформы — прыгай на них и жди'},
     {id:'lever',level:4,trigger:'lever',delay:0,text:'подойди к рычагу и нажми <span class="tip-key">✋</span> — он открывает дверь. Можно выключить!'},
-    {id:'enemy',level:5,trigger:'time',delay:3,text:'тени патрулируют. Не попадайся им на пути'},
-    {id:'enemy2',level:6,trigger:'time',delay:6,text:'тени слепы, но чувствуют движение'},
+    {id:'enemy',level:5,trigger:'time',delay:2,text:'тени патрулируют. Не попадайся им на пути'},
+    {id:'falling',level:5,trigger:'time',delay:5,text:'падающие платформы рушатся — не стой долго'},
+    {id:'ice',level:5,trigger:'time',delay:8,text:'лёд скользкий — трудно остановиться. Планируй заранее'},
+    {id:'enemy2',level:6,trigger:'time',delay:3,text:'тени слепы, но чувствуют движение'},
+    {id:'portal',level:6,trigger:'time',delay:6,text:'тёмные водовороты — ловушки! Возвращают в начало уровня. Обходи по краю!'},
     {id:'thread',level:10,trigger:'time',delay:2,text:'нажми <span class="tip-key">🪝</span> чтобы привязаться к якорю'},
     {id:'swing',level:10,trigger:'thread',delay:0,text:'раскачивайся <span class="tip-key">◀</span> <span class="tip-key">▶</span> как на качелях и прыгай <span class="tip-key">▲</span>'},
     {id:'climb',level:10,trigger:'time',delay:8,text:'укорачивай нить — жми <span class="tip-key">↑</span> во время раскачки'},
-    {id:'falling',level:12,trigger:'time',delay:3,text:'падающие платформы рушатся — не стой долго'},
+    {id:'wind',level:11,trigger:'time',delay:2,text:'ветер толкает — используй его или борись'},
+    {id:'darkness',level:12,trigger:'time',delay:2,text:'тьма наступает! Не останавливайся — беги!'},
+    {id:'flashlight',level:12,trigger:'time',delay:4,text:'видимость ограничена — свети фонариком в направлении движения'},
     {id:'pendulum',level:15,trigger:'time',delay:3,text:'маятники качаются ритмично — просчитай тайминг'},
     {id:'multi_lever',level:19,trigger:'time',delay:2,text:'три рычага — три двери. Ищи все'},
-    {id:'portal',level:6,trigger:'time',delay:3,text:'тёмные водовороты — ловушки! Возвращают в начало уровня. Обходи по краю!'},
-    {id:'spring',level:8,trigger:'time',delay:2,text:'пружины подбрасывают — используй для прыжка выше'},
-    {id:'ice',level:9,trigger:'time',delay:2,text:'лёд скользкий — трудно остановиться. Планируй заранее'},
-    {id:'wind',level:11,trigger:'time',delay:2,text:'ветер толкает — используй его или борись'},
-    {id:'darkness',level:15,trigger:'time',delay:2,text:'тьма наступает! Не останавливайся — беги!'},
-    {id:'flashlight',level:15,trigger:'time',delay:0.5,text:'видимость ограничена — свети фонариком в направлении движения'},
-    {id:'gravity',level:5,trigger:'time',delay:3,text:'анти-гравитация! Входи в зону и беги по потолку'},
-    {id:'pressure',level:32,trigger:'time',delay:2,text:'встань на кристалл — дверь откроется. Слезешь — закроется!'},
-    {id:'shadow',level:33,trigger:'time',delay:4,text:'тень следует за тобой с задержкой. Она может стоять на плите за тебя!'},
+    {id:'shadow',level:30,trigger:'time',delay:3,text:'тень следует за тобой с задержкой. Она может стоять на плите за тебя!'},
+    {id:'pressure',level:30,trigger:'time',delay:6,text:'встань на кристалл — дверь откроется. Слезешь — закроется!'},
     {id:'pulse',level:35,trigger:'time',delay:2,text:'платформы пульсируют! Они появляются и исчезают в ритме. Двигайся в такт!'},
     {id:'resonance',level:36,trigger:'time',delay:2,text:'двигайся — и скрытые платформы появятся рядом с тобой. Остановишься — исчезнут!'},
     {id:'ghost',level:40,trigger:'time',delay:2,text:'призрачные платформы мерцают и исчезают! Переходи пока они видны'},
-    {id:'stabilizer',level:41,trigger:'time',delay:3,text:'активируй кристалл-стабилизатор — он зафиксирует призрачные платформы!'},
+    {id:'stabilizer',level:40,trigger:'time',delay:5,text:'активируй кристалл-стабилизатор — он зафиксирует призрачные платформы! Можно активировать повторно'},
     {id:'laser',level:45,trigger:'time',delay:2,text:'красные лучи — смерть! Но они пульсируют. Жди когда выключатся и беги!'},
     {id:'fragments',level:47,trigger:'time',delay:2,text:'собери все фрагменты-кристаллы чтобы открыть дверь!'},
     {id:'choice',level:55,trigger:'time',delay:3,text:'два пути: <span style="color:#daa520">помнить</span> (выше) или <span style="color:#6a2a8a">забыть</span> (ниже). Выбор за тобой.'},
