@@ -2700,42 +2700,41 @@ var LEVELS=[
   },
   {
     name:'Механизмы',story:'Древние механизмы ещё работают. Рычаги открывают двери, платформы движутся по рельсам. Но и тьма научилась пользоваться механизмами.',
-    width:4200,height:900,spawn:{x:80,y:600},exit:{x:4000,y:450,w:40,h:80},
+    width:4200,height:900,spawn:{x:80,y:600},exit:{x:4000,y:500,w:40,h:80},
     platforms:[
       {x:0,y:750,w:600,h:40},{x:800,y:750,w:400,h:40},{x:1400,y:750,w:300,h:40},
       {x:1900,y:750,w:400,h:40},{x:2500,y:750,w:400,h:40},{x:3100,y:750,w:300,h:40},
       {x:3600,y:750,w:600,h:40},
-      // Steps to lever
-      {x:300,y:620,w:100,h:16},{x:500,y:520,w:100,h:16},
-      // After door 1
-      {x:1100,y:550,w:100,h:16},{x:1300,y:470,w:80,h:16},
+      // Steps to lever — gradual climb
+      {x:300,y:640,w:100,h:16},{x:500,y:560,w:100,h:16},
+      // After door 1 — accessible stepping stones
+      {x:1100,y:600,w:100,h:16},{x:1300,y:540,w:100,h:16},
       // Lever 2 area
-      {x:1600,y:550,w:80,h:16},
+      {x:1600,y:580,w:100,h:16},
+      // Wall section — shortened so player can jump over
+      {x:1950,y:350,w:20,h:200},{x:2080,y:350,w:20,h:200},{x:1970,y:500,w:60,h:16},
       // Moving platform target area
-      {x:2100,y:500,w:80,h:16},
-      // Wall section between levers
-      {x:1950,y:200,w:20,h:350},{x:2080,y:200,w:20,h:350},{x:1970,y:400,w:60,h:16},
-      // Upper exit path
-      {x:2800,y:500,w:120,h:16},{x:3000,y:420,w:100,h:16},
-      {x:3400,y:550,w:80,h:16},{x:3600,y:500,w:80,h:16},
-      {x:3800,y:480,w:80,h:16},
-      {x:3900,y:450,w:160,h:16},
-      // Ceiling platforms for gravity zone (inverted gravity landing)
-      {x:1950,y:90,w:120,h:16},{x:2200,y:70,w:120,h:16},{x:2400,y:90,w:80,h:16},
+      {x:2100,y:560,w:80,h:16},
+      // Exit path — more gradual climb
+      {x:2400,y:650,w:100,h:16},{x:2600,y:600,w:100,h:16},
+      {x:2800,y:560,w:120,h:16},{x:3000,y:520,w:100,h:16},
+      {x:3300,y:560,w:80,h:16},{x:3500,y:540,w:80,h:16},
+      {x:3700,y:520,w:80,h:16},
+      {x:3900,y:500,w:160,h:16},
     ],
     spikes:[{x:640,y:730,w:80},{x:1230,y:730,w:60},{x:1830,y:730,w:60}],
     saws:[{x:2700,y:680,r:28},{x:3350,y:680,r:30}],
-    checkpoints:[{x:1320,y:450},{x:2800,y:470}],
+    checkpoints:[{x:1320,y:520},{x:2800,y:530}],
     levers:[
-      {x:600,y:504,doorX:600,doorY:300,doorW:200,doorH:450,id:'door1'},
-      {x:1650,y:534,doorX:1700,doorY:300,doorW:200,doorH:450,id:'door2'},
+      {x:600,y:544,doorX:600,doorY:300,doorW:200,doorH:450,id:'door1'},
+      {x:1650,y:564,doorX:1700,doorY:300,doorW:200,doorH:450,id:'door2'},
     ],
     movingPlatforms:[
-      {x:2100,y:600,w:100,h:16,axis:'x',range:300,speed:1.2},
+      {x:2100,y:650,w:100,h:16,axis:'x',range:300,speed:1.2},
     ],
-    disappearingPlatforms:[{x:3400,y:550,w:80,h:16,visibleTime:5,hiddenTime:3}],
-    timedSpikePlatforms:[{x:1600,y:550,w:80,h:16,spikeInterval:4,spikeDuration:1.2}],
-    shards:[{x:1970,y:360,id:4}],
+    disappearingPlatforms:[{x:3400,y:560,w:80,h:16,visibleTime:5,hiddenTime:3}],
+    timedSpikePlatforms:[{x:1600,y:580,w:80,h:16,spikeInterval:4,spikeDuration:1.2}],
+    shards:[{x:1970,y:460,id:4}],
   },
   {
     name:'Тени',story:'Ты не один во тьме. Что-то движется в глубине — тёмные силуэты, патрулирующие свои владения. Они не видят, но чувствуют.',
@@ -4593,12 +4592,12 @@ var LEVELS=[
   },
   {
     name:'Исчезновение',story:'Последний рубеж перед архитектурой. Мир почти исчез. Остались лишь контуры.',
-    width:5000,height:1100,spawn:{x:80,y:800},exit:{x:4800,y:320,w:40,h:80},
+    width:5000,height:1100,spawn:{x:80,y:800},exit:{x:4800,y:460,w:40,h:80},
     platforms:[
       {x:0,y:950,w:400,h:40},{x:1600,y:950,w:300,h:40},{x:4600,y:950,w:400,h:40},
-      {x:4800,y:320,w:120,h:16},
-      // Stepping stones from CP2 ground up toward exit (so player can climb even without ghost platforms)
-      {x:4650,y:800,w:80,h:16},{x:4750,y:680,w:80,h:16},{x:4600,y:560,w:80,h:16},
+      {x:4800,y:460,w:120,h:16},
+      // Stepping stones from CP2 ground up toward exit (reachable without ghost platforms)
+      {x:4650,y:800,w:80,h:16},{x:4750,y:680,w:80,h:16},{x:4600,y:560,w:80,h:16},{x:4700,y:500,w:80,h:16},
     ],
     ghostPlatforms:[
       // Section 1: fast cycle — timed (x:400-1600)
@@ -4631,7 +4630,7 @@ var LEVELS=[
       {x:2600,y:940,range:150,speed:1.2},
     ],
     spikes:[{x:460,y:930,w:80},{x:1460,y:930,w:60}],
-    anchors:[{x:600,y:500},{x:1400,y:420},{x:2600,y:350},{x:3600,y:280},{x:4500,y:150}],
+    anchors:[{x:600,y:500},{x:1400,y:420},{x:2600,y:350},{x:3600,y:280},{x:4500,y:200}],
     checkpoints:[{x:1600,y:933},{x:4600,y:933}],
     shards:[{x:2890,y:400,id:44}],
   },
@@ -5774,30 +5773,34 @@ function updatePlayer(dt){
     var dy=player.body.position.y-thread.anchorY;
     var dist=Math.sqrt(dx*dx+dy*dy)||1;
     var pendAngle=Math.atan2(dx,Math.max(dy,1)); // angle from vertical
+    // Track peak swing speed for momentum-based release
+    var currentSpeed=Math.sqrt(player.body.velocity.x*player.body.velocity.x+player.body.velocity.y*player.body.velocity.y);
+    if(!thread._peakSpeed)thread._peakSpeed=0;
+    if(currentSpeed>thread._peakSpeed)thread._peakSpeed=currentSpeed;
     if(dy>0){
       // Player is BELOW anchor — normal pendulum swing zone
-      // Reduce force at extreme angles (beyond ~65 degrees) — prevents going over the top
-      var angleFactor=Math.max(0,1-Math.abs(pendAngle)/(Math.PI*0.36));
-      // Horizontal push — simulates pumping a swing
-      var swingForce=player.inputX*0.06*angleFactor;
+      // Reduce force at extreme angles (beyond ~75 degrees) — prevents going over the top
+      var angleFactor=Math.max(0,1-Math.abs(pendAngle)/(Math.PI*0.42));
+      // Swing force: pump the swing by pushing tangentially
+      // Force scales with rope length — longer rope = more leverage = bigger swings
+      var lengthFactor=Math.min(2,thread.length/150);
+      var swingForce=player.inputX*0.12*angleFactor*lengthFactor;
       MBody.applyForce(player.body,player.body.position,{x:swingForce,y:0});
     } else {
-      // Player is AT or ABOVE anchor — kill momentum, let gravity pull back down
-      // Strong dampening of both horizontal and vertical velocity
+      // Player is AT or ABOVE anchor — gentle dampening, allow some momentum transfer
       var vx=player.body.velocity.x;
       var vy=player.body.velocity.y;
-      MBody.setVelocity(player.body,{x:vx*0.85,y:Math.min(vy,2)});
-      // Dampen angular velocity aggressively
-      MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.5);
+      MBody.setVelocity(player.body,{x:vx*0.92,y:Math.min(vy,3)});
+      MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.6);
     }
-    // Speed caps to prevent runaway velocity
+    // Speed caps — higher limits on thread to allow big swings
     var vx=player.body.velocity.x;
-    if(Math.abs(vx)>5.5){
-      MBody.setVelocity(player.body,{x:Math.sign(vx)*5.5,y:player.body.velocity.y});
+    if(Math.abs(vx)>9){
+      MBody.setVelocity(player.body,{x:Math.sign(vx)*9,y:player.body.velocity.y});
     }
     var vy=player.body.velocity.y;
-    if(Math.abs(vy)>8){
-      MBody.setVelocity(player.body,{x:player.body.velocity.x,y:Math.sign(vy)*8});
+    if(Math.abs(vy)>12){
+      MBody.setVelocity(player.body,{x:player.body.velocity.x,y:Math.sign(vy)*12});
     }
     // Angular velocity damping
     MBody.setAngularVelocity(player.body,(player.body.angularVelocity||0)*0.9);
@@ -5951,10 +5954,10 @@ function respawnPlayer(){_deathGraceTimer=0.15;_lastDeathFrame=-1;if(player.spri
 for(var di=0;di<levelDarkness.length;di++){var dk=levelDarkness[di];dk.x=Math.min(dk.x,sp.x-400);dk.warningShown=false}
 // Reset shadow double recording on death
 if(shadowDouble.active){shadowDouble.recording=[];shadowDouble.elapsed=0;shadowDouble.replayTime=0;if(shadowDouble.body){MBody.setPosition(shadowDouble.body,{x:sp.x,y:sp.y});MBody.setVelocity(shadowDouble.body,{x:0,y:0})}}
-// Reset stabilizers on death — allow reactivation (3s cooldown)
-for(var si=0;si<levelStabilizers.length;si++){var stb=levelStabilizers[si];stb.activated=false;stb.depleted=false;stb.reactivateCooldown=3;stb.activateTime=0;stb.waveProgress=-1}
-// Reset ghost platform stabilization on death — but restore bodies for any invisible platforms
-for(var gi=0;gi<levelGhostPlatforms.length;gi++){var gpp=levelGhostPlatforms[gi];gpp.stabilized=false;gpp.stabilizeTimer=0;if(!gpp.visible&&gpp.body===null){/* body will be created by normal cycle or next stabilizer activation */}}
+// Reset stabilizers on death — allow immediate reactivation
+for(var si=0;si<levelStabilizers.length;si++){var stb=levelStabilizers[si];stb.activated=false;stb.depleted=false;stb.reactivateCooldown=0;stb.activateTime=0;stb.waveProgress=-1}
+// Reset ghost platform stabilization on death — restore bodies for invisible platforms so stabilizer can work
+for(var gi=0;gi<levelGhostPlatforms.length;gi++){var gpp=levelGhostPlatforms[gi];gpp.stabilized=false;gpp.stabilizeTimer=0;if(!gpp.visible&&gpp.body===null){gpp.visible=true;gpp.body=MBodies.rectangle(gpp.x+gpp.w/2,gpp.y+gpp.h/2,gpp.w,gpp.h,{isStatic:true,label:'ghostPlatform',friction:0.05,frictionStatic:0.001});MWorld.add(world,gpp.body);gpp.sprite.visible=true;gpp.alpha=1;gpp.targetAlpha=1;}}
 // Reset falling platforms on death — restore them to idle
 for(var fi=0;fi<fallingPlatforms.length;fi++){var fp=fallingPlatforms[fi];if(fp.state==='fallen'){fp.state='idle';fp.timer=0;fp.shakeTime=0;fp.body=MBodies.rectangle(fp.x+fp.w/2,fp.y+fp.h/2,fp.w,fp.h,{isStatic:true,label:'fallingPlatform',friction:0.05,frictionStatic:0.001});MWorld.add(world,fp.body);fp.sprite.x=fp.x;fp.sprite.y=fp.y;fp.sprite.visible=true}}
 // Reset levers/doors on death — close all doors, reset levers
@@ -6403,8 +6406,8 @@ function updateStabilizers(dt){
       st.sprite.x=st.x;st.sprite.y=st.y;
       continue;
     }
-    // Not yet activated — check player collision
-    if(player.body){
+    // Not yet activated — check player collision (only if alive)
+    if(player.alive&&player.body){
       var dx=player.body.position.x-st.x;
       var dy=player.body.position.y-(st.y-10);
       var dist=Math.sqrt(dx*dx+dy*dy);
@@ -7058,28 +7061,50 @@ function updateEnemies(dt){
 var pendulums=[];
 function createPendulum(data){
   var pivotX=data.x,pivotY=data.y,length=data.length||150,ballR=data.r||15;
-  var ball=MBodies.circle(pivotX,pivotY+length,ballR,{label:'pendulumBall',density:0.005});
+  var swingSpeed=data.speed||2.0;
+  // Start ball at an angle (displaced from vertical) so it begins swinging immediately
+  var startAngle=Math.PI*0.25; // ~45 degrees to the right
+  var startX=pivotX+Math.sin(startAngle)*length;
+  var startY=pivotY+Math.cos(startAngle)*length;
+  var ball=MBodies.circle(startX,startY,ballR,{label:'pendulumBall',density:0.005});
+  // Give initial tangential velocity for continuous swinging
+  var tangentVx=Math.cos(startAngle)*swingSpeed;
+  var tangentVy=-Math.sin(startAngle)*swingSpeed;
+  MBody.setVelocity(ball,{x:tangentVx,y:tangentVy});
   var rod=MConstraint.create({pointA:{x:pivotX,y:pivotY},bodyB:ball,length:length,stiffness:1,damping:0});
   MWorld.add(world,[ball,rod]);
   // Death sensor on ball
-  var sensor=MBodies.circle(pivotX,pivotY+length,ballR+4,{isStatic:true,isSensor:true,label:'pendulumZone'});
+  var sensor=MBodies.circle(startX,startY,ballR+4,{isStatic:true,isSensor:true,label:'pendulumZone'});
   MWorld.add(world,sensor);
   var spr=new PIXI.Container();gameContainer.addChild(spr);
   var g=new PIXI.Graphics();spr.addChild(g);
-  pendulums.push({ball:ball,rod:rod,sensor:sensor,sprite:spr,_gfx:g,pivotX:pivotX,pivotY:pivotY,length:length,ballR:ballR});
+  pendulums.push({ball:ball,rod:rod,sensor:sensor,sprite:spr,_gfx:g,pivotX:pivotX,pivotY:pivotY,length:length,ballR:ballR,swingSpeed:swingSpeed});
 }
-function updatePendulums(){
+function updatePendulums(dt){
   for(var i=0;i<pendulums.length;i++){
     var pd=pendulums[i];
     MBody.setPosition(pd.sensor,{x:pd.ball.position.x,y:pd.ball.position.y});
+    // Perpetual swing: maintain target speed by nudging velocity at the bottom of the arc
+    var bx=pd.ball.position.x,by=pd.ball.position.y;
+    var dx=bx-pd.pivotX,dy=by-pd.pivotY;
+    var dist=Math.sqrt(dx*dx+dy*dy)||1;
+    var currentSpeed=Math.sqrt(pd.ball.velocity.x*pd.ball.velocity.x+pd.ball.velocity.y*pd.ball.velocity.y);
+    var targetSpeed=pd.swingSpeed||2.0;
+    // When the ball is near the bottom of the arc and moving slowly, give it a push
+    if(currentSpeed<targetSpeed*0.6&&dy>dist*0.3){
+      var pushFactor=(targetSpeed-currentSpeed)*0.03;
+      var nx=dx/dist,ny=dy/dist;
+      // Tangential push (perpendicular to rod)
+      MBody.applyForce(pd.ball,pd.ball.position,{x:-ny*pushFactor,y:nx*pushFactor});
+    }
     var g=pd._gfx;g.clear();
     // Rod
-    g.moveTo(pd.pivotX,pd.pivotY);g.lineTo(pd.ball.position.x,pd.ball.position.y);g.stroke({width:3,color:0x2a2a3e});
+    g.moveTo(pd.pivotX,pd.pivotY);g.lineTo(bx,by);g.stroke({width:3,color:0x2a2a3e});
     // Ball
-    g.circle(pd.ball.position.x,pd.ball.position.y,pd.ballR);g.fill(0x2a1a2a);
-    g.circle(pd.ball.position.x,pd.ball.position.y,pd.ballR);g.stroke({width:2,color:0x2a1a2a});
+    g.circle(bx,by,pd.ballR);g.fill(0x2a1a2a);
+    g.circle(bx,by,pd.ballR);g.stroke({width:2,color:0x2a1a2a});
     // Spikes on ball
-    for(var j=0;j<6;j++){var a=(j/6)*Math.PI*2;g.moveTo(pd.ball.position.x+Math.cos(a)*pd.ballR,pd.ball.position.y+Math.sin(a)*pd.ballR);g.lineTo(pd.ball.position.x+Math.cos(a)*(pd.ballR+6),pd.ball.position.y+Math.sin(a)*(pd.ballR+6));g.stroke({width:2,color:0x2a1a2a})}
+    for(var j=0;j<6;j++){var a=(j/6)*Math.PI*2;g.moveTo(bx+Math.cos(a)*pd.ballR,by+Math.sin(a)*pd.ballR);g.lineTo(bx+Math.cos(a)*(pd.ballR+6),by+Math.sin(a)*(pd.ballR+6));g.stroke({width:2,color:0x2a1a2a})}
   }
 }
 
@@ -7560,6 +7585,7 @@ function shootThread(){
   }
   if(!nearest)return;
   thread.active=true;
+  thread._peakSpeed=0; // reset peak speed tracking for momentum-based release
   unlockAchievement('thread_master');progress.stats.threadsUsed=(progress.stats.threadsUsed||0)+1;
   thread.anchorX=nearest.x;thread.anchorY=nearest.y;
   thread.length=nearestDist;thread.targetLength=nearestDist;
@@ -7587,11 +7613,35 @@ function shootThread(){
 }
 function detachThread(){
   if(!thread.active)return;
+  // Momentum-based launch: the faster you swing, the further you fly on release
+  var vx=player.body.velocity.x;
+  var vy=player.body.velocity.y;
+  var swingSpeed=Math.sqrt(vx*vx+vy*vy);
+  var peakSpeed=thread._peakSpeed||0;
+  // Boost factor: scale up release velocity based on how well the player swung
+  // A good swing (peakSpeed > 4) gives up to 1.5x boost; a weak swing gives minimal boost
+  var boostFactor=1+Math.min(0.8,(peakSpeed-2)*0.15);
+  if(boostFactor<1)boostFactor=1;
+  // Apply the boosted velocity
+  var newVx=vx*boostFactor;
+  var newVy=vy*boostFactor;
+  // Cap launch speed to prevent extreme launches
+  var launchSpeed=Math.sqrt(newVx*newVx+newVy*newVy);
+  var maxLaunchSpeed=14;
+  if(launchSpeed>maxLaunchSpeed){
+    var scale=maxLaunchSpeed/launchSpeed;
+    newVx*=scale;newVy*=scale;
+  }
+  MBody.setVelocity(player.body,{x:newVx,y:newVy});
   thread.active=false;
   if(thread.constraint){MWorld.remove(world,thread.constraint);thread.constraint=null}
+  thread._peakSpeed=0;
   thread._gfx=null;
   if(thread.sprite){thread.sprite.destroy();thread.sprite=null}
   tgHaptic('light');sfxThreadDetach();
+  // Launch particles — more particles for bigger swings
+  var pCount=4+Math.floor(boostFactor*6);
+  spawnParticles(player.body.position.x,player.body.position.y,pCount,0x6a6acc,{angle:Math.atan2(vy,vx),spread:0.8,speed:2+boostFactor,life:0.3,size:2.5,gravity:0});
 }
 function updateThread(dt){
   // Show/hide climb buttons based on thread state
