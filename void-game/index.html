@@ -1829,8 +1829,18 @@ function initTelegramPlayer(){
 // ═══ TELEGRAM CLOUD STORAGE ═══
 var leaderboard=[];
 var _cloudSaveTimer=0;
+// Robust CloudStorage accessor — handles different Telegram SDK versions
+function getCloudStorage(){
+  if(tg&&tg.CloudStorage)return tg.CloudStorage;
+  // Fallback: some SDK versions expose it differently
+  if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.CloudStorage)return window.Telegram.WebApp.CloudStorage;
+  // Try the newer SDK pattern (v7+)
+  if(tg&&tg.cloudStorage)return tg.cloudStorage;
+  return null;
+}
 function saveToCloud(){
-  if(!tg||!tg.CloudStorage)return;
+  var cs=getCloudStorage();
+  if(!cs)return;
   try{
     // Save the FULL progress object to cloud so nothing is lost
     var data={
@@ -1847,34 +1857,35 @@ function saveToCloud(){
       totalDeaths:progress.totalDeaths||state.totalDeaths||0,
       choices:progress.choices||{forget:0,remember:0}
     };
-    tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){if(err)console.warn('[VOID] Cloud save error:',err);else console.log('[VOID] Cloud saved')});
+    cs.setItem('void_data',JSON.stringify(data),function(err){if(err)console.warn('[VOID] Cloud save error:',err);else console.log('[VOID] Cloud saved')});
   }catch(e){console.warn('[VOID] CloudStorage error:',e)}
 }
 var _cloudRetryCount=0;
 function saveToCloudWithRetry(){
-  if(!tg||!tg.CloudStorage)return;
+  var cs=getCloudStorage();
+  if(!cs)return;
   clearTimeout(_cloudSaveTimer);
+  _cloudRetryCount=0;
   _cloudSaveTimer=setTimeout(function(){
     _cloudRetryCount=0;
     _doCloudSaveAttempt();
   },2000);
 }
 function _doCloudSaveAttempt(){
-  if(!tg||!tg.CloudStorage)return;
-  var origSave=saveToCloud;
-  // Override callback to add retry
+  var cs=getCloudStorage();
+  if(!cs)return;
   try{
     var data={
       v:2,_tgUserId:getCurrentTgUserId()||'local',unlocked:progress.unlocked||1,levels:progress.levels||{},skin:progress.skin||0,
       shards:progress.shards||[],stats:progress.stats||{},achievements:progress.achievements||[],
       challenges:progress.challenges||{},firstLaunch:progress.firstLaunch||false,
-      totalDeaths:progress.totalDeaths||state.totalDeaths||0
+      totalDeaths:progress.totalDeaths||state.totalDeaths||0,choices:progress.choices||{forget:0,remember:0}
     };
-    tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){
+    cs.setItem('void_data',JSON.stringify(data),function(err){
       if(err){
         _cloudRetryCount++;
         if(_cloudRetryCount<3){console.warn('[VOID] Cloud save failed, retry '+_cloudRetryCount);setTimeout(_doCloudSaveAttempt,2000)}
-        else{console.warn('[VOID] Cloud save failed after 3 attempts');_cloudRetryCount=0}
+        else{console.warn('[VOID] Cloud save failed after 3 attempts');_cloudRetryCount=0;updateSyncIndicator(false)}
       }else{console.log('[VOID] Cloud saved');_cloudRetryCount=0;updateSyncIndicator(true)}
     });
   }catch(e){console.warn('[VOID] CloudStorage error:',e);_cloudRetryCount=0}
@@ -1883,12 +1894,14 @@ var _syncOk=false;
 var _userCheckTimer=3;
 function updateSyncIndicator(ok){_syncOk=ok;var el=document.getElementById('sync-indicator');if(el)el.textContent=ok?'☁ ✓':'☁ ✗';if(el)el.style.color=ok?'#4a6a5a':'#6a4a4a'}
 function debouncedCloudSave(){
-  if(!tg||!tg.CloudStorage)return;
+  var cs=getCloudStorage();
+  if(!cs)return;
   clearTimeout(_cloudSaveTimer);
   _cloudSaveTimer=setTimeout(function(){_cloudRetryCount=0;_doCloudSaveAttempt()},2000); // debounce 2s
 }
 function loadFromCloud(){
-  if(!tg||!tg.CloudStorage)return;
+  var cs=getCloudStorage();
+  if(!cs)return;
   try{
     tg.CloudStorage.getItem('void_data',function(err,val){
       if(err||!val){console.log('[VOID] No cloud data');return}
@@ -5139,44 +5152,44 @@ var LEVELS=[
   },
   {
     name:'Преддверие',story:'Последняя развилка. Самый трудный выбор. То, от чего не увернёшься.',
-    width:5400,height:1200,spawn:{x:80,y:900},exit:{x:5200,y:240,w:40,h:80},
+    width:5400,height:1200,spawn:{x:80,y:900},exit:{x:5200,y:340,w:40,h:80},
     choicePoint:{x:1800,upperY:450,lowerY:900},
     platforms:[
       // Start
       {x:0,y:1050,w:400,h:40},{x:600,y:1050,w:400,h:40},{x:1100,y:1050,w:400,h:40},
       // Fork
       {x:1600,y:1050,w:400,h:40},
-      // UPPER PATH (remember — full gauntlet: lasers + ghost + fragments)
-      {x:2000,y:750,w:80,h:16},{x:2200,y:600,w:80,h:16},
-      {x:2500,y:650,w:80,h:16},{x:2800,y:550,w:80,h:16},
+      // UPPER PATH (remember — stepping stones to reach upper area)
+      {x:1900,y:920,w:80,h:16},{x:2050,y:800,w:80,h:16},
+      {x:2200,y:700,w:80,h:16},{x:2400,y:620,w:80,h:16},
+      {x:2600,y:550,w:80,h:16},{x:2800,y:500,w:80,h:16},
       {x:3100,y:500,w:80,h:16},
       // LOWER PATH (forget — simpler but longer with darkness)
       {x:2000,y:980,w:400,h:40},{x:2600,y:980,w:400,h:40},
       {x:3200,y:980,w:400,h:40},
       // Convergence
       {x:3600,y:800,w:200,h:40},
-      // Post-convergence gauntlet
-      {x:3900,y:700,w:80,h:16},{x:4200,y:600,w:80,h:16},
-      {x:4500,y:500,w:80,h:16},{x:4800,y:400,w:80,h:16},
-      {x:5100,y:320,w:80,h:16},
-      {x:5200,y:240,w:120,h:16},
+      // Post-convergence — more gradual climb
+      {x:3900,y:720,w:100,h:16},{x:4150,y:650,w:100,h:16},
+      {x:4400,y:580,w:100,h:16},{x:4650,y:510,w:100,h:16},
+      {x:4900,y:440,w:100,h:16},{x:5100,y:380,w:80,h:16},
+      {x:5200,y:340,w:120,h:16},
     ],
     ghostPlatforms:[
-      // Upper path — ghost platforms
-      {x:2400,y:550,w:100,h:16,visibleTime:5.5,hiddenTime:3,phaseOffset:0},
-      {x:2650,y:480,w:100,h:16,visibleTime:5.5,hiddenTime:3,phaseOffset:0.7},
-      {x:2900,y:440,w:100,h:16,visibleTime:5.5,hiddenTime:3,phaseOffset:1.4},
+      // Upper path — ghost platforms (higher section)
+      {x:2650,y:480,w:100,h:16,visibleTime:5.5,hiddenTime:3,phaseOffset:0},
+      {x:2900,y:440,w:100,h:16,visibleTime:5.5,hiddenTime:3,phaseOffset:0.7},
     ],
     lasers:[
       // Upper path lasers
-      {x:2300,y:700,w:250,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0},
-      {x:3000,y:600,w:250,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0.8},
+      {x:2300,y:650,w:250,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0},
+      {x:3000,y:550,w:250,h:4,axis:'x',onTime:1.5,offTime:2,phaseOffset:0.8},
     ],
     doorFragments:[
       // Upper path — need to collect fragment
       {doorX:3600,doorY:500,doorW:40,doorH:300,fragments:[
-        {x:2840,y:510},
-        {x:3340,y:460},
+        {x:2840,y:460},
+        {x:3340,y:440},
       ]},
     ],
     darkness:[
@@ -5184,9 +5197,9 @@ var LEVELS=[
       {startX:2000,speed:0.6,height:1100},
     ],
     spikes:[{x:460,y:1030,w:80},{x:1060,y:1030,w:60}],
-    anchors:[{x:500,y:550},{x:1200,y:450},{x:2200,y:350},{x:3400,y:280},{x:4600,y:150},{x:5200,y:80}],
-    checkpoints:[{x:3600,y:780},{x:4800,y:380}],
-    shards:[{x:3340,y:420,id:58}],
+    anchors:[{x:500,y:700},{x:1200,y:600},{x:2200,y:400},{x:3400,y:300},{x:4600,y:250},{x:5200,y:180}],
+    checkpoints:[{x:3600,y:780},{x:4650,y:490}],
+    shards:[{x:3340,y:400,id:58}],
   },
   {
     name:'Врата',story:'Финал. Всё что было — ведёт сюда. Забвение дышит в спину. Беги. Прыгай. Помни.',
