@@ -964,7 +964,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.19.0';
+var VOID_VERSION='0.20.0';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -1903,7 +1903,7 @@ function loadFromCloud(){
   var cs=getCloudStorage();
   if(!cs)return;
   try{
-    tg.CloudStorage.getItem('void_data',function(err,val){
+    cs.getItem('void_data',function(err,val){
       if(err||!val){console.log('[VOID] No cloud data');return}
       try{
         var data=JSON.parse(val);
@@ -2601,16 +2601,18 @@ function manualCloudSave(){
   saveProgress();
   // Force cloud save (reset retry counter)
   _cloudRetryCount=0;
-  if(!tg||!tg.CloudStorage){
+  var cs=getCloudStorage();
+  if(!cs){
     btn.textContent='✗';btn.style.color='#6a4a4a';btn.style.opacity='1';
+    console.warn('[VOID] CloudStorage not available — running in browser mode?');
     setTimeout(function(){btn.textContent='☁';btn.style.color='#5a8a6a'},2000);
     return;
   }
-  var data={v:2,unlocked:progress.unlocked||1,levels:progress.levels||{},skin:progress.skin||0,
+  var data={v:2,_tgUserId:getCurrentTgUserId()||'local',unlocked:progress.unlocked||1,levels:progress.levels||{},skin:progress.skin||0,
     shards:progress.shards||[],stats:progress.stats||{},achievements:progress.achievements||[],
     challenges:progress.challenges||{},firstLaunch:progress.firstLaunch||false,
-    totalDeaths:progress.totalDeaths||state.totalDeaths||0};
-  tg.CloudStorage.setItem('void_data',JSON.stringify(data),function(err){
+    totalDeaths:progress.totalDeaths||state.totalDeaths||0,choices:progress.choices||{forget:0,remember:0}};
+  cs.setItem('void_data',JSON.stringify(data),function(err){
     if(err){
       btn.textContent='✗';btn.style.color='#6a4a4a';
       updateSyncIndicator(false);
@@ -10483,7 +10485,7 @@ function bindUI(){
   // Volume sliders
   document.getElementById('sfx-vol-slider').addEventListener('input',function(){settings.sfxVolume=this.value/100;if(sfxGain&&!soundMuted)sfxGain.gain.value=settings.sfxVolume*0.7;document.getElementById('sfx-vol-label').textContent=this.value+'%';saveSettings()});
   document.getElementById('music-vol-slider').addEventListener('input',function(){settings.musicVolume=this.value/100;if(musicGain&&!musicMuted)musicGain.gain.value=settings.musicVolume*0.7;document.getElementById('music-vol-label').textContent=this.value+'%';saveSettings()});
-  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem(_progressKey());if(tg&&tg.CloudStorage){try{tg.CloudStorage.removeItem('void_data')}catch(e){}}var resetId=getCurrentTgUserId();progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false,_tgUserId:resetId,choices:{forget:0,remember:0}};state.totalDeaths=0;state.choices={forget:0,remember:0};saveProgress();updateMenuStats();showScreen('menu')}});
+  document.getElementById('btn-reset-progress').addEventListener('click',function(){if(confirm('Сбросить весь прогресс? Это нельзя отменить.')){localStorage.removeItem(_progressKey());var _cs=getCloudStorage();if(_cs){try{_cs.removeItem('void_data')}catch(e){}}var resetId=getCurrentTgUserId();progress={unlocked:1,levels:{},skin:0,shards:[],stats:{jumps:0,dashes:0,wallJumps:0,threadsUsed:0,playTime:0,perfectLevels:0},totalDeaths:0,achievements:[],challenges:{},firstLaunch:false,_tgUserId:resetId,choices:{forget:0,remember:0}};state.totalDeaths=0;state.choices={forget:0,remember:0};saveProgress();updateMenuStats();showScreen('menu')}});
   // Global menu click sound for all .btn and .menu-icon-btn elements
   var allBtns=document.querySelectorAll('.btn,.menu-icon-btn,.menu-challenge,.tb');
   for(var bi=0;bi<allBtns.length;bi++){(function(btn){btn.addEventListener('click',function(){sfxMenuClick()})})(allBtns[bi])}

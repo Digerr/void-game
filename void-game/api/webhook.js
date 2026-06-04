@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 const GAME_URL = 'https://void-game-ruddy.vercel.app/';
 const CHANNEL_ID = '@void_game_official';
 const SUPPORT_CHANNEL_ID = process.env.SUPPORT_CHANNEL_ID || '-1003857849729'; // VOID - SUPPORT (private)
-const VERSION = '0.19.0';
+const VERSION = '0.20.0';
 
 // Reply Keyboard — постоянное меню кнопок
 const REPLY_KEYBOARD = {
@@ -575,17 +575,22 @@ export default async function handler(req, res) {
     const newsText =
       `📰 <b>Обновления VOID</b>\n\n` +
       `🔶 <b>v${VERSION}</b> — текущая\n` +
+      '• Маятники теперь качаются!\n' +
+      '• Физика шарфа: импульс при отрыве зависит от раскачки\n' +
+      '• Фикс кристалла-стабилизатора после смерти\n' +
+      '• Фикс облачного сохранения (robust CloudStorage)\n' +
+      '• Фикс уровней 5, 44, 54 — проходимые\n' +
+      '• Исчезающие платформы дольше видимые + плавное затухание\n\n' +
+      '🔹 <b>v0.19.0-beta</b>\n' +
       '• 6 новых погодных эффектов (акты 7-12)\n' +
       '• 16 новых достижений (46 всего)\n' +
       '• Расширенная статистика победы\n' +
       '• Прогресс актов в профиле\n' +
-      '• Рекорд смертей и попыток на уровень\n' +
-      '• Пригласить друга\n' +
-      '• Фиксы 4 багов в уровнях\n\n' +
-      '🔹 <b>v0.13.0-beta</b>\n' +
+      '• Рекорд смертей и попыток на уровень\n\n' +
+      '🔸 <b>v0.13.0-beta</b>\n' +
       '• Фикс физики шарфа (маятник)\n' +
       '• Настройка параметров swing/constraint\n\n' +
-      '🔸 <b>v0.12.0-beta</b>\n' +
+      '🔹 <b>v0.12.0-beta</b>\n' +
       '• Облачные сохранения (TG CloudStorage)\n' +
       '• Система достижений\n' +
       '• Испытания (Challenges)\n' +
