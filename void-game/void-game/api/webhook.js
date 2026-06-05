@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 const GAME_URL = 'https://void-game-ruddy.vercel.app/';
 const CHANNEL_ID = '@void_game_official';
 const SUPPORT_CHANNEL_ID = process.env.SUPPORT_CHANNEL_ID || '-1003857849729'; // VOID - SUPPORT (private)
-const VERSION = '0.25.2';
+const VERSION = '0.17.1-beta';
 
 // Reply Keyboard — постоянное меню кнопок
 const REPLY_KEYBOARD = {
@@ -147,13 +147,13 @@ export default async function handler(req, res) {
         type: 'article',
         id: 'void_stats',
         title: `📊 ${iqUserName} — #${playerRank} в мире`,
-        description: `Уровни: ${playerStats.completed}/60 · ⭐${playerStats.total_stars} · Очки: ${playerStats.score}`,
+        description: `Уровни: ${playerStats.completed}/30 · ⭐${playerStats.total_stars} · Очки: ${playerStats.score}`,
         input_message_content: {
           message_text:
             `📊 <b>Статистика ${iqUserName}</b> в VOID\n\n` +
             `🏆 Ранг: <b>#${playerRank}</b>\n` +
-            `📊 Уровни: ${playerStats.completed}/60\n` +
-            `⭐ Звёзды: ${playerStats.total_stars}/180\n` +
+            `📊 Уровни: ${playerStats.completed}/30\n` +
+            `⭐ Звёзды: ${playerStats.total_stars}/90\n` +
             `💎 Осколки: ${playerStats.total_shards || 0}\n` +
             `✨ Идеальные: ${playerStats.perfect_levels || 0}\n` +
             `🏅 Ачивки: ${playerStats.achievements_count || 0}\n` +
@@ -179,8 +179,8 @@ export default async function handler(req, res) {
             `⚔️ <b>Вызов в VOID!</b>\n\n` +
             `${iqUserName} бросает вызов!\n\n` +
             `🏆 Ранг: <b>#${playerRank}</b>\n` +
-            `📊 Уровни: ${playerStats.completed}/60\n` +
-            `⭐ Звёзды: ${playerStats.total_stars}/180\n` +
+            `📊 Уровни: ${playerStats.completed}/30\n` +
+            `⭐ Звёзды: ${playerStats.total_stars}/90\n` +
             `🔢 Очки: <b>${playerStats.score}</b>\n\n` +
             `Сможешь побить? 👇`,
           parse_mode: 'HTML'
@@ -279,7 +279,7 @@ export default async function handler(req, res) {
     if (newStatus === 'administrator' || newStatus === 'member') {
       if (chat.type === 'group' || chat.type === 'supergroup' || chat.type === 'channel') {
         await sendMsg(BOT_TOKEN, chat.id,
-          '🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя.\n60 уровней · 12 актов · магнитный шарф · паркур\n\nНажми кнопку ниже чтобы начать →',
+          '🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя.\n30 уровней · 6 актов · магнитный шарф · паркур\n\nНажми кнопку ниже чтобы начать →',
           {
             reply_markup: {
               inline_keyboard: [[
@@ -328,7 +328,7 @@ export default async function handler(req, res) {
     // In groups/channels: use URL button (web_app only works in private chats)
     if (isGroupChat) {
       await sendMsg(BOT_TOKEN, chatId,
-        `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 60 уровней, 12 актов, магнитный шарф, паркур.\n\nНажми ▶ ИГРАТЬ чтобы начать →`,
+        `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 30 уровней, 6 актов, магнитный шарф, паркур.\n\nНажми ▶ ИГРАТЬ чтобы начать →`,
         {
           reply_markup: {
             inline_keyboard: [[
@@ -339,7 +339,7 @@ export default async function handler(req, res) {
       );
     } else {
       await sendMsg(BOT_TOKEN, chatId,
-        `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 60 уровней, 12 актов, магнитный шарф, паркур.\n\nv${VERSION}\n\nНажми ▶ ИГРАТЬ чтобы начать →`,
+        `🌑 <b>VOID — во тьму</b>\n\nПлатформер о памяти, которое забыло себя. 30 уровней, 6 актов, магнитный шарф, паркур.\n\nv${VERSION}\n\nНажми ▶ ИГРАТЬ чтобы начать →`,
         {
           reply_markup: REPLY_KEYBOARD
         }
@@ -438,8 +438,8 @@ export default async function handler(req, res) {
       `📅 Недельный ранг: ${weeklyRank > 0 ? '#'+weeklyRank : 'нет'}\n` +
       `⏱ Дней в пустоте: <b>${days}</b>\n\n` +
       `📊 <b>Прогресс:</b>\n` +
-      `• Уровни: ${lbData.completed}/60\n` +
-      `• ⭐ Звёзды: ${lbData.total_stars}/180\n` +
+      `• Уровни: ${lbData.completed}/30\n` +
+      `• ⭐ Звёзды: ${lbData.total_stars}/90\n` +
       `• 💎 Осколки: ${lbData.total_shards || 0}\n` +
       `• ✨ Идеальные (3★): ${lbData.perfect_levels || 0}\n` +
       `• 🏅 Достижения: ${lbData.achievements_count || 0}\n` +
@@ -575,31 +575,22 @@ export default async function handler(req, res) {
     const newsText =
       `📰 <b>Обновления VOID</b>\n\n` +
       `🔶 <b>v${VERSION}</b> — текущая\n` +
-      '• Полный фикс облачных сохранений\n' +
-      '• Компактный формат данных (сжатие)\n' +
-      '• Разделение на чанки при превышении лимита\n' +
-      '• Надёжный CloudStorage accessor\n' +
-      '• Маятники теперь качаются!\n' +
-      '• Физика шарфа: импульс при отрыве зависит от раскачки\n' +
-      '• Фикс кристалла-стабилизатора после смерти\n' +
-      '• Фикс уровней 5, 44, 54 — проходимые\n' +
-      '• Исчезающие платформы дольше видимые + плавное затухание\n\n' +
-      '🔹 <b>v0.19.0-beta</b>\n' +
-      '• 6 новых погодных эффектов (акты 7-12)\n' +
-      '• 16 новых достижений (46 всего)\n' +
-      '• Расширенная статистика победы\n' +
-      '• Прогресс актов в профиле\n' +
-      '• Рекорд смертей и попыток на уровень\n\n' +
-      '🔸 <b>v0.13.0-beta</b>\n' +
+      '• Катсцены с персонажем-котиком\n' +
+      '• Сцена пробуждения «но шарф ещё тёплый»\n' +
+      '• Лидерборд: глобальный, недельный, по уровням\n' +
+      '• Магнитный шарф вместо нити-верёвки\n' +
+      '• Облачные сохранения ☁\n' +
+      '• Система достижений и испытаний\n\n' +
+      '🔹 <b>v0.13.0-beta</b>\n' +
       '• Фикс физики шарфа (маятник)\n' +
       '• Настройка параметров swing/constraint\n\n' +
-      '🔹 <b>v0.12.0-beta</b>\n' +
+      '🔸 <b>v0.12.0-beta</b>\n' +
       '• Облачные сохранения (TG CloudStorage)\n' +
       '• Система достижений\n' +
       '• Испытания (Challenges)\n' +
       '• Осколки (Shards)\n\n' +
       '⬇️ <b>Более ранние версии</b>\n' +
-      '• 60 уровней, 12 актов\n' +
+      '• 30 уровней, 6 актов\n' +
       '• Скины, лор, катсцены\n' +
       '• Фонарик, шарф, dash, wall-jump';
 
