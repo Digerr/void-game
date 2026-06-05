@@ -970,7 +970,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.25.2';
+var VOID_VERSION='0.25.3';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -6280,91 +6280,73 @@ function updatePlayer(dt){
   player.inputDashPressed=false;
   if(player.inputX!==0)player.facing=player.inputX>0?1:-1;
 
-  // Wall grab — stick to wall, move up/down with buttons, jump to release
-  var _wasWallGrab=player.wallGrabbing;
+  // Wall grab — auto-grab any wall, move up/down with buttons, jump to release
   player.wallSliding=false;
   if(!player.onGround){
-    // Determine wall contact — use sensors OR "grab memory" (body might drift slightly)
+    // Remember which wall we're on
     var _wallL=player.onWallLeft,_wallR=player.onWallRight;
-    if(player.wallGrabbing){
-      // Grace: if sensors just lost contact, keep grab for 0.15s
-      if(!_wallL&&!_wallR){
-        if(!player._wallGrabGrace)player._wallGrabGrace=0.15;
-        if(player._wallGrabGrace>0){
-          // Use remembered wall side
-          _wallL=player._wallGrabSide==='left';
-          _wallR=player._wallGrabSide==='right';
-        }
-      }else{
-        player._wallGrabGrace=0;
-        player._wallGrabSide=player.onWallLeft?'left':'right';
-      }
-    }
+    if(_wallL)player._wallGrabSide='left';
+    if(_wallR)player._wallGrabSide='right';
     if(_wallL||_wallR){
-      var _towardWall=(_wallL&&player.inputX<0)||(_wallR&&player.inputX>0);
-      var _awayFromWall=(_wallL&&player.inputX>0)||(_wallR&&player.inputX<0);
-      if(player.wallGrabbing){
-        // Already grabbing — stay unless pressing AWAY from wall
-        if(_awayFromWall){
-          player.wallGrabbing=false;
-          player._wallGrabGrace=0;
-        }else{
-          player.wallSliding=true;
-        }
-      }else if(_towardWall){
-        // Start new grab
-        player.wallGrabbing=true;
-        player.wallSliding=true;
-        player._wallGrabSide=_wallL?'left':'right';
-        player._wallGrabGrace=0;
-        if(!_wasWallGrab){
-          var wxg=_wallL?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;
-          spawnParticles(wxg,player.body.position.y,5,0x5a5a7a,{angle:_wallL?0:Math.PI,spread:1.5,speed:1.5,life:0.3,size:2,gravity:0.5});
-          tgHaptic('light');
-        }
+      // Touching a wall — GRAB IT automatically
+      if(!player.wallGrabbing){
+        // Fresh grab — particles + haptic
+        var wxg=_wallL?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;
+        spawnParticles(wxg,player.body.position.y,5,0x5a5a7a,{angle:_wallL?0:Math.PI,spread:1.5,speed:1.5,life:0.3,size:2,gravity:0.5});
+        tgHaptic('light');
       }
+      player.wallGrabbing=true;
+      player.wallSliding=true;
+    }else if(player.wallGrabbing){
+      // Lost sensor contact — use grace period (body drifts slightly off wall)
+      if(player._wallGrabGrace===undefined||player._wallGrabGrace<=0)player._wallGrabGrace=0.2;
     }else{
-      // No wall contact at all — release grab
-      player.wallGrabbing=false;
       player._wallGrabGrace=0;
     }
   }else{
-    // On ground — release grab
+    // On ground — release
     player.wallGrabbing=false;
     player._wallGrabGrace=0;
   }
-  // Wall grab climbing — move up/down with buttons or W/S/ArrowUp
+  // Wall grab movement — handle climbing and gravity override
   if(player.wallGrabbing){
-    // Decrease grace timer
-    if(player._wallGrabGrace>0)player._wallGrabGrace-=dt;
-    // If grace expired and no real sensor contact, release
-    if(player._wallGrabGrace<=0&&!player.onWallLeft&&!player.onWallRight){
-      player.wallGrabbing=false;
-      player.wallSliding=false;
-    }else{
-      var climbInput=0;
-      if(touchState.climbUp)climbInput=-1;
-      if(touchState.climbDown)climbInput=1;
-      if(climbInput===0){
-        if((keys['KeyW']||keys['ArrowUp'])&&!keys['Space'])climbInput=-1;
-        if(keys['KeyS'])climbInput=1;
+    // Grace countdown
+    if(player._wallGrabGrace>0){
+      player._wallGrabGrace-=dt;
+      if(player._wallGrabGrace<=0&&!player.onWallLeft&&!player.onWallRight){
+        // Grace expired, no wall — release
+        player.wallGrabbing=false;
+        player.wallSliding=false;
       }
-      // Apply movement: grab = no fall, climb input moves up/down
-      // Push body slightly toward wall to maintain sensor contact
-      var wallDir=player._wallGrabSide==='left'?-1:1;
-      var climbVy=climbInput*player.wallClimbSpeed;
-      MBody.setVelocity(player.body,{x:wallDir*0.5,y:climbVy});
-      // Kill jump buffer while grabbing (only Space/touch-jump triggers wall jump)
-      player.jumpBuffer=0;
-      // Climbing particles
-      if(climbInput!==0&&Math.random()<0.15){
-        var wx3=wallDir<0?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;
-        spawnParticles(wx3,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:wallDir<0?0:Math.PI,spread:0.8,speed:0.8,life:0.2,size:1.5,gravity:0.3});
-      }
-      // Idle grab particles (subtle dust)
-      if(climbInput===0&&Math.random()<0.04){
-        var wx=wallDir<0?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;
-        spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:wallDir<0?0:Math.PI,spread:0.3,speed:0.3,life:0.15,size:1,gravity:0.2});
+    }
+    if(player.wallGrabbing){
+      // Check if pressing AWAY from wall (release grab)
+      var _wDir=player._wallGrabSide==='left'?-1:1;
+      if((_wDir===-1&&player.inputX>0)||(_wDir===1&&player.inputX<0)){
+        player.wallGrabbing=false;
+        player.wallSliding=false;
+        player._wallGrabGrace=0;
+      }else{
+        // Stay on wall — get climb input
+        var climbInput=0;
+        if(touchState.climbUp)climbInput=-1;
+        if(touchState.climbDown)climbInput=1;
+        if(climbInput===0){
+          if(keys['KeyW']||keys['ArrowUp'])climbInput=-1;
+          if(keys['KeyS'])climbInput=1;
+        }
+        var climbVy=climbInput*player.wallClimbSpeed;
+        // Pin body to wall + apply climb velocity
+        MBody.setVelocity(player.body,{x:_wDir*0.8,y:climbVy});
+        // Climbing particles
+        if(climbInput!==0&&Math.random()<0.15){
+          var wx3=_wDir<0?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;
+          spawnParticles(wx3,player.body.position.y+PLAYER_H/2,1,0x3a3a4a,{angle:_wDir<0?0:Math.PI,spread:0.8,speed:0.8,life:0.2,size:1.5,gravity:0.3});
+        }
+        if(climbInput===0&&Math.random()<0.04){
+          var wx=_wDir<0?player.body.position.x-PLAYER_W/2:player.body.position.x+PLAYER_W/2;
+          spawnParticles(wx,player.body.position.y,1,0x3a3a4a,{angle:_wDir<0?0:Math.PI,spread:0.3,speed:0.3,life:0.15,size:1,gravity:0.2});
+        }
       }
     }
   }
