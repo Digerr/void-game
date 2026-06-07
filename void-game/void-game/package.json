@@ -1,8 +1,0 @@
-{
-  "name": "void-game",
-  "version": "0.15.0-beta",
-  "private": true,
-  "dependencies": {
-    "@supabase/supabase-js": "^2.0.0"
-  }
-}
