@@ -970,7 +970,7 @@ canvas{display:block;position:fixed;inset:0;z-index:1;will-change:transform}
     if('caches' in window){caches.keys().then(function(ks){for(var i=0;i<ks.length;i++){caches.delete(ks[i]);console.log('[VOID] Deleted cache:',ks[i])}})}
   }
 })();
-var VOID_VERSION='0.25.3';
+var VOID_VERSION='0.26.0';
 (function checkVersion(){
   // Use root path with cache-busting query to bypass TG WebView cache
   var checkUrl=location.origin+'/?_v='+Date.now();
@@ -1189,9 +1189,7 @@ function sfxIceSlide(){
 function sfxFallingPlatform(){
   playTone(200,0.3,'sawtooth',0.15,40);playNoise(0.2,0.15,400);
 }
-function sfxGravityFlip(){
-  playTone(300,0.2,'sine',0.15,100);playTone(150,0.3,'triangle',0.1,50);playNoise(0.15,0.1,600);
-}
+
 function sfxShard(){
   playTone(800,0.15,'sine',0.2,1200);playTone(1000,0.12,'triangle',0.12,1500);playTone(1200,0.1,'sine',0.08,1600);
 }
@@ -1493,7 +1491,6 @@ var ACHIEVEMENTS=[
   {id:'perfectionist',name:'перфекционист',desc:'получи ★★★ на любом уровне',icon:'💎'},
   {id:'dark_escape',name:'бегство',desc:'убеги от настигающей тьмы',icon:'🌑'},
   {id:'light_bearer',name:'носитель света',desc:'пройди уровень с фонариком',icon:'🔦'},
-  {id:'gravity_master',name:'невесомость',desc:'пройди уровень с анти-гравитацией',icon:'⇅'},
   {id:'deep_diver',name:'ныряльщик',desc:'пройди акт II полностью',icon:'🕳'},
   {id:'rope_walker',name:'канатоходец',desc:'пройди акт III полностью',icon:'🎭'},
   {id:'abyss_gazer',name:'зияющая бездна',desc:'пройди акт IV полностью',icon:'👁'},
@@ -2844,7 +2841,7 @@ var LEVELS=[
       {x:3000,y:420,w:80,h:16},{x:3200,y:380,w:80,h:16},
       {x:3300,y:350,w:160,h:16},
     ],
-    spikes:[{x:620,y:730,w:60},{x:1120,y:730,w:60},{x:2000,y:730,w:80},{x:2600,y:730,w:80}],
+    spikes:[{x:620,y:730,w:60},{x:1120,y:730,w:60},{x:2000,y:730,w:80},{x:2620,y:730,w:60}],
     checkpoints:[{x:1620,y:580},{x:2540,y:380}],
     shards:[{x:2240,y:260,id:1}],
   },
@@ -2854,7 +2851,9 @@ var LEVELS=[
     platforms:[
       {x:0,y:750,w:600,h:40},{x:800,y:750,w:400,h:40},{x:1400,y:750,w:300,h:40},{x:1900,y:750,w:400,h:40},{x:2500,y:750,w:300,h:40},{x:3000,y:750,w:400,h:40},{x:3550,y:750,w:450,h:40},
       {x:350,y:600,w:100,h:16},{x:550,y:500,w:100,h:16},{x:700,y:580,w:80,h:16},{x:950,y:550,w:100,h:16},
-      {x:1200,y:480,w:80,h:16},{x:1550,y:520,w:100,h:16},{x:1750,y:430,w:80,h:16},
+      {x:1200,y:480,w:80,h:16},
+      {x:1380,y:500,w:80,h:16},
+      {x:1550,y:520,w:100,h:16},{x:1750,y:430,w:80,h:16},
       {x:2100,y:550,w:80,h:16},{x:2300,y:480,w:80,h:16},
       {x:2700,y:500,w:120,h:16},{x:2900,y:420,w:100,h:16},
       // Wall climb near exit
@@ -2880,13 +2879,13 @@ var LEVELS=[
       {x:2050,y:650,w:200,h:40},
       // Wall section 2
       {x:2350,y:500,w:20,h:300},{x:2500,y:400,w:20,h:400},{x:2370,y:550,w:60,h:16},{x:2430,y:420,w:60,h:16},
-      {x:2700,y:380,w:100,h:16},{x:2900,y:320,w:100,h:16},{x:3100,y:400,w:80,h:16},{x:3300,y:330,w:100,h:16},
+      {x:2700,y:380,w:100,h:16},{x:2900,y:320,w:80,h:16},{x:3100,y:400,w:80,h:16},{x:3300,y:330,w:100,h:16},
       // Wall section 3 — final climb
       {x:3550,y:250,w:20,h:300},{x:3680,y:250,w:20,h:300},{x:3570,y:420,w:60,h:16},{x:3630,y:340,w:60,h:16},
       {x:3500,y:380,w:80,h:16},{x:3700,y:480,w:80,h:16},{x:3900,y:440,w:80,h:16},
       {x:4200,y:400,w:160,h:16},
     ],
-    spikes:[{x:430,y:780,w:50},{x:2000,y:630,w:40}],
+    spikes:[{x:430,y:780,w:50},{x:1980,y:630,w:40}],
     saws:[{x:1500,y:650,r:30},{x:1750,y:580,r:25},{x:3000,y:340,r:25},{x:3700,y:400,r:30}],
     disappearingPlatforms:[{x:1350,y:600,w:80,h:16,visibleTime:5,hiddenTime:3},{x:3100,y:400,w:80,h:16,visibleTime:4.5,hiddenTime:3,phaseOffset:1}],
     checkpoints:[{x:1600,y:530},{x:3100,y:370}],
@@ -2928,7 +2927,7 @@ var LEVELS=[
       {x:2100,y:650,w:100,h:16,axis:'x',range:300,speed:1.2},
     ],
     disappearingPlatforms:[{x:3400,y:560,w:80,h:16,visibleTime:5,hiddenTime:3}],
-    timedSpikePlatforms:[{x:1600,y:580,w:80,h:16,spikeInterval:4,spikeDuration:1.2}],
+    timedSpikePlatforms:[{x:1600,y:580,w:80,h:16,spikeInterval:6,spikeDuration:1.0}],
     shards:[{x:1970,y:460,id:4}],
   },
   {
@@ -3200,8 +3199,6 @@ var LEVELS=[
       {x:3500,y:500,w:80,h:16},{x:3700,y:430,w:80,h:16},
       {x:3900,y:380,w:80,h:16},{x:4100,y:420,w:80,h:16},
       {x:4300,y:380,w:80,h:16},{x:4400,y:350,w:160,h:16},
-      // Ceiling platforms for gravity zone (x:3200-3700)
-      {x:3250,y:140,w:100,h:16},{x:3450,y:120,w:100,h:16},{x:3650,y:140,w:80,h:16},
       // Wall jump section (between thread and enemy gauntlet)
       {x:2050,y:300,w:20,h:300},{x:2180,y:300,w:20,h:300},{x:2070,y:450,w:60,h:16},{x:2140,y:380,w:60,h:16},
     ],
@@ -3243,7 +3240,7 @@ var LEVELS=[
       {x:1650,y:400,w:20,h:250},{x:1650,y:650,w:400,h:40},
       // Thread chamber
       {x:2100,y:800,w:300,h:40},{x:2100,y:250,w:300,h:16},
-      {x:2100,y:400,w:20,h:400},{x:2380,y:400,w:20,h:400},
+      {x:2100,y:400,w:20,h:400},{x:2280,y:400,w:20,h:400},
       // Enemy corridor
       {x:2500,y:700,w:400,h:40},{x:2500,y:300,w:400,h:16},
       {x:2500,y:300,w:20,h:200},{x:2880,y:300,w:20,h:200},
@@ -3580,8 +3577,6 @@ var LEVELS=[
       {x:3850,y:480,w:80,h:16},
       {x:4100,y:430,w:80,h:16},{x:4350,y:400,w:80,h:16},
       {x:4600,y:420,w:80,h:16},{x:4700,y:380,w:160,h:16},
-      // Ceiling platforms for gravity zone (x:2600-3000)
-      {x:2650,y:120,w:100,h:16},{x:2850,y:100,w:100,h:16},{x:3050,y:120,w:80,h:16},
     ],
     spikes:[{x:440,y:780,w:60},{x:870,y:780,w:40},{x:1370,y:780,w:40},{x:2650,y:780,w:60},{x:4100,y:780,w:40}],
     saws:[{x:1000,y:730,r:28},{x:2000,y:730,r:25},{x:3050,y:730,r:30},{x:4000,y:730,r:25}],
@@ -3640,8 +3635,6 @@ var LEVELS=[
       {x:4300,y:420,w:80,h:16},{x:4550,y:380,w:80,h:16},
       {x:4800,y:400,w:80,h:16},{x:5100,y:380,w:80,h:16},
       {x:5200,y:350,w:160,h:16},
-      // Ceiling platforms for gravity zone (x:4000-4500)
-      {x:4050,y:90,w:100,h:16},{x:4250,y:70,w:100,h:16},{x:4450,y:90,w:80,h:16},
     ],
     spikes:[{x:440,y:730,w:60},{x:960,y:730,w:60},{x:2050,y:730,w:60},{x:2750,y:730,w:60}],
     saws:[{x:1700,y:680,r:25},{x:2900,y:680,r:28},{x:4700,y:680,r:25}],
@@ -3733,17 +3726,11 @@ var LEVELS=[
       // Navigation
       {x:200,y:650,w:80,h:16},{x:400,y:550,w:80,h:16},
       {x:700,y:580,w:80,h:16},{x:950,y:500,w:80,h:16},
-      // Gravity zone area (floor + ceiling platforms)
       {x:1200,y:480,w:80,h:16},{x:1400,y:400,w:80,h:16},
-      // Ceiling landing platforms for gravity zones
-      {x:1100,y:120,w:100,h:16},{x:1300,y:100,w:100,h:16},{x:1500,y:120,w:80,h:16},
-      // After first gravity flip
       {x:1700,y:500,w:80,h:16},
       // Wall section
       {x:2000,y:250,w:20,h:300},{x:2130,y:250,w:20,h:300},{x:2020,y:400,w:60,h:16},
-      // Second gravity zone with ceiling
       {x:2400,y:450,w:80,h:16},
-      {x:2350,y:100,w:100,h:16},{x:2550,y:80,w:100,h:16},{x:2750,y:100,w:80,h:16},
       // Thread section
       {x:2900,y:500,w:80,h:16},
       // Exit path
@@ -3904,9 +3891,7 @@ var LEVELS=[
       {x:750,y:550,w:80,h:16},{x:950,y:480,w:80,h:16},
       // After door 1 — falling platforms
       {x:1150,y:500,w:60,h:16},{x:1350,y:430,w:60,h:16},
-      // Gravity zone with ceiling platforms
       {x:1550,y:480,w:80,h:16},
-      {x:1500,y:140,w:100,h:16},{x:1700,y:120,w:100,h:16},{x:1900,y:140,w:80,h:16},
       // Thread + pendulum gauntlet
       {x:2100,y:500,w:80,h:16},{x:2350,y:430,w:80,h:16},
       // Moving platform + wind
@@ -4040,19 +4025,15 @@ var LEVELS=[
       {x:5100,y:850,w:300,h:40},{x:5500,y:850,w:500,h:40},
       // Entry
       {x:250,y:700,w:80,h:16},{x:450,y:600,w:80,h:16},
-      // Gravity zone 1 — ceiling platforms
       {x:700,y:550,w:80,h:16},
-      {x:650,y:140,w:100,h:16},{x:850,y:120,w:100,h:16},{x:1050,y:140,w:80,h:16},
-      // After gravity
+      // After first section
       {x:1200,y:500,w:80,h:16},{x:1400,y:420,w:80,h:16},
       // Thread + enemy
       {x:1700,y:480,w:80,h:16},
       // Wind + moving platform
       {x:2100,y:500,w:80,h:16},
-      // Gravity zone 2 — ceiling platforms
       {x:2500,y:450,w:80,h:16},
-      {x:2450,y:100,w:100,h:16},{x:2650,y:80,w:100,h:16},{x:2850,y:100,w:80,h:16},
-      // After second gravity
+      // After second section
       {x:3000,y:480,w:80,h:16},
       // Pendulum dodge
       {x:3300,y:500,w:80,h:16},{x:3500,y:430,w:80,h:16},
@@ -4200,10 +4181,8 @@ var LEVELS=[
       {x:2650,y:500,w:80,h:16},{x:2850,y:430,w:80,h:16},
       // Pendulum gauntlet
       {x:3100,y:480,w:80,h:16},{x:3300,y:420,w:80,h:16},
-      // Gravity zone with ceiling
       {x:3550,y:480,w:80,h:16},
-      {x:3500,y:120,w:100,h:16},{x:3700,y:100,w:100,h:16},{x:3900,y:120,w:80,h:16},
-      // After gravity
+      // After pendulum section
       {x:4050,y:500,w:80,h:16},
       // Enemy sprint
       {x:4300,y:450,w:80,h:16},{x:4500,y:400,w:80,h:16},
@@ -4267,10 +4246,8 @@ var LEVELS=[
       {x:1150,y:480,w:60,h:16},{x:1350,y:420,w:60,h:16},
       // Phase 2: Thread + pendulum
       {x:1600,y:500,w:60,h:16},{x:1850,y:440,w:60,h:16},
-      // Phase 3: Gravity flip + ceiling
       {x:2100,y:480,w:60,h:16},
-      {x:2050,y:160,w:100,h:16},{x:2250,y:140,w:100,h:16},{x:2450,y:160,w:80,h:16},
-      // After gravity
+      // After thread section
       {x:2600,y:500,w:60,h:16},
       // Phase 4: Lever + door puzzle
       {x:2850,y:550,w:80,h:16},{x:3050,y:480,w:80,h:16},
@@ -4358,7 +4335,7 @@ var LEVELS=[
     spikes:[{x:500,y:730,w:60},{x:1500,y:730,w:60},{x:1900,y:730,w:60},{x:2600,y:730,w:60}],
     enemies:[{x:1100,y:750,range:200,speed:0.8},{x:2700,y:750,range:150,speed:1.0}],
     levers:[{x:1900,y:500,doorX:1700,doorW:16,doorH:100,doorY:650,id:'lever1'}],
-    pressurePlates:[{x:1400,y:734,doorX:1500,doorY:600,doorW:100,doorH:16,id:'pp1'}],
+    pressurePlates:[{x:1400,y:734,w:60,h:10,door:{x:1700,y:650,w:16,h:100}}],
     anchors:[{x:550,y:320},{x:1500,y:450},{x:2600,y:300},{x:3250,y:280}],
     checkpoints:[{x:1100,y:480},{x:2400,y:443}],
     shards:[{x:590,y:420,id:30}],
@@ -4374,6 +4351,8 @@ var LEVELS=[
       {x:1100,y:540,w:100,h:16},{x:1400,y:620,w:80,h:16},
       {x:1750,y:540,w:100,h:16},{x:2100,y:460,w:80,h:16},
       {x:2700,y:580,w:80,h:16},{x:3000,y:500,w:80,h:16},{x:3400,y:440,w:80,h:16},
+      // Stepping stones from ground to upper route
+      {x:3200,y:700,w:80,h:16},{x:3400,y:600,w:80,h:16},
       // Exit platform
       {x:3750,y:380,w:100,h:16},
     ],
@@ -4401,6 +4380,8 @@ var LEVELS=[
       {x:2500,y:600,w:100,h:16},{x:2800,y:520,w:80,h:16},
       {x:3100,y:580,w:80,h:16},{x:3400,y:480,w:80,h:16},
       {x:3700,y:440,w:80,h:16},
+      // Stepping stones from ground to exit
+      {x:3700,y:700,w:80,h:16},{x:3850,y:580,w:80,h:16},
       // Exit platform
       {x:3950,y:380,w:100,h:16},
     ],
@@ -4430,6 +4411,8 @@ var LEVELS=[
       {x:2600,y:600,w:80,h:16},{x:2900,y:520,w:80,h:16},
       {x:3200,y:580,w:80,h:16},{x:3500,y:480,w:80,h:16},
       {x:3800,y:420,w:80,h:16},
+      // Stepping stones from ground to exit
+      {x:3700,y:700,w:80,h:16},{x:3850,y:550,w:80,h:16},
       // Exit platform
       {x:3950,y:350,w:100,h:16},
     ],
@@ -4523,7 +4506,7 @@ var LEVELS=[
       {x:250,y:720,w:100,h:16},
       {x:3800,y:420,w:80,h:16},{x:4000,y:380,w:120,h:16},
     ],
-    resonanceRadius:160,
+    resonanceRadius:180,
     resonancePlatforms:[
       // Path over first gap (x:500-1800) — hidden until you approach
       {x:550,y:700,w:100,h:16},{x:720,y:640,w:100,h:16},{x:900,y:600,w:80,h:16},
@@ -4564,6 +4547,7 @@ var LEVELS=[
       // Alternate path — resonance platforms over the gaps
       {x:1050,y:560,w:80,h:16},
       {x:1600,y:540,w:80,h:16},
+      {x:2300,y:520,w:80,h:16},
       {x:2900,y:540,w:80,h:16},
       {x:3100,y:460,w:80,h:16},
     ],
@@ -4600,7 +4584,7 @@ var LEVELS=[
       {x:1600,y:580,w:80,h:16},
       {x:2400,y:560,w:80,h:16},
     ],
-    enemies:[{x:2500,y:860,w:100,dir:1,speed:1}],
+    enemies:[{x:2500,y:860,range:100,speed:1}],
     spikes:[{x:560,y:880,w:80},{x:1180,y:880,w:60},{x:2360,y:880,w:60},{x:3070,y:880,w:40}],
     anchors:[{x:600,y:400},{x:1500,y:320},{x:2600,y:300},{x:3500,y:200},{x:4200,y:150}],
     checkpoints:[{x:1300,y:673},{x:2500,y:450}],
@@ -4616,7 +4600,7 @@ var LEVELS=[
       {x:4500,y:380,w:80,h:16},{x:4600,y:360,w:120,h:16},
     ],
     flashlight:true,
-    resonanceRadius:120,
+    resonanceRadius:180,
     pulsePlatforms:[
       // Fast cycle: 1.5s visible, 1.5s hidden
       {x:550,y:730,w:80,h:16,visibleTime:3.5,hiddenTime:2.5,phaseOffset:0,group:0},
@@ -4792,7 +4776,7 @@ var LEVELS=[
       {x:0,y:950,w:400,h:40},{x:1600,y:950,w:300,h:40},{x:4600,y:950,w:400,h:40},
       {x:4800,y:460,w:120,h:16},
       // Stepping stones from CP2 ground up toward exit (reachable without ghost platforms)
-      {x:4650,y:800,w:80,h:16},{x:4750,y:680,w:80,h:16},{x:4600,y:560,w:80,h:16},{x:4700,y:500,w:80,h:16},
+      {x:4650,y:800,w:80,h:16},{x:4700,y:660,w:80,h:16},{x:4750,y:540,w:80,h:16},{x:4800,y:460,w:80,h:16},
     ],
     ghostPlatforms:[
       // Section 1: fast cycle — timed (x:400-1600)
@@ -5076,7 +5060,7 @@ var LEVELS=[
       {x:4500,y:600,w:80,h:16},{x:4600,y:450,w:80,h:16},
       {x:4800,y:300,w:120,h:16},
     ],
-    resonanceRadius:160,
+    resonanceRadius:180,
     resonancePlatforms:[
       // Bridge section 1 (x:400-1800) — must keep moving
       {x:500,y:750,w:100,h:16},{x:680,y:700,w:100,h:16},{x:860,y:660,w:80,h:16},
@@ -5205,7 +5189,7 @@ var LEVELS=[
         {x:3140,y:480},
       ]},
     ],
-    anchors:[{x:400,y:500},{x:1300,y:400},{x:2600,y:350},{x:4000,y:250},{x:5000,y:120}],
+    anchors:[{x:400,y:680},{x:1300,y:680},{x:2600,y:350},{x:4000,y:250},{x:5000,y:120}],
     checkpoints:[{x:570,y:723},{x:2420,y:733},{x:4120,y:403},{x:4900,y:280}],
     shards:[{x:4540,y:310,id:54}],
   },
@@ -5213,12 +5197,14 @@ var LEVELS=[
   {
     name:'Развилка',story:'Впервые — выбор. Левый путь или правый. Забыть или помнить. Каждый шаг — решение.',
     width:4800,height:1100,spawn:{x:80,y:800},exit:{x:4600,y:320,w:40,h:80},
-    choicePoint:{x:1800,upperY:480,lowerY:880},
+    choicePoint:{x:2600,upperY:440,lowerY:880},
     platforms:[
       // Start area
       {x:0,y:950,w:500,h:40},{x:700,y:950,w:400,h:40},{x:1300,y:950,w:400,h:40},
       // Fork point — common platform where paths split
       {x:1800,y:950,w:200,h:40},
+      // Stepping stones from fork to upper path
+      {x:1900,y:820,w:80,h:16},
       // UPPER PATH (remember — harder, higher)
       {x:2000,y:700,w:80,h:16},{x:2200,y:580,w:80,h:16},{x:2400,y:500,w:80,h:16},
       {x:2600,y:440,w:100,h:16},{x:2800,y:380,w:80,h:16},
@@ -5240,7 +5226,7 @@ var LEVELS=[
     ],
     // Choice zone sensors — created by loadLevel when choicePoint is present
     // "remember" sensor at upper path, "forget" sensor at lower path
-    anchors:[{x:500,y:500},{x:1200,y:400},{x:2000,y:300},{x:3400,y:250},{x:4400,y:150}],
+    anchors:[{x:500,y:680},{x:1200,y:680},{x:2000,y:300},{x:3400,y:250},{x:4400,y:150}],
     saws:[{x:1600,y:880,r:25},{x:3000,y:650,r:28}],
     enemies:[{x:700,y:910,range:180,speed:1.8},{x:2600,y:840,range:200,speed:2.0}],
     checkpoints:[{x:3100,y:680},{x:4000,y:400}],
@@ -5250,12 +5236,14 @@ var LEVELS=[
     name:'Компромисс',story:'Не всё можно сохранить. Что выберешь — скорость или память? Лёгкость или правду?',
     shadowDouble:true,
     width:5000,height:1100,spawn:{x:80,y:800},exit:{x:4800,y:280,w:40,h:80},
-    choicePoint:{x:1600,upperY:450,lowerY:850},
+    choicePoint:{x:2000,upperY:550,lowerY:880},
     platforms:[
       // Start
       {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1100,y:950,w:400,h:40},
       // Fork point
       {x:1600,y:950,w:200,h:40},
+      // Stepping stones from fork to upper path
+      {x:1700,y:830,w:80,h:16},
       // UPPER PATH (remember — ghost + stabilizer, hard but reliable)
       {x:1800,y:700,w:80,h:16},{x:2000,y:550,w:80,h:16},
       {x:2300,y:600,w:80,h:16},{x:2600,y:520,w:80,h:16},
@@ -5292,7 +5280,7 @@ var LEVELS=[
       {x:3500,y:740,w:60,h:10,door:{x:4200,y:550,w:16,h:200}},
     ],
     spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60}],
-    anchors:[{x:500,y:500},{x:1200,y:400},{x:2000,y:300},{x:3200,y:250},{x:4400,y:150}],
+    anchors:[{x:500,y:680},{x:1200,y:680},{x:2000,y:300},{x:3200,y:500},{x:4400,y:150}],
     checkpoints:[{x:2900,y:730},{x:4120,y:483}],
     shards:[{x:2440,y:380,id:56}],
   },
@@ -5300,12 +5288,14 @@ var LEVELS=[
     name:'Цена',story:'У каждого выбора — цена. Забвение забирает понемногу. Память ранит каждого.',
     width:5200,height:1100,spawn:{x:80,y:800},exit:{x:5000,y:260,w:40,h:80},
     shadowDouble:true,
-    choicePoint:{x:1600,upperY:450,lowerY:850},
+    choicePoint:{x:2000,upperY:560,lowerY:880},
     platforms:[
       // Start
       {x:0,y:950,w:400,h:40},{x:600,y:950,w:400,h:40},{x:1100,y:950,w:400,h:40},
       // Fork
       {x:1600,y:950,w:200,h:40},
+      // Stepping stones from fork to upper path
+      {x:1700,y:830,w:80,h:16},
       // UPPER PATH (remember — shadow + pressure plates, need coordination)
       {x:1800,y:680,w:80,h:16},{x:2000,y:560,w:80,h:16},
       {x:2300,y:600,w:800,h:40}, // Long pressure plate platform
@@ -5332,14 +5322,14 @@ var LEVELS=[
       {x:2700,y:700,w:100,h:16,visibleTime:5,hiddenTime:3,phaseOffset:0.8,group:0},
     ],
     spikes:[{x:460,y:930,w:80},{x:1060,y:930,w:60}],
-    anchors:[{x:500,y:500},{x:1300,y:400},{x:2200,y:300},{x:3400,y:220},{x:4600,y:100}],
+    anchors:[{x:500,y:680},{x:1300,y:680},{x:2200,y:300},{x:3400,y:280},{x:4600,y:100}],
     checkpoints:[{x:3400,y:730},{x:4300,y:430}],
     shards:[{x:4640,y:320,id:57}],
   },
   {
     name:'Преддверие',story:'Последняя развилка. Самый трудный выбор. То, от чего не увернёшься.',
     width:5400,height:1200,spawn:{x:80,y:900},exit:{x:5200,y:340,w:40,h:80},
-    choicePoint:{x:1800,upperY:450,lowerY:900},
+    choicePoint:{x:2580,upperY:560,lowerY:980},
     platforms:[
       // Start
       {x:0,y:1050,w:400,h:40},{x:600,y:1050,w:400,h:40},{x:1100,y:1050,w:400,h:40},
@@ -5387,7 +5377,7 @@ var LEVELS=[
       {startX:2000,speed:0.6,height:1100},
     ],
     spikes:[{x:460,y:1030,w:80},{x:1020,y:1030,w:50}],
-    anchors:[{x:500,y:700},{x:1200,y:600},{x:2200,y:400},{x:3400,y:300},{x:4600,y:250},{x:5200,y:180}],
+    anchors:[{x:500,y:780},{x:1200,y:780},{x:2200,y:400},{x:3400,y:300},{x:4600,y:250},{x:5200,y:180}],
     checkpoints:[{x:3600,y:780},{x:4650,y:490}],
     shards:[{x:3340,y:400,id:58}],
   },
@@ -5943,7 +5933,7 @@ g.circle(tailBaseX-vf*6+tailWag*1.5,tailBaseY+5+tailCurl*1.5,1.2);g.fill(0x6a6a9
 var GROUND_GRACE=0.06;var _groundGraceTimer=0;function setupPlayerSensors(){playerSensorGround._collidingSet=new Set();playerSensorCeiling._collidingSet=new Set();playerSensorLeft._collidingSet=new Set();playerSensorRight._collidingSet=new Set();playerSensorGround._colliding=0;playerSensorCeiling._colliding=0;playerSensorLeft._colliding=0;playerSensorRight._colliding=0;_groundGraceTimer=0;MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);MEvents.on(engine,'collisionStart',onCollisionStart);MEvents.on(engine,'collisionEnd',onCollisionEnd)}
 function onCollisionStart(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,true);checkSpecialCollision(e.pairs[i].bodyA,e.pairs[i].bodyB)}}
 function onCollisionEnd(e){for(var i=0;i<e.pairs.length;i++){checkSensorCollision(e.pairs[i].bodyA,e.pairs[i].bodyB,false)}}
-function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='gravityZone'&&other.label!=='iceZone'&&other.label!=='pressurePlateZone'&&other.label!=='stabilizerZone'&&other.label!=='laserZone'&&other.label!=='fragmentZone'&&other.label!=='choiceRemember'&&other.label!=='choiceForget'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
+function checkSensorCollision(a,b,isStart){if(!playerSensorGround)return;var sensors=[playerSensorGround,playerSensorCeiling,playerSensorLeft,playerSensorRight];for(var i=0;i<sensors.length;i++){var s=sensors[i];if(a===s||b===s){var other=(a===s)?b:a;var oid=other.id||0;if(other.label!=='player'&&other.label!=='sensorGround'&&other.label!=='sensorCeiling'&&other.label!=='sensorLeft'&&other.label!=='sensorRight'&&other.label!=='deathZone'&&other.label!=='fallZone'&&other.label!=='exitZone'&&other.label!=='sawZone'&&other.label!=='enemyZone'&&other.label!=='leverZone'&&other.label!=='anchor'&&other.label!=='checkpointZone'&&other.label!=='shardZone'&&other.label!=='pendulumZone'&&other.label!=='springZone'&&other.label!=='portalZone'&&other.label!=='windZone'&&other.label!=='iceZone'&&other.label!=='pressurePlateZone'&&other.label!=='stabilizerZone'&&other.label!=='laserZone'&&other.label!=='fragmentZone'&&other.label!=='choiceRemember'&&other.label!=='choiceForget'&&other.label!=='boundary'){if(isStart)s._collidingSet.add(oid);else s._collidingSet.delete(oid);s._colliding=s._collidingSet.size}}}}
 function checkSpecialCollision(a,b){if(!player.alive)return;if((a.label==='exitZone'&&b.label==='player')||(b.label==='exitZone'&&a.label==='player')){if(!state._levelWon){state._levelWon=true;winLevel();return}}if(!player.alive)return;
   // ═══ ANTI-PHANTOM COLLISION SYSTEM ═══
   // Matter.js sensor bodies can fire stale collision events when:
@@ -6530,7 +6520,7 @@ for(var gi=0;gi<levelGhostPlatforms.length;gi++){var gpp=levelGhostPlatforms[gi]
 // Reset falling platforms on death — restore them to idle
 for(var fi=0;fi<fallingPlatforms.length;fi++){var fp=fallingPlatforms[fi];if(fp.state==='fallen'){fp.state='idle';fp.timer=0;fp.shakeTime=0;fp.body=MBodies.rectangle(fp.x+fp.w/2,fp.y+fp.h/2,fp.w,fp.h,{isStatic:true,label:'fallingPlatform',friction:0.05,frictionStatic:0.001});MWorld.add(world,fp.body);fp.sprite.x=fp.x;fp.sprite.y=fp.y;fp.sprite.visible=true}}
 // Reset levers/doors on death — close all doors, reset levers
-for(var li=0;li<levelLevers.length;li++){var lv=levelLevers[li];if(lv.on){lv.on=false;if(lv.doorBody){MWorld.add(world,lv.doorBody);lv.doorSprite.visible=true}}}
+for(var li=0;li<levelLevers.length;li++){var lv=levelLevers[li];if(lv.activated){lv.activated=false;if(lv.doorBody){MWorld.add(world,lv.doorBody);lv.doorSprite.visible=true}}}
 // Reset pressure plates on death — close their doors
 for(var pi=0;pi<levelPressurePlates.length;pi++){var pp=levelPressurePlates[pi];pp.pressed=false;if(pp.doorBody&&!pp.doorInWorld){MWorld.add(world,pp.doorBody);pp.doorSprite.visible=true}}}
 
@@ -7978,10 +7968,7 @@ function updateWind(dt){
   }
 }
 
-// ═══ GRAVITY ZONES (removed — no longer used) ═══
-var levelGravityZones=[];
-function updateGravityZones(dt){}
-function updateGravityZonesVisuals(dt){}
+// Gravity zones removed
 
 // ═══ PURSUING DARKNESS ═══
 var levelDarkness=[];
@@ -8385,8 +8372,7 @@ function loadLevel(n){
   levelLasers=[];if(lvl.lasers)for(var i=0;i<lvl.lasers.length;i++)createLaser(lvl.lasers[i]);
   // Door fragments
   levelDoorFragments=[];if(lvl.doorFragments)for(var i=0;i<lvl.doorFragments.length;i++)createDoorFragments(lvl.doorFragments[i]);
-  // Gravity zones
-  levelGravityZones=[];
+
   // Pursuing Darkness
   levelDarkness=[];if(lvl.darkness)for(var i=0;i<lvl.darkness.length;i++)createDarkness(lvl.darkness[i]);
   // Checkpoints
@@ -8427,7 +8413,7 @@ function loadLevel(n){
     gameContainer.addChild(forgetSpr);levelSprites.push(forgetSpr);
   }
 }
-function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelPulsePlatforms=[];levelGhostPlatforms=[];levelStabilizers=[];levelResonancePlatforms=[];resonanceGfx=null;levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelLasers=[];levelDoorFragments=[];levelGravityZones=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;clearAfterImages();clearDeathAnimation();if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
+function clearLevel(){MWorld.clear(world,false);MEvents.off(engine,'collisionStart',onCollisionStart);MEvents.off(engine,'collisionEnd',onCollisionEnd);levelBodies=[];levelSprites=[];sawBodies=[];sawSprites=[];movingPlatforms=[];fallingPlatforms=[];levelDisappearingPlatforms=[];levelPulsePlatforms=[];levelGhostPlatforms=[];levelStabilizers=[];levelResonancePlatforms=[];resonanceGfx=null;levelTimedSpikePlatforms=[];levelLevers=[];levelDoors=[];levelPressurePlates=[];levelEnemies=[];pendulums=[];levelAnchors=[];levelSprings=[];levelIce=[];levelPortals=[];levelWind=[];levelLasers=[];levelDoorFragments=[];levelDarkness=[];levelCheckpoints=[];levelShards=[];sawTime=0;shardAnimTime=0;checkpointTime=0;exitGlowTime=0;lightTime=0;state.lastCheckpoint=null;state.dashTrails=[];state.runDustTimer=0;state.hitStop=0;state.flashAlpha=0;state.flashTimer=0;clearAfterImages();clearDeathAnimation();if(thread.active)detachThread();clearParticles();clearWeather();if(shadowDouble.active){if(shadowDouble._connLine){shadowDouble._connLine.destroy();shadowDouble._connLine=null}shadowDouble={active:false,body:null,sprite:null,_gfx:null,_glowGfx:null,_connLine:null,recording:[],replayTime:0,delay:3.0,elapsed:0,trailParticles:[]}}if(gameContainer){var gc=gameContainer.children.slice();for(var i=0;i<gc.length;i++){if(gc[i].destroy)gc[i].destroy()}}if(player.body){player.body=null;player.sprite=null;player._gfx=null}state._levelWon=false;camera.x=0;camera.y=0}
 
 // ═══ TUTORIAL SYSTEM ═══
 var tutorial={
@@ -10923,7 +10909,7 @@ function gameLoop(timestamp){
   if(state.shakeTime>0){state.shakeTime-=rawDt;state.shakeAmount*=0.92;if(state.shakeTime<=0||state.shakeAmount<0.2){state.shakeAmount=0;state.shakeTime=0}}
   // Screen flash overlay
   if(state.flashTimer>0){state.flashTimer-=rawDt;if(state.flashTimer<=0){state.flashAlpha=0;state.flashTimer=0}else{state.flashAlpha*=0.9}}
-  if(state.screen==='playing'){readInput();updateGravityZones(dt);updatePlayer(dt);updateAfterImages(dt);updateDeathAnimation(dt);progress.stats.playTime=(progress.stats.playTime||0)+rawDt;
+  if(state.screen==='playing'){readInput();updatePlayer(dt);updateAfterImages(dt);updateDeathAnimation(dt);progress.stats.playTime=(progress.stats.playTime||0)+rawDt;
   // Variable gravity: lighter going up, heavier down, reduced at apex
   if(player.alive&&player.body){
     var pvy=player.body.velocity.y;
@@ -10938,7 +10924,7 @@ function gameLoop(timestamp){
   // Update positions of all setPosition-based bodies BEFORE MEngine.update
   // to prevent phantom collision detection with stale positions
   updateMovingPlatforms(dt);updateEnemies(dt);updatePendulums();
-  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updatePulsePlatforms(dt);updateGhostPlatforms(dt);updateStabilizers(dt);updateResonancePlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateLasers(dt);updateDoorFragments(dt);updateShadowDouble(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateGravityZonesVisuals(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
+  MEngine.update(engine,dt*1000);updateSaws(dt);updateFallingPlatforms(dt);updateDisappearingPlatforms(dt);updatePulsePlatforms(dt);updateGhostPlatforms(dt);updateStabilizers(dt);updateResonancePlatforms(dt);updateTimedSpikePlatforms(dt);updateLevers();updatePressurePlates(dt);updateLasers(dt);updateDoorFragments(dt);updateShadowDouble(dt);updateAnchors();updateSprings(dt);updateIce(dt);updatePortals(dt);updateWind(dt);updateDarkness(dt);updateCheckpoints(dt);updateShards(dt);updateThread(dt);updateExitGlow(dt);updateWeather(dt);updateTutorial(dt);updateCamera(dt);updateBackground(dt);updateLightAndFog(dt);updateParticles(rawDt);
   // Run dust: small particles while running on ground
   if(player.alive&&player.onGround&&Math.abs(player.body.velocity.x)>3){state.runDustTimer-=rawDt;if(state.runDustTimer<=0){state.runDustTimer=0.08;spawnParticles(player.body.position.x,player.body.position.y+PLAYER_H/2-2,1,0x3a3a4a,{angle:-Math.PI/2+player.facing*0.4,spread:0.5,speed:0.6,life:0.2,size:1.5,gravity:0.5})}}
   var elapsed=performance.now()-state.levelStartTime;var secs=Math.floor(elapsed/1000);var mins=Math.floor(secs/60);var ts=mins+':'+(secs%60<10?'0':'')+(secs%60);var ds='смерти: '+state.deaths;if(ts!==state._lastHudTime){document.getElementById('hud-timer').textContent=ts;state._lastHudTime=ts}if(ds!==state._lastHudDeaths){document.getElementById('hud-deaths').textContent=ds;state._lastHudDeaths=ds}}
