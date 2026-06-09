@@ -86,7 +86,7 @@ function getWeekKey() {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(200).json({ status: 'ok', version: '0.22.2' });
+    return res.status(200).json({ status: 'ok', version: '0.25.3' });
   }
 
   const body = req.body || {};
